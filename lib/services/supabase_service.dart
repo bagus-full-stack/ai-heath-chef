@@ -36,6 +36,20 @@ class AuthService {
     }
   }
 
+  /// Connexion via un fournisseur tiers (Google, GitHub, Discord, etc.)
+  Future<void> signInWithOAuth(OAuthProvider provider) async {
+    try {
+      await _supabase.auth.signInWithOAuth(
+        provider,
+        // C'est l'URL qui dira au navigateur de rouvrir ton application une fois connecté.
+        // Format typique : ton.bundle.id://login-callback
+        redirectTo: 'com.aihealthchef.app://login-callback/',
+      );
+    } catch (e) {
+      throw Exception('Erreur de connexion avec ${provider.name} : ${e.toString()}');
+    }
+  }
+
   /// Permet de savoir qui est connecté actuellement (renvoie null si personne)
   User? get currentUser => _supabase.auth.currentUser;
 

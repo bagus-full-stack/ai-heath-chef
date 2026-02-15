@@ -1,0 +1,31 @@
+name: Deploy Supabase Edge Functions
+
+# Ce script se déclenche uniquement...
+on:
+  push:
+    branches:
+      - main # ...quand tu push sur la branche principale
+    paths:
+      - 'supabase/functions/**' # ...ET seulement si un fichier dans ce dossier a été modifié
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    # On charge les secrets configurés sur GitHub
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation de la CLI Supabase
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Déploiement de la fonction analyze-meal
+        # La commande magique qui déploie ta fonction
+        run: supabase functions deploy analyze-meal --project-ref $PROJECT_ID

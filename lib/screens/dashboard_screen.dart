@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/percent_indicator.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:percent_indicator/percent_indicator.dart';
+import '../providers/dashboard_provider.dart';
+import 'package:image_picker/image_picker.dart';
 
-
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     const primaryColor = Color(0xFF6B66FF);
+
+    // Objectifs fixes (à rendre dynamiques avec le profil utilisateur plus tard)
+    const int targetKcal = 2200;
+    const double targetProt = 160.0;
+    const double targetGluc = 250.0;
+    const double targetLip = 75.0;
+
+    // On écoute notre base de données via Riverpod
+    final mealsAsyncValue = ref.watch(todayMealsProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -26,147 +36,190 @@ class DashboardScreen extends StatelessWidget {
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundImage: NetworkImage('https://i.pravatar.cc/100'), // Avatar mock
-            ),
+            child: CircleAvatar(backgroundImage: NetworkImage('https://i.pravatar.cc/100')),
           )
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Aujourd\'hui', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text('24 OCTOBRE', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 12)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 40),
 
-            // Jauge Circulaire Principale
-            Center(
-              child: CircularPercentIndicator(
-                radius: 130.0,
-                lineWidth: 20.0,
-                animation: true,
-                percent: 0.6, // 60% restants
-                arcType: ArcType.HALF,
-                arcBackgroundColor: Colors.grey.shade200,
-                circularStrokeCap: CircularStrokeCap.round,
-                progressColor: primaryColor,
-                center: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+      // La magie Riverpod : loading, error, et data
+      body: mealsAsyncValue.when(
+          loading: () => const Center(child: CircularProgressIndicator(color: primaryColor)),
+          error: (err, stack) => Center(child: Text('Erreur: $err')),
+          data: (meals) {
+
+            // --- CALCUL DES TOTAUX ---
+            int totalKcal = 0;
+            double totalProt = 0;
+            double totalGluc = 0;
+            double totalLip = 0;
+
+            for (var meal in meals) {
+              totalKcal += (meal['total_kcal'] as num).toInt();
+              totalProt += (meal['total_prot'] as num).toDouble();
+              totalGluc += (meal['total_gluc'] as num).toDouble();
+              totalLip += (meal['total_lip'] as num).toDouble();
+            }
+
+            // --- CALCUL DES REQUANTS ET POURCENTAGES ---
+            int remainingKcal = targetKcal - totalKcal;
+            if (remainingKcal < 0) remainingKcal = 0;
+
+            double percentKcal = totalKcal / targetKcal;
+            if (percentKcal > 1.0) percentKcal = 1.0;
+
+            double percentProt = totalProt / targetProt;
+            if (percentProt > 1.0) percentProt = 1.0;
+
+            double percentGluc = totalGluc / targetGluc;
+            if (percentGluc > 1.0) percentGluc = 1.0;
+
+            double percentLip = totalLip / targetLip;
+            if (percentLip > 1.0) percentLip = 1.0;
+
+            return RefreshIndicator(
+              onRefresh: () async => ref.refresh(todayMealsProvider), // Tirer vers le bas pour rafraîchir
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                physics: const AlwaysScrollableScrollPhysics(), // Nécessaire pour le pull-to-refresh
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('960', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 40)),
-                    Text('KCAL RESTANT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black54)),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(Icons.local_fire_department, size: 16, color: primaryColor),
-                        Text(' Objectif: 2200', style: TextStyle(color: Colors.black54, fontSize: 12)),
+                        const Text('Aujourd\'hui', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(color: primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                          // Affichage de la date du jour
+                          child: Text('${DateTime.now().day} / ${DateTime.now().month}', style: const TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                        ),
                       ],
                     ),
+                    const SizedBox(height: 40),
+
+                    // Jauge Circulaire Principale
+                    Center(
+                      child: CircularPercentIndicator(
+                        radius: 130.0,
+                        lineWidth: 20.0,
+                        animation: true,
+                        percent: percentKcal,
+                        arcType: ArcType.HALF,
+                        arcBackgroundColor: Colors.grey.shade200,
+                        circularStrokeCap: CircularStrokeCap.round,
+                        progressColor: primaryColor,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('$remainingKcal', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 40)),
+                            const Text('KCAL RESTANT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black54)),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(Icons.local_fire_department, size: 16, color: primaryColor),
+                                Text(' Objectif: 2200', style: TextStyle(color: Colors.black54, fontSize: 12)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Cartes de Macronutriments
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildMacroCard('PROTÉINES', '${totalProt.toInt()}g', '/${targetProt.toInt()}g', percentProt, Colors.blue),
+                        _buildMacroCard('GLUCIDES', '${totalGluc.toInt()}g', '/${targetGluc.toInt()}g', percentGluc, Colors.orange),
+                        _buildMacroCard('LIPIDES', '${totalLip.toInt()}g', '/${targetLip.toInt()}g', percentLip, Colors.pink),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+
+                    // Journal des repas
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Row(
+                          children: [
+                            Icon(Icons.restaurant, color: primaryColor),
+                            SizedBox(width: 8),
+                            Text('Journal des repas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Liste dynamique des repas sauvegardés
+                    if (meals.isEmpty)
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Text("Aucun repas enregistré aujourd'hui. Scannez votre première assiette !", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade500)),
+                        ),
+                      )
+                    else
+                      ...meals.map((meal) {
+                        // On formate l'heure (ex: 14:05)
+                        final date = DateTime.parse(meal['created_at']).toLocal();
+                        final timeString = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+
+                        return _buildMealCard(
+                          meal['name'] ?? 'Repas',
+                          timeString,
+                          '${meal['total_kcal']} kcal',
+                        );
+                      }).toList(),
+
+                    const SizedBox(height: 100), // Espace pour le bouton flottant
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-
-            // Cartes de Macronutriments
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildMacroCard('PROTÉINES', '85g', '/160g', Colors.blue),
-                _buildMacroCard('GLUCIDES', '112g', '/250g', Colors.orange),
-                _buildMacroCard('LIPIDES', '42g', '/75g', Colors.pink),
-              ],
-            ),
-            const SizedBox(height: 30),
-
-            // Journal des repas
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.restaurant, color: primaryColor),
-                    SizedBox(width: 8),
-                    Text('Journal des repas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Text('Voir tout', style: TextStyle(color: primaryColor, fontWeight: FontWeight.w600)),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Liste des repas (Mocks)
-            _buildMealCard('Bowl de Saumon', '08:30', '450 kcal'),
-            _buildMealCard('Salade César', '12:45', '320 kcal'),
-
-            const SizedBox(height: 100), // Espace pour le bouton flottant
-          ],
-        ),
+            );
+          }
       ),
 
       // Bouton Flottant (Caméra)
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // 1. On initialise le sélecteur d'image
-          final ImagePicker picker = ImagePicker();
-
-          // 2. On ouvre la caméra
-          final XFile? image = await picker.pickImage(
-            source: ImageSource.camera,
-            imageQuality: 80, // Petite compression native pour commencer
-          );
-
-          // 3. Si l'utilisateur a pris une photo, on navigue vers l'écran d'analyse
-          if (image != null && context.mounted) {
-            context.push('/meal_analysis', extra: image.path);
-          }
+      floatingActionButton: mealsAsyncValue.isLoading ? null : FloatingActionButton(
+        onPressed: () {
+          // Ce code ouvre l'appareil photo, comme on l'avait configuré !
+          _pickImageAndNavigate(context);
         },
         backgroundColor: Colors.pink.shade400,
         shape: const CircleBorder(),
         elevation: 4,
         child: const Icon(Icons.camera_alt, color: Colors.white, size: 28),
       ),
-
-      // Barre de navigation inférieure (Mock visuel)
-      // bottomNavigationBar: BottomNavigationBar(
-      //   selectedItemColor: primaryColor,
-      //   unselectedItemColor: Colors.grey,
-      //   items: const [
-      //     BottomNavigationBarItem(icon: Icon(Icons.dashboard_customize), label: 'Accueil'),
-      //     BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu), label: 'Coach'),
-      //     BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profil'),
-      //   ],
-      // ),
     );
   }
 
-  // --- WIDGETS REUTILISABLES POUR CET ÉCRAN ---
+  // Fonction pour appeler ImagePicker (placée ici pour garder le code propre)
+  Future<void> _pickImageAndNavigate(BuildContext context) async {
+    final ImagePicker picker = ImagePicker();
 
-  Widget _buildMacroCard(String title, String current, String total, Color color) {
+    // On ouvre l'appareil photo
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 80,
+    );
+
+    // Si on a pris une photo, on va vers l'écran d'analyse
+    if (image != null && context.mounted) {
+      context.push('/meal_analysis', extra: image.path);
+    }
+  }
+
+  // --- WIDGETS REUTILISABLES ---
+  Widget _buildMacroCard(String title, String current, String total, double percent, Color color) {
     return Container(
       width: 105,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 10, spreadRadius: 2)],
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 10, spreadRadius: 2)]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -189,7 +242,7 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(height: 8),
           LinearPercentIndicator(
             lineHeight: 4.0,
-            percent: 0.5, // Mock progress
+            percent: percent, // Pourcentage dynamique !
             backgroundColor: color.withOpacity(0.2),
             progressColor: color,
             barRadius: const Radius.circular(2),
@@ -204,18 +257,13 @@ class DashboardScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.grey.shade100, blurRadius: 10, spreadRadius: 1)],
-          border: Border.all(color: Colors.grey.shade100)
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.grey.shade100, blurRadius: 10, spreadRadius: 1)], border: Border.all(color: Colors.grey.shade100)),
       child: Row(
         children: [
           Container(
             width: 60, height: 60,
             decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.fastfood, color: Colors.grey), // Placeholder pour l'image
+            child: const Icon(Icons.fastfood, color: Colors.grey),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -239,8 +287,6 @@ class DashboardScreen extends StatelessWidget {
             decoration: BoxDecoration(color: const Color(0xFF6B66FF).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
             child: Text(calories, style: const TextStyle(color: Color(0xFF6B66FF), fontWeight: FontWeight.bold, fontSize: 12)),
           ),
-          const SizedBox(width: 8),
-          const Icon(Icons.chevron_right, color: Colors.grey),
         ],
       ),
     );
