@@ -25,5 +25,8 @@ jobs:
         with:
           version: latest
 
-      - name: Déploiement de toutes les fonctions
-        run: supabase functions deploy --project-ref $PROJECT_ID
+      - name: Déploiement de la fonction analyze-meal
+        run: supabase functions deploy analyze-meal --project-ref $PROJECT_ID
+
+      - name: Déploiement de la fonction coach-chat
+        run: supabase functions deploy coach-chat --project-ref $PROJECT_ID
