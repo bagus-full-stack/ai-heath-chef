@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../providers/meal_provider.dart';
+import '../models/ingredient.dart';
 
 class AIService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -49,6 +49,22 @@ class AIService {
 
     } catch (e) {
       throw Exception("Erreur lors de l'analyse IA : ${e.toString()}");
+    }
+  }
+
+  Future<String> chatWithCoach(String message, List<Map<String, dynamic>> history) async {
+    try {
+      final response = await Supabase.instance.client.functions.invoke(
+        'coach_chat',
+        body: {
+          'message': message,
+          'history': history,
+        },
+      );
+
+      return response.data['reply'] as String;
+    } catch (e) {
+      throw Exception("Erreur de connexion avec le Coach IA : $e");
     }
   }
 }

@@ -2,23 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import '../providers/dashboard_provider.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../providers/dashboard_provider.dart';
+import '../models/meal.dart'; // 🚀 On importe notre nouveau modèle !
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
+
+  // Fonction pour ouvrir la caméra et naviguer
+  Future<void> _pickImageAndNavigate(BuildContext context) async {
+    final ImagePicker picker = ImagePicker();
+
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 80,
+    );
+
+    if (image != null && context.mounted) {
+      context.push('/meal_analysis', extra: image.path);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     const primaryColor = Color(0xFF6B66FF);
 
-    // Objectifs fixes (à rendre dynamiques avec le profil utilisateur plus tard)
+    // Objectifs fixes
     const int targetKcal = 2200;
     const double targetProt = 160.0;
     const double targetGluc = 250.0;
     const double targetLip = 75.0;
 
-    // On écoute notre base de données via Riverpod
+    // On écoute notre base de données (qui renvoie maintenant une List<Meal>)
     final mealsAsyncValue = ref.watch(todayMealsProvider);
 
     return Scaffold(
@@ -41,11 +57,10 @@ class DashboardScreen extends ConsumerWidget {
         ],
       ),
 
-      // La magie Riverpod : loading, error, et data
       body: mealsAsyncValue.when(
           loading: () => const Center(child: CircularProgressIndicator(color: primaryColor)),
           error: (err, stack) => Center(child: Text('Erreur: $err')),
-          data: (meals) {
+          data: (List<Meal> meals) { // 🚀 On spécifie bien List<Meal> ici
 
             // --- CALCUL DES TOTAUX ---
             int totalKcal = 0;
@@ -53,14 +68,15 @@ class DashboardScreen extends ConsumerWidget {
             double totalGluc = 0;
             double totalLip = 0;
 
+            // C'est tellement plus propre avec des objets !
             for (var meal in meals) {
-              totalKcal += (meal['total_kcal'] as num).toInt();
-              totalProt += (meal['total_prot'] as num).toDouble();
-              totalGluc += (meal['total_gluc'] as num).toDouble();
-              totalLip += (meal['total_lip'] as num).toDouble();
+              totalKcal += meal.totalKcal;
+              totalProt += meal.totalProt;
+              totalGluc += meal.totalGluc;
+              totalLip += meal.totalLip;
             }
 
-            // --- CALCUL DES REQUANTS ET POURCENTAGES ---
+            // --- CALCUL DES RESTANTS ET POURCENTAGES ---
             int remainingKcal = targetKcal - totalKcal;
             if (remainingKcal < 0) remainingKcal = 0;
 
@@ -77,10 +93,10 @@ class DashboardScreen extends ConsumerWidget {
             if (percentLip > 1.0) percentLip = 1.0;
 
             return RefreshIndicator(
-              onRefresh: () async => ref.refresh(todayMealsProvider), // Tirer vers le bas pour rafraîchir
+              onRefresh: () async => ref.refresh(todayMealsProvider),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                physics: const AlwaysScrollableScrollPhysics(), // Nécessaire pour le pull-to-refresh
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -92,14 +108,13 @@ class DashboardScreen extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(color: primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-                          // Affichage de la date du jour
                           child: Text('${DateTime.now().day} / ${DateTime.now().month}', style: const TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 12)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 40),
 
-                    // Jauge Circulaire Principale
+                    // Jauge Circulaire
                     Center(
                       child: CircularPercentIndicator(
                         radius: 130.0,
@@ -140,7 +155,7 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 30),
 
-                    // Journal des repas
+                    // Section Journal des repas
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: const [
@@ -165,14 +180,13 @@ class DashboardScreen extends ConsumerWidget {
                       )
                     else
                       ...meals.map((meal) {
-                        // On formate l'heure (ex: 14:05)
-                        final date = DateTime.parse(meal['created_at']).toLocal();
-                        final timeString = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+                        // 🚀 L'objet meal gère déjà la date proprement
+                        final timeString = '${meal.createdAt.hour.toString().padLeft(2, '0')}:${meal.createdAt.minute.toString().padLeft(2, '0')}';
 
                         return _buildMealCard(
-                          meal['name'] ?? 'Repas',
+                          meal.name,
                           timeString,
-                          '${meal['total_kcal']} kcal',
+                          '${meal.totalKcal} kcal',
                         );
                       }).toList(),
 
@@ -184,34 +198,15 @@ class DashboardScreen extends ConsumerWidget {
           }
       ),
 
-      // Bouton Flottant (Caméra)
+      // Bouton Flottant
       floatingActionButton: mealsAsyncValue.isLoading ? null : FloatingActionButton(
-        onPressed: () {
-          // Ce code ouvre l'appareil photo, comme on l'avait configuré !
-          _pickImageAndNavigate(context);
-        },
+        onPressed: () => _pickImageAndNavigate(context),
         backgroundColor: Colors.pink.shade400,
         shape: const CircleBorder(),
         elevation: 4,
         child: const Icon(Icons.camera_alt, color: Colors.white, size: 28),
       ),
     );
-  }
-
-  // Fonction pour appeler ImagePicker (placée ici pour garder le code propre)
-  Future<void> _pickImageAndNavigate(BuildContext context) async {
-    final ImagePicker picker = ImagePicker();
-
-    // On ouvre l'appareil photo
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 80,
-    );
-
-    // Si on a pris une photo, on va vers l'écran d'analyse
-    if (image != null && context.mounted) {
-      context.push('/meal_analysis', extra: image.path);
-    }
   }
 
   // --- WIDGETS REUTILISABLES ---
@@ -242,7 +237,7 @@ class DashboardScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           LinearPercentIndicator(
             lineHeight: 4.0,
-            percent: percent, // Pourcentage dynamique !
+            percent: percent,
             backgroundColor: color.withOpacity(0.2),
             progressColor: color,
             barRadius: const Radius.circular(2),
@@ -285,7 +280,7 @@ class DashboardScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(color: const Color(0xFF6B66FF).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-            child: Text(calories, style: const TextStyle(color: Color(0xFF6B66FF), fontWeight: FontWeight.bold, fontSize: 12)),
+            child: Text(calories, style: const TextStyle(color: const Color(0xFF6B66FF), fontWeight: FontWeight.bold, fontSize: 12)),
           ),
         ],
       ),

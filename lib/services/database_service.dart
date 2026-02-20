@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../providers/meal_provider.dart';
+import '../models/ingredient.dart';
+import '../models/meal.dart';
 
 class DatabaseService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -43,7 +44,7 @@ class DatabaseService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getTodayMeals() async {
+  Future<List<Meal>> getTodayMeals() async {
     try {
       final user = _supabase.auth.currentUser;
       if (user == null) return [];
@@ -62,7 +63,7 @@ class DatabaseService {
           .lte('created_at', endOfDay)   // Jusqu'à ce soir 23:59
           .order('created_at', ascending: false); // Du plus récent au plus ancien
 
-      return List<Map<String, dynamic>>.from(response);
+      return (response as List<dynamic>).map((json) => Meal.fromJson(json)).toList();
     } catch (e) {
       throw Exception('Erreur lors de la récupération des repas : ${e.toString()}');
     }
