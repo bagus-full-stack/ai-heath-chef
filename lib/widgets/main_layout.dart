@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class MainLayout extends StatelessWidget {
-  final Widget child; // L'écran actuel (Dashboard, Coach ou Profil)
+  final Widget child;
 
   const MainLayout({super.key, required this.child});
 
+  // Fonction pour déterminer l'index actif en fonction de l'URL actuelle
   int _calculateSelectedIndex(BuildContext context) {
-    // On regarde l'URL actuelle pour allumer le bon bouton
-    final String location = GoRouterState.of(context).uri.toString();
+    final String location = GoRouterState.of(context).matchedLocation;
     if (location.startsWith('/dashboard')) return 0;
     if (location.startsWith('/coach')) return 1;
     if (location.startsWith('/profile')) return 2;
     return 0; // Par défaut
   }
 
+  // Fonction pour changer de page au clic
   void _onItemTapped(int index, BuildContext context) {
-    // On navigue vers la bonne page quand on clique sur un bouton
     switch (index) {
       case 0:
         context.go('/dashboard');
@@ -35,20 +35,50 @@ class MainLayout extends StatelessWidget {
     const primaryColor = Color(0xFF6B66FF);
 
     return Scaffold(
-      body: child, // Affiche l'écran sélectionné
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _calculateSelectedIndex(context),
-        onTap: (index) => _onItemTapped(index, context),
-        selectedItemColor: primaryColor,
-        unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.white,
-        elevation: 10,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard_customize), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu), label: 'Coach'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profil'),
-        ],
+      // Le child est l'écran actuel (Dashboard, Coach ou Profil)
+      body: child,
+
+      // La barre de navigation
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          currentIndex: _calculateSelectedIndex(context),
+          onTap: (index) => _onItemTapped(index, context),
+          selectedItemColor: primaryColor,
+          unselectedItemColor: Colors.grey.shade400,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          type: BottomNavigationBarType.fixed,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 12),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home),
+              label: 'Accueil',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.auto_awesome_outlined),
+              activeIcon: Icon(Icons.auto_awesome),
+              label: 'Coach IA',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              activeIcon: Icon(Icons.person),
+              label: 'Profil',
+            ),
+          ],
+        ),
       ),
     );
   }

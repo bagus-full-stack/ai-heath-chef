@@ -1,8 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  // Les données de nos 3 pages d'explication
+  final List<Map<String, dynamic>> _pages = [
+    {
+      'title': 'Prends tes repas en photo',
+      'description': 'Plus besoin de peser ou de chercher dans de longues listes. Une simple photo de ton assiette suffit.',
+      'icon': Icons.camera_alt_rounded,
+    },
+    {
+      'title': 'Analyse IA instantanée',
+      'description': 'Notre intelligence artificielle détecte les ingrédients et calcule tes macros avec une précision bluffante.',
+      'icon': Icons.auto_awesome,
+    },
+    {
+      'title': 'Atteins tes objectifs',
+      'description': 'Suis tes calories quotidiennes et discute avec ton Coach IA personnel pour rester motivé à 100%.',
+      'icon': Icons.track_changes_rounded,
+    },
+  ];
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,65 +44,141 @@ class OnboardingScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-              child: const Text('Étape 1 sur 2', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 12)),
-            ),
-            const SizedBox(height: 16),
-            const Text('Apprenons à nous connaître', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, height: 1.1)),
-            const SizedBox(height: 12),
-            Text('Ces informations permettent à notre IA de calculer votre besoin calorique précis.', style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
-            const SizedBox(height: 30),
-
-            // Choix du genre
-            const Row(children: [Icon(Icons.people_outline, color: primaryColor), SizedBox(width: 8), Text('Vous êtes...', style: TextStyle(fontWeight: FontWeight.bold))]),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: _buildSelectableCard('Homme', Icons.person_outline, true, primaryColor)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildSelectableCard('Femme', Icons.person_outline, false, primaryColor)),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Âge et Poids
-            Row(
-              children: [
-                Expanded(child: _buildInputField('Votre Âge', '25', 'ans')),
-                const SizedBox(width: 16),
-                Expanded(child: _buildInputField('Votre Poids', '70', 'kg')),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Objectifs
-            const Row(children: [Icon(Icons.track_changes, color: primaryColor), SizedBox(width: 8), Text('Quel est votre objectif ?', style: TextStyle(fontWeight: FontWeight.bold))]),
-            const SizedBox(height: 16),
-            _buildGoalCard('Perdre du poids', 'Réduire l\'apport calorique et brûler les graisses', Icons.trending_down, true, primaryColor),
-            _buildGoalCard('Maintenir mon poids', 'Équilibrer les macros pour une santé optimale', Icons.adjust, false, primaryColor),
-            _buildGoalCard('Prendre de la masse', 'Augmenter l\'apport pour le muscle', Icons.fitness_center, false, primaryColor),
-
-            const SizedBox(height: 40),
-
-            // Bouton
-            ElevatedButton(
-              onPressed: () => context.go('/dashboard'), // Vers le dashboard
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            // --- BOUTON PASSER (SKIP) ---
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 16.0, top: 8.0),
+                child: TextButton(
+                  onPressed: () => _finishOnboarding(), // Va vers l'écran de Login
+                  child: Text('Passer', style: TextStyle(color: Colors.grey.shade500, fontSize: 16)),
+                ),
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [Text('Calculer mon plan', style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)), SizedBox(width: 8), Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16)],
+            ),
+
+            // --- LE CARROUSEL ---
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
+                itemCount: _pages.length,
+                itemBuilder: (context, index) {
+                  final page = _pages[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Cercle avec icône
+                        Container(
+                          height: 220,
+                          width: 220,
+                          decoration: BoxDecoration(
+                            color: primaryColor.withOpacity(0.08),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            page['icon'],
+                            size: 100,
+                            color: primaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 60),
+
+                        // Titre
+                        Text(
+                          page['title'],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Description
+                        Text(
+                          page['description'],
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey.shade600,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // --- INDICATEURS ET BOUTON PRINCIPAL ---
+            Padding(
+              padding: const EdgeInsets.all(40.0),
+              child: Column(
+                children: [
+                  // Les petits points animés (Dots)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      _pages.length,
+                          (index) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        height: 8,
+                        // Le point actif est plus large (24) que les inactifs (8)
+                        width: _currentPage == index ? 24 : 8,
+                        decoration: BoxDecoration(
+                          color: _currentPage == index ? primaryColor : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+
+                  // Bouton Suivant / C'est parti
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_currentPage == _pages.length - 1) {
+                        // Dernière page : on redirige vers l'inscription/connexion
+                        _finishOnboarding();
+                      } else {
+                        // Pages précédentes : on fait glisser vers la droite
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      minimumSize: const Size(double.infinity, 56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      _currentPage == _pages.length - 1 ? "C'est parti !" : 'Suivant',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -77,58 +187,12 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSelectableCard(String title, IconData icon, bool isSelected, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      decoration: BoxDecoration(
-        color: isSelected ? color.withOpacity(0.05) : Colors.white,
-        border: Border.all(color: isSelected ? color : Colors.grey.shade300, width: 2),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: isSelected ? color : Colors.grey, size: 30),
-          const SizedBox(height: 8),
-          Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? color : Colors.grey.shade700)),
-        ],
-      ),
-    );
-  }
+  Future<void> _finishOnboarding() async {
+    // On sauvegarde dans la mémoire du téléphone qu'on a vu cet écran
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('showOnboarding', false);
 
-  Widget _buildInputField(String label, String placeholder, String suffix) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(children: [const Icon(Icons.calendar_today, size: 16, color: Colors.grey), const SizedBox(width: 4), Text(label, style: const TextStyle(fontWeight: FontWeight.bold))]),
-        const SizedBox(height: 8),
-        TextField(
-          decoration: InputDecoration(
-            hintText: placeholder,
-            suffixText: suffix,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey.shade300)),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGoalCard(String title, String subtitle, IconData icon, bool isSelected, Color color) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isSelected ? color.withOpacity(0.1) : Colors.white,
-        border: Border.all(color: isSelected ? color : Colors.grey.shade200, width: isSelected ? 2 : 1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: isSelected ? color : Colors.grey.shade100, borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: isSelected ? Colors.white : Colors.grey)),
-          const SizedBox(width: 16),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade600))])),
-          if (isSelected) Icon(Icons.check_circle, color: color)
-        ],
-      ),
-    );
+    // Ensuite, on va vers l'écran de connexion
+    if (mounted) context.go('/');
   }
 }

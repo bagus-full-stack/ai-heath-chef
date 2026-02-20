@@ -60,9 +60,10 @@ class ProfileScreen extends ConsumerWidget {
             Center(
               child: Column(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 50,
-                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=68'), // Image de test
+                    backgroundColor: Colors.grey.shade200,
+                    child: const Icon(Icons.person, size: 50, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   const Text('Chef Santé', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),

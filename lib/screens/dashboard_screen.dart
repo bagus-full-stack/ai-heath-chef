@@ -52,7 +52,10 @@ class DashboardScreen extends ConsumerWidget {
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(backgroundImage: NetworkImage('https://i.pravatar.cc/100')),
+            child: CircleAvatar(
+              backgroundColor: Color(0xFFEEEEEE),
+              child: const Icon(Icons.person, color: Colors.grey),
+            ),
           )
         ],
       ),

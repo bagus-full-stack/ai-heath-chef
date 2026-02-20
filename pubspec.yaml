@@ -41,6 +41,7 @@ dependencies:
   percent_indicator: ^4.2.5                 # Pour recréer tes magnifiques jauges circulaires du Dashboard
   google_fonts: ^8.0.1
   cupertino_icons: ^1.0.8
+  shared_preferences: ^2.5.4
 
 dev_dependencies:
   flutter_test:
