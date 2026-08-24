@@ -42,6 +42,20 @@ class MealNotifier extends AsyncNotifier<List<Ingredient>> {
       state.value!.map((i) => i.id == id ? i.copyWith(weight: (i.weight - 10).clamp(0, 9999)) : i).toList(),
     );
   }
+
+  // Retirer un ingrédient de la liste
+  void removeIngredient(String id) {
+    if (state.value == null) return;
+    state = AsyncValue.data(
+      state.value!.where((i) => i.id != id).toList(),
+    );
+  }
+
+  // Ajouter un ingrédient saisi manuellement
+  void addIngredient(Ingredient ingredient) {
+    final current = state.value ?? const <Ingredient>[];
+    state = AsyncValue.data([...current, ingredient]);
+  }
 }
 
 // On utilise AsyncNotifierProvider au lieu de AsyncNotifierProvider.autoDispose

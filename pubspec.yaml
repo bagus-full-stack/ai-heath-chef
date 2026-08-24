@@ -36,12 +36,14 @@ dependencies:
   supabase_flutter: ^2.12.0                 # Authentification, base de données PostgreSQL et Edge Functions
   flutter_riverpod: ^3.2.1                  # Pour gérer tes jauges et tes macros en temps réel
   go_router: ^16.2.0                        # Pour une navigation fluide entre tes écrans (indispensable pour les apps modernes)
+  camera: ^0.11.0+2                         # Capture photo immersive via l'API caméra officielle
   image_picker: ^1.2.1                      # Pour ouvrir l'appareil photo ou la galerie
   flutter_image_compress: ^2.4.0            # Pour compresser la photo avant de l'envoyer à l'IA (économise de la data !)
   percent_indicator: ^4.2.5                 # Pour recréer tes magnifiques jauges circulaires du Dashboard
   google_fonts: ^8.0.1
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.4
+  purchases_flutter: ^10.9.1
 
 dev_dependencies:
   flutter_test:

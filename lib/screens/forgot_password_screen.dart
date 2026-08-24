@@ -65,7 +65,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           children: [
             // ... (Garde ton en-tête et l'icône) ...
             const SizedBox(height: 20),
-            Center(child: Container(width: 80, height: 80, decoration: BoxDecoration(color: primaryColor.withOpacity(0.05), shape: BoxShape.circle), child: const Icon(Icons.vpn_key_outlined, size: 36, color: primaryColor))),
+            Center(child: Container(width: 80, height: 80, decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.05), shape: BoxShape.circle), child: const Icon(Icons.vpn_key_outlined, size: 36, color: primaryColor))),
             const SizedBox(height: 24),
             const Text('Mot de passe oublié', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),

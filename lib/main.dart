@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // On importe notre routeur personnalisé
 import 'router/app_router.dart';
+import 'services/purchase_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +19,12 @@ void main() async {
   await Supabase.initialize(
     url: 'https://atmandnlqyyjaofezyig.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0bWFuZG5scXl5amFvZmV6eWlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2Nzc4OTUsImV4cCI6MjA4NjI1Mzg5NX0.MHmN5m1rqJvSnMHda9kYplXXnA7KsJBJBgnyptrpq1A',
+  );
+
+  // Initialisation de RevenueCat (achats in-app natifs).
+  // Nécessite les clés API RevenueCat, voir lib/services/purchase_service.dart.
+  await PurchaseService.instance.configure(
+    appUserId: Supabase.instance.client.auth.currentUser?.id,
   );
 
   // On configure notre routeur avec cette information
@@ -37,7 +44,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF6B66FF),
-          background: Colors.white,
+          surface: Colors.white,
         ),
         useMaterial3: true,
       ),

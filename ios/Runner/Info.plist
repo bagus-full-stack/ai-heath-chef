@@ -49,6 +49,10 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>L’application a besoin d’accéder à la caméra pour photographier ton repas.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>L’application a besoin d’accéder à tes photos pour analyser un repas depuis ta galerie.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

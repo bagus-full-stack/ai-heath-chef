@@ -1,30 +1,74 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/main.dart';
+import 'package:ai_health_chef/models/user_profile.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('UserProfile', () {
+    test('fromJson maps every Supabase column', () {
+      final profile = UserProfile.fromJson({
+        'user_id': 'abc-123',
+        'full_name': 'Alex Martin',
+        'email': 'alex@example.com',
+        'sex': 'female',
+        'age': 29,
+        'current_weight': 62.5,
+        'target_weight': 58.0,
+        'goal': 'loseWeight',
+        'updated_at': '2026-01-01T10:00:00.000Z',
+      });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      expect(profile.userId, 'abc-123');
+      expect(profile.fullName, 'Alex Martin');
+      expect(profile.email, 'alex@example.com');
+      expect(profile.sex, 'female');
+      expect(profile.age, 29);
+      expect(profile.currentWeight, 62.5);
+      expect(profile.targetWeight, 58.0);
+      expect(profile.goal, 'loseWeight');
+      expect(profile.updatedAt, DateTime.parse('2026-01-01T10:00:00.000Z'));
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('fromJson falls back to defaults for missing fields', () {
+      final profile = UserProfile.fromJson({'user_id': 'abc-123'});
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      expect(profile.fullName, 'Utilisateur');
+      expect(profile.email, '');
+      expect(profile.sex, 'other');
+      expect(profile.age, 0);
+      expect(profile.currentWeight, 0);
+      expect(profile.targetWeight, 0);
+      expect(profile.goal, 'maintain');
+      expect(profile.updatedAt, isNull);
+    });
+
+    test('sexLabel translates known values and defaults to Autre', () {
+      expect(
+        UserProfile.fromJson({'user_id': '1', 'sex': 'male'}).sexLabel,
+        'Homme',
+      );
+      expect(
+        UserProfile.fromJson({'user_id': '1', 'sex': 'female'}).sexLabel,
+        'Femme',
+      );
+      expect(
+        UserProfile.fromJson({'user_id': '1', 'sex': 'other'}).sexLabel,
+        'Autre',
+      );
+    });
+
+    test('goalLabel translates known values and defaults to Maintien', () {
+      expect(
+        UserProfile.fromJson({'user_id': '1', 'goal': 'loseWeight'}).goalLabel,
+        'Perte de poids',
+      );
+      expect(
+        UserProfile.fromJson({'user_id': '1', 'goal': 'gainMuscle'}).goalLabel,
+        'Prise de masse',
+      );
+      expect(
+        UserProfile.fromJson({'user_id': '1', 'goal': 'maintain'}).goalLabel,
+        'Maintien',
+      );
+    });
   });
 }

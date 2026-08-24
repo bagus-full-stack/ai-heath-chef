@@ -2,37 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../providers/dashboard_provider.dart';
+import '../providers/profile_provider.dart';
 import '../models/meal.dart'; // 🚀 On importe notre nouveau modèle !
+import '../utils/nutrition_targets.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
-  // Fonction pour ouvrir la caméra et naviguer
-  Future<void> _pickImageAndNavigate(BuildContext context) async {
-    final ImagePicker picker = ImagePicker();
-
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 80,
-    );
-
-    if (image != null && context.mounted) {
-      context.push('/meal_analysis', extra: image.path);
-    }
+  // Fonction pour ouvrir l'écran de capture caméra
+  void _openCameraCapture(BuildContext context) {
+    context.push('/camera_capture');
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     const primaryColor = Color(0xFF6B66FF);
 
-    // Objectifs fixes
-    const int targetKcal = 2200;
-    const double targetProt = 160.0;
-    const double targetGluc = 250.0;
-    const double targetLip = 75.0;
+    // Objectifs personnalisés, calculés à partir du profil (sexe/âge/poids/
+    // objectif). Repli sur des valeurs par défaut tant que le profil n'est
+    // pas chargé ou incomplet — voir lib/utils/nutrition_targets.dart.
+    final profileAsync = ref.watch(profileProvider);
+    final targets = profileAsync.maybeWhen(
+      data: computeNutritionTargets,
+      orElse: () => NutritionTargets.fallback,
+    );
+    final targetKcal = targets.kcal;
+    final targetProt = targets.protein;
+    final targetGluc = targets.carbs;
+    final targetLip = targets.fat;
 
     // On écoute notre base de données (qui renvoie maintenant une List<Meal>)
     final mealsAsyncValue = ref.watch(todayMealsProvider);
@@ -49,12 +48,12 @@ class DashboardScreen extends ConsumerWidget {
             child: const Icon(Icons.bolt, color: Colors.white),
           ),
         ),
-        actions: const [
-          Padding(
+        actions: [
+          const Padding(
             padding: EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
               backgroundColor: Color(0xFFEEEEEE),
-              child: const Icon(Icons.person, color: Colors.grey),
+              child: Icon(Icons.person, color: Colors.grey),
             ),
           )
         ],
@@ -110,7 +109,7 @@ class DashboardScreen extends ConsumerWidget {
                         const Text('Aujourd\'hui', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(color: primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                          decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
                           child: Text('${DateTime.now().day} / ${DateTime.now().month}', style: const TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 12)),
                         ),
                       ],
@@ -136,9 +135,9 @@ class DashboardScreen extends ConsumerWidget {
                             const SizedBox(height: 8),
                             Row(
                               mainAxisSize: MainAxisSize.min,
-                              children: const [
-                                Icon(Icons.local_fire_department, size: 16, color: primaryColor),
-                                Text(' Objectif: 2200', style: TextStyle(color: Colors.black54, fontSize: 12)),
+                              children: [
+                                const Icon(Icons.local_fire_department, size: 16, color: primaryColor),
+                                Text(' Objectif: $targetKcal', style: const TextStyle(color: Colors.black54, fontSize: 12)),
                               ],
                             ),
                           ],
@@ -161,12 +160,12 @@ class DashboardScreen extends ConsumerWidget {
                     // Section Journal des repas
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
+                      children: [
                         Row(
                           children: [
-                            Icon(Icons.restaurant, color: primaryColor),
-                            SizedBox(width: 8),
-                            Text('Journal des repas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            const Icon(Icons.restaurant, color: primaryColor),
+                            const SizedBox(width: 8),
+                            const Text('Journal des repas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ],
@@ -191,7 +190,7 @@ class DashboardScreen extends ConsumerWidget {
                           timeString,
                           '${meal.totalKcal} kcal',
                         );
-                      }).toList(),
+                      }),
 
                     const SizedBox(height: 100), // Espace pour le bouton flottant
                   ],
@@ -203,7 +202,7 @@ class DashboardScreen extends ConsumerWidget {
 
       // Bouton Flottant
       floatingActionButton: mealsAsyncValue.isLoading ? null : FloatingActionButton(
-        onPressed: () => _pickImageAndNavigate(context),
+        onPressed: () => _openCameraCapture(context),
         backgroundColor: Colors.pink.shade400,
         shape: const CircleBorder(),
         elevation: 4,
@@ -241,7 +240,7 @@ class DashboardScreen extends ConsumerWidget {
           LinearPercentIndicator(
             lineHeight: 4.0,
             percent: percent,
-            backgroundColor: color.withOpacity(0.2),
+            backgroundColor: color.withValues(alpha: 0.2),
             progressColor: color,
             barRadius: const Radius.circular(2),
             padding: EdgeInsets.zero,
@@ -282,8 +281,8 @@ class DashboardScreen extends ConsumerWidget {
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: const Color(0xFF6B66FF).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-            child: Text(calories, style: const TextStyle(color: const Color(0xFF6B66FF), fontWeight: FontWeight.bold, fontSize: 12)),
+            decoration: BoxDecoration(color: const Color(0xFF6B66FF).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+            child: Text(calories, style: const TextStyle(color: Color(0xFF6B66FF), fontWeight: FontWeight.bold, fontSize: 12)),
           ),
         ],
       ),

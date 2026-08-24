@@ -55,7 +55,7 @@ class AIService {
   Future<String> chatWithCoach(String message, List<Map<String, dynamic>> history) async {
     try {
       final response = await Supabase.instance.client.functions.invoke(
-        'coach_chat',
+        'coach-chat',
         body: {
           'message': message,
           'history': history,

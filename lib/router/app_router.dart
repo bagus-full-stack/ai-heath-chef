@@ -5,14 +5,20 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // --- IMPORT DE TOUS TES ÉCRANS ---
 import '../screens/login_screen.dart';
+import '../screens/signup_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/coach_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/meal_analysis_screen.dart';
+import '../screens/camera_capture_screen.dart';
 import '../screens/forgot_password_screen.dart';
 import '../screens/paywall_screen.dart';
+import '../screens/checkout_screen.dart';
+import '../screens/account_screen.dart';
+import '../screens/coming_soon_screen.dart';
 import '../widgets/main_layout.dart';
+import '../models/selected_plan.dart';
 
 // --- 1. CLASSE OUTIL : Pont entre Supabase et GoRouter ---
 // Permet à l'application de réagir instantanément aux connexions/déconnexions
@@ -57,10 +63,11 @@ void setupRouter(bool showOnboarding) {
       final isLoggedIn = session != null;
 
       final isGoingToLogin = state.matchedLocation == '/';
+      final isGoingToSignup = state.matchedLocation == '/signup';
       final isGoingToOnboarding = state.matchedLocation == '/onboarding';
       final isGoingToForgotPassword = state.matchedLocation == '/forgot_password';
 
-      final isAuthScreen = isGoingToLogin || isGoingToOnboarding || isGoingToForgotPassword;
+      final isAuthScreen = isGoingToLogin || isGoingToSignup || isGoingToOnboarding || isGoingToForgotPassword;
 
       // RÈGLE 1 : Si NON connecté et essaie d'aller sur une page privée
       if (!isLoggedIn && !isAuthScreen) {
@@ -83,6 +90,10 @@ void setupRouter(bool showOnboarding) {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignUpScreen(),
+      ),
+      GoRoute(
         path: '/forgot_password',
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
@@ -95,11 +106,33 @@ void setupRouter(bool showOnboarding) {
         builder: (context, state) => const PaywallScreen(),
       ),
       GoRoute(
+        path: '/checkout',
+        builder: (context, state) {
+          final plan = state.extra as SelectedPlan?;
+          return CheckoutScreen(plan: plan);
+        },
+      ),
+      GoRoute(
         path: '/meal_analysis',
         builder: (context, state) {
           // On récupère le chemin de l'image passé en paramètre
           final imagePath = state.extra as String?;
           return MealAnalysisScreen(imagePath: imagePath);
+        },
+      ),
+      GoRoute(
+        path: '/camera_capture',
+        builder: (context, state) => const CameraCaptureScreen(),
+      ),
+      GoRoute(
+        path: '/account',
+        builder: (context, state) => const AccountScreen(),
+      ),
+      GoRoute(
+        path: '/coming-soon',
+        builder: (context, state) {
+          final args = state.extra as ComingSoonArgs?;
+          return ComingSoonScreen(args: args);
         },
       ),
 

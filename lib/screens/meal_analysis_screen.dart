@@ -47,7 +47,27 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
         title: const Text('ANALYSE DU REPAS', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black)),
         centerTitle: true,
         actions: [
-          IconButton(icon: const Icon(Icons.info_outline, color: primaryColor), onPressed: () {})
+          IconButton(
+            icon: const Icon(Icons.info_outline, color: primaryColor),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Comment ça marche ?'),
+                content: const Text(
+                  'Notre IA identifie les ingrédients de ton assiette et estime leurs valeurs '
+                  'nutritionnelles. Ajuste les quantités avec + / - si besoin, retire un '
+                  'ingrédient avec l’icône poubelle, puis valide pour l’enregistrer dans ton '
+                  'journal du jour.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Compris'),
+                  ),
+                ],
+              ),
+            ),
+          )
         ],
       ),
       body: SingleChildScrollView(
@@ -161,7 +181,17 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                           ...ingredients.map((item) => _buildIngredientCard(item, ref, primaryColor)),
                           const SizedBox(height: 16),
                           OutlinedButton.icon(
-                            onPressed: () {}, // Logique pour ajouter manuellement
+                            onPressed: () async {
+                              final ingredient = await showModalBottomSheet<Ingredient>(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (context) => const _AddIngredientSheet(),
+                              );
+                              if (ingredient != null) {
+                                ref.read(mealProvider.notifier).addIngredient(ingredient);
+                              }
+                            },
                             icon: const Icon(Icons.add, color: Colors.black54),
                             label: const Text('Ajouter un ingrédient', style: TextStyle(color: Colors.black87, fontSize: 16)),
                             style: OutlinedButton.styleFrom(
@@ -182,7 +212,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Container(
                         padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(color: primaryColor.withOpacity(0.05), borderRadius: BorderRadius.circular(16)),
+                        decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(16)),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -279,7 +309,10 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(child: Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15), overflow: TextOverflow.ellipsis)),
-                    const Icon(Icons.delete_outline, color: Colors.black54, size: 20),
+                    GestureDetector(
+                      onTap: () => ref.read(mealProvider.notifier).removeIngredient(item.id),
+                      child: const Icon(Icons.delete_outline, color: Colors.black54, size: 20),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -353,13 +386,216 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
         const SizedBox(height: 8),
         Container(
           height: 4, width: 80,
-          decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(2)),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2)),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Container(width: 40, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
           ),
         )
       ],
+    );
+  }
+}
+
+/// Formulaire d'ajout manuel d'un ingrédient. Les valeurs saisies décrivent
+/// la portion ajoutée (poids + macros pour ce poids) ; elles sont converties
+/// en valeurs "pour 100g" pour rester cohérentes avec le modèle [Ingredient],
+/// qui recalcule les totaux à partir du poids ajustable via +/-.
+class _AddIngredientSheet extends StatefulWidget {
+  const _AddIngredientSheet();
+
+  @override
+  State<_AddIngredientSheet> createState() => _AddIngredientSheetState();
+}
+
+class _AddIngredientSheetState extends State<_AddIngredientSheet> {
+  static const primaryColor = Color(0xFF6B66FF);
+
+  final _nameController = TextEditingController();
+  final _weightController = TextEditingController();
+  final _kcalController = TextEditingController();
+  final _protController = TextEditingController();
+  final _glucController = TextEditingController();
+  final _lipController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _weightController.dispose();
+    _kcalController.dispose();
+    _protController.dispose();
+    _glucController.dispose();
+    _lipController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final name = _nameController.text.trim();
+    final weight = int.tryParse(_weightController.text.trim());
+    final kcal = double.tryParse(_kcalController.text.trim().replaceAll(',', '.'));
+    final prot = double.tryParse(_protController.text.trim().replaceAll(',', '.')) ?? 0;
+    final gluc = double.tryParse(_glucController.text.trim().replaceAll(',', '.')) ?? 0;
+    final lip = double.tryParse(_lipController.text.trim().replaceAll(',', '.')) ?? 0;
+
+    if (name.isEmpty) {
+      _showError('Entre le nom de l’ingrédient.');
+      return;
+    }
+    if (weight == null || weight <= 0) {
+      _showError('Entre un poids valide (en g).');
+      return;
+    }
+    if (kcal == null || kcal < 0) {
+      _showError('Entre les calories de cette portion.');
+      return;
+    }
+
+    final ratio = 100 / weight;
+    Navigator.of(context).pop(
+      Ingredient(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        name: name,
+        weight: weight,
+        kcalPer100g: kcal * ratio,
+        protPer100g: prot * ratio,
+        glucPer100g: gluc * ratio,
+        lipPer100g: lip * ratio,
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              const Text('Ajouter un ingrédient', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(
+                'Renseigne les valeurs pour la portion que tu ajoutes.',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+              ),
+              const SizedBox(height: 18),
+              TextField(
+                controller: _nameController,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: _fieldDecoration('Nom de l’ingrédient'),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _weightController,
+                      keyboardType: TextInputType.number,
+                      decoration: _fieldDecoration('Poids', suffixText: 'g'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _kcalController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: _fieldDecoration('Calories', suffixText: 'kcal'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _protController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: _fieldDecoration('Protéines', suffixText: 'g'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _glucController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: _fieldDecoration('Glucides', suffixText: 'g'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _lipController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: _fieldDecoration('Lipides', suffixText: 'g'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              ElevatedButton(
+                onPressed: _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  minimumSize: const Size(double.infinity, 54),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Ajouter',
+                  style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _fieldDecoration(String label, {String? suffixText}) {
+    return InputDecoration(
+      labelText: label,
+      suffixText: suffixText,
+      filled: true,
+      fillColor: Colors.grey.shade50,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: primaryColor, width: 1.4),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
     );
   }
 }
