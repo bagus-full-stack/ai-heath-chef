@@ -9,6 +9,7 @@ import '../models/user_profile.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 import '../providers/profile_provider.dart';
+import '../utils/bmi.dart';
 
 /// Écran d'édition du profil (identité + objectifs), ouvert depuis "Compte"
 /// et "Mes objectifs" dans lib/screens/profile_screen.dart.
@@ -26,6 +27,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   final _ageController = TextEditingController();
   final _currentWeightController = TextEditingController();
   final _targetWeightController = TextEditingController();
+  final _heightController = TextEditingController();
 
   OnboardingSex _sex = OnboardingSex.other;
   OnboardingGoal _goal = OnboardingGoal.maintain;
@@ -40,6 +42,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     _ageController.dispose();
     _currentWeightController.dispose();
     _targetWeightController.dispose();
+    _heightController.dispose();
     super.dispose();
   }
 
@@ -54,6 +57,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         profile.currentWeight == 0 ? '' : profile.currentWeight.toString();
     _targetWeightController.text =
         profile.targetWeight == 0 ? '' : profile.targetWeight.toString();
+    _heightController.text = profile.heightCm == 0 ? '' : profile.heightCm.toString();
     _sex = OnboardingSex.values.firstWhere(
       (s) => s.name == profile.sex,
       orElse: () => OnboardingSex.other,
@@ -109,14 +113,16 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           double.tryParse(_currentWeightController.text.trim().replaceAll(',', '.'));
       final targetWeight =
           double.tryParse(_targetWeightController.text.trim().replaceAll(',', '.'));
+      final height = double.tryParse(_heightController.text.trim().replaceAll(',', '.'));
 
-      if (age != null && currentWeight != null && targetWeight != null) {
+      if (age != null && currentWeight != null && targetWeight != null && height != null) {
         await authService.upsertProfile(
           fullName: _fullNameController.text.trim(),
           sex: _sex.name,
           age: age,
           currentWeight: currentWeight,
           targetWeight: targetWeight,
+          heightCm: height,
           goal: _goal.name,
           avatarUrl: url,
         );
@@ -168,6 +174,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         double.tryParse(_currentWeightController.text.trim().replaceAll(',', '.'));
     final targetWeight =
         double.tryParse(_targetWeightController.text.trim().replaceAll(',', '.'));
+    final height = double.tryParse(_heightController.text.trim().replaceAll(',', '.'));
 
     if (_fullNameController.text.trim().isEmpty) {
       _showError('Ton nom ne peut pas être vide.');
@@ -185,6 +192,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       _showError('Entre un poids cible valide.');
       return;
     }
+    if (height == null || height < 100 || height > 250) {
+      _showError('Entre ta taille en cm.');
+      return;
+    }
 
     setState(() => _isSaving = true);
     try {
@@ -194,6 +205,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             age: age,
             currentWeight: currentWeight,
             targetWeight: targetWeight,
+            heightCm: height,
             goal: _goal.name,
             avatarUrl: _avatarUrl,
           );
@@ -332,6 +344,22 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         ],
                       ),
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Taille', style: TextStyle(fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _heightController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            decoration: _decoration(suffixText: 'cm'),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 18),
@@ -347,6 +375,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                             controller: _currentWeightController,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             decoration: _decoration(suffixText: 'kg'),
+                            onChanged: (_) => setState(() {}),
                           ),
                         ],
                       ),
@@ -368,6 +397,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 18),
+                _buildBmiCard(),
                 const SizedBox(height: 18),
                 const Text('Objectif principal', style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
@@ -407,6 +438,84 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// Affiche l'IMC calculé en direct à partir du poids actuel et de la
+  /// taille saisis dans le formulaire (avant même l'enregistrement).
+  Widget _buildBmiCard() {
+    final weight = double.tryParse(_currentWeightController.text.trim().replaceAll(',', '.'));
+    final height = double.tryParse(_heightController.text.trim().replaceAll(',', '.'));
+    final bmi = (weight != null && height != null)
+        ? computeBmi(weightKg: weight, heightCm: height)
+        : null;
+
+    if (bmi == null) {
+      return Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.monitor_weight_outlined, color: Colors.grey.shade400),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Renseigne ton poids et ta taille pour voir ton IMC.',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bmi.color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: bmi.color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(color: bmi.color, shape: BoxShape.circle),
+            child: Center(
+              child: Text(
+                bmi.value.toStringAsFixed(1),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'IMC : ${bmi.label}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Plage ${bmi.label.toLowerCase()} : ${bmi.rangeLabel}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

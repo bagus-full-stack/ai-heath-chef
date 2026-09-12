@@ -24,6 +24,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _heightController = TextEditingController();
 
   bool _isSubmitting = false;
   OnboardingSex? _selectedSex;
@@ -35,6 +36,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void dispose() {
     _ageController.dispose();
     _weightController.dispose();
+    _heightController.dispose();
     super.dispose();
   }
 
@@ -66,6 +68,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       return;
     }
 
+    final height = double.tryParse(_heightController.text.trim().replaceAll(',', '.'));
+    if (height == null || height < 100 || height > 250) {
+      _showError('Entre ta taille en cm.');
+      return;
+    }
+
     if (_selectedGoal == null) {
       _showError('Choisis ton objectif principal.');
       return;
@@ -85,6 +93,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             age: age,
             currentWeight: weight,
             targetWeight: weight,
+            heightCm: height,
             goal: goal,
           );
 
@@ -95,6 +104,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           age: age,
           currentWeight: weight,
           targetWeight: weight,
+          heightCm: height,
           goal: goal.name,
         );
       }
@@ -305,6 +315,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 18),
+                  _SectionHeader(icon: Icons.height_outlined, label: 'Votre Taille'),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _heightController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    textInputAction: TextInputAction.done,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    decoration: _fieldDecoration(hintText: '175', suffixText: 'cm'),
                   ),
                   const SizedBox(height: 24),
                   _SectionHeader(icon: Icons.track_changes_outlined, label: 'Quel est votre objectif ?'),

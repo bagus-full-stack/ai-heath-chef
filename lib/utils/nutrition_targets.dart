@@ -34,8 +34,9 @@ const Map<String, double> _assumedHeightCmBySex = {
 /// formule de Mifflin-St Jeor pour le métabolisme de base.
 ///
 /// Approximations assumées faute de données collectées à l'onboarding :
-/// - Taille : moyenne par sexe (voir [_assumedHeightCmBySex]) — pas de champ
-///   taille dans le modèle actuel.
+/// - Taille : utilise `profile.heightCm` si renseignée, sinon retombe sur une
+///   moyenne par sexe (voir [_assumedHeightCmBySex]) pour les profils créés
+///   avant l'ajout de ce champ.
 /// - Niveau d'activité : "modérément actif" (facteur 1.375) par défaut.
 /// Le résultat est donc indicatif, pas une valeur médicale précise.
 NutritionTargets computeNutritionTargets(UserProfile? profile) {
@@ -43,7 +44,9 @@ NutritionTargets computeNutritionTargets(UserProfile? profile) {
     return NutritionTargets.fallback;
   }
 
-  final heightCm = _assumedHeightCmBySex[profile.sex] ?? _assumedHeightCmBySex['other']!;
+  final heightCm = profile.heightCm > 0
+      ? profile.heightCm
+      : _assumedHeightCmBySex[profile.sex] ?? _assumedHeightCmBySex['other']!;
   final sexOffset = profile.sex == 'female' ? -161 : 5;
 
   final bmr = 10 * profile.currentWeight + 6.25 * heightCm - 5 * profile.age + sexOffset;

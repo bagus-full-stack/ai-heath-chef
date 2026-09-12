@@ -6,6 +6,7 @@ import 'package:percent_indicator/percent_indicator.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/profile_provider.dart';
 import '../models/meal.dart'; // 🚀 On importe notre nouveau modèle !
+import '../utils/bmi.dart';
 import '../utils/nutrition_targets.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -32,6 +33,15 @@ class DashboardScreen extends ConsumerWidget {
     final targetProt = targets.protein;
     final targetGluc = targets.carbs;
     final targetLip = targets.fat;
+
+    // IMC calculé à partir du poids actuel et de la taille du profil ; null
+    // tant que le profil n'est pas chargé ou incomplet (voir lib/utils/bmi.dart).
+    final bmi = profileAsync.maybeWhen(
+      data: (profile) => profile != null
+          ? computeBmi(weightKg: profile.currentWeight, heightCm: profile.heightCm)
+          : null,
+      orElse: () => null,
+    );
 
     // On écoute notre base de données (qui renvoie maintenant une List<Meal>)
     final mealsAsyncValue = ref.watch(todayMealsProvider);
@@ -157,6 +167,11 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 30),
 
+                    if (bmi != null) ...[
+                      _buildBmiCard(bmi),
+                      const SizedBox(height: 30),
+                    ],
+
                     // Section Journal des repas
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -212,6 +227,44 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   // --- WIDGETS REUTILISABLES ---
+  Widget _buildBmiCard(BmiResult bmi) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.grey.shade100, blurRadius: 10, spreadRadius: 1)],
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(color: bmi.color, shape: BoxShape.circle),
+            child: Center(
+              child: Text(
+                bmi.value.toStringAsFixed(1),
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('IMC : ${bmi.label}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                const SizedBox(height: 2),
+                Text('Plage ${bmi.label.toLowerCase()} : ${bmi.rangeLabel}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMacroCard(String title, String current, String total, double percent, Color color) {
     return Container(
       width: 105,

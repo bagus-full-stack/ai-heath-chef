@@ -58,6 +58,7 @@ class AuthService {
     required int age,
     required double currentWeight,
     required double targetWeight,
+    required double heightCm,
     required String goal,
     String? avatarUrl,
   }) async {
@@ -79,6 +80,7 @@ class AuthService {
         'age': age,
         'current_weight': currentWeight,
         'target_weight': targetWeight,
+        'height_cm': heightCm,
         'goal': goal,
         'avatar_url': ?avatarUrl,
       }, onConflict: 'user_id');

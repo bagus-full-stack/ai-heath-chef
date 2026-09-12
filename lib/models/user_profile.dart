@@ -6,6 +6,7 @@ class UserProfile {
   final int age;
   final double currentWeight;
   final double targetWeight;
+  final double heightCm;
   final String goal;
   final String? avatarUrl;
   final DateTime? updatedAt;
@@ -18,6 +19,7 @@ class UserProfile {
     required this.age,
     required this.currentWeight,
     required this.targetWeight,
+    this.heightCm = 0,
     required this.goal,
     this.avatarUrl,
     this.updatedAt,
@@ -32,6 +34,7 @@ class UserProfile {
       age: (json['age'] as num?)?.toInt() ?? 0,
       currentWeight: (json['current_weight'] as num?)?.toDouble() ?? 0,
       targetWeight: (json['target_weight'] as num?)?.toDouble() ?? 0,
+      heightCm: (json['height_cm'] as num?)?.toDouble() ?? 0,
       goal: (json['goal'] as String?) ?? 'maintain',
       avatarUrl: json['avatar_url'] as String?,
       updatedAt: json['updated_at'] == null
