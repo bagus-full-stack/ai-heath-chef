@@ -65,6 +65,19 @@ Sans configuration, l'application fonctionne en **mode démo** (achats simulés,
 flutter run
 ```
 
+## Build de l'APK
+
+```bash
+flutter build apk --release
+```
+
+L'APK généré se trouve dans `build/app/outputs/flutter-apk/app-release.apk`.
+
+- Le fichier `.env` (voir [Configuration Supabase](#configuration-supabase)) doit exister à la racine avant le build : il est embarqué comme asset et chargé au démarrage, sans lui l'app plante au lancement.
+- `flutter build apk --release --split-per-abi` génère un APK par architecture (ARM/x86), plus léger qu'un APK universel.
+- Pour le Play Store, préfère `flutter build appbundle --release` (format `.aab` requis).
+- ⚠️ Le build release est actuellement signé avec la clé **debug** (`android/app/build.gradle.kts`) — suffisant pour tester sur un appareil, mais à remplacer par une vraie clé de signature avant toute publication sur le Play Store.
+
 ## Tests
 
 ```bash
