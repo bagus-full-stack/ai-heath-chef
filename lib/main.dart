@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,15 +11,19 @@ import 'services/purchase_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // On charge les variables d'environnement depuis le fichier .env
+  // (voir .env.example pour le modèle à remplir).
+  await dotenv.load();
+
   // On lit la mémoire du téléphone
   final prefs = await SharedPreferences.getInstance();
   // S'il n'y a rien dans la mémoire (premier lancement), ça vaudra 'true'
   final showOnboarding = prefs.getBool('showOnboarding') ?? true;
 
-  // Initialisation de Supabase (les clés seront à changer plus tard)
+  // Initialisation de Supabase à partir des clés du fichier .env
   await Supabase.initialize(
-    url: 'https://atmandnlqyyjaofezyig.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0bWFuZG5scXl5amFvZmV6eWlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2Nzc4OTUsImV4cCI6MjA4NjI1Mzg5NX0.MHmN5m1rqJvSnMHda9kYplXXnA7KsJBJBgnyptrpq1A',
+    url: dotenv.env['SUPABASE_URL']!,
+    publishableKey: dotenv.env['SUPABASE_PUBLISHABLE_KEY']!,
   );
 
   // Initialisation de RevenueCat (achats in-app natifs).

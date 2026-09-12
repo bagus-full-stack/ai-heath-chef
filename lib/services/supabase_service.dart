@@ -80,7 +80,7 @@ class AuthService {
         'current_weight': currentWeight,
         'target_weight': targetWeight,
         'goal': goal,
-        if (avatarUrl != null) 'avatar_url': avatarUrl,
+        'avatar_url': ?avatarUrl,
       }, onConflict: 'user_id');
     } catch (e) {
       throw Exception('Erreur lors de la sauvegarde du profil : ${e.toString()}');

@@ -57,7 +57,7 @@ class DatabaseService {
       // On interroge la table 'meals' dans Supabase
       final response = await _supabase
           .from('meals')
-          .select()
+          .select('id, name, total_kcal, total_prot, total_gluc, total_lip, created_at')
           .eq('user_id', user.id) // Uniquement MES repas
           .gte('created_at', startOfDay) // Depuis ce matin 00:00
           .lte('created_at', endOfDay)   // Jusqu'à ce soir 23:59

@@ -24,9 +24,11 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
         .from('chat_messages')
         .select('id, role, text, created_at')
         .eq('user_id', user.id)
-        .order('created_at', ascending: true);
+        .order('created_at', ascending: false)
+        .limit(50);
+    final sortedRows = rows.reversed;
 
-    final messages = rows
+    final messages = sortedRows
         .map<ChatMessage>((row) => ChatMessage(
               id: row['id']?.toString() ?? DateTime.now().microsecondsSinceEpoch.toString(),
               text: row['text'] as String? ?? '',

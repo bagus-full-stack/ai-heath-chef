@@ -1,4 +1,4 @@
-package com.example.ai_health_chef
+package com.aihealthchef.app
 
 import io.flutter.embedding.android.FlutterActivity
 
