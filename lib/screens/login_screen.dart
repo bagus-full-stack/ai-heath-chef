@@ -49,6 +49,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           age: onboarding.age!,
           currentWeight: onboarding.currentWeight!,
           targetWeight: onboarding.targetWeight!,
+          heightCm: onboarding.heightCm!,
           goal: onboarding.goal!.name,
         );
       }

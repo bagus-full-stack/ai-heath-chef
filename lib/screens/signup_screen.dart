@@ -79,6 +79,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             age: onboarding.age!,
             currentWeight: onboarding.currentWeight!,
             targetWeight: onboarding.targetWeight!,
+            heightCm: onboarding.heightCm!,
             goal: onboarding.goal!.name,
           );
         }

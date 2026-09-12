@@ -40,6 +40,7 @@ void main() {
         age: 27,
         currentWeight: 65.0,
         targetWeight: 60.0,
+        heightCm: 168.0,
         goal: OnboardingGoal.loseWeight,
       );
 
@@ -49,6 +50,7 @@ void main() {
       expect(profile.age, 27);
       expect(profile.currentWeight, 65.0);
       expect(profile.targetWeight, 60.0);
+      expect(profile.heightCm, 168.0);
       expect(profile.goal, OnboardingGoal.loseWeight);
     });
   });

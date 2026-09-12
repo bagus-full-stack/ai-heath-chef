@@ -76,7 +76,28 @@ L'APK généré se trouve dans `build/app/outputs/flutter-apk/app-release.apk`.
 - Le fichier `.env` (voir [Configuration Supabase](#configuration-supabase)) doit exister à la racine avant le build : il est embarqué comme asset et chargé au démarrage, sans lui l'app plante au lancement.
 - `flutter build apk --release --split-per-abi` génère un APK par architecture (ARM/x86), plus léger qu'un APK universel.
 - Pour le Play Store, préfère `flutter build appbundle --release` (format `.aab` requis).
-- ⚠️ Le build release est actuellement signé avec la clé **debug** (`android/app/build.gradle.kts`) — suffisant pour tester sur un appareil, mais à remplacer par une vraie clé de signature avant toute publication sur le Play Store.
+
+### Signature release (Play Store)
+
+Le build release est signé via `android/key.properties`, qui référence un keystore local (`.jks`). Ni l'un ni l'autre ne sont commités (voir `.gitignore`) — si `key.properties` est absent, le build retombe automatiquement sur la clé debug (utile en CI sans les secrets).
+
+Pour générer ta propre clé sur une nouvelle machine :
+
+```bash
+keytool -genkeypair -v -keystore android/app/upload-keystore.jks \
+  -alias upload -keyalg RSA -keysize 2048 -validity 10000
+```
+
+Puis crée `android/key.properties` :
+
+```
+storePassword=<mot de passe du keystore>
+keyPassword=<mot de passe de la clé, identique au précédent pour un keystore PKCS12>
+keyAlias=upload
+storeFile=upload-keystore.jks
+```
+
+⚠️ **Le fichier `.jks` et ses mots de passe sont irremplaçables** : sans eux, impossible de publier une mise à jour de l'app existante sur le Play Store (il faudrait republier sous un nouvel identifiant). Sauvegarde-les immédiatement dans un gestionnaire de mots de passe ou un stockage sécurisé, en dehors de ce dépôt.
 
 ## Tests
 
