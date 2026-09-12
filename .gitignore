@@ -36,6 +36,9 @@ migrate_working_dir/
 # Environment variables (secrets) — never commit the real file
 .env
 
+# Supabase CLI local cache
+supabase/.temp/
+
 # Symbolication related
 app.*.symbols
 
