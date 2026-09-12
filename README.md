@@ -5,8 +5,8 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas par photo vi
 ## Fonctionnalités
 
 - **Authentification** — inscription, connexion, mot de passe oublié (Supabase Auth)
-- **Onboarding** — questionnaire de profil (objectifs, données physiques) utilisé pour calculer les cibles nutritionnelles
-- **Dashboard** — jauges de macros (calories, protéines, glucides, lipides) sur la journée
+- **Onboarding** — questionnaire de profil (objectifs, données physiques dont la taille) utilisé pour calculer les cibles nutritionnelles
+- **Dashboard** — jauges de macros (calories, protéines, glucides, lipides) sur la journée, et IMC calculé à partir du profil (catégorie OMS + plage)
 - **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
 - **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`)
 - **Profil & compte** — gestion du profil utilisateur, paramètres de compte
@@ -32,7 +32,7 @@ lib/
   screens/      Écrans de l'application
   services/       Accès Supabase, IA (Edge Functions) et RevenueCat (database_service, ai_service, supabase_service, purchase_service)
   router/        Configuration go_router (routes + redirections auth)
-  utils/          Calcul des cibles nutritionnelles (nutrition_targets)
+  utils/          Calcul des cibles nutritionnelles (nutrition_targets) et de l'IMC (bmi)
   widgets/        Composants réutilisables (jauges, cartes de repas, layout principal)
 test/             Tests unitaires (providers, utils)
 ```
@@ -40,7 +40,7 @@ test/             Tests unitaires (providers, utils)
 ## Prérequis
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (compatible Dart ^3.11.0)
-- Un projet [Supabase](https://supabase.com) avec les Edge Functions `analyze-meal` et `coach-chat` déployées
+- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal` et `coach-chat` déployées (voir ci-dessous)
 - (Optionnel) Un projet [RevenueCat](https://www.revenuecat.com) pour activer les achats réels
 
 ## Installation
@@ -51,7 +51,9 @@ flutter pub get
 
 ### Configuration Supabase
 
-L'URL et la clé publique (anon) Supabase sont actuellement définies directement dans `lib/main.dart`. Pour pointer vers ton propre projet, remplace-les par les tiennes (Project Settings > API dans le dashboard Supabase).
+1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` dans l'ordre (0001 puis 0002) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase). Ils créent les tables `profiles`, `meals`, `chat_messages`, leurs policies RLS, et le bucket de stockage `avatars`.
+3. **Edge Functions** — déploie `analyze-meal` et `coach-chat` (`supabase/functions/`) avec `supabase functions deploy <nom>`, et configure les secrets qu'elles utilisent (ex. clé API du modèle IA) via `supabase secrets set` ou l'onglet Edge Functions > Secrets du dashboard.
 
 ### Configuration RevenueCat (optionnel)
 
