@@ -10,7 +10,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
 - **Analyse de produit par photo** — même principe pour un produit emballé (Edge Function `analyze-product`), lit l'étiquette nutritionnelle plutôt qu'une assiette
 - **Scan de code-barres** — recherche instantanée d'un produit (EAN/UPC) via la base publique Open Food Facts, sans appel IA
-- **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`), et idées de repas personnalisées selon le profil/objectif (Edge Function `meal-suggestions`, mises en cache un jour à la fois)
+- **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`), et idées de repas personnalisées selon le profil/objectif (Edge Function `meal-suggestions`, mises en cache un jour à la fois), chacune illustrée par une image générée via Pollinations.ai (Edge Function `meal-images`, voir ci-dessous)
 - **Personnalisation du Coach IA** — choix du ton des réponses (motivant, bienveillant, direct, humoristique)
 - **Préférences alimentaires** — régime (végétarien, végétalien, pescétarien, halal, kasher) et allergies/intolérances, pris en compte par les idées de repas et le Coach IA
 - **Rappels** — notifications locales quotidiennes pour les repas (petit-déjeuner/déjeuner/dîner, activables et personnalisables individuellement) et rappels personnalisés illimités (nom + heure au choix), réglables depuis Profil > Notifications
@@ -19,7 +19,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Conditions d'utilisation** — CGU et mentions légales (⚠️ contenu de brouillon, voir [Notes](#notes) ci-dessous)
 - **À propos** — version de l'app (lue dynamiquement), liens vers l'aide et les CGU
 - **Compte admin** — accès complet aux fonctionnalités PRO sans abonnement réel, activable uniquement depuis le SQL Editor Supabase (jamais depuis l'app)
-- **Quotas IA par utilisateur** — limite quotidienne d'appels par utilisateur sur chaque Edge Function IA (20/jour pour `analyze-meal`/`analyze-product`, 50/jour pour `coach-chat`, 10/jour pour `meal-suggestions`), pour contenir les coûts en cas d'abus
+- **Quotas IA par utilisateur** — limite quotidienne d'appels par utilisateur sur chaque Edge Function IA (20/jour pour `analyze-meal`/`analyze-product`, 50/jour pour `coach-chat`, 10/jour pour `meal-suggestions`/`meal-images`), pour contenir les coûts en cas d'abus
 - **Abonnement PRO** — paywall, checkout et gestion des achats in-app via RevenueCat (avec un **mode démo** intégré tant que les clés RevenueCat ne sont pas configurées, permettant de tester tout le parcours Paywall → Checkout → déblocage PRO sans compte Apple/Google payant)
 
 ## Stack technique
@@ -62,14 +62,16 @@ supabase/
   migrations/   Schéma SQL versionné (0001 à 0008, voir ci-dessous)
   functions/    Edge Functions : analyze-meal, analyze-product, coach-chat, meal-suggestions
                 (+ _shared/quota.ts, vérification d'identité et quota quotidien réutilisés
-                par les quatre fonctions)
+                par ces quatre fonctions), meal-images (même logique de quota, mais dupliquée
+                dans son propre index.ts — déployée via l'éditeur du Dashboard Supabase, qui
+                ne bundle pas les fichiers partagés hors de la fonction)
 test/           Tests unitaires (providers, utils)
 ```
 
 ## Prérequis
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (compatible Dart ^3.11.0)
-- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions` déployées (voir ci-dessous)
+- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions` et `meal-images` déployées (voir ci-dessous)
 - (Optionnel) Un projet [RevenueCat](https://www.revenuecat.com) pour activer les achats réels
 
 ## Installation
@@ -90,8 +92,11 @@ flutter pub get
    - `0006` : photo de repas (`image_url` sur `meals`) + bucket `meal_photos`
    - `0007` : statut admin (`is_admin` sur `profiles`), verrouillé contre toute auto-promotion côté client
    - `0008` : table `api_usage` + fonction `increment_api_usage`, pour les quotas quotidiens par utilisateur sur les Edge Functions IA (voir ci-dessous)
-3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions` (`supabase/functions/`, ainsi que le dossier partagé `supabase/functions/_shared/`) avec `supabase functions deploy <nom>`, et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
-4. **Compte admin (optionnel)** — pour donner à un compte l'accès complet aux fonctionnalités PRO sans abonnement réel, exécute depuis le SQL Editor : `update public.profiles set is_admin = true where email = 'ton-email@exemple.com';`. Ce champ n'est modifiable que depuis le SQL Editor (aucun moyen de le changer depuis l'app, voir migration 0007).
+3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions` et `meal-images` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
+   - **Via la CLI** (`supabase functions deploy <nom>`, depuis la racine du projet) : bundle aussi le dossier partagé `supabase/functions/_shared/`, utilisé par `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions`.
+   - **Via l'éditeur du Dashboard Supabase** : chaque fonction n'est composée que des fichiers que tu lui ajoutes explicitement — le dossier `_shared/` du repo n'est pas visible depuis là. `meal-images` est conçue pour ce cas : sa logique de quota est dupliquée directement dans son `index.ts`, sans dépendance externe, donc un simple copier-coller du fichier suffit à la déployer depuis le Dashboard.
+4. **Illustrations des idées de repas (optionnel)** — `meal-images` génère une image IA par suggestion via [Pollinations.ai](https://pollinations.ai), qui fonctionne **sans compte** (accès anonyme, gratuit, limité en débit). Pour un accès plus rapide et sans watermark, crée un compte sur [auth.pollinations.ai](https://auth.pollinations.ai), récupère ton token, puis configure le secret `POLLINATIONS_TOKEN` via `supabase secrets set POLLINATIONS_TOKEN=<token>`. Ce token n'est utilisé que côté Edge Function (jamais exposé dans l'app) ; en son absence, `meal-images` retombe automatiquement sur l'accès anonyme.
+5. **Compte admin (optionnel)** — pour donner à un compte l'accès complet aux fonctionnalités PRO sans abonnement réel, exécute depuis le SQL Editor : `update public.profiles set is_admin = true where email = 'ton-email@exemple.com';`. Ce champ n'est modifiable que depuis le SQL Editor (aucun moyen de le changer depuis l'app, voir migration 0007).
 
 ### Configuration RevenueCat (optionnel)
 

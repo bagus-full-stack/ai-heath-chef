@@ -156,6 +156,7 @@ class DatabaseService {
       'gluc': s.gluc,
       'lip': s.lip,
       'description': s.description,
+      'imageUrl': s.imageUrl,
     }).toList();
 
     await _supabase.from('meal_suggestions').upsert(

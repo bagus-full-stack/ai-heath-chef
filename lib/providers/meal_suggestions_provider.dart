@@ -55,7 +55,8 @@ class MealSuggestionsNotifier extends AsyncNotifier<List<MealSuggestion>> {
     }
 
     final targets = computeNutritionTargets(profile);
-    final suggestions = await AIService().getMealSuggestions(
+    final aiService = AIService();
+    final suggestions = await aiService.getMealSuggestions(
       goal: profile?.goal ?? 'maintain',
       targetKcal: targets.kcal,
       targetProt: targets.protein,
@@ -65,9 +66,10 @@ class MealSuggestionsNotifier extends AsyncNotifier<List<MealSuggestion>> {
       allergies: allergies,
       count: 6,
     );
+    final illustratedSuggestions = await aiService.getMealImages(suggestions);
 
-    await dbService.saveMealSuggestions(dayKey, suggestions, signature);
-    return suggestions;
+    await dbService.saveMealSuggestions(dayKey, illustratedSuggestions, signature);
+    return illustratedSuggestions;
   }
 
   String _todayKey() {

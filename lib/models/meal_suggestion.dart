@@ -6,6 +6,7 @@ class MealSuggestion {
   final double gluc;
   final double lip;
   final String description;
+  final String? imageUrl;
 
   const MealSuggestion({
     required this.timeSlot,
@@ -15,6 +16,7 @@ class MealSuggestion {
     required this.gluc,
     required this.lip,
     required this.description,
+    this.imageUrl,
   });
 
   factory MealSuggestion.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,22 @@ class MealSuggestion {
       gluc: (json['gluc'] as num?)?.toDouble() ?? 0,
       lip: (json['lip'] as num?)?.toDouble() ?? 0,
       description: json['description'] as String? ?? '',
+      imageUrl: json['imageUrl'] as String?,
+    );
+  }
+
+  /// Retourne une copie de cette suggestion avec une image générée
+  /// (Pollinations.ai), sans toucher aux autres champs.
+  MealSuggestion withImageUrl(String? imageUrl) {
+    return MealSuggestion(
+      timeSlot: timeSlot,
+      title: title,
+      kcal: kcal,
+      prot: prot,
+      gluc: gluc,
+      lip: lip,
+      description: description,
+      imageUrl: imageUrl,
     );
   }
 }

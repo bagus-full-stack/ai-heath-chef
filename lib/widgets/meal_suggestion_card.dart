@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../models/meal_suggestion.dart';
@@ -11,10 +14,12 @@ const Map<String, IconData> _kTimeSlotIcons = {
   'Collation': Icons.apple_rounded,
 };
 
-/// Carte présentant une idée de repas générée par l'IA. Pas d'image réseau
-/// (l'IA ne fournit pas de photo réelle du plat) : on utilise à la place une
-/// icône représentative du moment de la journée, pour rester fiable hors
-/// ligne et éviter d'afficher des visuels non représentatifs du plat.
+/// Carte présentant une idée de repas générée par l'IA, illustrée par une
+/// image générée (Pollinations.ai, encodée en data URI) quand elle a pu être
+/// générée. Ce n'est jamais une vraie photo du plat — juste une illustration
+/// IA — donc en cas d'échec de génération (réseau, quota...) on retombe sur
+/// une icône représentative du moment de la journée plutôt que de bloquer
+/// l'affichage de la suggestion.
 class MealSuggestionCard extends StatelessWidget {
   final MealSuggestion suggestion;
   final VoidCallback onAdd;
@@ -28,6 +33,7 @@ class MealSuggestionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final icon = _kTimeSlotIcons[suggestion.timeSlot] ?? Icons.restaurant_rounded;
+    final imageBytes = _decodeDataUri(suggestion.imageUrl);
 
     return Container(
       clipBehavior: Clip.antiAlias,
@@ -54,9 +60,19 @@ class MealSuggestionCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: _kPrimaryColor.withValues(alpha: 0.08),
                 ),
-                child: Center(
-                  child: Icon(icon, size: 48, color: _kPrimaryColor),
-                ),
+                child: imageBytes != null
+                    ? Image.memory(
+                        imageBytes,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: 100,
+                        errorBuilder: (context, error, stackTrace) => Center(
+                          child: Icon(icon, size: 48, color: _kPrimaryColor),
+                        ),
+                      )
+                    : Center(
+                        child: Icon(icon, size: 48, color: _kPrimaryColor),
+                      ),
               ),
               Positioned(
                 top: 12,
@@ -146,6 +162,20 @@ class MealSuggestionCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Décode une data URI base64 (`data:image/...;base64,...`) en octets bruts.
+/// Retourne `null` si `dataUri` est nul/vide ou mal formé, plutôt que de
+/// lever une exception — la carte retombe alors sur l'icône par défaut.
+Uint8List? _decodeDataUri(String? dataUri) {
+  if (dataUri == null || dataUri.isEmpty) return null;
+  final commaIndex = dataUri.indexOf(',');
+  if (commaIndex == -1) return null;
+  try {
+    return base64Decode(dataUri.substring(commaIndex + 1));
+  } catch (_) {
+    return null;
   }
 }
 

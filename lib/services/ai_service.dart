@@ -128,6 +128,36 @@ class AIService {
     }
   }
 
+  /// Génère une illustration IA (Pollinations.ai) pour chaque suggestion et
+  /// retourne les suggestions enrichies de leur `imageUrl` (data URI). Une
+  /// suggestion dont l'image échoue à se générer garde `imageUrl == null`
+  /// (la carte retombe alors sur l'icône par défaut) plutôt que de faire
+  /// échouer tout l'appel.
+  Future<List<MealSuggestion>> getMealImages(List<MealSuggestion> suggestions) async {
+    if (suggestions.isEmpty) return suggestions;
+
+    try {
+      final response = await _supabase.functions.invoke(
+        'meal-images',
+        body: {
+          'meals': suggestions
+              .map((s) => {'title': s.title, 'description': s.description})
+              .toList(),
+        },
+      );
+
+      final List<dynamic> images = response.data['images'];
+      return [
+        for (var i = 0; i < suggestions.length; i++)
+          suggestions[i].withImageUrl(i < images.length ? images[i] as String? : null),
+      ];
+    } catch (e) {
+      // La génération d'images est un bonus visuel, pas une fonctionnalité
+      // critique : en cas d'échec, on garde les suggestions telles quelles.
+      return suggestions;
+    }
+  }
+
   /// Extrait un message d'erreur lisible d'une [FunctionException] (le champ
   /// `error` renvoyé par nos Edge Functions, ex. quota dépassé), au lieu de
   /// laisser fuiter la représentation brute de l'exception à l'utilisateur.
