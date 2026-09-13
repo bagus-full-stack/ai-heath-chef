@@ -12,6 +12,7 @@ class UserProfile {
   final String dietType;
   final List<String> allergies;
   final String coachTone;
+  final bool isAdmin;
   final DateTime? updatedAt;
 
   const UserProfile({
@@ -28,6 +29,7 @@ class UserProfile {
     this.dietType = 'none',
     this.allergies = const [],
     this.coachTone = 'motivant',
+    this.isAdmin = false,
     this.updatedAt,
   });
 
@@ -46,6 +48,7 @@ class UserProfile {
       dietType: (json['diet_type'] as String?) ?? 'none',
       allergies: (json['allergies'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [],
       coachTone: (json['coach_tone'] as String?) ?? 'motivant',
+      isAdmin: json['is_admin'] as bool? ?? false,
       updatedAt: json['updated_at'] == null
           ? null
           : DateTime.tryParse(json['updated_at'] as String),
