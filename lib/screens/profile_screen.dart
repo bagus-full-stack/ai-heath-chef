@@ -164,13 +164,15 @@ class ProfileScreen extends ConsumerWidget {
                     _SettingsItem(
                       icon: Icons.restaurant_menu_rounded,
                       title: 'Préférences alimentaires',
-                      subtitle: 'Végétarien, halal, allergies...',
+                      subtitle: currentProfile.allergies.isEmpty
+                          ? currentProfile.dietTypeLabel
+                          : '${currentProfile.dietTypeLabel} · ${currentProfile.allergies.length} allergie(s)',
                       onTap: () => context.push('/dietary_preferences'),
                     ),
                     _SettingsItem(
                       icon: Icons.auto_awesome_rounded,
                       title: 'Coach IA',
-                      subtitle: 'Ton ton, tes conseils, tes prompts',
+                      subtitle: 'Ton : ${currentProfile.coachToneLabel}',
                       onTap: () => context.push('/coach_personalization'),
                     ),
                     _SettingsItem(

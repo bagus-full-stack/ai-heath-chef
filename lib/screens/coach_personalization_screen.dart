@@ -57,6 +57,7 @@ class _CoachPersonalizationScreenState extends ConsumerState<CoachPersonalizatio
     if (tone == _coachTone) {
       return;
     }
+    final previousTone = _coachTone;
     setState(() {
       _coachTone = tone;
       _saving = true;
@@ -66,6 +67,7 @@ class _CoachPersonalizationScreenState extends ConsumerState<CoachPersonalizatio
       ref.invalidate(profileProvider);
     } catch (e) {
       if (mounted) {
+        setState(() => _coachTone = previousTone);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
         );

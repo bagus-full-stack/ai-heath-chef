@@ -43,9 +43,12 @@ class MealSuggestionsNotifier extends AsyncNotifier<List<MealSuggestion>> {
     required bool forceRefresh,
   }) async {
     final dayKey = _todayKey();
+    final dietType = profile?.dietType ?? 'none';
+    final allergies = profile?.allergies ?? const [];
+    final signature = _preferencesSignature(dietType, allergies);
 
     if (!forceRefresh) {
-      final cached = await dbService.getCachedMealSuggestions(dayKey);
+      final cached = await dbService.getCachedMealSuggestions(dayKey, signature);
       if (cached != null) {
         return cached;
       }
@@ -58,12 +61,12 @@ class MealSuggestionsNotifier extends AsyncNotifier<List<MealSuggestion>> {
       targetProt: targets.protein,
       targetGluc: targets.carbs,
       targetLip: targets.fat,
-      dietType: profile?.dietType ?? 'none',
-      allergies: profile?.allergies ?? const [],
+      dietType: dietType,
+      allergies: allergies,
       count: 6,
     );
 
-    await dbService.saveMealSuggestions(dayKey, suggestions);
+    await dbService.saveMealSuggestions(dayKey, suggestions, signature);
     return suggestions;
   }
 
@@ -72,5 +75,13 @@ class MealSuggestionsNotifier extends AsyncNotifier<List<MealSuggestion>> {
     final month = now.month.toString().padLeft(2, '0');
     final day = now.day.toString().padLeft(2, '0');
     return '${now.year}-$month-$day';
+  }
+
+  /// Identifie les préférences utilisées pour générer un lot de suggestions,
+  /// afin de détecter un changement de régime/allergies en cours de journée
+  /// (voir [DatabaseService.getCachedMealSuggestions]).
+  String _preferencesSignature(String dietType, List<String> allergies) {
+    final sortedAllergies = [...allergies]..sort();
+    return '$dietType|${sortedAllergies.join(',')}';
   }
 }
