@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../models/meal_analysis_args.dart';
+
 enum _CaptureMode { scanner, repas, produit }
 
 class CameraCaptureScreen extends StatefulWidget {
@@ -192,7 +194,10 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
       if (!mounted) {
         return;
       }
-      context.pushReplacement('/meal_analysis', extra: image.path);
+      context.pushReplacement(
+        '/meal_analysis',
+        extra: MealAnalysisArgs(imagePath: image.path, isProduct: _mode == _CaptureMode.produit),
+      );
     } catch (e) {
       if (!mounted) {
         return;
@@ -223,7 +228,10 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
       if (!mounted || image == null) {
         return;
       }
-      context.pushReplacement('/meal_analysis', extra: image.path);
+      context.pushReplacement(
+        '/meal_analysis',
+        extra: MealAnalysisArgs(imagePath: image.path, isProduct: _mode == _CaptureMode.produit),
+      );
     } catch (e) {
       if (!mounted) {
         return;
@@ -242,13 +250,14 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
   }
 
   void _selectMode(_CaptureMode mode) {
-    if (mode == _mode) {
+    // Le scan de code-barres utilise sa propre caméra dédiée (mobile_scanner),
+    // incompatible avec le CameraController de cet écran : on ouvre un écran
+    // séparé plutôt que de basculer le mode en place.
+    if (mode == _CaptureMode.scanner) {
+      context.push('/barcode_scanner');
       return;
     }
-    if (mode != _CaptureMode.repas) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${_modeLabel(mode)} : bientôt disponible.')),
-      );
+    if (mode == _mode) {
       return;
     }
     setState(() => _mode = mode);
@@ -369,7 +378,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                       ],
                     ),
                   ),
-                  const _FocusCaption(),
+                  _FocusCaption(isProduct: _mode == _CaptureMode.produit),
                   Positioned(
                     left: 20,
                     right: 20,
@@ -533,22 +542,24 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
 }
 
 class _FocusCaption extends StatelessWidget {
-  const _FocusCaption();
+  final bool isProduct;
+
+  const _FocusCaption({required this.isProduct});
 
   @override
   Widget build(BuildContext context) {
-    return const Positioned(
+    return Positioned(
       left: 32,
       right: 32,
       top: 0,
       bottom: 0,
       child: Center(
         child: Padding(
-          padding: EdgeInsets.only(bottom: 90),
+          padding: const EdgeInsets.only(bottom: 90),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'ANALYSE NUTRITIONNELLE IA',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -559,11 +570,11 @@ class _FocusCaption extends StatelessWidget {
                   shadows: [Shadow(color: Colors.black54, blurRadius: 6)],
                 ),
               ),
-              SizedBox(height: 6),
+              const SizedBox(height: 6),
               Text(
-                'Cadrez votre plat au centre',
+                isProduct ? 'Cadrez l’étiquette du produit' : 'Cadrez votre plat au centre',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 13,
                   fontStyle: FontStyle.italic,

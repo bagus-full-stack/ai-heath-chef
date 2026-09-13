@@ -15,6 +15,7 @@ import '../screens/dietary_preferences_screen.dart';
 import '../screens/help_center_screen.dart';
 import '../screens/terms_screen.dart';
 import '../screens/profile_screen.dart';
+import '../screens/barcode_scanner_screen.dart';
 import '../screens/meal_analysis_screen.dart';
 import '../screens/meal_suggestions_screen.dart';
 import '../screens/notification_settings_screen.dart';
@@ -25,6 +26,7 @@ import '../screens/checkout_screen.dart';
 import '../screens/account_screen.dart';
 import '../screens/coming_soon_screen.dart';
 import '../widgets/main_layout.dart';
+import '../models/meal_analysis_args.dart';
 import '../models/selected_plan.dart';
 
 // --- 1. CLASSE OUTIL : Pont entre Supabase et GoRouter ---
@@ -122,14 +124,21 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/meal_analysis',
         builder: (context, state) {
-          // On récupère le chemin de l'image passé en paramètre
-          final imagePath = state.extra as String?;
-          return MealAnalysisScreen(imagePath: imagePath);
+          final args = state.extra as MealAnalysisArgs?;
+          return MealAnalysisScreen(
+            imagePath: args?.imagePath,
+            barcode: args?.barcode,
+            isProduct: args?.isProduct ?? false,
+          );
         },
       ),
       GoRoute(
         path: '/camera_capture',
         builder: (context, state) => const CameraCaptureScreen(),
+      ),
+      GoRoute(
+        path: '/barcode_scanner',
+        builder: (context, state) => const BarcodeScannerScreen(),
       ),
       GoRoute(
         path: '/meal_suggestions',

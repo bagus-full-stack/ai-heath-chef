@@ -9,8 +9,15 @@ import '../models/ingredient.dart';
 
 class MealAnalysisScreen extends ConsumerStatefulWidget {
   final String? imagePath;
+  final String? barcode;
+  final bool isProduct;
 
-  const MealAnalysisScreen({super.key, this.imagePath});
+  const MealAnalysisScreen({
+    super.key,
+    this.imagePath,
+    this.barcode,
+    this.isProduct = false,
+  });
 
   @override
   ConsumerState<MealAnalysisScreen> createState() => _MealAnalysisScreenState();
@@ -21,13 +28,20 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
   @override
   void initState() {
     super.initState();
-    // On lance l'analyse IA juste après la construction initiale de l'écran
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.imagePath != null) {
-        ref.read(mealProvider.notifier).analyzeImage(widget.imagePath!);
-      }
-    });
+    // On lance l'analyse (IA ou recherche produit) juste après la
+    // construction initiale de l'écran.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startAnalysis());
   }
+
+  void _startAnalysis() {
+    if (widget.barcode != null) {
+      ref.read(mealProvider.notifier).loadFromBarcode(widget.barcode!);
+    } else if (widget.imagePath != null) {
+      ref.read(mealProvider.notifier).analyzeImage(widget.imagePath!, isProduct: widget.isProduct);
+    }
+  }
+
+  bool get _isProductFlow => widget.barcode != null || widget.isProduct;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +59,10 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
           onPressed: () => context.pop(),
         ),
-        title: const Text('ANALYSE DU REPAS', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black)),
+        title: Text(
+          _isProductFlow ? 'ANALYSE DU PRODUIT' : 'ANALYSE DU REPAS',
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -86,14 +103,21 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                   if (widget.imagePath != null)
                     Image.file(File(widget.imagePath!), fit: BoxFit.cover)
                   else
-                    const Icon(Icons.fastfood, size: 80, color: Colors.grey),
+                    Icon(
+                      widget.barcode != null ? Icons.qr_code_scanner_rounded : Icons.fastfood,
+                      size: 80,
+                      color: Colors.grey,
+                    ),
 
                   Positioned(
                     bottom: 16, left: 16,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(20)),
-                      child: const Text('Identifié par l\'IA', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                      child: Text(
+                        widget.barcode != null ? 'Trouvé via code-barres' : 'Identifié par l\'IA',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
                     ),
                   )
                 ],
@@ -109,7 +133,14 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                   children: [
                     const CircularProgressIndicator(color: primaryColor),
                     const SizedBox(height: 20),
-                    Text('L\'IA analyse votre assiette...', style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
+                    Text(
+                      widget.barcode != null
+                          ? 'Recherche du produit...'
+                          : widget.isProduct
+                              ? 'L\'IA lit l\'étiquette du produit...'
+                              : 'L\'IA analyse votre assiette...',
+                      style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                    ),
                     const SizedBox(height: 8),
                     Text('Cela prend généralement quelques secondes.', style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
                   ],
@@ -128,9 +159,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                     Text(error.toString(), textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600)),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {
-                        if (widget.imagePath != null) ref.read(mealProvider.notifier).analyzeImage(widget.imagePath!);
-                      },
+                      onPressed: _startAnalysis,
                       style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
                       child: const Text('Réessayer', style: TextStyle(color: Colors.white)),
                     )
@@ -246,7 +275,10 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                             );
 
                             // Appel au service de base de données
-                            await DatabaseService().saveMeal(ingredients, 'Repas IA'); // Tu pourras rendre le nom dynamique plus tard
+                            final mealName = _isProductFlow
+                                ? ingredients.first.name
+                                : 'Repas IA';
+                            await DatabaseService().saveMeal(ingredients, mealName);
 
                             // On invalide le cache du journal pour qu'il recharge
                             // les repas à jour au retour sur le Dashboard.

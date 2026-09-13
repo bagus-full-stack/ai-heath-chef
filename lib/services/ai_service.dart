@@ -8,7 +8,21 @@ class AIService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   /// Fonction principale qui prend le chemin de l'image et retourne une liste d'ingrédients
-  Future<List<Ingredient>> analyzeMealImage(String imagePath) async {
+  Future<List<Ingredient>> analyzeMealImage(String imagePath) {
+    return _analyzeImage(imagePath, 'analyze-meal', "Erreur lors de l'analyse IA");
+  }
+
+  /// Analyse la photo d'un produit emballé (étiquette nutritionnelle) et
+  /// retourne un ingrédient représentant le produit entier.
+  Future<List<Ingredient>> analyzeProductImage(String imagePath) {
+    return _analyzeImage(imagePath, 'analyze-product', "Erreur lors de l'analyse du produit");
+  }
+
+  Future<List<Ingredient>> _analyzeImage(
+    String imagePath,
+    String functionName,
+    String errorPrefix,
+  ) async {
     try {
       // 1. COMPRESSION DE L'IMAGE
       // On réduit la taille (max 800x800) et la qualité (70%) pour un envoi ultra-rapide
@@ -28,9 +42,8 @@ class AIService {
       final String base64Image = base64Encode(compressedBytes);
 
       // 3. APPEL À SUPABASE EDGE FUNCTIONS
-      // On appelle la fonction 'analyze-meal' déployée sur ton projet Supabase
       final response = await _supabase.functions.invoke(
-        'analyze-meal',
+        functionName,
         body: {'image': base64Image},
       );
 
@@ -49,7 +62,7 @@ class AIService {
       )).toList();
 
     } catch (e) {
-      throw Exception("Erreur lors de l'analyse IA : ${e.toString()}");
+      throw Exception("$errorPrefix : ${e.toString()}");
     }
   }
 

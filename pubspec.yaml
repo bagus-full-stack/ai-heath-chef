@@ -50,6 +50,8 @@ dependencies:
   flutter_timezone: ^5.1.0
   package_info_plus: ^10.2.1
   url_launcher: ^6.3.2
+  mobile_scanner: ^7.4.1
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

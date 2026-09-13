@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/ai_service.dart';
+import '../services/product_lookup_service.dart';
 import '../models/ingredient.dart';
 
-// --- LE SERVICE IA ---
+// --- LES SERVICES ---
 final aiServiceProvider = Provider<AIService>((ref) => AIService());
+final productLookupServiceProvider = Provider<ProductLookupService>((ref) => ProductLookupService());
 
 // --- LE PROVIDER PRINCIPAL ---
 // On utilise AsyncNotifier (sans AutoDispose) pour simplifier et éviter les erreurs de typage
@@ -15,15 +17,27 @@ class MealNotifier extends AsyncNotifier<List<Ingredient>> {
     return [];
   }
 
-  // Lancer l'analyse IA
-  Future<void> analyzeImage(String imagePath) async {
+  // Lancer l'analyse IA d'une photo (repas, ou produit emballé si isProduct)
+  Future<void> analyzeImage(String imagePath, {bool isProduct = false}) async {
     // 1. On passe en état de chargement
     state = const AsyncValue.loading();
 
     // 2. On essaie de récupérer les données
     state = await AsyncValue.guard(() async {
       final aiService = ref.read(aiServiceProvider);
-      return await aiService.analyzeMealImage(imagePath);
+      return isProduct
+          ? await aiService.analyzeProductImage(imagePath)
+          : await aiService.analyzeMealImage(imagePath);
+    });
+  }
+
+  // Chercher un produit à partir d'un code-barres scanné (Open Food Facts)
+  Future<void> loadFromBarcode(String barcode) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final productService = ref.read(productLookupServiceProvider);
+      final ingredient = await productService.lookupBarcode(barcode);
+      return [ingredient];
     });
   }
 

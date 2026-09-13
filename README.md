@@ -8,6 +8,8 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas par photo vi
 - **Onboarding** — questionnaire de profil (objectifs, données physiques dont la taille) utilisé pour calculer les cibles nutritionnelles
 - **Dashboard** — jauges de macros (calories, protéines, glucides, lipides) sur la journée, et IMC calculé à partir du profil (catégorie OMS + plage)
 - **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
+- **Analyse de produit par photo** — même principe pour un produit emballé (Edge Function `analyze-product`), lit l'étiquette nutritionnelle plutôt qu'une assiette
+- **Scan de code-barres** — recherche instantanée d'un produit (EAN/UPC) via la base publique Open Food Facts, sans appel IA
 - **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`), et idées de repas personnalisées selon le profil/objectif (Edge Function `meal-suggestions`)
 - **Profil & compte** — gestion du profil utilisateur, paramètres de compte
 - **Préférences alimentaires** — régime (végétarien, végétalien, pescétarien, halal, kasher) et allergies/intolérances, pris en compte par les idées de repas et le Coach IA
@@ -23,6 +25,8 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas par photo vi
 - **Supabase** (`supabase_flutter`) — authentification, base de données PostgreSQL, Edge Functions
 - **RevenueCat** (`purchases_flutter`) — achats in-app iOS/Android
 - **camera** / **image_picker** / **flutter_image_compress** — capture et compression des photos de repas
+- **mobile_scanner** — scan de code-barres produit
+- **http** — appel de l'API publique Open Food Facts (lookup produit par code-barres)
 - **percent_indicator** — jauges circulaires du dashboard
 - **google_fonts**, **shared_preferences**
 - **flutter_local_notifications** / **timezone** / **flutter_timezone** — notifications locales programmées (rappels de repas)
@@ -44,7 +48,7 @@ test/             Tests unitaires (providers, utils)
 ## Prérequis
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (compatible Dart ^3.11.0)
-- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal`, `coach-chat` et `meal-suggestions` déployées (voir ci-dessous)
+- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions` déployées (voir ci-dessous)
 - (Optionnel) Un projet [RevenueCat](https://www.revenuecat.com) pour activer les achats réels
 
 ## Installation
@@ -56,8 +60,8 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` dans l'ordre (0001 à 0004) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase). Ils créent les tables `profiles` (avec régime/allergies/ton du coach), `meals`, `chat_messages`, `meal_suggestions`, leurs policies RLS, et le bucket de stockage `avatars`.
-3. **Edge Functions** — déploie `analyze-meal`, `coach-chat` et `meal-suggestions` (`supabase/functions/`) avec `supabase functions deploy <nom>`, et configure les secrets qu'elles utilisent (ex. clé API du modèle IA) via `supabase secrets set` ou l'onglet Edge Functions > Secrets du dashboard.
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` dans l'ordre (0001 à 0005) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase). Ils créent les tables `profiles` (avec régime/allergies/ton du coach), `meals`, `chat_messages`, `meal_suggestions`, leurs policies RLS, et le bucket de stockage `avatars`.
+3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions` (`supabase/functions/`) avec `supabase functions deploy <nom>`, et configure les secrets qu'elles utilisent (ex. clé API du modèle IA) via `supabase secrets set` ou l'onglet Edge Functions > Secrets du dashboard.
 
 ### Configuration RevenueCat (optionnel)
 
