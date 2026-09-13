@@ -109,7 +109,6 @@ class ProfileScreen extends ConsumerWidget {
                       icon: Icons.notifications_none_rounded,
                       title: 'Notifications',
                       subtitle: 'Rappels repas et suivi',
-                      badge: '2 Nouveaux',
                       onTap: () => context.push(
                         '/coming-soon',
                         extra: const ComingSoonArgs(

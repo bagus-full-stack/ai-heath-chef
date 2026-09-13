@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../models/chat_message.dart';
 import '../providers/chat_provider.dart';
+import '../providers/dashboard_provider.dart';
 import '../providers/meal_suggestions_provider.dart';
 import '../providers/profile_provider.dart';
+import '../utils/nutrition_targets.dart';
 import '../widgets/meal_suggestion_card.dart';
 
 const Color kCoachPrimaryColor = Color(0xFF6B66FF);
@@ -287,11 +289,30 @@ class _RealtimeBanner extends StatelessWidget {
   }
 }
 
-class _DailyObjectiveCard extends StatelessWidget {
+class _DailyObjectiveCard extends ConsumerWidget {
   const _DailyObjectiveCard();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(profileProvider);
+    final mealsAsync = ref.watch(todayMealsProvider);
+
+    final targets = profileAsync.maybeWhen(
+      data: computeNutritionTargets,
+      orElse: () => NutritionTargets.fallback,
+    );
+    final goalLabel = profileAsync.maybeWhen(
+      data: (profile) => profile?.goalLabel ?? 'Maintien',
+      orElse: () => 'Maintien',
+    );
+    final totalKcal = mealsAsync.maybeWhen(
+      data: (meals) => meals.fold<int>(0, (sum, meal) => sum + meal.totalKcal),
+      orElse: () => 0,
+    );
+
+    var remainingKcal = targets.kcal - totalKcal;
+    if (remainingKcal < 0) remainingKcal = 0;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -320,18 +341,18 @@ class _DailyObjectiveCard extends StatelessWidget {
           const SizedBox(height: 14),
           RichText(
             textAlign: TextAlign.center,
-            text: const TextSpan(
-              style: TextStyle(fontWeight: FontWeight.w900),
+            text: TextSpan(
+              style: const TextStyle(fontWeight: FontWeight.w900),
               children: [
                 TextSpan(
-                  text: '500',
-                  style: TextStyle(
+                  text: '$remainingKcal',
+                  style: const TextStyle(
                     color: Colors.black,
                     fontSize: 52,
                     height: 1,
                   ),
                 ),
-                TextSpan(
+                const TextSpan(
                   text: ' kcal',
                   style: TextStyle(
                     color: Color(0xFFF06B9E),
@@ -343,8 +364,8 @@ class _DailyObjectiveCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Il vous reste 500 kcal pour atteindre votre objectif de '
-            'Perte de Gras.',
+            'Il vous reste $remainingKcal kcal pour atteindre votre objectif de '
+            '$goalLabel.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.grey.shade600,
@@ -358,11 +379,36 @@ class _DailyObjectiveCard extends StatelessWidget {
   }
 }
 
-class _NeedsCard extends StatelessWidget {
+class _NeedsCard extends ConsumerWidget {
   const _NeedsCard();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(profileProvider);
+    final mealsAsync = ref.watch(todayMealsProvider);
+
+    final targets = profileAsync.maybeWhen(
+      data: computeNutritionTargets,
+      orElse: () => NutritionTargets.fallback,
+    );
+
+    double totalProt = 0;
+    double totalGluc = 0;
+    double totalLip = 0;
+    mealsAsync.whenData((meals) {
+      for (final meal in meals) {
+        totalProt += meal.totalProt;
+        totalGluc += meal.totalGluc;
+        totalLip += meal.totalLip;
+      }
+    });
+
+    double progressOf(double value, double target) {
+      if (target <= 0) return 0;
+      final progress = value / target;
+      return progress > 1 ? 1 : progress;
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -394,39 +440,31 @@ class _NeedsCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
-                'Mis à jour il y a 2 min',
-                style: TextStyle(
-                  color: Colors.grey.shade500,
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 18),
-          const _NeedRow(
+          _NeedRow(
             icon: Icons.fitness_center,
-            iconColor: Color(0xFF6B66FF),
+            iconColor: const Color(0xFF6B66FF),
             label: 'PROTÉINES',
-            value: '112g',
-            progress: 0.72,
+            value: '${totalProt.toInt()}/${targets.protein.toInt()}g',
+            progress: progressOf(totalProt, targets.protein),
           ),
           const SizedBox(height: 14),
-          const _NeedRow(
+          _NeedRow(
             icon: Icons.grain_rounded,
-            iconColor: Color(0xFFF06B9E),
+            iconColor: const Color(0xFFF06B9E),
             label: 'GLUCIDES',
-            value: '180g',
-            progress: 0.84,
+            value: '${totalGluc.toInt()}/${targets.carbs.toInt()}g',
+            progress: progressOf(totalGluc, targets.carbs),
           ),
           const SizedBox(height: 14),
-          const _NeedRow(
+          _NeedRow(
             icon: Icons.local_fire_department_rounded,
-            iconColor: Color(0xFFFFB54A),
+            iconColor: const Color(0xFFFFB54A),
             label: 'LIPIDES',
-            value: '45g',
-            progress: 0.66,
+            value: '${totalLip.toInt()}/${targets.fat.toInt()}g',
+            progress: progressOf(totalLip, targets.fat),
           ),
         ],
       ),
