@@ -59,11 +59,25 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ),
         actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: Color(0xFFEEEEEE),
-              child: Icon(Icons.person, color: Colors.grey),
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: GestureDetector(
+              onTap: () => context.push('/account'),
+              child: profileAsync.maybeWhen(
+                data: (profile) => CircleAvatar(
+                  backgroundColor: const Color(0xFFEEEEEE),
+                  backgroundImage: profile?.avatarUrl != null
+                      ? NetworkImage(profile!.avatarUrl!)
+                      : null,
+                  child: profile?.avatarUrl == null
+                      ? const Icon(Icons.person, color: Colors.grey)
+                      : null,
+                ),
+                orElse: () => const CircleAvatar(
+                  backgroundColor: Color(0xFFEEEEEE),
+                  child: Icon(Icons.person, color: Colors.grey),
+                ),
+              ),
             ),
           )
         ],

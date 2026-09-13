@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../models/chat_message.dart';
 import '../providers/chat_provider.dart';
 import '../providers/meal_suggestions_provider.dart';
+import '../providers/profile_provider.dart';
 import '../widgets/meal_suggestion_card.dart';
 
 const Color kCoachPrimaryColor = Color(0xFF6B66FF);
@@ -188,11 +189,17 @@ class _MealSuggestionsRow extends ConsumerWidget {
   }
 }
 
-class _Header extends StatelessWidget {
+class _Header extends ConsumerWidget {
   const _Header();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(profileProvider);
+    final avatarUrl = profileAsync.maybeWhen(
+      data: (profile) => profile?.avatarUrl,
+      orElse: () => null,
+    );
+
     return Row(
       children: [
         Container(
@@ -218,11 +225,13 @@ class _Header extends StatelessWidget {
         Stack(
           clipBehavior: Clip.none,
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 18,
-              backgroundImage: NetworkImage(
-                'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
-              ),
+              backgroundColor: Colors.grey.shade200,
+              backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+              child: avatarUrl == null
+                  ? Icon(Icons.person, color: Colors.grey.shade500, size: 20)
+                  : null,
             ),
             Positioned(
               right: -1,
