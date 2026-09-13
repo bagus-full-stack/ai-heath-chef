@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/selected_plan.dart';
+import '../providers/purchase_provider.dart';
 import '../services/purchase_service.dart';
 
-class CheckoutScreen extends StatefulWidget {
+class CheckoutScreen extends ConsumerStatefulWidget {
   final SelectedPlan? plan;
 
   const CheckoutScreen({super.key, this.plan});
 
   @override
-  State<CheckoutScreen> createState() => _CheckoutScreenState();
+  ConsumerState<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
-class _CheckoutScreenState extends State<CheckoutScreen> {
+class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   bool _isProcessing = false;
 
   SelectedPlan get _plan =>
@@ -39,6 +41,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       switch (outcome) {
         case PurchaseOutcome.success:
+          ref.invalidate(entitlementProvider);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(

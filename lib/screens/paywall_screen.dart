@@ -93,6 +93,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         ),
       );
       if (isEntitled) {
+        ref.invalidate(entitlementProvider);
         context.go('/dashboard');
       }
     } catch (e) {
