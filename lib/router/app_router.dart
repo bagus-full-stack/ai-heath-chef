@@ -9,7 +9,9 @@ import '../screens/signup_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/about_screen.dart';
+import '../screens/coach_personalization_screen.dart';
 import '../screens/coach_screen.dart';
+import '../screens/dietary_preferences_screen.dart';
 import '../screens/help_center_screen.dart';
 import '../screens/terms_screen.dart';
 import '../screens/profile_screen.dart';
@@ -148,6 +150,14 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/about',
         builder: (context, state) => const AboutScreen(),
+      ),
+      GoRoute(
+        path: '/dietary_preferences',
+        builder: (context, state) => const DietaryPreferencesScreen(),
+      ),
+      GoRoute(
+        path: '/coach_personalization',
+        builder: (context, state) => const CoachPersonalizationScreen(),
       ),
       GoRoute(
         path: '/account',

@@ -58,6 +58,8 @@ class MealSuggestionsNotifier extends AsyncNotifier<List<MealSuggestion>> {
       targetProt: targets.protein,
       targetGluc: targets.carbs,
       targetLip: targets.fat,
+      dietType: profile?.dietType ?? 'none',
+      allergies: profile?.allergies ?? const [],
       count: 6,
     );
 

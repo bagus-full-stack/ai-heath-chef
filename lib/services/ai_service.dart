@@ -53,13 +53,22 @@ class AIService {
     }
   }
 
-  Future<String> chatWithCoach(String message, List<Map<String, dynamic>> history) async {
+  Future<String> chatWithCoach(
+    String message,
+    List<Map<String, dynamic>> history, {
+    String coachTone = 'motivant',
+    String dietType = 'none',
+    List<String> allergies = const [],
+  }) async {
     try {
       final response = await Supabase.instance.client.functions.invoke(
         'coach-chat',
         body: {
           'message': message,
           'history': history,
+          'coachTone': coachTone,
+          'dietType': dietType,
+          'allergies': allergies,
         },
       );
 
@@ -70,13 +79,16 @@ class AIService {
   }
 
   /// Génère des idées de repas personnalisées via l'IA, en fonction de
-  /// l'objectif de l'utilisateur et de ses cibles nutritionnelles du jour.
+  /// l'objectif de l'utilisateur, de ses cibles nutritionnelles du jour et
+  /// de son régime/allergies déclarés.
   Future<List<MealSuggestion>> getMealSuggestions({
     required String goal,
     required int targetKcal,
     required double targetProt,
     required double targetGluc,
     required double targetLip,
+    String dietType = 'none',
+    List<String> allergies = const [],
     int count = 6,
   }) async {
     try {
@@ -88,6 +100,8 @@ class AIService {
           'targetProt': targetProt,
           'targetGluc': targetGluc,
           'targetLip': targetLip,
+          'dietType': dietType,
+          'allergies': allergies,
           'count': count,
         },
       );

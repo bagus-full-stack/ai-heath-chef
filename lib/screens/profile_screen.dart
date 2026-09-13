@@ -165,27 +165,13 @@ class ProfileScreen extends ConsumerWidget {
                       icon: Icons.restaurant_menu_rounded,
                       title: 'Préférences alimentaires',
                       subtitle: 'Végétarien, halal, allergies...',
-                      onTap: () => context.push(
-                        '/coming-soon',
-                        extra: const ComingSoonArgs(
-                          title: 'Préférences alimentaires',
-                          message: 'Le réglage de tes préférences et allergies arrive bientôt.',
-                          icon: Icons.restaurant_menu_rounded,
-                        ),
-                      ),
+                      onTap: () => context.push('/dietary_preferences'),
                     ),
                     _SettingsItem(
                       icon: Icons.auto_awesome_rounded,
                       title: 'Coach IA',
                       subtitle: 'Ton ton, tes conseils, tes prompts',
-                      onTap: () => context.push(
-                        '/coming-soon',
-                        extra: const ComingSoonArgs(
-                          title: 'Coach IA',
-                          message: 'La personnalisation du Coach IA arrive bientôt.',
-                          icon: Icons.auto_awesome_rounded,
-                        ),
-                      ),
+                      onTap: () => context.push('/coach_personalization'),
                     ),
                     _SettingsItem(
                       icon: Icons.info_outline_rounded,

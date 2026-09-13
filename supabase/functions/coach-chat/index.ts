@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
             throw new Error("Le corps de la requête est vide ou mal formé.");
         }
 
-        const { message, history } = body;
+        const { message, history, coachTone, dietType, allergies } = body;
         if (!message) {
             throw new Error("Aucun message n'a été fourni dans la requête.");
         }
@@ -64,7 +64,35 @@ Deno.serve(async (req) => {
         }
 
         // === 3. PRÉPARATION DES INSTRUCTIONS SYSTÈME ===
-        const systemInstruction = "Tu es Chef Santé, un coach en nutrition expert, empathique et motivant. Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur et tu l'encourages. Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.";
+        const TONE_INSTRUCTIONS: Record<string, string> = {
+            motivant: "Tu es empathique et motivant : tu encourages l'utilisateur et le pousses gentiment à avancer.",
+            bienveillant: "Tu es calme, doux et bienveillant : tu rassures l'utilisateur, sans jamais le juger sur ses écarts.",
+            direct: "Tu es direct et concis : tu vas droit au but avec des conseils actionnables, sans détour ni fioriture.",
+            humoristique: "Tu es léger et plein d'humour, tout en restant utile et sérieux sur le fond nutritionnel.",
+        };
+        const toneInstruction = TONE_INSTRUCTIONS[coachTone as string] ?? TONE_INSTRUCTIONS.motivant;
+
+        const DIET_LABELS: Record<string, string> = {
+            vegetarian: "végétarien (sans viande ni poisson)",
+            vegan: "végétalien (sans aucun produit d'origine animale)",
+            pescetarian: "pescétarien (sans viande, poisson autorisé)",
+            halal: "halal",
+            kosher: "kasher",
+        };
+        const dietLabel = DIET_LABELS[dietType as string];
+        const allergyList: string[] = Array.isArray(allergies)
+            ? allergies.filter((a) => typeof a === 'string' && a.trim().length > 0)
+            : [];
+
+        let dietaryNote = "";
+        if (dietLabel) {
+            dietaryNote += ` L'utilisateur suit un régime ${dietLabel} : ne recommande jamais un aliment qui l'enfreint.`;
+        }
+        if (allergyList.length > 0) {
+            dietaryNote += ` L'utilisateur est allergique/intolérant à : ${allergyList.join(', ')}. Ne recommande jamais ces aliments.`;
+        }
+
+        const systemInstruction = `Tu es Chef Santé, un coach en nutrition expert. ${toneInstruction} Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.${dietaryNote} Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.`;
 
         // On prépare le payload exact attendu par l'API REST de Google
         // On combine l'historique (s'il y en a) avec le nouveau message

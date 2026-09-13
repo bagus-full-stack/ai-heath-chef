@@ -10,6 +10,8 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas par photo vi
 - **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
 - **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`), et idées de repas personnalisées selon le profil/objectif (Edge Function `meal-suggestions`)
 - **Profil & compte** — gestion du profil utilisateur, paramètres de compte
+- **Préférences alimentaires** — régime (végétarien, végétalien, pescétarien, halal, kasher) et allergies/intolérances, pris en compte par les idées de repas et le Coach IA
+- **Personnalisation du Coach IA** — choix du ton des réponses (motivant, bienveillant, direct, humoristique)
 - **Rappels de repas** — notifications locales quotidiennes (petit-déjeuner/déjeuner/dîner), activables et personnalisables (heure) individuellement, réglables depuis Profil > Notifications
 - **Abonnement PRO** — paywall, checkout et gestion des achats in-app via RevenueCat (avec un **mode démo** intégré tant que les clés RevenueCat ne sont pas configurées, permettant de tester tout le parcours Paywall → Checkout → déblocage PRO sans compte Apple/Google payant)
 
@@ -54,7 +56,7 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` dans l'ordre (0001, 0002, 0003) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase). Ils créent les tables `profiles`, `meals`, `chat_messages`, `meal_suggestions`, leurs policies RLS, et le bucket de stockage `avatars`.
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` dans l'ordre (0001 à 0004) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase). Ils créent les tables `profiles` (avec régime/allergies/ton du coach), `meals`, `chat_messages`, `meal_suggestions`, leurs policies RLS, et le bucket de stockage `avatars`.
 3. **Edge Functions** — déploie `analyze-meal`, `coach-chat` et `meal-suggestions` (`supabase/functions/`) avec `supabase functions deploy <nom>`, et configure les secrets qu'elles utilisent (ex. clé API du modèle IA) via `supabase secrets set` ou l'onglet Edge Functions > Secrets du dashboard.
 
 ### Configuration RevenueCat (optionnel)

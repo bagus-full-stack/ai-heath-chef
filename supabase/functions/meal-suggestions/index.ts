@@ -37,6 +37,14 @@ const GOAL_LABELS: Record<string, string> = {
     maintain: "maintien du poids (repas équilibrés)",
 };
 
+const DIET_LABELS: Record<string, string> = {
+    vegetarian: "végétarien (sans viande ni poisson)",
+    vegan: "végétalien (sans aucun produit d'origine animale)",
+    pescetarian: "pescétarien (sans viande, poisson autorisé)",
+    halal: "halal",
+    kosher: "kasher",
+};
+
 Deno.serve(async (req) => {
     // === GESTION DU PREFLIGHT (CORS) ===
     if (req.method === 'OPTIONS') {
@@ -58,11 +66,17 @@ Deno.serve(async (req) => {
             targetProt,
             targetGluc,
             targetLip,
+            dietType,
+            allergies,
             count,
         } = body;
 
         const suggestionCount = Number.isFinite(count) && count > 0 ? Math.min(count, 10) : 6;
         const goalLabel = GOAL_LABELS[goal as string] ?? GOAL_LABELS.maintain;
+        const dietLabel = DIET_LABELS[dietType as string];
+        const allergyList: string[] = Array.isArray(allergies)
+            ? allergies.filter((a) => typeof a === 'string' && a.trim().length > 0)
+            : [];
 
         // === 2. VÉRIFICATION CLÉ API GEMINI ===
         const apiKey = Deno.env.get('GEMINI_API_KEY');
@@ -72,10 +86,21 @@ Deno.serve(async (req) => {
         }
 
         // === 3. PRÉPARATION DU PROMPT ===
+        const constraintLines = [];
+        if (dietLabel) {
+            constraintLines.push(`Régime à respecter STRICTEMENT : ${dietLabel}.`);
+        }
+        if (allergyList.length > 0) {
+            constraintLines.push(
+                `Allergies/intolérances à éviter ABSOLUMENT, dans aucun ingrédient : ${allergyList.join(', ')}.`,
+            );
+        }
+        const constraintsText = constraintLines.length > 0 ? `\n${constraintLines.join('\n')}` : '';
+
         const promptText = `
 Tu es Chef Santé, un coach en nutrition expert et créatif.
 Propose ${suggestionCount} idées de repas variées et réalistes, adaptées à un objectif de ${goalLabel}.
-L'utilisateur vise environ ${targetKcal ?? 2200} kcal, ${targetProt ?? 160}g de protéines, ${targetGluc ?? 250}g de glucides et ${targetLip ?? 75}g de lipides par jour au total.
+L'utilisateur vise environ ${targetKcal ?? 2200} kcal, ${targetProt ?? 160}g de protéines, ${targetGluc ?? 250}g de glucides et ${targetLip ?? 75}g de lipides par jour au total.${constraintsText}
 Varie les moments de la journée (Petit-déjeuner, Déjeuner, Dîner, Collation) et les types de plats — ne propose jamais deux fois le même plat.
 Tu DOIS répondre UNIQUEMENT avec un JSON strict, sans balises markdown ni texte autour, au format exact suivant :
 {

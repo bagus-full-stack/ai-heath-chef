@@ -89,6 +89,41 @@ class AuthService {
     }
   }
 
+  /// Met à jour uniquement le régime et les allergies déclarées (sans
+  /// toucher au reste du profil), utilisé par l'écran "Préférences
+  /// alimentaires". Nécessite qu'un profil existe déjà pour l'utilisateur.
+  Future<void> updateDietaryPreferences({
+    required String dietType,
+    required List<String> allergies,
+  }) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception('Vous devez être connecté pour enregistrer vos préférences.');
+    }
+    try {
+      await _supabase
+          .from('profiles')
+          .update({'diet_type': dietType, 'allergies': allergies})
+          .eq('user_id', user.id);
+    } catch (e) {
+      throw Exception('Erreur lors de la sauvegarde des préférences : ${e.toString()}');
+    }
+  }
+
+  /// Met à jour uniquement le ton choisi pour le Coach IA, utilisé par
+  /// l'écran de personnalisation du Coach.
+  Future<void> updateCoachTone(String coachTone) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception('Vous devez être connecté pour enregistrer ce réglage.');
+    }
+    try {
+      await _supabase.from('profiles').update({'coach_tone': coachTone}).eq('user_id', user.id);
+    } catch (e) {
+      throw Exception('Erreur lors de la sauvegarde du ton du Coach : ${e.toString()}');
+    }
+  }
+
   /// Compresse puis uploade une photo de profil vers le bucket Supabase
   /// Storage `avatars`, et retourne son URL publique.
   ///

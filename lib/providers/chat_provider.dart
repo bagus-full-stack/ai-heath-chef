@@ -1,4 +1,5 @@
 import 'package:ai_health_chef/models/chat_message.dart';
+import 'package:ai_health_chef/providers/profile_provider.dart';
 import 'package:ai_health_chef/services/ai_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -61,9 +62,13 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
 
     await _storeMessage(userMessage);
 
+    final profile = ref.read(profileProvider).value;
     final aiReplyText = await _aiService.chatWithCoach(
       trimmed,
       _toGeminiHistory(historyForGemini),
+      coachTone: profile?.coachTone ?? 'motivant',
+      dietType: profile?.dietType ?? 'none',
+      allergies: profile?.allergies ?? const [],
     );
     final assistantMessage = _buildAssistantMessage(aiReplyText);
 
