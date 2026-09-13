@@ -275,10 +275,16 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                             );
 
                             // Appel au service de base de données
+                            final dbService = DatabaseService();
+                            // Un repas issu d'un scan de code-barres n'a pas
+                            // de photo à uploader.
+                            final imageUrl = widget.imagePath != null
+                                ? await dbService.uploadMealPhoto(widget.imagePath!)
+                                : null;
                             final mealName = _isProductFlow
                                 ? ingredients.first.name
                                 : 'Repas IA';
-                            await DatabaseService().saveMeal(ingredients, mealName);
+                            await dbService.saveMeal(ingredients, mealName, imageUrl: imageUrl);
 
                             // On invalide le cache du journal pour qu'il recharge
                             // les repas à jour au retour sur le Dashboard.

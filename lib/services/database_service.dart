@@ -1,3 +1,4 @@
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/ingredient.dart';
 import '../models/meal.dart';
@@ -6,8 +7,9 @@ import '../models/meal_suggestion.dart';
 class DatabaseService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  /// Sauvegarde le repas et ses macros dans Supabase
-  Future<void> saveMeal(List<Ingredient> ingredients, String mealName) async {
+  /// Sauvegarde le repas et ses macros dans Supabase. [imageUrl] est
+  /// optionnel : un repas issu d'un scan de code-barres n'a pas de photo.
+  Future<void> saveMeal(List<Ingredient> ingredients, String mealName, {String? imageUrl}) async {
     try {
       // 1. On vérifie qui est connecté
       final user = _supabase.auth.currentUser;
@@ -38,10 +40,42 @@ class DatabaseService {
         'total_gluc': totalGluc,
         'total_lip': totalLip,
         'ingredients': ingredientsJson,
+        'image_url': imageUrl,
       });
 
     } catch (e) {
       throw Exception('Erreur lors de la sauvegarde : ${e.toString()}');
+    }
+  }
+
+  /// Compresse puis uploade la photo d'un repas/produit vers le bucket
+  /// Supabase Storage `meal_photos`, et retourne son URL publique. Retourne
+  /// `null` en cas d'échec (compression, upload...) plutôt que de lever une
+  /// exception : une photo qui échoue à s'uploader ne doit pas empêcher de
+  /// sauvegarder le repas lui-même.
+  Future<String?> uploadMealPhoto(String imagePath) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return null;
+
+    try {
+      final compressedBytes = await FlutterImageCompress.compressWithFile(
+        imagePath,
+        minWidth: 800,
+        minHeight: 800,
+        quality: 70,
+      );
+      if (compressedBytes == null) return null;
+
+      final path = '${user.id}/${DateTime.now().microsecondsSinceEpoch}.jpg';
+      await _supabase.storage.from('meal_photos').uploadBinary(
+            path,
+            compressedBytes,
+            fileOptions: const FileOptions(contentType: 'image/jpeg'),
+          );
+
+      return _supabase.storage.from('meal_photos').getPublicUrl(path);
+    } catch (e) {
+      return null;
     }
   }
 
@@ -60,7 +94,7 @@ class DatabaseService {
       // On interroge la table 'meals' dans Supabase
       final response = await _supabase
           .from('meals')
-          .select('id, name, total_kcal, total_prot, total_gluc, total_lip, created_at')
+          .select('id, name, total_kcal, total_prot, total_gluc, total_lip, image_url, created_at')
           .eq('user_id', user.id) // Uniquement MES repas
           .gte('created_at', startOfDay) // Depuis ce matin 00:00
           .lte('created_at', endOfDay)   // Jusqu'à ce soir 23:59

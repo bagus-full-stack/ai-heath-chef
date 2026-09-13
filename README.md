@@ -6,7 +6,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas par photo vi
 
 - **Authentification** — inscription, connexion, mot de passe oublié (Supabase Auth)
 - **Onboarding** — questionnaire de profil (objectifs, données physiques dont la taille) utilisé pour calculer les cibles nutritionnelles
-- **Dashboard** — jauges de macros (calories, protéines, glucides, lipides) sur la journée, et IMC calculé à partir du profil (catégorie OMS + plage)
+- **Dashboard** — jauges de macros (calories, protéines, glucides, lipides) sur la journée, IMC calculé à partir du profil (catégorie OMS + plage), et journal des repas du jour avec la photo de chaque repas
 - **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
 - **Analyse de produit par photo** — même principe pour un produit emballé (Edge Function `analyze-product`), lit l'étiquette nutritionnelle plutôt qu'une assiette
 - **Scan de code-barres** — recherche instantanée d'un produit (EAN/UPC) via la base publique Open Food Facts, sans appel IA
@@ -60,7 +60,7 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` dans l'ordre (0001 à 0005) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase). Ils créent les tables `profiles` (avec régime/allergies/ton du coach), `meals`, `chat_messages`, `meal_suggestions`, leurs policies RLS, et le bucket de stockage `avatars`.
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` dans l'ordre (0001 à 0006) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase). Ils créent les tables `profiles` (avec régime/allergies/ton du coach), `meals` (avec photo), `chat_messages`, `meal_suggestions`, leurs policies RLS, et les buckets de stockage `avatars` et `meal_photos`.
 3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions` (`supabase/functions/`) avec `supabase functions deploy <nom>`, et configure les secrets qu'elles utilisent (ex. clé API du modèle IA) via `supabase secrets set` ou l'onglet Edge Functions > Secrets du dashboard.
 
 ### Configuration RevenueCat (optionnel)

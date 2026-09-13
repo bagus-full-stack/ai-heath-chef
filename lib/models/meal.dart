@@ -5,6 +5,7 @@ class Meal {
   final double totalProt;
   final double totalGluc;
   final double totalLip;
+  final String? imageUrl;
   final DateTime createdAt;
 
   Meal({
@@ -14,6 +15,7 @@ class Meal {
     required this.totalProt,
     required this.totalGluc,
     required this.totalLip,
+    this.imageUrl,
     required this.createdAt,
   });
 
@@ -26,6 +28,7 @@ class Meal {
       totalProt: (json['total_prot'] as num).toDouble(),
       totalGluc: (json['total_gluc'] as num).toDouble(),
       totalLip: (json['total_lip'] as num).toDouble(),
+      imageUrl: json['image_url'] as String?,
       createdAt: DateTime.parse(json['created_at']).toLocal(),
     );
   }

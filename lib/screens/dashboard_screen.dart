@@ -218,6 +218,7 @@ class DashboardScreen extends ConsumerWidget {
                           meal.name,
                           timeString,
                           '${meal.totalKcal} kcal',
+                          meal.imageUrl,
                         );
                       }),
 
@@ -317,17 +318,28 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMealCard(String name, String time, String calories) {
+  Widget _buildMealCard(String name, String time, String calories, String? imageUrl) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.grey.shade100, blurRadius: 10, spreadRadius: 1)], border: Border.all(color: Colors.grey.shade100)),
       child: Row(
         children: [
-          Container(
-            width: 60, height: 60,
-            decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.fastfood, color: Colors.grey),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 60,
+              height: 60,
+              color: Colors.grey.shade200,
+              child: imageUrl != null
+                  ? Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.fastfood, color: Colors.grey),
+                    )
+                  : const Icon(Icons.fastfood, color: Colors.grey),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
