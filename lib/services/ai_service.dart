@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/ingredient.dart';
+import '../models/meal_suggestion.dart';
 
 class AIService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -65,6 +66,38 @@ class AIService {
       return response.data['reply'] as String;
     } catch (e) {
       throw Exception("Erreur de connexion avec le Coach IA : $e");
+    }
+  }
+
+  /// Génère des idées de repas personnalisées via l'IA, en fonction de
+  /// l'objectif de l'utilisateur et de ses cibles nutritionnelles du jour.
+  Future<List<MealSuggestion>> getMealSuggestions({
+    required String goal,
+    required int targetKcal,
+    required double targetProt,
+    required double targetGluc,
+    required double targetLip,
+    int count = 6,
+  }) async {
+    try {
+      final response = await _supabase.functions.invoke(
+        'meal-suggestions',
+        body: {
+          'goal': goal,
+          'targetKcal': targetKcal,
+          'targetProt': targetProt,
+          'targetGluc': targetGluc,
+          'targetLip': targetLip,
+          'count': count,
+        },
+      );
+
+      final List<dynamic> data = response.data['suggestions'];
+      return data
+          .map((item) => MealSuggestion.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw Exception("Erreur lors de la génération des idées de repas : ${e.toString()}");
     }
   }
 }

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/chat_message.dart';
 import '../providers/chat_provider.dart';
+import '../providers/meal_suggestions_provider.dart';
+import '../widgets/meal_suggestion_card.dart';
 
 const Color kCoachPrimaryColor = Color(0xFF6B66FF);
 
@@ -14,7 +17,7 @@ class CoachScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openChatSheet(context),
+        onPressed: () => openCoachChatSheet(context),
         backgroundColor: kCoachPrimaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -63,7 +66,7 @@ class CoachScreen extends ConsumerWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: () => _openChatSheet(context),
+                      onPressed: () => context.push('/meal_suggestions'),
                       child: const Text(
                         'Tout voir',
                         style: TextStyle(
@@ -79,24 +82,7 @@ class CoachScreen extends ConsumerWidget {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               sliver: SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 275,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: _mealSuggestions.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 16),
-                    itemBuilder: (context, index) {
-                      return _MealSuggestionCard(
-                        suggestion: _mealSuggestions[index],
-                        onAdd: () => _openChatSheet(
-                          context,
-                          presetMessage: 'Ajuste ce repas pour mon objectif: ${_mealSuggestions[index].title}',
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                child: _MealSuggestionsRow(),
               ),
             ),
             SliverPadding(
@@ -114,15 +100,90 @@ class CoachScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  void _openChatSheet(BuildContext context, {String? presetMessage}) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return _CoachChatSheet(presetMessage: presetMessage);
-      },
+/// Ouvre la feuille de chat du Coach IA. Public pour être réutilisable
+/// depuis d'autres écrans (ex: l'écran "Idées repas").
+void openCoachChatSheet(BuildContext context, {String? presetMessage}) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (sheetContext) {
+      return _CoachChatSheet(presetMessage: presetMessage);
+    },
+  );
+}
+
+/// Ligne horizontale d'idées de repas générées par l'IA (aperçu limité),
+/// utilisée sur l'écran d'accueil du Coach.
+class _MealSuggestionsRow extends ConsumerWidget {
+  const _MealSuggestionsRow();
+
+  static const int _previewCount = 3;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final suggestionsAsync = ref.watch(mealSuggestionsProvider);
+
+    return SizedBox(
+      height: 285,
+      child: suggestionsAsync.when(
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: kCoachPrimaryColor),
+        ),
+        error: (error, stackTrace) => Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Impossible de générer des idées de repas pour le moment.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => ref.invalidate(mealSuggestionsProvider),
+                  child: const Text('Réessayer'),
+                ),
+              ],
+            ),
+          ),
+        ),
+        data: (suggestions) {
+          if (suggestions.isEmpty) {
+            return Center(
+              child: Text(
+                'Aucune idée de repas disponible pour le moment.',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            );
+          }
+
+          final preview = suggestions.take(_previewCount).toList();
+          return ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: preview.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 16),
+            itemBuilder: (context, index) {
+              final suggestion = preview[index];
+              return SizedBox(
+                width: 280,
+                child: MealSuggestionCard(
+                  suggestion: suggestion,
+                  onAdd: () => openCoachChatSheet(
+                    context,
+                    presetMessage: 'Ajuste ce repas pour mon objectif: ${suggestion.title}',
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -436,179 +497,6 @@ class _NeedRow extends StatelessWidget {
   }
 }
 
-class _MealSuggestion {
-  final String timeSlot;
-  final String title;
-  final String kcal;
-  final String prot;
-  final String gluc;
-  final String lip;
-  final String imageUrl;
-
-  const _MealSuggestion({
-    required this.timeSlot,
-    required this.title,
-    required this.kcal,
-    required this.prot,
-    required this.gluc,
-    required this.lip,
-    required this.imageUrl,
-  });
-}
-
-class _MealSuggestionCard extends StatelessWidget {
-  final _MealSuggestion suggestion;
-  final VoidCallback onAdd;
-
-  const _MealSuggestionCard({
-    required this.suggestion,
-    required this.onAdd,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 280,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Stack(
-            children: [
-              Image.network(
-                suggestion.imageUrl,
-                height: 165,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-              Positioned(
-                top: 12,
-                left: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    suggestion.timeSlot,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 11,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  suggestion.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.local_fire_department_outlined,
-                      size: 16,
-                      color: kCoachPrimaryColor,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      suggestion.kcal,
-                      style: const TextStyle(
-                        color: kCoachPrimaryColor,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _MacroMini(label: 'PROT', value: suggestion.prot),
-                    _MacroMini(label: 'GLUC', value: suggestion.gluc),
-                    _MacroMini(label: 'LIP', value: suggestion.lip),
-                    GestureDetector(
-                      onTap: onAdd,
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: const BoxDecoration(
-                          color: kCoachPrimaryColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.add, color: Colors.white, size: 20),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MacroMini extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _MacroMini({
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey.shade500,
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _CoachTipCard extends StatelessWidget {
   final String title;
   final String text;
@@ -672,39 +560,6 @@ class _CoachTipCard extends StatelessWidget {
     );
   }
 }
-
-final List<_MealSuggestion> _mealSuggestions = [
-  _MealSuggestion(
-    timeSlot: 'Déjeuner',
-    title: 'Salade de Quinoa & Saumon',
-    kcal: '380 kcal',
-    prot: '32g',
-    gluc: '25g',
-    lip: '18g',
-    imageUrl:
-        'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=800&q=80',
-  ),
-  _MealSuggestion(
-    timeSlot: 'Dîner',
-    title: 'Bowl de Poulet & Riz',
-    kcal: '420 kcal',
-    prot: '38g',
-    gluc: '41g',
-    lip: '12g',
-    imageUrl:
-        'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=800&q=80',
-  ),
-  _MealSuggestion(
-    timeSlot: 'Collation',
-    title: 'Skyr, fruits rouges & noix',
-    kcal: '210 kcal',
-    prot: '20g',
-    gluc: '16g',
-    lip: '8g',
-    imageUrl:
-        'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?auto=format&fit=crop&w=800&q=80',
-  ),
-];
 
 class _CoachChatSheet extends ConsumerStatefulWidget {
   final String? presetMessage;

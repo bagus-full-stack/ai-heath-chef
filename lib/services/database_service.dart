@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/ingredient.dart';
 import '../models/meal.dart';
+import '../models/meal_suggestion.dart';
 
 class DatabaseService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -49,10 +50,12 @@ class DatabaseService {
       final user = _supabase.auth.currentUser;
       if (user == null) return [];
 
-      // On calcule le début et la fin de la journée d'aujourd'hui
+      // On calcule le début et la fin de la journée d'aujourd'hui en heure
+      // locale, puis on convertit en UTC : 'created_at' est un timestamptz
+      // stocké en UTC côté Supabase, donc on doit comparer des UTC entre eux.
       final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day).toIso8601String();
-      final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String();
+      final startOfDay = DateTime(now.year, now.month, now.day).toUtc().toIso8601String();
+      final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59).toUtc().toIso8601String();
 
       // On interroge la table 'meals' dans Supabase
       final response = await _supabase
@@ -67,5 +70,54 @@ class DatabaseService {
     } catch (e) {
       throw Exception('Erreur lors de la récupération des repas : ${e.toString()}');
     }
+  }
+
+  /// Récupère les idées de repas déjà générées aujourd'hui pour cet
+  /// utilisateur, si elles existent (cache quotidien). Retourne `null` s'il
+  /// n'y a rien en base pour ce jour (il faudra alors appeler l'IA).
+  Future<List<MealSuggestion>?> getCachedMealSuggestions(String dayKey) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return null;
+
+    final response = await _supabase
+        .from('meal_suggestions')
+        .select('suggestions')
+        .eq('user_id', user.id)
+        .eq('day', dayKey)
+        .maybeSingle();
+
+    if (response == null) return null;
+
+    final suggestions = response['suggestions'] as List<dynamic>;
+    if (suggestions.isEmpty) return null;
+
+    return suggestions
+        .map((item) => MealSuggestion.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Sauvegarde (ou remplace) les idées de repas générées pour aujourd'hui.
+  Future<void> saveMealSuggestions(String dayKey, List<MealSuggestion> suggestions) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    final suggestionsJson = suggestions.map((s) => {
+      'timeSlot': s.timeSlot,
+      'title': s.title,
+      'kcal': s.kcal,
+      'prot': s.prot,
+      'gluc': s.gluc,
+      'lip': s.lip,
+      'description': s.description,
+    }).toList();
+
+    await _supabase.from('meal_suggestions').upsert(
+      {
+        'user_id': user.id,
+        'day': dayKey,
+        'suggestions': suggestionsJson,
+      },
+      onConflict: 'user_id,day',
+    );
   }
 }

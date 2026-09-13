@@ -11,6 +11,7 @@ import '../screens/dashboard_screen.dart';
 import '../screens/coach_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/meal_analysis_screen.dart';
+import '../screens/meal_suggestions_screen.dart';
 import '../screens/camera_capture_screen.dart';
 import '../screens/forgot_password_screen.dart';
 import '../screens/paywall_screen.dart';
@@ -123,6 +124,10 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/camera_capture',
         builder: (context, state) => const CameraCaptureScreen(),
+      ),
+      GoRoute(
+        path: '/meal_suggestions',
+        builder: (context, state) => const MealSuggestionsScreen(),
       ),
       GoRoute(
         path: '/account',
