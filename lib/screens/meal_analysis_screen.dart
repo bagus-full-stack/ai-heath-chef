@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/meal_provider.dart';
+import '../providers/dashboard_provider.dart';
 import '../services/database_service.dart';
 import '../models/ingredient.dart';
 
@@ -246,6 +247,10 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
 
                             // Appel au service de base de données
                             await DatabaseService().saveMeal(ingredients, 'Repas IA'); // Tu pourras rendre le nom dynamique plus tard
+
+                            // On invalide le cache du journal pour qu'il recharge
+                            // les repas à jour au retour sur le Dashboard.
+                            ref.invalidate(todayMealsProvider);
 
                             // On ferme le dialogue de chargement
                             if (context.mounted) Navigator.pop(context);
