@@ -19,6 +19,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Conditions d'utilisation** — CGU et mentions légales (⚠️ contenu de brouillon, voir [Notes](#notes) ci-dessous)
 - **À propos** — version de l'app (lue dynamiquement), liens vers l'aide et les CGU
 - **Compte admin** — accès complet aux fonctionnalités PRO sans abonnement réel, activable uniquement depuis le SQL Editor Supabase (jamais depuis l'app)
+- **Quotas IA par utilisateur** — limite quotidienne d'appels par utilisateur sur chaque Edge Function IA (20/jour pour `analyze-meal`/`analyze-product`, 50/jour pour `coach-chat`, 10/jour pour `meal-suggestions`), pour contenir les coûts en cas d'abus
 - **Abonnement PRO** — paywall, checkout et gestion des achats in-app via RevenueCat (avec un **mode démo** intégré tant que les clés RevenueCat ne sont pas configurées, permettant de tester tout le parcours Paywall → Checkout → déblocage PRO sans compte Apple/Google payant)
 
 ## Stack technique
@@ -58,8 +59,10 @@ lib/
   utils/        Calcul des cibles nutritionnelles (nutrition_targets) et de l'IMC (bmi)
   widgets/      Composants réutilisables (layout principal, carte de suggestion de repas)
 supabase/
-  migrations/   Schéma SQL versionné (0001 à 0007, voir ci-dessous)
+  migrations/   Schéma SQL versionné (0001 à 0008, voir ci-dessous)
   functions/    Edge Functions : analyze-meal, analyze-product, coach-chat, meal-suggestions
+                (+ _shared/quota.ts, vérification d'identité et quota quotidien réutilisés
+                par les quatre fonctions)
 test/           Tests unitaires (providers, utils)
 ```
 
@@ -78,7 +81,7 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0007) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0008) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
    - `0001` : tables `profiles`, `meals`, `chat_messages` + policies RLS + bucket `avatars`
    - `0002` : taille (`height_cm`) sur `profiles`
    - `0003` : table `meal_suggestions` (cache des idées de repas IA)
@@ -86,7 +89,8 @@ flutter pub get
    - `0005` : signature de préférences sur `meal_suggestions` (invalide le cache si le régime change en cours de journée)
    - `0006` : photo de repas (`image_url` sur `meals`) + bucket `meal_photos`
    - `0007` : statut admin (`is_admin` sur `profiles`), verrouillé contre toute auto-promotion côté client
-3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions` (`supabase/functions/`) avec `supabase functions deploy <nom>`, et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard.
+   - `0008` : table `api_usage` + fonction `increment_api_usage`, pour les quotas quotidiens par utilisateur sur les Edge Functions IA (voir ci-dessous)
+3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions` (`supabase/functions/`, ainsi que le dossier partagé `supabase/functions/_shared/`) avec `supabase functions deploy <nom>`, et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
 4. **Compte admin (optionnel)** — pour donner à un compte l'accès complet aux fonctionnalités PRO sans abonnement réel, exécute depuis le SQL Editor : `update public.profiles set is_admin = true where email = 'ton-email@exemple.com';`. Ce champ n'est modifiable que depuis le SQL Editor (aucun moyen de le changer depuis l'app, voir migration 0007).
 
 ### Configuration RevenueCat (optionnel)
@@ -145,6 +149,7 @@ flutter test
 - **Photos de repas** — uploadées dans le bucket `meal_photos` uniquement pour les analyses par photo ("Repas"/"Produit") ; un repas issu d'un scan de code-barres n'a pas de photo.
 - **CGU/mentions légales à finaliser** — le contenu de `lib/screens/terms_screen.dart` décrit honnêtement le fonctionnement actuel de l'app (données collectées, absence de conseil médical, contenu généré par IA, abonnement), mais reste un brouillon : l'identité légale de l'éditeur (`[Nom de l'éditeur à compléter]`) et l'adresse de contact doivent être complétées, et le texte doit être relu par un professionnel du droit avant toute publication publique — un bandeau d'avertissement s'affiche sur l'écran tant que ce n'est pas fait.
 - **Adresse de contact** — actuellement `support@aihealthchef.app` (`lib/screens/about_screen.dart`, constante `kSupportEmail`), à remplacer par une vraie boîte surveillée avant publication.
+- **Quotas IA** — les limites quotidiennes (`supabase/functions/_shared/quota.ts`) sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque Edge Function si besoin. Un compte admin (`profiles.is_admin`) n'en est **pas** exempté — le quota s'applique à tout le monde, y compris toi.
 
 ## Ressources Flutter
 

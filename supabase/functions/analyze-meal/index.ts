@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import { checkAndIncrementQuota } from "../_shared/quota.ts"
 
 // 1. Headers CORS complets
 const corsHeaders = {
@@ -45,6 +46,12 @@ Deno.serve(async (req) => {
     // === GESTION DU PREFLIGHT (CORS) ===
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
+    }
+
+    // === QUOTA QUOTIDIEN PAR UTILISATEUR ===
+    const quota = await checkAndIncrementQuota(req, 'analyze-meal', 20, corsHeaders);
+    if (!quota.ok) {
+        return quota.response!;
     }
 
     try {

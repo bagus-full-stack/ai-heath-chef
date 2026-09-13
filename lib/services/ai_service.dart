@@ -62,7 +62,7 @@ class AIService {
       )).toList();
 
     } catch (e) {
-      throw Exception("$errorPrefix : ${e.toString()}");
+      throw Exception("$errorPrefix : ${_describeError(e)}");
     }
   }
 
@@ -87,7 +87,7 @@ class AIService {
 
       return response.data['reply'] as String;
     } catch (e) {
-      throw Exception("Erreur de connexion avec le Coach IA : $e");
+      throw Exception("Erreur de connexion avec le Coach IA : ${_describeError(e)}");
     }
   }
 
@@ -124,7 +124,21 @@ class AIService {
           .map((item) => MealSuggestion.fromJson(item as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      throw Exception("Erreur lors de la génération des idées de repas : ${e.toString()}");
+      throw Exception("Erreur lors de la génération des idées de repas : ${_describeError(e)}");
     }
+  }
+
+  /// Extrait un message d'erreur lisible d'une [FunctionException] (le champ
+  /// `error` renvoyé par nos Edge Functions, ex. quota dépassé), au lieu de
+  /// laisser fuiter la représentation brute de l'exception à l'utilisateur.
+  String _describeError(Object error) {
+    if (error is FunctionException) {
+      final details = error.details;
+      if (details is Map && details['error'] is String) {
+        return details['error'] as String;
+      }
+      return error.reasonPhrase ?? error.toString();
+    }
+    return error.toString();
   }
 }
