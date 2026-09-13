@@ -6,6 +6,8 @@ import '../providers/meal_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../services/database_service.dart';
 import '../models/ingredient.dart';
+import '../widgets/animated_async_value.dart';
+import '../widgets/success_transition_dialog.dart';
 
 class MealAnalysisScreen extends ConsumerStatefulWidget {
   final String? imagePath;
@@ -146,7 +148,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
               ),
 
               // 2. Gestion de l'affichage selon l'état de l'IA
-              mealState.when(
+              mealState.animatedWhen(
                 // ÉTAT 1 : CHARGEMENT
                 loading: () => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 60.0),
@@ -270,12 +272,16 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text(
-                                  '$totalKcal',
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: primaryColor,
+                                TweenAnimationBuilder<int>(
+                                  duration: const Duration(milliseconds: 300),
+                                  tween: IntTween(begin: totalKcal, end: totalKcal),
+                                  builder: (context, value, child) => Text(
+                                    '$value',
+                                    style: const TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      color: primaryColor,
+                                    ),
                                   ),
                                 ),
                                 const Text(
@@ -298,8 +304,27 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                         child: Column(
                           children: [
                             ...ingredients.map(
-                              (item) =>
-                                  _buildIngredientCard(item, ref, primaryColor),
+                              (item) => Dismissible(
+                                key: ValueKey(item.id),
+                                direction: DismissDirection.endToStart,
+                                onDismissed: (_) => ref
+                                    .read(mealProvider.notifier)
+                                    .removeIngredient(item.id),
+                                background: Container(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  alignment: Alignment.centerRight,
+                                  decoration: BoxDecoration(
+                                    color: Colors.redAccent,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                child: _buildIngredientCard(item, ref, primaryColor),
+                              ),
                             ),
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
@@ -377,17 +402,17 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                 children: [
                                   _buildSummaryMacro(
                                     'Protéines',
-                                    '${totalProt.toStringAsFixed(1)}g',
+                                    totalProt,
                                     primaryColor,
                                   ),
                                   _buildSummaryMacro(
                                     'Glucides',
-                                    '${totalGluc.toStringAsFixed(1)}g',
+                                    totalGluc,
                                     Colors.orange,
                                   ),
                                   _buildSummaryMacro(
                                     'Lipides',
-                                    '${totalLip.toStringAsFixed(1)}g',
+                                    totalLip,
                                     Colors.pink,
                                   ),
                                 ],
@@ -402,14 +427,15 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
                         child: ElevatedButton(
                           onPressed: () async {
+                            final isSuccess = ValueNotifier<bool>(false);
                             try {
-                              // On affiche un indicateur de chargement natif
+                              // On affiche un indicateur de chargement, qui se
+                              // transformera en confirmation visuelle une fois
+                              // la sauvegarde terminée.
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
-                                builder: (context) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
+                                builder: (context) => SuccessTransitionDialog(isSuccess: isSuccess),
                               );
 
                               // Appel au service de base de données
@@ -433,6 +459,11 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                               // On invalide le cache du journal pour qu'il recharge
                               // les repas à jour au retour sur le Dashboard.
                               ref.invalidate(todayMealsProvider);
+
+                              // On laisse le temps de voir la confirmation
+                              // visuelle avant de fermer le dialogue.
+                              isSuccess.value = true;
+                              await Future.delayed(const Duration(milliseconds: 700));
 
                               // On ferme le dialogue de chargement
                               if (context.mounted) Navigator.pop(context);
@@ -557,11 +588,15 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                       color: Colors.orange,
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      '${item.currentKcal} kcal',
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 13,
+                    TweenAnimationBuilder<int>(
+                      duration: const Duration(milliseconds: 300),
+                      tween: IntTween(begin: item.currentKcal, end: item.currentKcal),
+                      builder: (context, value, child) => Text(
+                        '$value kcal',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -575,19 +610,19 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                       children: [
                         _buildMacroBadge(
                           'PROT',
-                          '${item.currentProt.toStringAsFixed(1)}g',
+                          item.currentProt,
                           primaryColor,
                         ),
                         const SizedBox(width: 8),
                         _buildMacroBadge(
                           'GLUC',
-                          '${item.currentGluc.toStringAsFixed(1)}g',
+                          item.currentGluc,
                           Colors.orange,
                         ),
                         const SizedBox(width: 8),
                         _buildMacroBadge(
                           'LIP',
-                          '${item.currentLip.toStringAsFixed(1)}g',
+                          item.currentLip,
                           Colors.pink,
                         ),
                       ],
@@ -610,11 +645,15 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                             ),
                             padding: EdgeInsets.zero,
                           ),
-                          Text(
-                            '${item.weight} G',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
+                          TweenAnimationBuilder<int>(
+                            duration: const Duration(milliseconds: 200),
+                            tween: IntTween(begin: item.weight, end: item.weight),
+                            builder: (context, value, child) => Text(
+                              '$value G',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                           IconButton(
@@ -641,7 +680,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
     );
   }
 
-  Widget _buildMacroBadge(String label, String value, Color color) {
+  Widget _buildMacroBadge(String label, double value, Color color) {
     return Column(
       children: [
         Text(
@@ -652,19 +691,23 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
             color: Colors.black54,
           ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: color,
+        TweenAnimationBuilder<double>(
+          duration: const Duration(milliseconds: 300),
+          tween: Tween<double>(begin: value, end: value),
+          builder: (context, animatedValue, child) => Text(
+            '${animatedValue.toStringAsFixed(1)}g',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSummaryMacro(String title, String value, Color color) {
+  Widget _buildSummaryMacro(String title, double value, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -673,9 +716,13 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
         ),
         const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        TweenAnimationBuilder<double>(
+          duration: const Duration(milliseconds: 300),
+          tween: Tween<double>(begin: value, end: value),
+          builder: (context, animatedValue, child) => Text(
+            '${animatedValue.toStringAsFixed(1)}g',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
         ),
         const SizedBox(height: 8),
         Container(

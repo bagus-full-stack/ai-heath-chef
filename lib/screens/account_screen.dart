@@ -10,6 +10,7 @@ import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 import '../providers/profile_provider.dart';
 import '../utils/bmi.dart';
+import '../widgets/animated_async_value.dart';
 
 /// Écran d'édition du profil (identité + objectifs), ouvert depuis "Compte"
 /// et "Mes objectifs" dans lib/screens/profile_screen.dart.
@@ -251,7 +252,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         ),
         centerTitle: true,
       ),
-      body: profileAsync.when(
+      body: profileAsync.animatedWhen(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Padding(
@@ -451,71 +452,78 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         ? computeBmi(weightKg: weight, heightCm: height)
         : null;
 
-    if (bmi == null) {
-      return Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.monitor_weight_outlined, color: Colors.grey.shade400),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Renseigne ton poids et ta taille pour voir ton IMC.',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bmi.color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: bmi.color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(color: bmi.color, shape: BoxShape.circle),
-            child: Center(
-              child: Text(
-                bmi.value.toStringAsFixed(1),
-                style: const TextStyle(
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 250),
+      alignment: Alignment.topCenter,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 250),
+        child: bmi == null
+            ? Container(
+                key: const ValueKey('bmi-placeholder'),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.monitor_weight_outlined, color: Colors.grey.shade400),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Renseigne ton poids et ta taille pour voir ton IMC.',
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : Container(
+                key: const ValueKey('bmi-value'),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: bmi.color.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: bmi.color.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(color: bmi.color, shape: BoxShape.circle),
+                      child: Center(
+                        child: Text(
+                          bmi.value.toStringAsFixed(1),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'IMC : ${bmi.label}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Plage ${bmi.label.toLowerCase()} : ${bmi.rangeLabel}',
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'IMC : ${bmi.label}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Plage ${bmi.label.toLowerCase()} : ${bmi.rangeLabel}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

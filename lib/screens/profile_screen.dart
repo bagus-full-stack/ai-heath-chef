@@ -7,6 +7,7 @@ import '../models/user_profile.dart';
 import '../providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart';
+import '../widgets/animated_async_value.dart';
 import 'coming_soon_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -61,7 +62,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: profileAsync.when(
+      body: profileAsync.animatedWhen(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Padding(

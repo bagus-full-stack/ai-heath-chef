@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/meal_suggestions_provider.dart';
+import '../widgets/animated_async_value.dart';
 import '../widgets/meal_suggestion_card.dart';
 import 'coach_screen.dart' show openCoachChatSheet, kCoachPrimaryColor;
 
@@ -38,7 +39,7 @@ class MealSuggestionsScreen extends ConsumerWidget {
         ],
       ),
       body: SafeArea(
-        child: suggestionsAsync.when(
+        child: suggestionsAsync.animatedWhen(
           loading: () => const Center(
             child: CircularProgressIndicator(color: kCoachPrimaryColor),
           ),

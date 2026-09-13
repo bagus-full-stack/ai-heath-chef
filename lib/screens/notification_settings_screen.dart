@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../models/meal_reminder.dart';
 import '../providers/custom_reminders_provider.dart';
 import '../providers/notification_settings_provider.dart';
+import '../widgets/animated_async_value.dart';
 
 const Color _kPrimaryColor = Color(0xFF6B66FF);
 
@@ -47,7 +48,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
         ),
         centerTitle: true,
       ),
-      body: settingsAsync.when(
+      body: settingsAsync.animatedWhen(
         loading: () => const Center(child: CircularProgressIndicator(color: _kPrimaryColor)),
         error: (error, stackTrace) => Center(
           child: Padding(
@@ -100,7 +101,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-            customRemindersAsync.when(
+            customRemindersAsync.animatedWhen(
               loading: () => const Padding(
                 padding: EdgeInsets.symmetric(vertical: 20),
                 child: Center(child: CircularProgressIndicator(color: _kPrimaryColor)),

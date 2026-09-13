@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../models/selected_plan.dart';
 import '../providers/purchase_provider.dart';
 import '../services/purchase_service.dart';
+import '../widgets/success_transition_dialog.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final SelectedPlan? plan;
@@ -42,16 +43,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       switch (outcome) {
         case PurchaseOutcome.success:
           ref.invalidate(entitlementProvider);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                PurchaseService.instance.isDemoMode
-                    ? 'Achat simulé (mode démo) : accès PRO débloqué !'
-                    : 'Abonnement activé, bienvenue dans AI Health Chef PRO !',
-              ),
-              backgroundColor: const Color(0xFF45C48C),
-            ),
+          await _showSuccessMoment(
+            PurchaseService.instance.isDemoMode
+                ? 'Achat simulé (mode démo)\nAccès PRO débloqué !'
+                : 'Abonnement activé !\nBienvenue dans AI Health Chef PRO.',
           );
+          if (!mounted) {
+            return;
+          }
           context.go('/dashboard');
         case PurchaseOutcome.none:
           ScaffoldMessenger.of(context).showSnackBar(
@@ -74,6 +73,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       if (mounted) {
         setState(() => _isProcessing = false);
       }
+    }
+  }
+
+  /// Petit moment de célébration affiché juste après un achat réussi, avant
+  /// de revenir au Dashboard — remplace le simple SnackBar par une
+  /// confirmation visuelle qui a le temps d'être vue.
+  Future<void> _showSuccessMoment(String message) async {
+    final isSuccess = ValueNotifier<bool>(true);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => SuccessTransitionDialog(isSuccess: isSuccess, successMessage: message),
+    );
+    await Future.delayed(const Duration(milliseconds: 1200));
+    if (mounted) {
+      Navigator.pop(context);
     }
   }
 

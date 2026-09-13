@@ -8,6 +8,7 @@ import '../providers/profile_provider.dart';
 import '../models/meal.dart'; // 🚀 On importe notre nouveau modèle !
 import '../utils/bmi.dart';
 import '../utils/nutrition_targets.dart';
+import '../widgets/animated_async_value.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -64,14 +65,18 @@ class DashboardScreen extends ConsumerWidget {
             child: GestureDetector(
               onTap: () => context.push('/account'),
               child: profileAsync.maybeWhen(
-                data: (profile) => CircleAvatar(
-                  backgroundColor: const Color(0xFFEEEEEE),
-                  backgroundImage: profile?.avatarUrl != null
-                      ? NetworkImage(profile!.avatarUrl!)
-                      : null,
-                  child: profile?.avatarUrl == null
-                      ? const Icon(Icons.person, color: Colors.grey)
-                      : null,
+                data: (profile) => AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: CircleAvatar(
+                    key: ValueKey(profile?.avatarUrl ?? 'no-avatar'),
+                    backgroundColor: const Color(0xFFEEEEEE),
+                    backgroundImage: profile?.avatarUrl != null
+                        ? NetworkImage(profile!.avatarUrl!)
+                        : null,
+                    child: profile?.avatarUrl == null
+                        ? const Icon(Icons.person, color: Colors.grey)
+                        : null,
+                  ),
                 ),
                 orElse: () => const CircleAvatar(
                   backgroundColor: Color(0xFFEEEEEE),
@@ -83,7 +88,7 @@ class DashboardScreen extends ConsumerWidget {
         ],
       ),
 
-      body: mealsAsyncValue.when(
+      body: mealsAsyncValue.animatedWhen(
           loading: () => const Center(child: CircularProgressIndicator(color: primaryColor)),
           error: (err, stack) => Center(child: Text('Erreur: $err')),
           data: (List<Meal> meals) { // 🚀 On spécifie bien List<Meal> ici
@@ -181,10 +186,20 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 30),
 
-                    if (bmi != null) ...[
-                      _buildBmiCard(bmi),
-                      const SizedBox(height: 30),
-                    ],
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      alignment: Alignment.topCenter,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: bmi != null
+                            ? Padding(
+                                key: const ValueKey('bmi'),
+                                padding: const EdgeInsets.only(bottom: 30),
+                                child: _buildBmiCard(bmi),
+                              )
+                            : const SizedBox.shrink(key: ValueKey('no-bmi')),
+                      ),
+                    ),
 
                     // Section Journal des repas
                     Row(
@@ -202,25 +217,31 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 16),
 
                     // Liste dynamique des repas sauvegardés
-                    if (meals.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Text("Aucun repas enregistré aujourd'hui. Scannez votre première assiette !", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade500)),
-                        ),
-                      )
-                    else
-                      ...meals.map((meal) {
-                        // 🚀 L'objet meal gère déjà la date proprement
-                        final timeString = '${meal.createdAt.hour.toString().padLeft(2, '0')}:${meal.createdAt.minute.toString().padLeft(2, '0')}';
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: meals.isEmpty
+                          ? Center(
+                              key: const ValueKey('empty-meals'),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Text("Aucun repas enregistré aujourd'hui. Scannez votre première assiette !", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade500)),
+                              ),
+                            )
+                          : Column(
+                              key: ValueKey('meals-${meals.length}'),
+                              children: meals.map((meal) {
+                                // 🚀 L'objet meal gère déjà la date proprement
+                                final timeString = '${meal.createdAt.hour.toString().padLeft(2, '0')}:${meal.createdAt.minute.toString().padLeft(2, '0')}';
 
-                        return _buildMealCard(
-                          meal.name,
-                          timeString,
-                          '${meal.totalKcal} kcal',
-                          meal.imageUrl,
-                        );
-                      }),
+                                return _buildMealCard(
+                                  meal.name,
+                                  timeString,
+                                  '${meal.totalKcal} kcal',
+                                  meal.imageUrl,
+                                );
+                              }).toList(),
+                            ),
+                    ),
 
                     const SizedBox(height: 100), // Espace pour le bouton flottant
                   ],

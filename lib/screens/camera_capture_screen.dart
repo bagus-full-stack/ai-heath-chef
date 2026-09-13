@@ -453,22 +453,24 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      _modeLabel(mode).toUpperCase(),
+                                    AnimatedDefaultTextStyle(
+                                      duration: const Duration(milliseconds: 200),
                                       style: TextStyle(
                                         color: selected ? primaryColor : Colors.white70,
                                         fontWeight: selected ? FontWeight.bold : FontWeight.w500,
                                         fontSize: 12,
                                         letterSpacing: 0.6,
                                       ),
+                                      child: Text(_modeLabel(mode).toUpperCase()),
                                     ),
                                     const SizedBox(height: 4),
-                                    if (selected)
-                                      Container(
-                                        width: 18,
-                                        height: 2,
-                                        color: primaryColor,
-                                      ),
+                                    AnimatedContainer(
+                                      duration: const Duration(milliseconds: 200),
+                                      curve: Curves.easeOut,
+                                      width: selected ? 18 : 0,
+                                      height: 2,
+                                      color: primaryColor,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -607,7 +609,10 @@ class _CircleIconButton extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
         ),
-        child: Icon(icon, color: Colors.white, size: 20),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: Icon(icon, key: ValueKey(icon), color: Colors.white, size: 20),
+        ),
       ),
     );
   }

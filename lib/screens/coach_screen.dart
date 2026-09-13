@@ -8,7 +8,9 @@ import '../providers/dashboard_provider.dart';
 import '../providers/meal_suggestions_provider.dart';
 import '../providers/profile_provider.dart';
 import '../utils/nutrition_targets.dart';
+import '../widgets/animated_async_value.dart';
 import '../widgets/meal_suggestion_card.dart';
+import '../widgets/staggered_entrance.dart';
 
 const Color kCoachPrimaryColor = Color(0xFF6B66FF);
 
@@ -131,7 +133,7 @@ class _MealSuggestionsRow extends ConsumerWidget {
 
     return SizedBox(
       height: 285,
-      child: suggestionsAsync.when(
+      child: suggestionsAsync.animatedWhen(
         loading: () => const Center(
           child: CircularProgressIndicator(color: kCoachPrimaryColor),
         ),
@@ -173,13 +175,16 @@ class _MealSuggestionsRow extends ConsumerWidget {
             separatorBuilder: (context, index) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               final suggestion = preview[index];
-              return SizedBox(
-                width: 280,
-                child: MealSuggestionCard(
-                  suggestion: suggestion,
-                  onAdd: () => openCoachChatSheet(
-                    context,
-                    presetMessage: 'Ajuste ce repas pour mon objectif: ${suggestion.title}',
+              return StaggeredEntrance(
+                delay: Duration(milliseconds: 60 * index),
+                child: SizedBox(
+                  width: 280,
+                  child: MealSuggestionCard(
+                    suggestion: suggestion,
+                    onAdd: () => openCoachChatSheet(
+                      context,
+                      presetMessage: 'Ajuste ce repas pour mon objectif: ${suggestion.title}',
+                    ),
                   ),
                 ),
               );
@@ -529,11 +534,16 @@ class _NeedRow extends StatelessWidget {
               const SizedBox(height: 8),
               ClipRRect(
                 borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 6,
-                  backgroundColor: iconColor.withValues(alpha: 0.16),
-                  color: iconColor,
+                child: TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeOut,
+                  tween: Tween<double>(begin: 0, end: progress),
+                  builder: (context, animatedProgress, child) => LinearProgressIndicator(
+                    value: animatedProgress,
+                    minHeight: 6,
+                    backgroundColor: iconColor.withValues(alpha: 0.16),
+                    color: iconColor,
+                  ),
                 ),
               ),
             ],
@@ -779,7 +789,10 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                           itemCount: messages.length,
                           itemBuilder: (context, index) {
                             final message = messages[index];
-                            return _ChatBubble(message: message);
+                            return StaggeredEntrance(
+                              key: ValueKey(message.id),
+                              child: _ChatBubble(message: message),
+                            );
                           },
                         ),
                 ),

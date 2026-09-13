@@ -22,6 +22,7 @@ class BarcodeScannerScreen extends StatefulWidget {
 class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   final MobileScannerController _controller = MobileScannerController();
   bool _handled = false;
+  bool _detected = false;
 
   @override
   void dispose() {
@@ -29,7 +30,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     super.dispose();
   }
 
-  void _onDetect(BarcodeCapture capture) {
+  Future<void> _onDetect(BarcodeCapture capture) async {
     if (_handled || capture.barcodes.isEmpty) {
       return;
     }
@@ -40,6 +41,14 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
 
     _handled = true;
     unawaited(_controller.stop());
+    setState(() => _detected = true);
+
+    // Petit temps de pause pour laisser le retour visuel de succès se voir
+    // avant de naviguer, plutôt que de couper directement vers l'écran suivant.
+    await Future.delayed(const Duration(milliseconds: 350));
+    if (!mounted) {
+      return;
+    }
     context.pushReplacement('/meal_analysis', extra: MealAnalysisArgs(barcode: code));
   }
 
@@ -53,7 +62,27 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
           children: [
             MobileScanner(controller: _controller, onDetect: _onDetect),
             Positioned.fill(
-              child: CustomPaint(painter: _BarcodeFocusPainter()),
+              child: CustomPaint(painter: _BarcodeFocusPainter(success: _detected)),
+            ),
+            IgnorePointer(
+              child: Center(
+                child: Transform.translate(
+                  offset: const Offset(0, -20),
+                  child: AnimatedOpacity(
+                    opacity: _detected ? 1 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: const BoxDecoration(
+                        color: Colors.greenAccent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.check_rounded, color: Colors.white, size: 36),
+                    ),
+                  ),
+                ),
+              ),
             ),
             Positioned(
               top: 16,
@@ -138,6 +167,10 @@ class _CircleIconButton extends StatelessWidget {
 }
 
 class _BarcodeFocusPainter extends CustomPainter {
+  final bool success;
+
+  _BarcodeFocusPainter({required this.success});
+
   @override
   void paint(Canvas canvas, Size size) {
     final overlayPaint = Paint()..color = Colors.black.withValues(alpha: 0.55);
@@ -160,12 +193,12 @@ class _BarcodeFocusPainter extends CustomPainter {
     canvas.drawPath(cutoutPath, overlayPaint);
 
     final borderPaint = Paint()
-      ..color = _kPrimaryColor
+      ..color = success ? Colors.greenAccent : _kPrimaryColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5;
+      ..strokeWidth = success ? 3.5 : 2.5;
     canvas.drawRRect(frameRRect, borderPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _BarcodeFocusPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _BarcodeFocusPainter oldDelegate) => oldDelegate.success != success;
 }

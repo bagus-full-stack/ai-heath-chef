@@ -6,6 +6,8 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import '../models/selected_plan.dart';
 import '../providers/purchase_provider.dart';
 import '../services/purchase_service.dart';
+import '../widgets/animated_async_value.dart';
+import '../widgets/staggered_entrance.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key});
@@ -216,28 +218,39 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           ),
                         ),
                         const SizedBox(height: 28),
-                        _BenefitCard(
-                          icon: Icons.photo_camera_back_rounded,
-                          title: 'Reconnaissance Photo Illimitée',
-                          subtitle: 'Analysez autant de repas que nécessaire, sans limite.',
+                        const StaggeredEntrance(
+                          child: _BenefitCard(
+                            icon: Icons.photo_camera_back_rounded,
+                            title: 'Reconnaissance Photo Illimitée',
+                            subtitle: 'Analysez autant de repas que nécessaire, sans limite.',
+                          ),
                         ),
                         const SizedBox(height: 12),
-                        _BenefitCard(
-                          icon: Icons.bubble_chart_rounded,
-                          title: 'Coach de repas personnel',
-                          subtitle: 'Recevez des recommandations adaptées à votre objectif.',
+                        StaggeredEntrance(
+                          delay: const Duration(milliseconds: 80),
+                          child: const _BenefitCard(
+                            icon: Icons.bubble_chart_rounded,
+                            title: 'Coach de repas personnel',
+                            subtitle: 'Recevez des recommandations adaptées à votre objectif.',
+                          ),
                         ),
                         const SizedBox(height: 12),
-                        _BenefitCard(
-                          icon: Icons.auto_graph_rounded,
-                          title: 'Analyses avancées',
-                          subtitle: 'Macros détaillées et tendances nutritionnelles.',
+                        StaggeredEntrance(
+                          delay: const Duration(milliseconds: 160),
+                          child: const _BenefitCard(
+                            icon: Icons.auto_graph_rounded,
+                            title: 'Analyses avancées',
+                            subtitle: 'Macros détaillées et tendances nutritionnelles.',
+                          ),
                         ),
                         const SizedBox(height: 12),
-                        _BenefitCard(
-                          icon: Icons.no_food_rounded,
-                          title: 'Sans publicité',
-                          subtitle: 'Une expérience fluide, premium et concentrée.',
+                        StaggeredEntrance(
+                          delay: const Duration(milliseconds: 240),
+                          child: const _BenefitCard(
+                            icon: Icons.no_food_rounded,
+                            title: 'Sans publicité',
+                            subtitle: 'Une expérience fluide, premium et concentrée.',
+                          ),
                         ),
                         if (PurchaseService.instance.isDemoMode) ...[
                           const SizedBox(height: 16),
@@ -273,7 +286,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        offeringsAsync.when(
+                        offeringsAsync.animatedWhen(
                           loading: () => const Padding(
                             padding: EdgeInsets.symmetric(vertical: 24),
                             child: Center(
