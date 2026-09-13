@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // On importe notre routeur personnalisé
 import 'router/app_router.dart';
+import 'services/notification_service.dart';
 import 'services/purchase_service.dart';
 
 void main() async {
@@ -31,6 +32,9 @@ void main() async {
   await PurchaseService.instance.configure(
     appUserId: Supabase.instance.client.auth.currentUser?.id,
   );
+
+  // Initialisation des notifications locales (rappels de repas).
+  await NotificationService.instance.initialize();
 
   // On configure notre routeur avec cette information
   setupRouter(showOnboarding);

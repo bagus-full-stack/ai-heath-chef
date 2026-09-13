@@ -10,6 +10,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas par photo vi
 - **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
 - **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`), et idées de repas personnalisées selon le profil/objectif (Edge Function `meal-suggestions`)
 - **Profil & compte** — gestion du profil utilisateur, paramètres de compte
+- **Rappels de repas** — notifications locales quotidiennes (petit-déjeuner/déjeuner/dîner), activables et personnalisables (heure) individuellement, réglables depuis Profil > Notifications
 - **Abonnement PRO** — paywall, checkout et gestion des achats in-app via RevenueCat (avec un **mode démo** intégré tant que les clés RevenueCat ne sont pas configurées, permettant de tester tout le parcours Paywall → Checkout → déblocage PRO sans compte Apple/Google payant)
 
 ## Stack technique
@@ -22,15 +23,16 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas par photo vi
 - **camera** / **image_picker** / **flutter_image_compress** — capture et compression des photos de repas
 - **percent_indicator** — jauges circulaires du dashboard
 - **google_fonts**, **shared_preferences**
+- **flutter_local_notifications** / **timezone** / **flutter_timezone** — notifications locales programmées (rappels de repas)
 
 ## Architecture du projet
 
 ```
 lib/
-  models/       Modèles de données (UserProfile, Meal, Ingredient, SelectedPlan, ChatMessage, MealSuggestion)
-  providers/    State management Riverpod (auth, dashboard, meal, onboarding, profile, purchase, chat, meal suggestions)
+  models/       Modèles de données (UserProfile, Meal, Ingredient, SelectedPlan, ChatMessage, MealSuggestion, MealReminder)
+  providers/    State management Riverpod (auth, dashboard, meal, onboarding, profile, purchase, chat, meal suggestions, notifications)
   screens/      Écrans de l'application
-  services/       Accès Supabase, IA (Edge Functions) et RevenueCat (database_service, ai_service, supabase_service, purchase_service)
+  services/       Accès Supabase, IA (Edge Functions), RevenueCat et notifications locales (database_service, ai_service, supabase_service, purchase_service, notification_service)
   router/        Configuration go_router (routes + redirections auth)
   utils/          Calcul des cibles nutritionnelles (nutrition_targets) et de l'IMC (bmi)
   widgets/        Composants réutilisables (jauges, cartes de repas, layout principal)

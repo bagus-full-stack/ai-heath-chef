@@ -8,10 +8,14 @@ import '../screens/login_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/dashboard_screen.dart';
+import '../screens/about_screen.dart';
 import '../screens/coach_screen.dart';
+import '../screens/help_center_screen.dart';
+import '../screens/terms_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/meal_analysis_screen.dart';
 import '../screens/meal_suggestions_screen.dart';
+import '../screens/notification_settings_screen.dart';
 import '../screens/camera_capture_screen.dart';
 import '../screens/forgot_password_screen.dart';
 import '../screens/paywall_screen.dart';
@@ -128,6 +132,22 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/meal_suggestions',
         builder: (context, state) => const MealSuggestionsScreen(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/help',
+        builder: (context, state) => const HelpCenterScreen(),
+      ),
+      GoRoute(
+        path: '/terms',
+        builder: (context, state) => const TermsScreen(),
+      ),
+      GoRoute(
+        path: '/about',
+        builder: (context, state) => const AboutScreen(),
       ),
       GoRoute(
         path: '/account',

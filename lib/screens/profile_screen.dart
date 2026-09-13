@@ -109,14 +109,7 @@ class ProfileScreen extends ConsumerWidget {
                       icon: Icons.notifications_none_rounded,
                       title: 'Notifications',
                       subtitle: 'Rappels repas et suivi',
-                      onTap: () => context.push(
-                        '/coming-soon',
-                        extra: const ComingSoonArgs(
-                          title: 'Notifications',
-                          message: 'La gestion des rappels et notifications arrive bientôt.',
-                          icon: Icons.notifications_none_rounded,
-                        ),
-                      ),
+                      onTap: () => context.push('/notifications'),
                     ),
                     _SettingsItem(
                       icon: Icons.credit_card_outlined,
@@ -148,27 +141,13 @@ class ProfileScreen extends ConsumerWidget {
                       icon: Icons.help_outline_rounded,
                       title: 'Centre d’aide',
                       subtitle: 'FAQ, guides et tutoriels',
-                      onTap: () => context.push(
-                        '/coming-soon',
-                        extra: const ComingSoonArgs(
-                          title: 'Centre d’aide',
-                          message: 'Le centre d’aide et la FAQ arrivent bientôt.',
-                          icon: Icons.help_outline_rounded,
-                        ),
-                      ),
+                      onTap: () => context.push('/help'),
                     ),
                     _SettingsItem(
                       icon: Icons.description_outlined,
                       title: 'Conditions d’utilisation',
                       subtitle: 'CGU et mentions légales',
-                      onTap: () => context.push(
-                        '/coming-soon',
-                        extra: const ComingSoonArgs(
-                          title: 'Conditions d’utilisation',
-                          message: 'Les conditions d’utilisation seront bientôt consultables ici.',
-                          icon: Icons.description_outlined,
-                        ),
-                      ),
+                      onTap: () => context.push('/terms'),
                     ),
                   ],
                 ),
@@ -212,14 +191,7 @@ class ProfileScreen extends ConsumerWidget {
                       icon: Icons.info_outline_rounded,
                       title: 'À propos',
                       subtitle: 'Version et informations',
-                      onTap: () => context.push(
-                        '/coming-soon',
-                        extra: const ComingSoonArgs(
-                          title: 'À propos',
-                          message: 'AI Health Chef v1.0.0',
-                          icon: Icons.info_outline_rounded,
-                        ),
-                      ),
+                      onTap: () => context.push('/about'),
                     ),
                   ],
                 ),
