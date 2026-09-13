@@ -100,9 +100,19 @@ const List<_FaqSection> _faqSections = [
 class HelpCenterScreen extends StatelessWidget {
   const HelpCenterScreen({super.key});
 
-  Future<void> _contactSupport() async {
+  Future<void> _contactSupport(BuildContext context) async {
     final uri = Uri(scheme: 'mailto', path: kSupportEmail, query: 'subject=Question AI Health Chef');
-    await launchUrl(uri);
+    bool launched = false;
+    try {
+      launched = await launchUrl(uri);
+    } catch (_) {
+      launched = false;
+    }
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Aucune app mail configurée. Écris-nous à $kSupportEmail.')),
+      );
+    }
   }
 
   @override
@@ -195,7 +205,7 @@ class HelpCenterScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   ElevatedButton.icon(
-                    onPressed: _contactSupport,
+                    onPressed: () => _contactSupport(context),
                     icon: const Icon(Icons.mail_outline_rounded, size: 18),
                     label: const Text('Contacter le support'),
                     style: ElevatedButton.styleFrom(

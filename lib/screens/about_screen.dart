@@ -12,9 +12,19 @@ const String kSupportEmail = 'support@aihealthchef.app';
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
-  Future<void> _contactSupport() async {
+  Future<void> _contactSupport(BuildContext context) async {
     final uri = Uri(scheme: 'mailto', path: kSupportEmail, query: 'subject=Contact AI Health Chef');
-    await launchUrl(uri);
+    bool launched = false;
+    try {
+      launched = await launchUrl(uri);
+    } catch (_) {
+      launched = false;
+    }
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Aucune app mail configurée. Écris-nous à $kSupportEmail.')),
+      );
+    }
   }
 
   @override
@@ -96,7 +106,7 @@ class AboutScreen extends StatelessWidget {
               icon: Icons.mail_outline_rounded,
               title: 'Contacter le support',
               subtitle: kSupportEmail,
-              onTap: _contactSupport,
+              onTap: () => _contactSupport(context),
             ),
             const SizedBox(height: 28),
             Center(
