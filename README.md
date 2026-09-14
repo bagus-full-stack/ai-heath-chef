@@ -20,6 +20,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **À propos** — version de l'app (lue dynamiquement), liens vers l'aide et les CGU
 - **Compte admin** — accès complet aux fonctionnalités PRO sans abonnement réel, activable uniquement depuis le SQL Editor Supabase (jamais depuis l'app)
 - **Quotas IA par utilisateur** — limite quotidienne d'appels par utilisateur sur chaque Edge Function IA (20/jour pour `analyze-meal`/`analyze-product`, 50/jour pour `coach-chat`, 10/jour pour `meal-suggestions`/`meal-images`), pour contenir les coûts en cas d'abus
+- **Quota IA global (protection du budget partagé)** — en plus du quota par utilisateur, `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions` (celles qui appellent la clé `GEMINI_API_KEY`, partagée par toute l'app) respectent aussi un plafond quotidien **agrégé, tous utilisateurs confondus** (500/jour pour `analyze-meal`/`analyze-product`, 1000/jour pour `coach-chat`, 300/jour pour `meal-suggestions`) : un disjoncteur qui évite qu'un usage normal mais nombreux épuise silencieusement le débit/budget gratuit d'une seule clé partagée
 - **Abonnement PRO** — paywall, checkout et gestion des achats in-app via RevenueCat (avec un **mode démo** intégré tant que les clés RevenueCat ne sont pas configurées, permettant de tester tout le parcours Paywall → Checkout → déblocage PRO sans compte Apple/Google payant)
 
 ## Stack technique
@@ -59,12 +60,13 @@ lib/
   utils/        Calcul des cibles nutritionnelles (nutrition_targets) et de l'IMC (bmi)
   widgets/      Composants réutilisables (layout principal, carte de suggestion de repas)
 supabase/
-  migrations/   Schéma SQL versionné (0001 à 0008, voir ci-dessous)
-  functions/    Edge Functions : analyze-meal, analyze-product, coach-chat, meal-suggestions
-                (+ _shared/quota.ts, vérification d'identité et quota quotidien réutilisés
-                par ces quatre fonctions), meal-images (même logique de quota, mais dupliquée
-                dans son propre index.ts — déployée via l'éditeur du Dashboard Supabase, qui
-                ne bundle pas les fichiers partagés hors de la fonction)
+  migrations/   Schéma SQL versionné (0001 à 0009, voir ci-dessous)
+  functions/    Edge Functions : analyze-meal, analyze-product, coach-chat, meal-suggestions,
+                meal-images — chacune déployée depuis l'éditeur du Dashboard Supabase, donc
+                chacune embarque sa propre copie de la vérification d'identité et du quota
+                (quotidien par utilisateur + global partagé) dans son index.ts, sans dépendre
+                d'un dossier partagé. _shared/quota.ts reste dans le repo comme référence/
+                copie canonique de cette logique, mais n'est importé par aucune fonction.
 test/           Tests unitaires (providers, utils)
 ```
 
@@ -83,7 +85,7 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0008) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0009) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
    - `0001` : tables `profiles`, `meals`, `chat_messages` + policies RLS + bucket `avatars`
    - `0002` : taille (`height_cm`) sur `profiles`
    - `0003` : table `meal_suggestions` (cache des idées de repas IA)
@@ -92,9 +94,9 @@ flutter pub get
    - `0006` : photo de repas (`image_url` sur `meals`) + bucket `meal_photos`
    - `0007` : statut admin (`is_admin` sur `profiles`), verrouillé contre toute auto-promotion côté client
    - `0008` : table `api_usage` + fonction `increment_api_usage`, pour les quotas quotidiens par utilisateur sur les Edge Functions IA (voir ci-dessous)
+   - `0009` : table `global_api_usage` + fonction `increment_global_api_usage`, pour le quota global (tous utilisateurs confondus) qui protège le budget/débit partagé de `GEMINI_API_KEY` (voir ci-dessous)
 3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions` et `meal-images` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
-   - **Via la CLI** (`supabase functions deploy <nom>`, depuis la racine du projet) : bundle aussi le dossier partagé `supabase/functions/_shared/`, utilisé par `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions`.
-   - **Via l'éditeur du Dashboard Supabase** : chaque fonction n'est composée que des fichiers que tu lui ajoutes explicitement — le dossier `_shared/` du repo n'est pas visible depuis là. `meal-images` est conçue pour ce cas : sa logique de quota est dupliquée directement dans son `index.ts`, sans dépendance externe, donc un simple copier-coller du fichier suffit à la déployer depuis le Dashboard.
+   - Chaque fonction est **autonome** (aucun import relatif vers `_shared/`) : un simple copier-coller de son `index.ts` dans l'éditeur du Dashboard Supabase suffit à la déployer/redéployer, sans erreur de bundling.
 4. **Illustrations des idées de repas (optionnel, 100% gratuit)** — `meal-images` génère une image IA par suggestion, en cascade entre deux fournisseurs gratuits :
    - **Cloudflare Workers AI (FLUX.1 [schnell])**, essayé en premier — meilleure qualité, gratuit jusqu'à ~10 000 Neurons/jour (~100 images, partagées entre tous les utilisateurs de l'app), sans carte bancaire requise. Crée un compte gratuit sur [dash.cloudflare.com](https://dash.cloudflare.com), récupère ton **Account ID** (visible sur le Dashboard) et crée un **API Token** avec la permission "Workers AI" (My Profile > API Tokens), puis configure les secrets `CLOUDFLARE_ACCOUNT_ID` et `CLOUDFLARE_API_TOKEN`.
    - **[Pollinations.ai](https://pollinations.ai)**, utilisé en repli si Cloudflare échoue ou n'est pas configuré — fonctionne **sans compte** (accès anonyme, gratuit, limité en débit). Pour un accès plus rapide et sans watermark, crée un compte sur [auth.pollinations.ai](https://auth.pollinations.ai) et configure le secret `POLLINATIONS_TOKEN`.
@@ -158,7 +160,7 @@ flutter test
 - **Photos de repas** — uploadées dans le bucket `meal_photos` uniquement pour les analyses par photo ("Repas"/"Produit") ; un repas issu d'un scan de code-barres n'a pas de photo.
 - **CGU/mentions légales à finaliser** — le contenu de `lib/screens/terms_screen.dart` décrit honnêtement le fonctionnement actuel de l'app (données collectées, absence de conseil médical, contenu généré par IA, abonnement), mais reste un brouillon : l'identité légale de l'éditeur (`[Nom de l'éditeur à compléter]`) et l'adresse de contact doivent être complétées, et le texte doit être relu par un professionnel du droit avant toute publication publique — un bandeau d'avertissement s'affiche sur l'écran tant que ce n'est pas fait.
 - **Adresse de contact** — actuellement `support@aihealthchef.app` (`lib/screens/about_screen.dart`, constante `kSupportEmail`), à remplacer par une vraie boîte surveillée avant publication.
-- **Quotas IA** — les limites quotidiennes (`supabase/functions/_shared/quota.ts`) sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque Edge Function si besoin. Un compte admin (`profiles.is_admin`) n'en est **pas** exempté — le quota s'applique à tout le monde, y compris toi.
+- **Quotas IA** — les limites quotidiennes sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque `supabase/functions/<nom>/index.ts` si besoin (4ᵉ argument = quota par utilisateur, 5ᵉ argument optionnel = quota global partagé par toute l'app, voir migration 0009). Cette fonction est dupliquée dans chaque Edge Function (voir Architecture ci-dessus) — un changement dans `_shared/quota.ts` doit être reporté manuellement dans chaque `index.ts` si tu veux le garder comme référence à jour. Un compte admin (`profiles.is_admin`) n'en est **pas** exempté — le quota s'applique à tout le monde, y compris toi.
 
 ## Ressources Flutter
 

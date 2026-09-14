@@ -18,6 +18,12 @@ export interface QuotaCheckResult {
  * cette fonction. Bloque l'appel (429) s'il dépasse la limite du jour, ou
  * si l'appelant n'est pas authentifié (401).
  *
+ * Si `globalDailyLimit` est fourni, vérifie aussi et incrémente un compteur
+ * GLOBAL (tous utilisateurs confondus) pour cette fonction — un disjoncteur
+ * qui protège le budget/débit partagé de la clé API commune à toute l'app
+ * (voir migration 0009) contre un épuisement agrégé, même quand chaque
+ * utilisateur individuellement reste sous sa propre limite.
+ *
  * Nécessite les secrets SUPABASE_URL / SUPABASE_ANON_KEY /
  * SUPABASE_SERVICE_ROLE_KEY, injectés automatiquement par Supabase dans
  * toutes les Edge Functions — rien à configurer manuellement.
@@ -27,6 +33,7 @@ export async function checkAndIncrementQuota(
     functionName: string,
     dailyLimit: number,
     corsHeaders: Record<string, string>,
+    globalDailyLimit?: number,
 ): Promise<QuotaCheckResult> {
     const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
 
@@ -83,6 +90,27 @@ export async function checkAndIncrementQuota(
                 { status: 429, headers: jsonHeaders },
             ),
         };
+    }
+
+    if (globalDailyLimit !== undefined) {
+        const { data: globalAllowed, error: globalQuotaError } = await serviceClient.rpc(
+            "increment_global_api_usage",
+            { p_function_name: functionName, p_daily_limit: globalDailyLimit },
+        );
+
+        if (globalQuotaError) {
+            console.error(`Erreur quota global (${functionName}) :`, globalQuotaError.message);
+        } else if (!globalAllowed) {
+            return {
+                ok: false,
+                response: new Response(
+                    JSON.stringify({
+                        error: "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
+                    }),
+                    { status: 429, headers: jsonHeaders },
+                ),
+            };
+        }
     }
 
     return { ok: true, userId };

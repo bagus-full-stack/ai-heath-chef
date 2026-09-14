@@ -1,5 +1,105 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { checkAndIncrementQuota } from "../_shared/quota.ts"
+import { createClient } from "jsr:@supabase/supabase-js@2"
+
+/**
+ * Copie volontaire de la logique de `_shared/quota.ts` plutôt qu'un import
+ * relatif : cette fonction est déployée depuis l'éditeur du Dashboard
+ * Supabase, qui ne bundle que les fichiers ajoutés explicitement à CETTE
+ * fonction et ne voit pas le dossier `_shared` partagé par les autres. La
+ * dupliquer ici évite l'erreur "Module not found .../_shared/quota.ts" au
+ * déploiement (voir aussi meal-images/index.ts, même pattern).
+ */
+interface QuotaCheckResult {
+    ok: boolean;
+    userId?: string;
+    response?: Response;
+}
+
+async function checkAndIncrementQuota(
+    req: Request,
+    functionName: string,
+    dailyLimit: number,
+    corsHeaders: Record<string, string>,
+    globalDailyLimit?: number,
+): Promise<QuotaCheckResult> {
+    const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+        return {
+            ok: false,
+            response: new Response(
+                JSON.stringify({ error: "Authentification requise." }),
+                { status: 401, headers: jsonHeaders },
+            ),
+        };
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData, error: userError } = await userClient.auth.getUser();
+    if (userError || !userData?.user) {
+        return {
+            ok: false,
+            response: new Response(
+                JSON.stringify({ error: "Authentification invalide." }),
+                { status: 401, headers: jsonHeaders },
+            ),
+        };
+    }
+    const userId = userData.user.id;
+
+    const serviceClient = createClient(supabaseUrl, serviceRoleKey);
+    const { data: allowed, error: quotaError } = await serviceClient.rpc(
+        "increment_api_usage",
+        { p_user_id: userId, p_function_name: functionName, p_daily_limit: dailyLimit },
+    );
+
+    if (quotaError) {
+        console.error(`Erreur quota (${functionName}) :`, quotaError.message);
+        return { ok: true, userId };
+    }
+
+    if (!allowed) {
+        return {
+            ok: false,
+            response: new Response(
+                JSON.stringify({
+                    error: `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
+                }),
+                { status: 429, headers: jsonHeaders },
+            ),
+        };
+    }
+
+    if (globalDailyLimit !== undefined) {
+        const { data: globalAllowed, error: globalQuotaError } = await serviceClient.rpc(
+            "increment_global_api_usage",
+            { p_function_name: functionName, p_daily_limit: globalDailyLimit },
+        );
+
+        if (globalQuotaError) {
+            console.error(`Erreur quota global (${functionName}) :`, globalQuotaError.message);
+        } else if (!globalAllowed) {
+            return {
+                ok: false,
+                response: new Response(
+                    JSON.stringify({
+                        error: "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
+                    }),
+                    { status: 429, headers: jsonHeaders },
+                ),
+            };
+        }
+    }
+
+    return { ok: true, userId };
+}
 
 // 1. Headers CORS complets
 const corsHeaders = {
@@ -53,7 +153,7 @@ Deno.serve(async (req) => {
     }
 
     // === QUOTA QUOTIDIEN PAR UTILISATEUR ===
-    const quota = await checkAndIncrementQuota(req, 'meal-suggestions', 10, corsHeaders);
+    const quota = await checkAndIncrementQuota(req, 'meal-suggestions', 10, corsHeaders, 300);
     if (!quota.ok) {
         return quota.response!;
     }
