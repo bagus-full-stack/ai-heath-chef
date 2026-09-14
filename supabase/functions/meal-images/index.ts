@@ -137,6 +137,66 @@ async function fetchAvailableModels(token: string | null): Promise<string[]> {
     }
 }
 
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function buildFoodPrompt(title: string, description: string): string {
+    return (
+        `Professional food photography of ${title}, ${description}. ` +
+        `Michelin-star restaurant plating on a clean plate, soft natural window light, ` +
+        `shallow depth of field, macro detail, vibrant fresh ingredients, shot on DSLR, ` +
+        `4K, appetizing, food magazine cover quality.`
+    );
+}
+
+/**
+ * Génère l'illustration via Cloudflare Workers AI (FLUX.1 [schnell]) : la
+ * meilleure qualité disponible ici, et gratuite jusqu'à ~10 000 Neurons/jour
+ * (~100 images à 8 steps, partagés entre tous les utilisateurs de l'app) —
+ * aucun risque de facturation tant que le compte Cloudflare reste sur le
+ * plan gratuit. Retourne `null` si les secrets ne sont pas configurés, si le
+ * quota gratuit du jour est épuisé, ou en cas d'erreur — l'appelant retombe
+ * alors sur Pollinations.
+ */
+async function generateWithCloudflare(
+    prompt: string,
+    accountId: string,
+    apiToken: string,
+): Promise<string | null> {
+    const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/black-forest-labs/flux-1-schnell`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt, steps: 8 }),
+        });
+
+        if (!response.ok) {
+            console.warn(`Cloudflare Workers AI : HTTP ${response.status} pour le prompt "${prompt.slice(0, 40)}..."`);
+            return null;
+        }
+
+        const data = await response.json();
+        // L'API Cloudflare v4 enveloppe généralement la réponse dans
+        // `result`, mais on accepte aussi un champ `image` à la racine par
+        // robustesse face à d'éventuelles variations de format.
+        const base64 = data?.result?.image ?? data?.image;
+        if (typeof base64 !== 'string' || base64.length === 0) {
+            console.warn('Cloudflare Workers AI : réponse sans image exploitable.', JSON.stringify(data).slice(0, 200));
+            return null;
+        }
+        return `data:image/jpeg;base64,${base64}`;
+    } catch (err) {
+        console.warn('Cloudflare Workers AI : erreur réseau —', (err as Error).message);
+        return null;
+    }
+}
+
 /**
  * Génère l'illustration d'un repas via Pollinations.ai et la renvoie en data
  * URI base64. On utilise le token du compte (secret POLLINATIONS_TOKEN) s'il
@@ -150,16 +210,12 @@ async function fetchAvailableModels(token: string | null): Promise<string[]> {
  * l'ordre jusqu'à ce qu'un fonctionne, au lieu de dépendre d'un seul modèle
  * qui pourrait être temporairement indisponible ou hors du niveau d'accès.
  */
-async function generateMealImage(
-    title: string,
-    description: string,
+async function generateWithPollinations(
+    prompt: string,
     token: string | null,
     models: string[],
+    seed: number,
 ): Promise<string | null> {
-    const prompt =
-        `Professional appetizing food photography of ${title}. ${description}. ` +
-        `Restaurant plating, natural light, shallow depth of field, high detail.`;
-    const seed = seedFromTitle(title);
     const headers: Record<string, string> = {};
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -169,37 +225,76 @@ async function generateMealImage(
     for (const modelName of models) {
         const url =
             `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}` +
-            `?width=640&height=420&nologo=true&seed=${seed}&model=${modelName}&referrer=aihealthchef.app`;
+            `?width=768&height=512&nologo=true&enhance=true&seed=${seed}` +
+            `&model=${modelName}&referrer=aihealthchef.app`;
 
-        try {
-            const response = await fetch(url, { headers });
-            if (!response.ok) {
-                lastError = `HTTP ${response.status}`;
-                console.warn(`Échec modèle "${modelName}" pour "${title}" : ${lastError}`);
-                continue;
+        // Une seule nouvelle tentative sur un 429 (quota Pollinations atteint) :
+        // au-delà, on préfère passer au modèle suivant plutôt que de faire
+        // attendre l'utilisateur indéfiniment.
+        for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+                const response = await fetch(url, { headers });
+                if (response.status === 429 && attempt === 0) {
+                    lastError = 'HTTP 429 (limite de débit), nouvelle tentative...';
+                    console.warn(`Modèle "${modelName}" : ${lastError}`);
+                    await sleep(4000);
+                    continue;
+                }
+                if (!response.ok) {
+                    lastError = `HTTP ${response.status}`;
+                    console.warn(`Échec modèle "${modelName}" : ${lastError}`);
+                    break;
+                }
+                const contentType = response.headers.get('content-type') ?? '';
+                if (!contentType.startsWith('image/')) {
+                    lastError = `Réponse non-image (${contentType || 'type inconnu'})`;
+                    console.warn(`Échec modèle "${modelName}" : ${lastError}`);
+                    break;
+                }
+                const bytes = new Uint8Array(await response.arrayBuffer());
+                let binary = '';
+                for (let i = 0; i < bytes.length; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                const base64 = btoa(binary);
+                return `data:${contentType};base64,${base64}`;
+            } catch (err) {
+                lastError = (err as Error).message;
+                console.warn(`Erreur réseau modèle "${modelName}" :`, lastError);
+                break;
             }
-            const contentType = response.headers.get('content-type') ?? '';
-            if (!contentType.startsWith('image/')) {
-                lastError = `Réponse non-image (${contentType || 'type inconnu'})`;
-                console.warn(`Échec modèle "${modelName}" pour "${title}" : ${lastError}`);
-                continue;
-            }
-            const bytes = new Uint8Array(await response.arrayBuffer());
-            let binary = '';
-            for (let i = 0; i < bytes.length; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            const base64 = btoa(binary);
-            return `data:${contentType};base64,${base64}`;
-        } catch (err) {
-            lastError = (err as Error).message;
-            console.warn(`Erreur réseau modèle "${modelName}" pour "${title}" :`, lastError);
-            continue;
         }
     }
 
-    console.warn(`Tous les modèles d'image ont échoué pour "${title}". Dernière erreur : ${lastError}`);
+    console.warn(`Tous les modèles Pollinations ont échoué. Dernière erreur : ${lastError}`);
     return null;
+}
+
+/**
+ * Génère l'illustration d'un repas en cascade : Cloudflare Workers AI
+ * (FLUX.1 [schnell], meilleure qualité, gratuit dans la limite du quota
+ * quotidien Cloudflare) en premier si les secrets CLOUDFLARE_ACCOUNT_ID et
+ * CLOUDFLARE_API_TOKEN sont configurés, sinon/en cas d'échec Pollinations
+ * (toujours gratuit, qualité inférieure mais sans limite de quota mensuel).
+ */
+async function generateMealImage(
+    title: string,
+    description: string,
+    cfAccountId: string | null,
+    cfApiToken: string | null,
+    pollinationsToken: string | null,
+    pollinationsModels: string[],
+): Promise<string | null> {
+    const prompt = buildFoodPrompt(title, description);
+
+    if (cfAccountId && cfApiToken) {
+        const cfImage = await generateWithCloudflare(prompt, cfAccountId, cfApiToken);
+        if (cfImage) return cfImage;
+        console.warn(`Cloudflare a échoué pour "${title}", repli sur Pollinations.`);
+    }
+
+    const seed = seedFromTitle(title);
+    return generateWithPollinations(prompt, pollinationsToken, pollinationsModels, seed);
 }
 
 Deno.serve(async (req) => {
@@ -230,20 +325,32 @@ Deno.serve(async (req) => {
             });
         }
 
-        const token = Deno.env.get('POLLINATIONS_TOKEN') ?? null;
-        const models = await fetchAvailableModels(token);
+        const cfAccountId = Deno.env.get('CLOUDFLARE_ACCOUNT_ID') ?? null;
+        const cfApiToken = Deno.env.get('CLOUDFLARE_API_TOKEN') ?? null;
+        const pollinationsToken = Deno.env.get('POLLINATIONS_TOKEN') ?? null;
+        const models = await fetchAvailableModels(pollinationsToken);
 
-        // Génération en parallèle, avec un léger décalage pour rester
-        // raisonnable vis-à-vis des limites de débit de Pollinations
-        // (surtout sans token, plus limité).
+        // Génération en parallèle, avec un décalage entre chaque requête.
+        // Cloudflare Workers AI n'a pas la limite de débit serrée de
+        // Pollinations, donc un décalage minime suffit quand il est
+        // configuré ; sinon on reste prudent pour l'offre anonyme
+        // Pollinations (~1 req/15s, voir APIDOCS.md).
+        const staggerMs = cfAccountId && cfApiToken ? 300 : pollinationsToken ? 1200 : 3000;
         const images = await Promise.all(
             meals.map((meal: { title?: string; description?: string }, index: number) =>
                 new Promise<string | null>((resolve) => {
                     setTimeout(async () => {
                         const title = typeof meal?.title === 'string' ? meal.title : 'Repas';
                         const description = typeof meal?.description === 'string' ? meal.description : '';
-                        resolve(await generateMealImage(title, description, token, models));
-                    }, index * 400);
+                        resolve(await generateMealImage(
+                            title,
+                            description,
+                            cfAccountId,
+                            cfApiToken,
+                            pollinationsToken,
+                            models,
+                        ));
+                    }, index * staggerMs);
                 })
             ),
         );
