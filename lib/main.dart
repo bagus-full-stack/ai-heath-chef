@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_gemma/flutter_gemma.dart';
+import 'package:flutter_gemma_litertlm/flutter_gemma_litertlm.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,6 +17,13 @@ void main() async {
   // On charge les variables d'environnement depuis le fichier .env
   // (voir .env.example pour le modèle à remplir).
   await dotenv.load();
+
+  // Initialisation de l'IA locale (Gemma3n, format .litertlm). Enregistre
+  // uniquement le moteur d'inférence ici — le token Hugging Face n'est
+  // récupéré (via l'Edge Function huggingface-token) qu'au moment où
+  // l'utilisateur lance explicitement le téléchargement du modèle depuis
+  // Profil > IA locale, pas au démarrage de l'app.
+  await FlutterGemma.initialize(inferenceEngines: [LiteRtLmEngine()]);
 
   // On lit la mémoire du téléphone
   final prefs = await SharedPreferences.getInstance();
@@ -48,7 +57,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'AI Health Chef',
+      title: 'Chef Santé',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(

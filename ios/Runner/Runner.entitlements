@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- IA locale (flutter_gemma) : nécessaire pour l'inférence sur un
+	     modèle de plusieurs Go sans crash mémoire. Ce fichier n'est PAS
+	     encore rattaché au projet Xcode (voir README > IA locale) — à
+	     faire manuellement dans Xcode (Signing & Capabilities), une
+	     opération risquée à automatiser à l'aveugle sans pouvoir builder
+	     ni tester sur un Mac. -->
+	<key>com.apple.developer.kernel.extended-virtual-addressing</key>
+	<true/>
+	<key>com.apple.developer.kernel.increased-memory-limit</key>
+	<true/>
+</dict>
+</plist>

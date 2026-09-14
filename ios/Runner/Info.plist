@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Ai Health Chef</string>
+	<string>Chef Santé</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -53,6 +53,12 @@
 	<string>L’application a besoin d’accéder à la caméra pour photographier ton repas.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>L’application a besoin d’accéder à tes photos pour analyser un repas depuis ta galerie.</string>
+	<!-- IA locale (flutter_gemma) : accès fichiers + réseau local requis par
+	     le moteur d'inférence .litertlm. -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Utilisé par le moteur d'IA locale pour les fonctionnalités hors connexion.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

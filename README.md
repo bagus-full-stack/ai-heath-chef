@@ -1,4 +1,4 @@
-# AI Health Chef
+# Chef Santé
 
 Application mobile Flutter de suivi nutritionnel : analyse de repas et de produits par photo ou code-barres via IA, coaching nutritionnel personnalisable par chat, rappels de repas, suivi des macros/calories et abonnement PRO.
 
@@ -22,10 +22,11 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Quotas IA par utilisateur** — limite quotidienne d'appels par utilisateur sur chaque Edge Function IA (20/jour pour `analyze-meal`/`analyze-product`, 50/jour pour `coach-chat`, 10/jour pour `meal-suggestions`/`meal-images`), pour contenir les coûts en cas d'abus
 - **Quota IA global (protection du budget partagé)** — en plus du quota par utilisateur, `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions` (celles qui appellent la clé `GEMINI_API_KEY`, partagée par toute l'app) respectent aussi un plafond quotidien **agrégé, tous utilisateurs confondus** (500/jour pour `analyze-meal`/`analyze-product`, 1000/jour pour `coach-chat`, 300/jour pour `meal-suggestions`) : un disjoncteur qui évite qu'un usage normal mais nombreux épuise silencieusement le débit/budget gratuit d'une seule clé partagée
 - **Abonnement PRO** — paywall, checkout et gestion des achats in-app via RevenueCat (avec un **mode démo** intégré tant que les clés RevenueCat ne sont pas configurées, permettant de tester tout le parcours Paywall → Checkout → déblocage PRO sans compte Apple/Google payant)
+- **IA locale (scan + chat, optionnelle, gratuite)** — Gemma3n exécuté directement sur l'appareil (`flutter_gemma`), activable depuis Profil > IA locale : analyse photo et chat coach fonctionnent alors sans connexion et sans consommer le quota cloud partagé. Repli automatique sur le cloud si le modèle n'est pas téléchargé ou échoue. Jamais derrière un abonnement PRO — voir [IA locale](#ia-locale) ci-dessous pour la configuration.
 
 ## Stack technique
 
-- **Flutter** (SDK ^3.11.0) / Dart
+- **Flutter** (SDK ^3.12.0) / Dart
 - **Riverpod** (`flutter_riverpod`) — gestion d'état
 - **go_router** — navigation, avec redirection automatique selon l'état d'authentification Supabase
 - **Supabase** (`supabase_flutter`) — authentification, base de données PostgreSQL, Edge Functions, Storage
@@ -38,23 +39,27 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **url_launcher** — ouverture du client mail (contact support)
 - **percent_indicator** — jauges circulaires du dashboard
 - **google_fonts**, **shared_preferences**, **flutter_dotenv**
+- **flutter_gemma** / **flutter_gemma_litertlm** — IA locale (Gemma3n, scan + chat) exécutée sur l'appareil, sans connexion
 
 ## Architecture du projet
 
 ```
 lib/
+  config/       Paramètres du modèle IA locale (local_ai_config)
   models/       UserProfile, Meal, Ingredient, SelectedPlan, ChatMessage, MealSuggestion,
                 MealReminder, CustomReminder, MealAnalysisArgs
   providers/    State management Riverpod : auth, profile, dashboard (journal du jour),
                 meal (analyse/scan en cours), meal_suggestions, chat, onboarding, purchase
-                (entitlement PRO/admin), notification_settings, custom_reminders
+                (entitlement PRO/admin), notification_settings, custom_reminders,
+                local_ai (activation/téléchargement de l'IA locale)
   screens/      Écrans de l'application (dashboard, coach, profil, compte, onboarding,
-                auth, caméra/scanner, analyse repas/produit, notifications, préférences
-                alimentaires, personnalisation coach, paywall/checkout, centre d'aide,
-                CGU, à propos, coming-soon)
-  services/     Accès Supabase (database_service, supabase_service), IA via Edge
-                Functions (ai_service), RevenueCat (purchase_service), notifications
-                locales (notification_service), lookup produit Open Food Facts
+                auth, caméra/scanner, analyse repas/produit, notifications, IA locale,
+                préférences alimentaires, personnalisation coach, paywall/checkout,
+                centre d'aide, CGU, à propos, coming-soon)
+  services/     Accès Supabase (database_service, supabase_service), IA cloud via Edge
+                Functions (ai_service), IA locale sur l'appareil (local_ai_service),
+                RevenueCat (purchase_service), notifications locales
+                (notification_service), lookup produit Open Food Facts
                 (product_lookup_service)
   router/       Configuration go_router (routes + redirections auth)
   utils/        Calcul des cibles nutritionnelles (nutrition_targets) et de l'IMC (bmi)
@@ -62,18 +67,19 @@ lib/
 supabase/
   migrations/   Schéma SQL versionné (0001 à 0009, voir ci-dessous)
   functions/    Edge Functions : analyze-meal, analyze-product, coach-chat, meal-suggestions,
-                meal-images — chacune déployée depuis l'éditeur du Dashboard Supabase, donc
-                chacune embarque sa propre copie de la vérification d'identité et du quota
-                (quotidien par utilisateur + global partagé) dans son index.ts, sans dépendre
-                d'un dossier partagé. _shared/quota.ts reste dans le repo comme référence/
-                copie canonique de cette logique, mais n'est importé par aucune fonction.
+                meal-images, huggingface-token — chacune déployée depuis l'éditeur du
+                Dashboard Supabase, donc chacune embarque sa propre copie de la vérification
+                d'identité et du quota (quotidien par utilisateur + global partagé) dans son
+                index.ts, sans dépendre d'un dossier partagé. _shared/quota.ts reste dans le
+                repo comme référence/copie canonique de cette logique, mais n'est importé par
+                aucune fonction.
 test/           Tests unitaires (providers, utils)
 ```
 
 ## Prérequis
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (compatible Dart ^3.11.0)
-- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions` et `meal-images` déployées (voir ci-dessous)
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (compatible Dart ^3.12.0 — bump récent, requis par `flutter_gemma`)
+- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` déployées (voir ci-dessous)
 - (Optionnel) Un projet [RevenueCat](https://www.revenuecat.com) pour activer les achats réels
 
 ## Installation
@@ -95,14 +101,19 @@ flutter pub get
    - `0007` : statut admin (`is_admin` sur `profiles`), verrouillé contre toute auto-promotion côté client
    - `0008` : table `api_usage` + fonction `increment_api_usage`, pour les quotas quotidiens par utilisateur sur les Edge Functions IA (voir ci-dessous)
    - `0009` : table `global_api_usage` + fonction `increment_global_api_usage`, pour le quota global (tous utilisateurs confondus) qui protège le budget/débit partagé de `GEMINI_API_KEY` (voir ci-dessous)
-3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions` et `meal-images` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
+3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
    - Chaque fonction est **autonome** (aucun import relatif vers `_shared/`) : un simple copier-coller de son `index.ts` dans l'éditeur du Dashboard Supabase suffit à la déployer/redéployer, sans erreur de bundling.
 4. **Illustrations des idées de repas (optionnel, 100% gratuit)** — `meal-images` génère une image IA par suggestion, en cascade entre deux fournisseurs gratuits :
    - **Cloudflare Workers AI (FLUX.1 [schnell])**, essayé en premier — meilleure qualité, gratuit jusqu'à ~10 000 Neurons/jour (~100 images, partagées entre tous les utilisateurs de l'app), sans carte bancaire requise. Crée un compte gratuit sur [dash.cloudflare.com](https://dash.cloudflare.com), récupère ton **Account ID** (visible sur le Dashboard) et crée un **API Token** avec la permission "Workers AI" (My Profile > API Tokens), puis configure les secrets `CLOUDFLARE_ACCOUNT_ID` et `CLOUDFLARE_API_TOKEN`.
    - **[Pollinations.ai](https://pollinations.ai)**, utilisé en repli si Cloudflare échoue ou n'est pas configuré — fonctionne **sans compte** (accès anonyme, gratuit, limité en débit). Pour un accès plus rapide et sans watermark, crée un compte sur [auth.pollinations.ai](https://auth.pollinations.ai) et configure le secret `POLLINATIONS_TOKEN`.
 
    Configure les secrets utilisés via `supabase secrets set <NOM>=<valeur>` ou l'onglet Edge Functions > Secrets du dashboard. Aucun de ces tokens n'est exposé dans l'app cliente (utilisés uniquement côté Edge Function) ; en l'absence de tous, `meal-images` retombe sur l'accès anonyme Pollinations.
-5. **Compte admin (optionnel)** — pour donner à un compte l'accès complet aux fonctionnalités PRO sans abonnement réel, exécute depuis le SQL Editor : `update public.profiles set is_admin = true where email = 'ton-email@exemple.com';`. Ce champ n'est modifiable que depuis le SQL Editor (aucun moyen de le changer depuis l'app, voir migration 0007).
+5. **IA locale (optionnel)** <a name="ia-locale"></a> — le scan et le chat coach peuvent tourner directement sur l'appareil (Gemma3n via `flutter_gemma`), sans connexion et sans consommer le quota cloud partagé, activable depuis Profil > IA locale dans l'app. Configuration :
+   - Crée un compte sur [huggingface.co](https://huggingface.co), demande l'accès au modèle "gated" [google/gemma-3n-E2B-it-litert-lm](https://huggingface.co/google/gemma-3n-E2B-it-litert-lm) (acceptation de licence), puis génère un token d'accès (Settings > Access Tokens).
+   - Déploie `huggingface-token` et configure le secret `HUGGINGFACE_TOKEN` avec ce token. Cette fonction est volontairement **sans quota** — elle ne consomme aucune API payante, elle donne juste le token à un utilisateur authentifié pour qu'il télécharge le modèle (~3,1 Go) directement depuis son appareil vers Hugging Face ; le token n'est jamais embarqué dans le binaire de l'app.
+   - **Android** : `minSdk` est passé à **30** (Android 11+) dans `android/app/build.gradle.kts` — requis par le moteur d'inférence `.litertlm` (`flutter_gemma_litertlm`). ⚠️ Ceci relève la version Android minimale pour **toute l'app**, pas seulement l'IA locale — vérifie que ça correspond à ton public cible avant de publier.
+   - **iOS** : la cible de déploiement est passée à 15.0 dans `project.pbxproj`. Un fichier `ios/Runner/Runner.entitlements` a été créé (mémoire étendue, nécessaire pour l'inférence sur un modèle de plusieurs Go) mais **doit être rattaché manuellement au projet dans Xcode** (Signing & Capabilities) — non fait automatiquement, ni testé, faute de Mac disponible pendant le développement de cette fonctionnalité.
+6. **Compte admin (optionnel)** — pour donner à un compte l'accès complet aux fonctionnalités PRO sans abonnement réel, exécute depuis le SQL Editor : `update public.profiles set is_admin = true where email = 'ton-email@exemple.com';`. Ce champ n'est modifiable que depuis le SQL Editor (aucun moyen de le changer depuis l'app, voir migration 0007).
 
 ### Configuration RevenueCat (optionnel)
 

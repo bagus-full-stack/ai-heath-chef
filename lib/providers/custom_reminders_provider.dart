@@ -53,7 +53,7 @@ class CustomRemindersNotifier extends AsyncNotifier<List<CustomReminder>> {
 
     await NotificationService.instance.scheduleDailyReminder(
       id: reminder.id,
-      title: 'AI Health Chef',
+      title: 'Chef Santé',
       body: reminder.name,
       hour: reminder.hour,
       minute: reminder.minute,
@@ -107,7 +107,7 @@ class CustomRemindersNotifier extends AsyncNotifier<List<CustomReminder>> {
     if (reminder.enabled) {
       await NotificationService.instance.scheduleDailyReminder(
         id: reminder.id,
-        title: 'AI Health Chef',
+        title: 'Chef Santé',
         body: reminder.name,
         hour: reminder.hour,
         minute: reminder.minute,

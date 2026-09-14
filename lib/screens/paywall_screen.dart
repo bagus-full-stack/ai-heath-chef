@@ -362,7 +362,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             elevation: 0,
           ),
           child: const Text(
-            'Débloquer AI Health Chef PRO',
+            'Débloquer Chef Santé PRO',
             style: TextStyle(
               fontSize: 16,
               color: Colors.white,

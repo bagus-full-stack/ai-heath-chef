@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/user_profile.dart';
 import '../providers/auth_provider.dart';
+import '../providers/local_ai_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../widgets/animated_async_value.dart';
@@ -45,6 +46,7 @@ class ProfileScreen extends ConsumerWidget {
     final entitlementAsync = ref.watch(entitlementProvider);
     final isPro = entitlementAsync.value ?? false;
     final user = Supabase.instance.client.auth.currentUser;
+    final localAiSettings = ref.watch(localAiSettingsProvider).value;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -177,6 +179,18 @@ class ProfileScreen extends ConsumerWidget {
                       onTap: () => context.push('/coach_personalization'),
                     ),
                     _SettingsItem(
+                      icon: Icons.memory_rounded,
+                      title: 'IA locale',
+                      subtitle: localAiSettings == null
+                          ? 'Scan et chat sur l\'appareil'
+                          : !localAiSettings.enabled
+                              ? 'Désactivée'
+                              : localAiSettings.isDownloaded
+                                  ? 'Activée'
+                                  : 'Activée · à télécharger',
+                      onTap: () => context.push('/local_ai_settings'),
+                    ),
+                    _SettingsItem(
                       icon: Icons.info_outline_rounded,
                       title: 'À propos',
                       subtitle: 'Version et informations',
@@ -209,7 +223,7 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 18),
                 Center(
                   child: Text(
-                    'AI Health Chef v1.0.0',
+                    'Chef Santé v1.0.0',
                     style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                   ),
                 ),

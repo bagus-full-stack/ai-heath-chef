@@ -1,11 +1,17 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- Rappels de repas (notifications locales programmées) : permet au
          plugin de reprogrammer les rappels après un redémarrage du téléphone. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- IA locale (flutter_gemma) : service au premier plan pour le
+         téléchargement volumineux (~3 Go) du modèle, afin qu'il survive le
+         passage en arrière-plan de l'app (limite Android de 9 minutes sans
+         ce mode) — voir foreground: true dans LocalAiService.downloadModel. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <application
-        android:label="ai_health_chef"
+        android:label="Chef Santé"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -53,6 +59,21 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
+
+        <!-- IA locale (flutter_gemma) : requis pour que le téléchargement
+             en service au premier plan (foreground: true) fonctionne sur
+             Android 14+ (API 34+). -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge" />
+
+        <!-- IA locale (flutter_gemma) : accès GPU/OpenCL pour l'inférence
+             (facultatif si l'appareil ne le supporte pas — android:required="false"). -->
+        <uses-native-library android:name="libvndksupport.so" android:required="false" />
+        <uses-native-library android:name="libOpenCL.so" android:required="false" />
+        <uses-native-library android:name="libOpenCL-car.so" android:required="false" />
+        <uses-native-library android:name="libOpenCL-pixel.so" android:required="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

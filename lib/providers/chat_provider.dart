@@ -1,4 +1,5 @@
 import 'package:ai_health_chef/models/chat_message.dart';
+import 'package:ai_health_chef/providers/local_ai_provider.dart';
 import 'package:ai_health_chef/providers/profile_provider.dart';
 import 'package:ai_health_chef/services/ai_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,13 +64,46 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     await _storeMessage(userMessage);
 
     final profile = ref.read(profileProvider).value;
-    final aiReplyText = await _aiService.chatWithCoach(
-      trimmed,
-      _toGeminiHistory(historyForGemini),
-      coachTone: profile?.coachTone ?? 'motivant',
-      dietType: profile?.dietType ?? 'none',
-      allergies: profile?.allergies ?? const [],
-    );
+    final coachTone = profile?.coachTone ?? 'motivant';
+    final dietType = profile?.dietType ?? 'none';
+    final allergies = profile?.allergies ?? const <String>[];
+    final geminiHistory = _toGeminiHistory(historyForGemini);
+
+    // IA locale d'abord si activée et téléchargée (pas de connexion requise,
+    // n'utilise pas le quota cloud partagé), sinon/en cas d'échec repli sur
+    // le cloud. Le try/catch ci-dessous n'existait pas avant l'ajout du mode
+    // local — nécessaire pour savoir quand replier, pas un élargissement du
+    // périmètre de cette fonction.
+    String aiReplyText;
+    final localSettings = ref.read(localAiSettingsProvider).value;
+    if (localSettings?.isReadyToUse == true) {
+      try {
+        final local = ref.read(localAiServiceProvider);
+        aiReplyText = await local.chatWithCoach(
+          trimmed,
+          geminiHistory,
+          coachTone: coachTone,
+          dietType: dietType,
+          allergies: allergies,
+        );
+      } catch (_) {
+        aiReplyText = await _aiService.chatWithCoach(
+          trimmed,
+          geminiHistory,
+          coachTone: coachTone,
+          dietType: dietType,
+          allergies: allergies,
+        );
+      }
+    } else {
+      aiReplyText = await _aiService.chatWithCoach(
+        trimmed,
+        geminiHistory,
+        coachTone: coachTone,
+        dietType: dietType,
+        allergies: allergies,
+      );
+    }
     final assistantMessage = _buildAssistantMessage(aiReplyText);
 
     state = AsyncData([...(state.value ?? currentMessages), assistantMessage]);

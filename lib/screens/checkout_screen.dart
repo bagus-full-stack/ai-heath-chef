@@ -46,7 +46,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           await _showSuccessMoment(
             PurchaseService.instance.isDemoMode
                 ? 'Achat simulé (mode démo)\nAccès PRO débloqué !'
-                : 'Abonnement activé !\nBienvenue dans AI Health Chef PRO.',
+                : 'Abonnement activé !\nBienvenue dans Chef Santé PRO.',
           );
           if (!mounted) {
             return;
@@ -247,7 +247,7 @@ class _OrderSummaryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'AI Health Chef PRO',
+                  'Chef Santé PRO',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 13,

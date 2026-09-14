@@ -1,5 +1,5 @@
 name: ai_health_chef
-description: "A new Flutter project."
+description: "Chef Santé — coach nutrition IA : analyse de repas par photo, chat coach, suivi des macros."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.11.0
+  sdk: ^3.12.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -52,6 +52,8 @@ dependencies:
   url_launcher: ^6.3.2
   mobile_scanner: ^7.4.1
   http: ^1.6.0
+  flutter_gemma: ^1.8.2                     # IA locale (Gemma3n) pour le scan et le chat coach, sans connexion
+  flutter_gemma_litertlm: ^1.6.3            # Moteur d'inférence .litertlm requis par flutter_gemma pour Gemma3n
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +65,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4           # Génère les icônes d'app (Chef Santé) à partir de assets/icon/
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -78,6 +81,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - .env
+    - assets/icon/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
@@ -103,6 +107,26 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
+
+# Icône d'app "Chef Santé" — régénère avec `dart run flutter_launcher_icons`
+# après avoir remplacé les fichiers source dans assets/icon/.
+flutter_launcher_icons:
+  image_path: "assets/icon/icon.png"
+  android: true
+  adaptive_icon_background: "#3E6B4F"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+  ios: true
+  web:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    background_color: "#3E6B4F"
+    theme_color: "#3E6B4F"
+  windows:
+    generate: true
+    image_path: "assets/icon/icon.png"
+  macos:
+    generate: true
+    image_path: "assets/icon/icon.png"
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

@@ -63,7 +63,7 @@ class NotificationSettingsNotifier
     if (setting.enabled) {
       await NotificationService.instance.scheduleDailyReminder(
         id: slot.notificationId,
-        title: 'AI Health Chef',
+        title: 'Chef Santé',
         body: slot.notificationBody,
         hour: setting.hour,
         minute: setting.minute,

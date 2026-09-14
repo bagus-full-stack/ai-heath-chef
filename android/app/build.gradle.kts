@@ -40,10 +40,19 @@ android {
         applicationId = "com.aihealthchef.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // minSdk fixé à 30 (au lieu du défaut Flutter) : requis par
+        // flutter_gemma_litertlm (libLiteRtLm.so dépend d'appels système
+        // Bionic absents sur les versions Android plus anciennes).
+        minSdk = 30
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // L'inférence .litertlm (IA locale) n'est prise en charge qu'en
+        // arm64-v8a par flutter_gemma_litertlm.
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
     }
 
     signingConfigs {

@@ -35,13 +35,13 @@ final List<_TermsSection> _sections = [
   const _TermsSection(
     '2. Objet',
     'Les présentes Conditions d’Utilisation (« CGU ») régissent l’accès et '
-        'l’usage de l’application mobile AI Health Chef (« l’Application »). '
+        'l’usage de l’application mobile Chef Santé (« l’Application »). '
         'En créant un compte ou en utilisant l’Application, tu acceptes '
         'l’intégralité des présentes CGU.',
   ),
   const _TermsSection(
     '3. Description du service',
-    'AI Health Chef permet de : suivre ses repas et ses macronutriments au '
+    'Chef Santé permet de : suivre ses repas et ses macronutriments au '
         'quotidien ; analyser une photo de repas via intelligence artificielle '
         'pour estimer les ingrédients et valeurs nutritionnelles ; échanger '
         'avec un coach nutritionnel conversationnel basé sur l’IA ; recevoir '
@@ -51,7 +51,7 @@ final List<_TermsSection> _sections = [
   ),
   const _TermsSection(
     '4. Ce n’est pas un avis médical',
-    'AI Health Chef fournit des informations et estimations à titre '
+    'Chef Santé fournit des informations et estimations à titre '
         'purement informatif et ne constitue en aucun cas un avis médical, '
         'un diagnostic ou une prescription. Les calculs de calories, macros '
         'et objectifs nutritionnels sont des estimations générales. '

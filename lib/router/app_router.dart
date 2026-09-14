@@ -19,6 +19,7 @@ import '../screens/barcode_scanner_screen.dart';
 import '../screens/meal_analysis_screen.dart';
 import '../screens/meal_suggestions_screen.dart';
 import '../screens/notification_settings_screen.dart';
+import '../screens/local_ai_settings_screen.dart';
 import '../screens/camera_capture_screen.dart';
 import '../screens/forgot_password_screen.dart';
 import '../screens/paywall_screen.dart';
@@ -147,6 +148,10 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/local_ai_settings',
+        builder: (context, state) => const LocalAiSettingsScreen(),
       ),
       GoRoute(
         path: '/help',

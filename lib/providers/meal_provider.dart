@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/ai_service.dart';
 import '../services/product_lookup_service.dart';
 import '../models/ingredient.dart';
+import 'local_ai_provider.dart';
 
 // --- LES SERVICES ---
 final aiServiceProvider = Provider<AIService>((ref) => AIService());
@@ -22,8 +23,22 @@ class MealNotifier extends AsyncNotifier<List<Ingredient>> {
     // 1. On passe en état de chargement
     state = const AsyncValue.loading();
 
-    // 2. On essaie de récupérer les données
+    // 2. On essaie de récupérer les données : IA locale d'abord si activée
+    // et téléchargée (pas de connexion requise, n'utilise pas le quota
+    // cloud partagé), sinon/en cas d'échec repli sur le cloud comme avant.
     state = await AsyncValue.guard(() async {
+      final localSettings = ref.read(localAiSettingsProvider).value;
+      if (localSettings?.isReadyToUse == true) {
+        try {
+          final local = ref.read(localAiServiceProvider);
+          return isProduct
+              ? await local.analyzeProductImage(imagePath)
+              : await local.analyzeMealImage(imagePath);
+        } catch (_) {
+          // IA locale indisponible/échec : on retombe sur le cloud ci-dessous.
+        }
+      }
+
       final aiService = ref.read(aiServiceProvider);
       return isProduct
           ? await aiService.analyzeProductImage(imagePath)
