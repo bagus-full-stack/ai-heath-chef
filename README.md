@@ -135,7 +135,8 @@ L'APK généré se trouve dans `build/app/outputs/flutter-apk/app-release.apk`.
 
 - Le fichier `.env` (voir [Configuration Supabase](#configuration-supabase)) doit exister à la racine avant le build : il est embarqué comme asset et chargé au démarrage, sans lui l'app plante au lancement.
 - `flutter build apk --release --split-per-abi` génère un APK par architecture (ARM/x86), plus léger qu'un APK universel.
-- Pour le Play Store, préfère `flutter build appbundle --release` (format `.aab` requis).
+- **IA locale (Gemma3n)** : `flutter_gemma_litertlm` ajoute plus de 100 Mo de bibliothèques natives (moteur d'inférence + accélérateurs NPU Qualcomm/GPU), et ne fonctionne pleinement qu'en arm64 — un APK universel (par défaut) les embarque pour rien sur les 3 architectures. Pour tester/sideloader sans ce surpoids x3, utilise `flutter build apk --release --target-platform android-arm64` (un seul arm64, build aussi plus rapide).
+- Pour le Play Store, préfère `flutter build appbundle --release` (format `.aab` requis) : Google Play ne livre que l'architecture du téléphone de chaque utilisateur, donc pas de surpoids pour eux même sans `--target-platform`.
 
 ### Signature release (Play Store)
 

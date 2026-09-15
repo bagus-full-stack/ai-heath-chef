@@ -3,7 +3,8 @@ import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
+    // kotlin-android retiré : Kotlin est désormais fourni nativement par le
+    // Flutter Gradle Plugin (Built-in Kotlin, voir android/gradle.properties).
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -29,10 +30,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
         // Requis par flutter_local_notifications (rappels de repas).
         isCoreLibraryDesugaringEnabled = true
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
@@ -76,6 +73,14 @@ android {
                 signingConfigs.getByName("debug")
             }
         }
+    }
+}
+
+// DSL compilerOptions (remplace l'ancien android.kotlinOptions, déprécié à
+// partir du Kotlin Gradle Plugin utilisé ici).
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
