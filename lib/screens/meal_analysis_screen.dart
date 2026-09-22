@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/meal_provider.dart';
 import '../providers/dashboard_provider.dart';
-import '../services/database_service.dart';
+import '../local_db/local_db_provider.dart';
 import '../models/ingredient.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/success_transition_dialog.dart';
@@ -438,22 +438,16 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                 builder: (context) => SuccessTransitionDialog(isSuccess: isSuccess),
                               );
 
-                              // Appel au service de base de données
-                              final dbService = DatabaseService();
-                              // Un repas issu d'un scan de code-barres n'a pas
-                              // de photo à uploader.
-                              final imageUrl = widget.imagePath != null
-                                  ? await dbService.uploadMealPhoto(
-                                      widget.imagePath!,
-                                    )
-                                  : null;
+                              // Sauvegarde locale d'abord (utilisable hors
+                              // ligne), avec synchronisation Supabase en
+                              // arrière-plan — voir lib/local_db/meal_repository.dart.
                               final mealName = _isProductFlow
                                   ? ingredients.first.name
                                   : 'Repas IA';
-                              await dbService.saveMeal(
+                              await ref.read(mealRepositoryProvider).saveMeal(
                                 ingredients,
                                 mealName,
-                                imageUrl: imageUrl,
+                                imagePath: widget.imagePath,
                               );
 
                               // On invalide le cache du journal pour qu'il recharge

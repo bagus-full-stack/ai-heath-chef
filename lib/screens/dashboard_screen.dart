@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'dart:io';
 
 import '../providers/dashboard_provider.dart';
 import '../providers/profile_provider.dart';
 import '../models/meal.dart'; // 🚀 On importe notre nouveau modèle !
+import '../local_db/meal_repository.dart' show localImagePrefix;
+import '../local_db/local_db_provider.dart';
 import '../utils/bmi.dart';
 import '../utils/nutrition_targets.dart';
 import '../widgets/animated_async_value.dart';
@@ -233,11 +236,29 @@ class DashboardScreen extends ConsumerWidget {
                                 // 🚀 L'objet meal gère déjà la date proprement
                                 final timeString = '${meal.createdAt.hour.toString().padLeft(2, '0')}:${meal.createdAt.minute.toString().padLeft(2, '0')}';
 
-                                return _buildMealCard(
-                                  meal.name,
-                                  timeString,
-                                  '${meal.totalKcal} kcal',
-                                  meal.imageUrl,
+                                return Dismissible(
+                                  key: ValueKey(meal.id),
+                                  direction: DismissDirection.endToStart,
+                                  onDismissed: (_) {
+                                    ref.read(mealRepositoryProvider).deleteMeal(meal.id);
+                                    ref.invalidate(todayMealsProvider);
+                                  },
+                                  background: Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                                    alignment: Alignment.centerRight,
+                                    decoration: BoxDecoration(
+                                      color: Colors.redAccent,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(Icons.delete_outline, color: Colors.white),
+                                  ),
+                                  child: _buildMealCard(
+                                    meal.name,
+                                    timeString,
+                                    '${meal.totalKcal} kcal',
+                                    meal.imageUrl,
+                                  ),
                                 );
                               }).toList(),
                             ),
@@ -353,12 +374,19 @@ class DashboardScreen extends ConsumerWidget {
               height: 60,
               color: Colors.grey.shade200,
               child: imageUrl != null
-                  ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.fastfood, color: Colors.grey),
-                    )
+                  ? (imageUrl.startsWith(localImagePrefix)
+                      ? Image.file(
+                          File(imageUrl.substring(localImagePrefix.length)),
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.fastfood, color: Colors.grey),
+                        )
+                      : Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.fastfood, color: Colors.grey),
+                        ))
                   : const Icon(Icons.fastfood, color: Colors.grey),
             ),
           ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -5,11 +7,15 @@ import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:flutter_gemma_litertlm/flutter_gemma_litertlm.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 // On importe notre routeur personnalisé
 import 'router/app_router.dart';
 import 'services/notification_service.dart';
 import 'services/purchase_service.dart';
+import 'local_db/app_database.dart';
+import 'local_db/meal_repository.dart';
+import 'local_db/local_db_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +54,21 @@ void main() async {
   // On configure notre routeur avec cette information
   setupRouter(showOnboarding);
 
-  runApp(const ProviderScope(child: MyApp()));
+  // Base locale (repas hors ligne) partagée entre le provider Riverpod et le
+  // déclenchement de synchronisation au retour du réseau ci-dessous.
+  final localDb = AppDatabase();
+  final mealRepository = MealRepository(localDb);
+  unawaited(mealRepository.syncPendingMeals());
+  Connectivity().onConnectivityChanged.listen((results) {
+    if (!results.contains(ConnectivityResult.none)) {
+      mealRepository.syncPendingMeals();
+    }
+  });
+
+  runApp(ProviderScope(
+    overrides: [appDatabaseProvider.overrideWithValue(localDb)],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {

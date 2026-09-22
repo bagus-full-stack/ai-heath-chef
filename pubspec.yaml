@@ -54,6 +54,11 @@ dependencies:
   http: ^1.6.0
   flutter_gemma: ^1.8.2                     # IA locale (Gemma3n) pour le scan et le chat coach, sans connexion
   flutter_gemma_litertlm: ^1.6.3            # Moteur d'inférence .litertlm requis par flutter_gemma pour Gemma3n
+  drift: ^2.35.0                            # Base de données locale (SQLite) pour le mode hors ligne
+  drift_flutter: ^0.3.1                     # Ouverture de la base SQLite native sur mobile/desktop pour drift
+  path_provider: ^2.1.6                     # Localise le dossier où stocker le fichier de la base locale
+  uuid: ^4.5.1                               # Génère les id (uuid v4) des repas côté client, réutilisés tels quels lors de la synchronisation vers Supabase
+  connectivity_plus: ^7.3.1                 # Détecte le retour du réseau pour déclencher la synchronisation des repas en attente
 
 dev_dependencies:
   flutter_test:
@@ -66,6 +71,8 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4           # Génère les icônes d'app (Chef Santé) à partir de assets/icon/
+  drift_dev: ^2.35.0                        # Génère le code de la base locale (database.g.dart) à partir des tables drift
+  build_runner: ^2.16.1                     # Lance la génération de code (drift_dev)
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
