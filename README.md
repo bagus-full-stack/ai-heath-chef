@@ -1,4 +1,4 @@
-# Chef Santé
+# AI Health Chef
 
 Application mobile Flutter de suivi nutritionnel : analyse de repas et de produits par photo ou code-barres via IA, coaching nutritionnel personnalisable par chat, rappels de repas, suivi des macros/calories et abonnement PRO.
 

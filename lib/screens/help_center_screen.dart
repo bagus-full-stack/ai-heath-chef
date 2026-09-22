@@ -101,7 +101,7 @@ class HelpCenterScreen extends StatelessWidget {
   const HelpCenterScreen({super.key});
 
   Future<void> _contactSupport(BuildContext context) async {
-    final uri = Uri(scheme: 'mailto', path: kSupportEmail, query: 'subject=Question Chef Santé');
+    final uri = Uri(scheme: 'mailto', path: kSupportEmail, query: 'subject=Question AI Health Chef');
     bool launched = false;
     try {
       launched = await launchUrl(uri);

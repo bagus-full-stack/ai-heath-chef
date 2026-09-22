@@ -13,7 +13,7 @@ class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
   Future<void> _contactSupport(BuildContext context) async {
-    final uri = Uri(scheme: 'mailto', path: kSupportEmail, query: 'subject=Contact Chef Santé');
+    final uri = Uri(scheme: 'mailto', path: kSupportEmail, query: 'subject=Contact AI Health Chef');
     bool launched = false;
     try {
       launched = await launchUrl(uri);
@@ -62,7 +62,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Chef Santé',
+                    'AI Health Chef',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
@@ -84,7 +84,7 @@ class AboutScreen extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             Text(
-              'Chef Santé t’aide à suivre tes repas et tes objectifs nutritionnels : '
+              'AI Health Chef t’aide à suivre tes repas et tes objectifs nutritionnels : '
               'scanne ton assiette pour une estimation automatique des calories et macros, '
               'échange avec un coach IA, reçois des idées de repas personnalisées et des '
               'rappels pour ne rien oublier.',
@@ -111,7 +111,7 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: 28),
             Center(
               child: Text(
-                '© ${DateTime.now().year} Chef Santé',
+                '© ${DateTime.now().year} AI Health Chef',
                 style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
               ),
             ),

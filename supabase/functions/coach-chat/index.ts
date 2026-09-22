@@ -245,7 +245,7 @@ Deno.serve(async (req) => {
             dietaryNote += ` L'utilisateur est allergique/intolérant à : ${allergyList.join(', ')}. Ne recommande jamais ces aliments.`;
         }
 
-        const systemInstruction = `Tu es Chef Santé, un coach en nutrition expert. ${toneInstruction} Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.${dietaryNote} Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.`;
+        const systemInstruction = `Tu es AI Health Chef, un coach en nutrition expert. ${toneInstruction} Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.${dietaryNote} Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.`;
 
         // On prépare le payload exact attendu par l'API REST de Google
         // On combine l'historique (s'il y en a) avec le nouveau message

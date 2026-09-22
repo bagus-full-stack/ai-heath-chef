@@ -230,7 +230,7 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 18),
                 Center(
                   child: Text(
-                    'Chef Santé v1.0.0',
+                    'AI Health Chef v1.0.0',
                     style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                   ),
                 ),

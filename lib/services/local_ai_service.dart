@@ -191,7 +191,7 @@ Le JSON doit avoir cette structure exacte :
     }
 
     final systemInstruction =
-        "Tu es Chef Santé, un coach en nutrition expert. $toneInstruction Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.$dietaryNote Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.";
+        "Tu es AI Health Chef, un coach en nutrition expert. $toneInstruction Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.$dietaryNote Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.";
 
     final model = await FlutterGemma.getActiveModel(maxTokens: 2048);
     final chat = await model.createChat();

@@ -251,7 +251,7 @@ Deno.serve(async (req) => {
         const constraintsText = constraintLines.length > 0 ? `\n${constraintLines.join('\n')}` : '';
 
         const promptText = `
-Tu es Chef Santé, un coach en nutrition expert et créatif.
+Tu es AI Health Chef, un coach en nutrition expert et créatif.
 Propose ${suggestionCount} idées de repas variées et réalistes, adaptées à un objectif de ${goalLabel}.
 L'utilisateur vise environ ${targetKcal ?? 2200} kcal, ${targetProt ?? 160}g de protéines, ${targetGluc ?? 250}g de glucides et ${targetLip ?? 75}g de lipides par jour au total.${constraintsText}
 Varie les moments de la journée (Petit-déjeuner, Déjeuner, Dîner, Collation) et les types de plats — ne propose jamais deux fois le même plat.
