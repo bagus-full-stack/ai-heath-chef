@@ -59,6 +59,7 @@ dependencies:
   path_provider: ^2.1.6                     # Localise le dossier où stocker le fichier de la base locale
   uuid: ^4.5.1                               # Génère les id (uuid v4) des repas côté client, réutilisés tels quels lors de la synchronisation vers Supabase
   connectivity_plus: ^7.3.1                 # Détecte le retour du réseau pour déclencher la synchronisation des repas en attente
+  fl_chart: ^1.1.1                          # Courbe de tendance calories sur 30 jours (Analyses avancées)
 
 dev_dependencies:
   flutter_test:

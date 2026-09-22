@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,16 +38,16 @@ class _DaySummary {
 class NutritionTrendsScreen extends ConsumerWidget {
   const NutritionTrendsScreen({super.key});
 
-  List<_DaySummary> _buildDailySummaries(List<Meal> meals) {
+  List<_DaySummary> _buildDailySummaries(List<Meal> meals, {int days = 7}) {
     final today = DateTime.now();
-    final days = List.generate(7, (i) {
-      final d = DateTime(today.year, today.month, today.day).subtract(Duration(days: 6 - i));
+    final daySummaries = List.generate(days, (i) {
+      final d = DateTime(today.year, today.month, today.day).subtract(Duration(days: days - 1 - i));
       return _DaySummary(d);
     });
 
     for (final meal in meals) {
       final key = DateTime(meal.createdAt.year, meal.createdAt.month, meal.createdAt.day);
-      final summary = days.firstWhere(
+      final summary = daySummaries.firstWhere(
         (d) => d.day == key,
         orElse: () => _DaySummary(key),
       );
@@ -58,7 +59,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
       summary.sugar += meal.totalSugar;
       summary.satFat += meal.totalSatFat;
     }
-    return days;
+    return daySummaries;
   }
 
   @override
@@ -85,6 +86,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
           : Consumer(
               builder: (context, ref, _) {
                 final mealsAsync = ref.watch(nutritionTrendsProvider);
+                final mealsAsync30 = ref.watch(nutritionTrends30Provider);
                 final profileAsync = ref.watch(profileProvider);
                 final targets = profileAsync.maybeWhen(
                   data: computeNutritionTargets,
@@ -127,6 +129,23 @@ class NutritionTrendsScreen extends ConsumerWidget {
                             child: _SectionCard(
                               title: 'Calories · 7 derniers jours',
                               child: _CaloriesChart(days: days, targetKcal: targets.kcal),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          StaggeredEntrance(
+                            delay: const Duration(milliseconds: 30),
+                            child: _SectionCard(
+                              title: 'Tendance calories · 30 derniers jours',
+                              child: mealsAsync30.maybeWhen(
+                                data: (meals30) => _CaloriesTrend30Chart(
+                                  days: _buildDailySummaries(meals30, days: 30),
+                                  targetKcal: targets.kcal,
+                                ),
+                                orElse: () => const SizedBox(
+                                  height: 160,
+                                  child: Center(child: CircularProgressIndicator(color: _primaryColor)),
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -300,6 +319,91 @@ class _CaloriesChart extends StatelessWidget {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+}
+
+class _CaloriesTrend30Chart extends StatelessWidget {
+  final List<_DaySummary> days;
+  final int targetKcal;
+  const _CaloriesTrend30Chart({required this.days, required this.targetKcal});
+
+  @override
+  Widget build(BuildContext context) {
+    final maxKcal = [targetKcal, ...days.map((d) => d.kcal)].reduce((a, b) => a > b ? a : b).toDouble();
+    final interval = maxKcal > 0 ? maxKcal / 4 : 1.0;
+
+    return SizedBox(
+      height: 160,
+      child: LineChart(
+        LineChartData(
+          minY: 0,
+          maxY: maxKcal * 1.15,
+          gridData: FlGridData(show: true, drawVerticalLine: false, horizontalInterval: interval),
+          borderData: FlBorderData(show: false),
+          titlesData: FlTitlesData(
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 34,
+                interval: interval,
+                getTitlesWidget: (value, meta) => Text(
+                  value.round().toString(),
+                  style: const TextStyle(fontSize: 9, color: Colors.black45),
+                ),
+              ),
+            ),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 24,
+                interval: 6,
+                getTitlesWidget: (value, meta) {
+                  final i = value.round();
+                  if (i < 0 || i >= days.length) return const SizedBox.shrink();
+                  final d = days[i].day;
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text('${d.day}/${d.month}', style: const TextStyle(fontSize: 9, color: Colors.black45)),
+                  );
+                },
+              ),
+            ),
+          ),
+          extraLinesData: targetKcal > 0
+              ? ExtraLinesData(horizontalLines: [
+                  HorizontalLine(
+                    y: targetKcal.toDouble(),
+                    color: Colors.redAccent.withValues(alpha: 0.6),
+                    strokeWidth: 1,
+                    dashArray: [6, 4],
+                  ),
+                ])
+              : null,
+          lineBarsData: [
+            LineChartBarData(
+              spots: [for (var i = 0; i < days.length; i++) FlSpot(i.toDouble(), days[i].kcal.toDouble())],
+              isCurved: true,
+              color: _primaryColor,
+              barWidth: 2,
+              dotData: const FlDotData(show: false),
+              belowBarData: BarAreaData(show: true, color: _primaryColor.withValues(alpha: 0.08)),
+            ),
+          ],
+          lineTouchData: LineTouchData(
+            touchTooltipData: LineTouchTooltipData(
+              getTooltipItems: (spots) => spots
+                  .map((s) => LineTooltipItem(
+                        '${s.y.round()} kcal',
+                        const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                      ))
+                  .toList(),
+            ),
+          ),
+        ),
       ),
     );
   }

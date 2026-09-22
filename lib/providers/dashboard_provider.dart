@@ -22,3 +22,10 @@ final nutritionTrendsProvider = FutureProvider<List<Meal>>((ref) async {
   final mealRepository = ref.watch(mealRepositoryProvider);
   return await mealRepository.getMealsSince(7);
 });
+
+/// Repas des 30 derniers jours, pour la courbe de tendance calories longue
+/// durée de l'écran "Analyses avancées" (PRO).
+final nutritionTrends30Provider = FutureProvider<List<Meal>>((ref) async {
+  final mealRepository = ref.watch(mealRepositoryProvider);
+  return await mealRepository.getMealsSince(30);
+});
