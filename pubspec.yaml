@@ -1,5 +1,5 @@
 name: ai_health_chef
-description: "Chef Santé — coach nutrition IA : analyse de repas par photo, chat coach, suivi des macros."
+description: "AI Health Chef — coach nutrition IA : analyse de repas par photo, chat coach, suivi des macros."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -29,6 +29,8 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:                    # Support FR/EN (voir lib/l10n/)
     sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
@@ -71,7 +73,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  flutter_launcher_icons: ^0.14.4           # Génère les icônes d'app (Chef Santé) à partir de assets/icon/
+  flutter_launcher_icons: ^0.14.4           # Génère les icônes d'app (AI Health Chef) à partir de assets/icon/
   drift_dev: ^2.35.0                        # Génère le code de la base locale (database.g.dart) à partir des tables drift
   build_runner: ^2.16.1                     # Lance la génération de code (drift_dev)
 
@@ -85,6 +87,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Génère lib/l10n/app_localizations.dart à partir de lib/l10n/app_*.arb
+  # (config dans l10n.yaml) — FR/EN, voir lib/l10n/l10n_extensions.dart.
+  generate: true
 
   # To add assets to your application, add an assets section, like this:
   assets:
@@ -116,7 +122,7 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
 
-# Icône d'app "Chef Santé" — régénère avec `dart run flutter_launcher_icons`
+# Icône d'app "AI Health Chef" — régénère avec `dart run flutter_launcher_icons`
 # après avoir remplacé les fichiers source dans assets/icon/.
 flutter_launcher_icons:
   image_path: "assets/icon/icon.png"
