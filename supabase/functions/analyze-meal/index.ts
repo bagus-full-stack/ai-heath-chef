@@ -225,7 +225,7 @@ Deno.serve(async (req) => {
         const promptText = `
 Tu es un nutritionniste expert et un chef cuisinier. 
 Ton but est d'analyser la nourriture présente sur cette photo.
-Identifie les ingrédients principaux, estime une portion réaliste en grammes (weight), et fournis les macronutriments (kcal, protéines, glucides, lipides) POUR 100 GRAMMES de cet ingrédient.
+Identifie les ingrédients principaux, estime une portion réaliste en grammes (weight), et fournis les macronutriments (kcal, protéines, glucides, lipides, fibres, sucres, acides gras saturés) POUR 100 GRAMMES de cet ingrédient.
 Tu DOIS répondre UNIQUEMENT au format JSON strict, sans aucun autre texte autour ni balises markdown.
 Le JSON doit avoir cette structure exacte :
 {
@@ -237,7 +237,10 @@ Le JSON doit avoir cette structure exacte :
       "kcalPer100g": 120,
       "protPer100g": 10.5,
       "glucPer100g": 2.0,
-      "lipPer100g": 5.0
+      "lipPer100g": 5.0,
+      "fiberPer100g": 1.2,
+      "sugarPer100g": 1.5,
+      "satFatPer100g": 2.0
     }
   ]
 }`;

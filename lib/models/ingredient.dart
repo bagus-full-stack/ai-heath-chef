@@ -6,6 +6,9 @@ class Ingredient {
   final double protPer100g;
   final double glucPer100g;
   final double lipPer100g;
+  final double fiberPer100g;
+  final double sugarPer100g;
+  final double satFatPer100g;
 
   Ingredient({
     required this.id,
@@ -15,6 +18,9 @@ class Ingredient {
     required this.protPer100g,
     required this.glucPer100g,
     required this.lipPer100g,
+    this.fiberPer100g = 0,
+    this.sugarPer100g = 0,
+    this.satFatPer100g = 0,
   });
 
   Ingredient copyWith({int? weight}) {
@@ -26,6 +32,9 @@ class Ingredient {
       protPer100g: protPer100g,
       glucPer100g: glucPer100g,
       lipPer100g: lipPer100g,
+      fiberPer100g: fiberPer100g,
+      sugarPer100g: sugarPer100g,
+      satFatPer100g: satFatPer100g,
     );
   }
 
@@ -34,6 +43,9 @@ class Ingredient {
   double get currentProt => (protPer100g * weight / 100);
   double get currentGluc => (glucPer100g * weight / 100);
   double get currentLip => (lipPer100g * weight / 100);
+  double get currentFiber => (fiberPer100g * weight / 100);
+  double get currentSugar => (sugarPer100g * weight / 100);
+  double get currentSatFat => (satFatPer100g * weight / 100);
 
   // Utile pour convertir facilement l'objet en JSON pour Supabase
   Map<String, dynamic> toJson() {
@@ -45,6 +57,9 @@ class Ingredient {
       'prot': currentProt,
       'gluc': currentGluc,
       'lip': currentLip,
+      'fiber': currentFiber,
+      'sugar': currentSugar,
+      'satFat': currentSatFat,
     };
   }
 }

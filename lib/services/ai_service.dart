@@ -59,6 +59,9 @@ class AIService {
         protPer100g: (item['protPer100g'] as num).toDouble(),
         glucPer100g: (item['glucPer100g'] as num).toDouble(),
         lipPer100g: (item['lipPer100g'] as num).toDouble(),
+        fiberPer100g: (item['fiberPer100g'] as num?)?.toDouble() ?? 0,
+        sugarPer100g: (item['sugarPer100g'] as num?)?.toDouble() ?? 0,
+        satFatPer100g: (item['satFatPer100g'] as num?)?.toDouble() ?? 0,
       )).toList();
 
     } catch (e) {

@@ -17,6 +17,9 @@ class LocalMeals extends Table {
   RealColumn get totalProt => real().withDefault(const Constant(0))();
   RealColumn get totalGluc => real().withDefault(const Constant(0))();
   RealColumn get totalLip => real().withDefault(const Constant(0))();
+  RealColumn get totalFiber => real().withDefault(const Constant(0))();
+  RealColumn get totalSugar => real().withDefault(const Constant(0))();
+  RealColumn get totalSatFat => real().withDefault(const Constant(0))();
 
   /// Snapshot des ingrédients, encodé en JSON (même contenu que la colonne
   /// jsonb `ingredients` côté Supabase).
@@ -52,7 +55,18 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.addColumn(localMeals, localMeals.totalFiber);
+            await m.addColumn(localMeals, localMeals.totalSugar);
+            await m.addColumn(localMeals, localMeals.totalSatFat);
+          }
+        },
+      );
 
   static QueryExecutor _openConnection() {
     return driftDatabase(

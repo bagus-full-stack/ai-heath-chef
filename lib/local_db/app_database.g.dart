@@ -83,6 +83,42 @@ class $LocalMealsTable extends LocalMeals
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _totalFiberMeta = const VerificationMeta(
+    'totalFiber',
+  );
+  @override
+  late final GeneratedColumn<double> totalFiber = GeneratedColumn<double>(
+    'total_fiber',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _totalSugarMeta = const VerificationMeta(
+    'totalSugar',
+  );
+  @override
+  late final GeneratedColumn<double> totalSugar = GeneratedColumn<double>(
+    'total_sugar',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _totalSatFatMeta = const VerificationMeta(
+    'totalSatFat',
+  );
+  @override
+  late final GeneratedColumn<double> totalSatFat = GeneratedColumn<double>(
+    'total_sat_fat',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _ingredientsJsonMeta = const VerificationMeta(
     'ingredientsJson',
   );
@@ -167,6 +203,9 @@ class $LocalMealsTable extends LocalMeals
     totalProt,
     totalGluc,
     totalLip,
+    totalFiber,
+    totalSugar,
+    totalSatFat,
     ingredientsJson,
     imageUrl,
     localImagePath,
@@ -231,6 +270,27 @@ class $LocalMealsTable extends LocalMeals
       context.handle(
         _totalLipMeta,
         totalLip.isAcceptableOrUnknown(data['total_lip']!, _totalLipMeta),
+      );
+    }
+    if (data.containsKey('total_fiber')) {
+      context.handle(
+        _totalFiberMeta,
+        totalFiber.isAcceptableOrUnknown(data['total_fiber']!, _totalFiberMeta),
+      );
+    }
+    if (data.containsKey('total_sugar')) {
+      context.handle(
+        _totalSugarMeta,
+        totalSugar.isAcceptableOrUnknown(data['total_sugar']!, _totalSugarMeta),
+      );
+    }
+    if (data.containsKey('total_sat_fat')) {
+      context.handle(
+        _totalSatFatMeta,
+        totalSatFat.isAcceptableOrUnknown(
+          data['total_sat_fat']!,
+          _totalSatFatMeta,
+        ),
       );
     }
     if (data.containsKey('ingredients_json')) {
@@ -314,6 +374,18 @@ class $LocalMealsTable extends LocalMeals
         DriftSqlType.double,
         data['${effectivePrefix}total_lip'],
       )!,
+      totalFiber: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}total_fiber'],
+      )!,
+      totalSugar: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}total_sugar'],
+      )!,
+      totalSatFat: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}total_sat_fat'],
+      )!,
       ingredientsJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}ingredients_json'],
@@ -355,6 +427,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
   final double totalProt;
   final double totalGluc;
   final double totalLip;
+  final double totalFiber;
+  final double totalSugar;
+  final double totalSatFat;
 
   /// Snapshot des ingrédients, encodé en JSON (même contenu que la colonne
   /// jsonb `ingredients` côté Supabase).
@@ -387,6 +462,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
     required this.totalProt,
     required this.totalGluc,
     required this.totalLip,
+    required this.totalFiber,
+    required this.totalSugar,
+    required this.totalSatFat,
     required this.ingredientsJson,
     this.imageUrl,
     this.localImagePath,
@@ -404,6 +482,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
     map['total_prot'] = Variable<double>(totalProt);
     map['total_gluc'] = Variable<double>(totalGluc);
     map['total_lip'] = Variable<double>(totalLip);
+    map['total_fiber'] = Variable<double>(totalFiber);
+    map['total_sugar'] = Variable<double>(totalSugar);
+    map['total_sat_fat'] = Variable<double>(totalSatFat);
     map['ingredients_json'] = Variable<String>(ingredientsJson);
     if (!nullToAbsent || imageUrl != null) {
       map['image_url'] = Variable<String>(imageUrl);
@@ -426,6 +507,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
       totalProt: Value(totalProt),
       totalGluc: Value(totalGluc),
       totalLip: Value(totalLip),
+      totalFiber: Value(totalFiber),
+      totalSugar: Value(totalSugar),
+      totalSatFat: Value(totalSatFat),
       ingredientsJson: Value(ingredientsJson),
       imageUrl: imageUrl == null && nullToAbsent
           ? const Value.absent()
@@ -452,6 +536,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
       totalProt: serializer.fromJson<double>(json['totalProt']),
       totalGluc: serializer.fromJson<double>(json['totalGluc']),
       totalLip: serializer.fromJson<double>(json['totalLip']),
+      totalFiber: serializer.fromJson<double>(json['totalFiber']),
+      totalSugar: serializer.fromJson<double>(json['totalSugar']),
+      totalSatFat: serializer.fromJson<double>(json['totalSatFat']),
       ingredientsJson: serializer.fromJson<String>(json['ingredientsJson']),
       imageUrl: serializer.fromJson<String?>(json['imageUrl']),
       localImagePath: serializer.fromJson<String?>(json['localImagePath']),
@@ -471,6 +558,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
       'totalProt': serializer.toJson<double>(totalProt),
       'totalGluc': serializer.toJson<double>(totalGluc),
       'totalLip': serializer.toJson<double>(totalLip),
+      'totalFiber': serializer.toJson<double>(totalFiber),
+      'totalSugar': serializer.toJson<double>(totalSugar),
+      'totalSatFat': serializer.toJson<double>(totalSatFat),
       'ingredientsJson': serializer.toJson<String>(ingredientsJson),
       'imageUrl': serializer.toJson<String?>(imageUrl),
       'localImagePath': serializer.toJson<String?>(localImagePath),
@@ -488,6 +578,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
     double? totalProt,
     double? totalGluc,
     double? totalLip,
+    double? totalFiber,
+    double? totalSugar,
+    double? totalSatFat,
     String? ingredientsJson,
     Value<String?> imageUrl = const Value.absent(),
     Value<String?> localImagePath = const Value.absent(),
@@ -502,6 +595,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
     totalProt: totalProt ?? this.totalProt,
     totalGluc: totalGluc ?? this.totalGluc,
     totalLip: totalLip ?? this.totalLip,
+    totalFiber: totalFiber ?? this.totalFiber,
+    totalSugar: totalSugar ?? this.totalSugar,
+    totalSatFat: totalSatFat ?? this.totalSatFat,
     ingredientsJson: ingredientsJson ?? this.ingredientsJson,
     imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
     localImagePath: localImagePath.present
@@ -520,6 +616,15 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
       totalProt: data.totalProt.present ? data.totalProt.value : this.totalProt,
       totalGluc: data.totalGluc.present ? data.totalGluc.value : this.totalGluc,
       totalLip: data.totalLip.present ? data.totalLip.value : this.totalLip,
+      totalFiber: data.totalFiber.present
+          ? data.totalFiber.value
+          : this.totalFiber,
+      totalSugar: data.totalSugar.present
+          ? data.totalSugar.value
+          : this.totalSugar,
+      totalSatFat: data.totalSatFat.present
+          ? data.totalSatFat.value
+          : this.totalSatFat,
       ingredientsJson: data.ingredientsJson.present
           ? data.ingredientsJson.value
           : this.ingredientsJson,
@@ -543,6 +648,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
           ..write('totalProt: $totalProt, ')
           ..write('totalGluc: $totalGluc, ')
           ..write('totalLip: $totalLip, ')
+          ..write('totalFiber: $totalFiber, ')
+          ..write('totalSugar: $totalSugar, ')
+          ..write('totalSatFat: $totalSatFat, ')
           ..write('ingredientsJson: $ingredientsJson, ')
           ..write('imageUrl: $imageUrl, ')
           ..write('localImagePath: $localImagePath, ')
@@ -562,6 +670,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
     totalProt,
     totalGluc,
     totalLip,
+    totalFiber,
+    totalSugar,
+    totalSatFat,
     ingredientsJson,
     imageUrl,
     localImagePath,
@@ -580,6 +691,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
           other.totalProt == this.totalProt &&
           other.totalGluc == this.totalGluc &&
           other.totalLip == this.totalLip &&
+          other.totalFiber == this.totalFiber &&
+          other.totalSugar == this.totalSugar &&
+          other.totalSatFat == this.totalSatFat &&
           other.ingredientsJson == this.ingredientsJson &&
           other.imageUrl == this.imageUrl &&
           other.localImagePath == this.localImagePath &&
@@ -596,6 +710,9 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
   final Value<double> totalProt;
   final Value<double> totalGluc;
   final Value<double> totalLip;
+  final Value<double> totalFiber;
+  final Value<double> totalSugar;
+  final Value<double> totalSatFat;
   final Value<String> ingredientsJson;
   final Value<String?> imageUrl;
   final Value<String?> localImagePath;
@@ -611,6 +728,9 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
     this.totalProt = const Value.absent(),
     this.totalGluc = const Value.absent(),
     this.totalLip = const Value.absent(),
+    this.totalFiber = const Value.absent(),
+    this.totalSugar = const Value.absent(),
+    this.totalSatFat = const Value.absent(),
     this.ingredientsJson = const Value.absent(),
     this.imageUrl = const Value.absent(),
     this.localImagePath = const Value.absent(),
@@ -627,6 +747,9 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
     this.totalProt = const Value.absent(),
     this.totalGluc = const Value.absent(),
     this.totalLip = const Value.absent(),
+    this.totalFiber = const Value.absent(),
+    this.totalSugar = const Value.absent(),
+    this.totalSatFat = const Value.absent(),
     this.ingredientsJson = const Value.absent(),
     this.imageUrl = const Value.absent(),
     this.localImagePath = const Value.absent(),
@@ -647,6 +770,9 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
     Expression<double>? totalProt,
     Expression<double>? totalGluc,
     Expression<double>? totalLip,
+    Expression<double>? totalFiber,
+    Expression<double>? totalSugar,
+    Expression<double>? totalSatFat,
     Expression<String>? ingredientsJson,
     Expression<String>? imageUrl,
     Expression<String>? localImagePath,
@@ -663,6 +789,9 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
       if (totalProt != null) 'total_prot': totalProt,
       if (totalGluc != null) 'total_gluc': totalGluc,
       if (totalLip != null) 'total_lip': totalLip,
+      if (totalFiber != null) 'total_fiber': totalFiber,
+      if (totalSugar != null) 'total_sugar': totalSugar,
+      if (totalSatFat != null) 'total_sat_fat': totalSatFat,
       if (ingredientsJson != null) 'ingredients_json': ingredientsJson,
       if (imageUrl != null) 'image_url': imageUrl,
       if (localImagePath != null) 'local_image_path': localImagePath,
@@ -681,6 +810,9 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
     Value<double>? totalProt,
     Value<double>? totalGluc,
     Value<double>? totalLip,
+    Value<double>? totalFiber,
+    Value<double>? totalSugar,
+    Value<double>? totalSatFat,
     Value<String>? ingredientsJson,
     Value<String?>? imageUrl,
     Value<String?>? localImagePath,
@@ -697,6 +829,9 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
       totalProt: totalProt ?? this.totalProt,
       totalGluc: totalGluc ?? this.totalGluc,
       totalLip: totalLip ?? this.totalLip,
+      totalFiber: totalFiber ?? this.totalFiber,
+      totalSugar: totalSugar ?? this.totalSugar,
+      totalSatFat: totalSatFat ?? this.totalSatFat,
       ingredientsJson: ingredientsJson ?? this.ingredientsJson,
       imageUrl: imageUrl ?? this.imageUrl,
       localImagePath: localImagePath ?? this.localImagePath,
@@ -730,6 +865,15 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
     }
     if (totalLip.present) {
       map['total_lip'] = Variable<double>(totalLip.value);
+    }
+    if (totalFiber.present) {
+      map['total_fiber'] = Variable<double>(totalFiber.value);
+    }
+    if (totalSugar.present) {
+      map['total_sugar'] = Variable<double>(totalSugar.value);
+    }
+    if (totalSatFat.present) {
+      map['total_sat_fat'] = Variable<double>(totalSatFat.value);
     }
     if (ingredientsJson.present) {
       map['ingredients_json'] = Variable<String>(ingredientsJson.value);
@@ -765,6 +909,9 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
           ..write('totalProt: $totalProt, ')
           ..write('totalGluc: $totalGluc, ')
           ..write('totalLip: $totalLip, ')
+          ..write('totalFiber: $totalFiber, ')
+          ..write('totalSugar: $totalSugar, ')
+          ..write('totalSatFat: $totalSatFat, ')
           ..write('ingredientsJson: $ingredientsJson, ')
           ..write('imageUrl: $imageUrl, ')
           ..write('localImagePath: $localImagePath, ')
@@ -797,6 +944,9 @@ typedef $$LocalMealsTableCreateCompanionBuilder =
       Value<double> totalProt,
       Value<double> totalGluc,
       Value<double> totalLip,
+      Value<double> totalFiber,
+      Value<double> totalSugar,
+      Value<double> totalSatFat,
       Value<String> ingredientsJson,
       Value<String?> imageUrl,
       Value<String?> localImagePath,
@@ -814,6 +964,9 @@ typedef $$LocalMealsTableUpdateCompanionBuilder =
       Value<double> totalProt,
       Value<double> totalGluc,
       Value<double> totalLip,
+      Value<double> totalFiber,
+      Value<double> totalSugar,
+      Value<double> totalSatFat,
       Value<String> ingredientsJson,
       Value<String?> imageUrl,
       Value<String?> localImagePath,
@@ -864,6 +1017,21 @@ class $$LocalMealsTableFilterComposer
 
   ColumnFilters<double> get totalLip => $composableBuilder(
     column: $table.totalLip,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get totalFiber => $composableBuilder(
+    column: $table.totalFiber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get totalSugar => $composableBuilder(
+    column: $table.totalSugar,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get totalSatFat => $composableBuilder(
+    column: $table.totalSatFat,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -942,6 +1110,21 @@ class $$LocalMealsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get totalFiber => $composableBuilder(
+    column: $table.totalFiber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get totalSugar => $composableBuilder(
+    column: $table.totalSugar,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get totalSatFat => $composableBuilder(
+    column: $table.totalSatFat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get ingredientsJson => $composableBuilder(
     column: $table.ingredientsJson,
     builder: (column) => ColumnOrderings(column),
@@ -1002,6 +1185,21 @@ class $$LocalMealsTableAnnotationComposer
 
   GeneratedColumn<double> get totalLip =>
       $composableBuilder(column: $table.totalLip, builder: (column) => column);
+
+  GeneratedColumn<double> get totalFiber => $composableBuilder(
+    column: $table.totalFiber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get totalSugar => $composableBuilder(
+    column: $table.totalSugar,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get totalSatFat => $composableBuilder(
+    column: $table.totalSatFat,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get ingredientsJson => $composableBuilder(
     column: $table.ingredientsJson,
@@ -1064,6 +1262,9 @@ class $$LocalMealsTableTableManager
                 Value<double> totalProt = const Value.absent(),
                 Value<double> totalGluc = const Value.absent(),
                 Value<double> totalLip = const Value.absent(),
+                Value<double> totalFiber = const Value.absent(),
+                Value<double> totalSugar = const Value.absent(),
+                Value<double> totalSatFat = const Value.absent(),
                 Value<String> ingredientsJson = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
                 Value<String?> localImagePath = const Value.absent(),
@@ -1079,6 +1280,9 @@ class $$LocalMealsTableTableManager
                 totalProt: totalProt,
                 totalGluc: totalGluc,
                 totalLip: totalLip,
+                totalFiber: totalFiber,
+                totalSugar: totalSugar,
+                totalSatFat: totalSatFat,
                 ingredientsJson: ingredientsJson,
                 imageUrl: imageUrl,
                 localImagePath: localImagePath,
@@ -1096,6 +1300,9 @@ class $$LocalMealsTableTableManager
                 Value<double> totalProt = const Value.absent(),
                 Value<double> totalGluc = const Value.absent(),
                 Value<double> totalLip = const Value.absent(),
+                Value<double> totalFiber = const Value.absent(),
+                Value<double> totalSugar = const Value.absent(),
+                Value<double> totalSatFat = const Value.absent(),
                 Value<String> ingredientsJson = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
                 Value<String?> localImagePath = const Value.absent(),
@@ -1111,6 +1318,9 @@ class $$LocalMealsTableTableManager
                 totalProt: totalProt,
                 totalGluc: totalGluc,
                 totalLip: totalLip,
+                totalFiber: totalFiber,
+                totalSugar: totalSugar,
+                totalSatFat: totalSatFat,
                 ingredientsJson: ingredientsJson,
                 imageUrl: imageUrl,
                 localImagePath: localImagePath,

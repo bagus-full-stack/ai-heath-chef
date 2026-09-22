@@ -6,7 +6,9 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 
 - **Authentification** — inscription, connexion, mot de passe oublié (Supabase Auth)
 - **Onboarding** — questionnaire de profil (objectifs, données physiques dont la taille) utilisé pour calculer les cibles nutritionnelles
-- **Dashboard** — jauges de macros (calories, protéines, glucides, lipides) sur la journée, IMC calculé à partir du profil (catégorie OMS + plage), et journal des repas du jour avec la photo de chaque repas
+- **Dashboard** — jauges de macros (calories, protéines, glucides, lipides) sur la journée, IMC calculé à partir du profil (catégorie OMS + plage), et journal des repas du jour avec la photo de chaque repas (suppression d'un repas par glissement)
+- **Hors ligne (local-first)** — repas enregistrés d'abord dans une base SQLite locale (fonctionne sans connexion), puis synchronisés vers Supabase dès que le réseau est disponible (au démarrage et à chaque retour de connexion)
+- **Analyse nutritionnelle étendue (PRO)** — en plus des macros principales, fibres/sucres/graisses saturées sont estimés par l'IA (ou lus depuis Open Food Facts pour un scan code-barres) et affichés en moyenne quotidienne dans les Analyses avancées
 - **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
 - **Analyse de produit par photo** — même principe pour un produit emballé (Edge Function `analyze-product`), lit l'étiquette nutritionnelle plutôt qu'une assiette
 - **Scan de code-barres** — recherche instantanée d'un produit (EAN/UPC) via la base publique Open Food Facts, sans appel IA
@@ -34,6 +36,9 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **camera** / **image_picker** / **flutter_image_compress** — capture et compression des photos de repas/produits
 - **mobile_scanner** — scan de code-barres produit
 - **http** — appel de l'API publique Open Food Facts (lookup produit par code-barres)
+- **drift** / **drift_flutter** — base de données locale (SQLite) pour le mode hors ligne
+- **connectivity_plus** — détection du retour réseau pour déclencher la synchronisation des repas en attente
+- **uuid** — génération des id de repas côté client
 - **flutter_local_notifications** / **timezone** / **flutter_timezone** — notifications locales programmées (rappels)
 - **package_info_plus** — version de l'app affichée dans "À propos"
 - **url_launcher** — ouverture du client mail (contact support)
@@ -46,12 +51,15 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 ```
 lib/
   config/       Paramètres du modèle IA locale (local_ai_config)
+  local_db/     Base de données locale (drift/SQLite) et synchronisation hors ligne :
+                app_database (schéma + migrations), meal_repository (source de vérité des
+                repas, écrit en local puis pousse vers Supabase), local_db_provider
   models/       UserProfile, Meal, Ingredient, SelectedPlan, ChatMessage, MealSuggestion,
                 MealReminder, CustomReminder, MealAnalysisArgs
-  providers/    State management Riverpod : auth, profile, dashboard (journal du jour),
-                meal (analyse/scan en cours), meal_suggestions, chat, onboarding, purchase
-                (entitlement PRO/admin), notification_settings, custom_reminders,
-                local_ai (activation/téléchargement de l'IA locale)
+  providers/    State management Riverpod : auth, profile, dashboard (journal du jour, lu
+                depuis la base locale), meal (analyse/scan en cours), meal_suggestions,
+                chat, onboarding, purchase (entitlement PRO/admin), notification_settings,
+                custom_reminders, local_ai (activation/téléchargement de l'IA locale)
   screens/      Écrans de l'application (dashboard, coach, profil, compte, onboarding,
                 auth, caméra/scanner, analyse repas/produit, notifications, IA locale,
                 préférences alimentaires, personnalisation coach, paywall/checkout,
@@ -65,7 +73,7 @@ lib/
   utils/        Calcul des cibles nutritionnelles (nutrition_targets) et de l'IMC (bmi)
   widgets/      Composants réutilisables (layout principal, carte de suggestion de repas)
 supabase/
-  migrations/   Schéma SQL versionné (0001 à 0009, voir ci-dessous)
+  migrations/   Schéma SQL versionné (0001 à 0010, voir ci-dessous)
   functions/    Edge Functions : analyze-meal, analyze-product, coach-chat, meal-suggestions,
                 meal-images, huggingface-token — chacune déployée depuis l'éditeur du
                 Dashboard Supabase, donc chacune embarque sa propre copie de la vérification
@@ -91,7 +99,7 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0009) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0010) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
    - `0001` : tables `profiles`, `meals`, `chat_messages` + policies RLS + bucket `avatars`
    - `0002` : taille (`height_cm`) sur `profiles`
    - `0003` : table `meal_suggestions` (cache des idées de repas IA)
@@ -101,6 +109,7 @@ flutter pub get
    - `0007` : statut admin (`is_admin` sur `profiles`), verrouillé contre toute auto-promotion côté client
    - `0008` : table `api_usage` + fonction `increment_api_usage`, pour les quotas quotidiens par utilisateur sur les Edge Functions IA (voir ci-dessous)
    - `0009` : table `global_api_usage` + fonction `increment_global_api_usage`, pour le quota global (tous utilisateurs confondus) qui protège le budget/débit partagé de `GEMINI_API_KEY` (voir ci-dessous)
+   - `0010` : fibres/sucres/graisses saturées (`total_fiber`/`total_sugar`/`total_sat_fat` sur `meals`), en plus des macros principales
 3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
    - Chaque fonction est **autonome** (aucun import relatif vers `_shared/`) : un simple copier-coller de son `index.ts` dans l'éditeur du Dashboard Supabase suffit à la déployer/redéployer, sans erreur de bundling.
 4. **Illustrations des idées de repas (optionnel, 100% gratuit)** — `meal-images` génère une image IA par suggestion, en cascade entre deux fournisseurs gratuits :
@@ -168,6 +177,7 @@ flutter test
 
 ## Notes
 
+- **Repas hors ligne** — les repas sont écrits dans une base SQLite locale (`lib/local_db/`) avant toute tentative réseau ; un repas créé ou supprimé hors ligne reste en attente (`isSynced`/`isDeleted`) et se synchronise automatiquement vers Supabase au prochain démarrage ou retour de connexion, sans action de l'utilisateur.
 - **Notifications locales, pas de synchronisation** — les rappels (créneaux fixes et personnalisés) sont programmés en local sur l'appareil (`flutter_local_notifications`) et persistés dans `shared_preferences` : ils ne sont pas sauvegardés dans Supabase, donc ne survivent pas à une désinstallation et ne se synchronisent pas entre appareils.
 - **Photos de repas** — uploadées dans le bucket `meal_photos` uniquement pour les analyses par photo ("Repas"/"Produit") ; un repas issu d'un scan de code-barres n'a pas de photo.
 - **CGU/mentions légales à finaliser** — le contenu de `lib/screens/terms_screen.dart` décrit honnêtement le fonctionnement actuel de l'app (données collectées, absence de conseil médical, contenu généré par IA, abonnement), mais reste un brouillon : l'identité légale de l'éditeur (`[Nom de l'éditeur à compléter]`) et l'adresse de contact doivent être complétées, et le texte doit être relu par un professionnel du droit avant toute publication publique — un bandeau d'avertissement s'affiche sur l'écran tant que ce n'est pas fait.

@@ -49,6 +49,9 @@ class MealRepository {
     final totalProt = ingredients.fold<double>(0, (sum, i) => sum + i.currentProt);
     final totalGluc = ingredients.fold<double>(0, (sum, i) => sum + i.currentGluc);
     final totalLip = ingredients.fold<double>(0, (sum, i) => sum + i.currentLip);
+    final totalFiber = ingredients.fold<double>(0, (sum, i) => sum + i.currentFiber);
+    final totalSugar = ingredients.fold<double>(0, (sum, i) => sum + i.currentSugar);
+    final totalSatFat = ingredients.fold<double>(0, (sum, i) => sum + i.currentSatFat);
 
     final localImagePath = imagePath == null ? null : await _storeLocalPhoto(id, imagePath);
 
@@ -60,6 +63,9 @@ class MealRepository {
           totalProt: Value(totalProt),
           totalGluc: Value(totalGluc),
           totalLip: Value(totalLip),
+          totalFiber: Value(totalFiber),
+          totalSugar: Value(totalSugar),
+          totalSatFat: Value(totalSatFat),
           ingredientsJson: Value(jsonEncode(ingredients.map((i) => i.toJson()).toList())),
           localImagePath: Value(localImagePath),
           createdAt: DateTime.now(),
@@ -141,6 +147,9 @@ class MealRepository {
       totalProt: row.totalProt,
       totalGluc: row.totalGluc,
       totalLip: row.totalLip,
+      totalFiber: row.totalFiber,
+      totalSugar: row.totalSugar,
+      totalSatFat: row.totalSatFat,
       imageUrl: row.imageUrl ?? (row.localImagePath != null ? '$localImagePrefix${row.localImagePath}' : null),
       createdAt: row.createdAt,
     );
@@ -195,6 +204,9 @@ class MealRepository {
           'total_prot': row.totalProt,
           'total_gluc': row.totalGluc,
           'total_lip': row.totalLip,
+          'total_fiber': row.totalFiber,
+          'total_sugar': row.totalSugar,
+          'total_sat_fat': row.totalSatFat,
           'ingredients': jsonDecode(row.ingredientsJson),
           'image_url': imageUrl,
           'created_at': row.createdAt.toUtc().toIso8601String(),

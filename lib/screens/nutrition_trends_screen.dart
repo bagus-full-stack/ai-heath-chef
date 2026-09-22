@@ -14,6 +14,9 @@ const _primaryColor = Color(0xFF6B66FF);
 const _protColor = Colors.blue;
 const _glucColor = Colors.orange;
 const _lipColor = Colors.pink;
+const _fiberColor = Colors.green;
+const _sugarColor = Colors.redAccent;
+const _satFatColor = Colors.brown;
 const _dayLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
 class _DaySummary {
@@ -22,6 +25,9 @@ class _DaySummary {
   double prot = 0;
   double gluc = 0;
   double lip = 0;
+  double fiber = 0;
+  double sugar = 0;
+  double satFat = 0;
 
   _DaySummary(this.day);
 }
@@ -48,6 +54,9 @@ class NutritionTrendsScreen extends ConsumerWidget {
       summary.prot += meal.totalProt;
       summary.gluc += meal.totalGluc;
       summary.lip += meal.totalLip;
+      summary.fiber += meal.totalFiber;
+      summary.sugar += meal.totalSugar;
+      summary.satFat += meal.totalSatFat;
     }
     return days;
   }
@@ -105,6 +114,9 @@ class NutritionTrendsScreen extends ConsumerWidget {
                     final totalProt = days.fold<double>(0, (sum, d) => sum + d.prot);
                     final totalGluc = days.fold<double>(0, (sum, d) => sum + d.gluc);
                     final totalLip = days.fold<double>(0, (sum, d) => sum + d.lip);
+                    final totalFiber = days.fold<double>(0, (sum, d) => sum + d.fiber);
+                    final totalSugar = days.fold<double>(0, (sum, d) => sum + d.sugar);
+                    final totalSatFat = days.fold<double>(0, (sum, d) => sum + d.satFat);
 
                     return RefreshIndicator(
                       onRefresh: () async => ref.refresh(nutritionTrendsProvider),
@@ -140,6 +152,18 @@ class NutritionTrendsScreen extends ConsumerWidget {
                                 avgGluc: totalGluc / 7,
                                 avgLip: totalLip / 7,
                                 targets: targets,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          StaggeredEntrance(
+                            delay: const Duration(milliseconds: 180),
+                            child: _SectionCard(
+                              title: 'Autres nutriments (moyenne/jour)',
+                              child: _ExtraNutrients(
+                                avgFiber: totalFiber / 7,
+                                avgSugar: totalSugar / 7,
+                                avgSatFat: totalSatFat / 7,
                               ),
                             ),
                           ),
@@ -377,6 +401,29 @@ class _DailyAverages extends StatelessWidget {
         _AverageRow(label: 'Glucides', value: '${avgGluc.round()}g', target: '/${targets.carbs.round()}g', color: _glucColor),
         const SizedBox(height: 10),
         _AverageRow(label: 'Lipides', value: '${avgLip.round()}g', target: '/${targets.fat.round()}g', color: _lipColor),
+      ],
+    );
+  }
+}
+
+/// Fibres/sucres/graisses saturées n'ont pas de cible personnalisée dans
+/// [NutritionTargets] (contrairement aux macros principales) : on affiche
+/// donc de simples moyennes, sans comparaison "/cible".
+class _ExtraNutrients extends StatelessWidget {
+  final double avgFiber;
+  final double avgSugar;
+  final double avgSatFat;
+  const _ExtraNutrients({required this.avgFiber, required this.avgSugar, required this.avgSatFat});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _AverageRow(label: 'Fibres', value: '${avgFiber.round()}g', target: '', color: _fiberColor),
+        const SizedBox(height: 10),
+        _AverageRow(label: 'Sucres', value: '${avgSugar.round()}g', target: '', color: _sugarColor),
+        const SizedBox(height: 10),
+        _AverageRow(label: 'Graisses sat.', value: '${avgSatFat.round()}g', target: '', color: _satFatColor),
       ],
     );
   }

@@ -22,7 +22,7 @@ class LocalAiService {
   static const _promptMeal = '''
 Tu es un nutritionniste expert et un chef cuisinier.
 Ton but est d'analyser la nourriture présente sur cette photo.
-Identifie les ingrédients principaux, estime une portion réaliste en grammes (weight), et fournis les macronutriments (kcal, protéines, glucides, lipides) POUR 100 GRAMMES de cet ingrédient.
+Identifie les ingrédients principaux, estime une portion réaliste en grammes (weight), et fournis les macronutriments (kcal, protéines, glucides, lipides, fibres, sucres, acides gras saturés) POUR 100 GRAMMES de cet ingrédient.
 Tu DOIS répondre UNIQUEMENT au format JSON strict, sans aucun autre texte autour ni balises markdown.
 Le JSON doit avoir cette structure exacte :
 {
@@ -34,7 +34,10 @@ Le JSON doit avoir cette structure exacte :
       "kcalPer100g": 120,
       "protPer100g": 10.5,
       "glucPer100g": 2.0,
-      "lipPer100g": 5.0
+      "lipPer100g": 5.0,
+      "fiberPer100g": 1.2,
+      "sugarPer100g": 1.5,
+      "satFatPer100g": 2.0
     }
   ]
 }''';
@@ -42,7 +45,7 @@ Le JSON doit avoir cette structure exacte :
   static const _promptProduct = '''
 Tu es un nutritionniste expert. Cette photo montre un produit alimentaire emballé — le plus souvent son étiquette nutritionnelle (tableau des valeurs nutritionnelles au dos du produit), parfois juste la face avant de l'emballage.
 Lis attentivement le tableau nutritionnel s'il est visible (valeurs "pour 100g" ou "pour 100ml"). S'il n'y a pas de tableau visible, estime au mieux à partir du nom/type de produit visible sur l'emballage.
-Retourne UN SEUL ingrédient représentant ce produit dans son ensemble : son nom (marque + nom du produit si visible), sa portion habituelle en grammes (weight — utilise la portion indiquée sur l'étiquette si présente, sinon 100), et ses macronutriments (kcal, protéines, glucides, lipides) POUR 100 GRAMMES.
+Retourne UN SEUL ingrédient représentant ce produit dans son ensemble : son nom (marque + nom du produit si visible), sa portion habituelle en grammes (weight — utilise la portion indiquée sur l'étiquette si présente, sinon 100), et ses macronutriments (kcal, protéines, glucides, lipides, fibres, sucres, acides gras saturés) POUR 100 GRAMMES.
 Tu DOIS répondre UNIQUEMENT au format JSON strict, sans aucun autre texte autour ni balises markdown.
 Le JSON doit avoir cette structure exacte :
 {
@@ -54,7 +57,10 @@ Le JSON doit avoir cette structure exacte :
       "kcalPer100g": 250,
       "protPer100g": 8.0,
       "glucPer100g": 30.0,
-      "lipPer100g": 10.0
+      "lipPer100g": 10.0,
+      "fiberPer100g": 2.5,
+      "sugarPer100g": 12.0,
+      "satFatPer100g": 3.0
     }
   ]
 }''';
@@ -159,6 +165,9 @@ Le JSON doit avoir cette structure exacte :
         protPer100g: (map['protPer100g'] as num).toDouble(),
         glucPer100g: (map['glucPer100g'] as num).toDouble(),
         lipPer100g: (map['lipPer100g'] as num).toDouble(),
+        fiberPer100g: (map['fiberPer100g'] as num?)?.toDouble() ?? 0,
+        sugarPer100g: (map['sugarPer100g'] as num?)?.toDouble() ?? 0,
+        satFatPer100g: (map['satFatPer100g'] as num?)?.toDouble() ?? 0,
       );
     }).toList();
   }

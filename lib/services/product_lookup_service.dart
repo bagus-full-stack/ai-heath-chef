@@ -51,6 +51,9 @@ class ProductLookupService {
       protPer100g: _readNutrient(nutriments, 'proteins_100g'),
       glucPer100g: _readNutrient(nutriments, 'carbohydrates_100g'),
       lipPer100g: _readNutrient(nutriments, 'fat_100g'),
+      fiberPer100g: _readNutrient(nutriments, 'fiber_100g'),
+      sugarPer100g: _readNutrient(nutriments, 'sugars_100g'),
+      satFatPer100g: _readNutrient(nutriments, 'saturated-fat_100g'),
     );
   }
 

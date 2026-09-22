@@ -241,6 +241,18 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                     0,
                     (sum, item) => sum + item.currentLip,
                   );
+                  final totalFiber = ingredients.fold<double>(
+                    0,
+                    (sum, item) => sum + item.currentFiber,
+                  );
+                  final totalSugar = ingredients.fold<double>(
+                    0,
+                    (sum, item) => sum + item.currentSugar,
+                  );
+                  final totalSatFat = ingredients.fold<double>(
+                    0,
+                    (sum, item) => sum + item.currentSatFat,
+                  );
 
                   return Column(
                     children: [
@@ -414,6 +426,28 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                     'Lipides',
                                     totalLip,
                                     Colors.pink,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _buildSummaryMacro(
+                                    'Fibres',
+                                    totalFiber,
+                                    Colors.green,
+                                  ),
+                                  _buildSummaryMacro(
+                                    'Sucres',
+                                    totalSugar,
+                                    Colors.redAccent,
+                                  ),
+                                  _buildSummaryMacro(
+                                    'Sat.',
+                                    totalSatFat,
+                                    Colors.brown,
                                   ),
                                 ],
                               ),
