@@ -13,3 +13,10 @@ final todayMealsProvider = FutureProvider<List<Meal>>((ref) async {
   final dbService = ref.watch(databaseServiceProvider);
   return await dbService.getTodayMeals();
 });
+
+/// Repas des 7 derniers jours, pour l'écran "Analyses avancées" (PRO) —
+/// tendances nutritionnelles et macros détaillées.
+final nutritionTrendsProvider = FutureProvider<List<Meal>>((ref) async {
+  final dbService = ref.watch(databaseServiceProvider);
+  return await dbService.getMealsSince(7);
+});

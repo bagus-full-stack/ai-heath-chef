@@ -23,6 +23,7 @@ import '../screens/local_ai_settings_screen.dart';
 import '../screens/camera_capture_screen.dart';
 import '../screens/forgot_password_screen.dart';
 import '../screens/paywall_screen.dart';
+import '../screens/nutrition_trends_screen.dart';
 import '../screens/checkout_screen.dart';
 import '../screens/account_screen.dart';
 import '../screens/coming_soon_screen.dart';
@@ -114,6 +115,10 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/paywall',
         builder: (context, state) => const PaywallScreen(),
+      ),
+      GoRoute(
+        path: '/nutrition_trends',
+        builder: (context, state) => const NutritionTrendsScreen(),
       ),
       GoRoute(
         path: '/checkout',

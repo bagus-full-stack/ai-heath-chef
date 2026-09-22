@@ -122,6 +122,13 @@ class ProfileScreen extends ConsumerWidget {
                       onTap: () => context.push('/paywall'),
                     ),
                     _SettingsItem(
+                      icon: Icons.insights_rounded,
+                      title: 'Analyses avancées',
+                      subtitle: 'Macros détaillées et tendances nutritionnelles',
+                      badge: isPro ? null : 'PRO',
+                      onTap: () => context.push('/nutrition_trends'),
+                    ),
+                    _SettingsItem(
                       icon: Icons.shield_outlined,
                       title: 'Sécurité et Confidentialité',
                       subtitle: 'Données et sécurité',

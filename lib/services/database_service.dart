@@ -106,6 +106,32 @@ class DatabaseService {
     }
   }
 
+  /// Récupère tous les repas des [days] derniers jours (aujourd'hui inclus),
+  /// du plus ancien au plus récent — utilisé pour les tendances nutritionnelles.
+  Future<List<Meal>> getMealsSince(int days) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) return [];
+
+      final now = DateTime.now();
+      final startDate = DateTime(now.year, now.month, now.day)
+          .subtract(Duration(days: days - 1))
+          .toUtc()
+          .toIso8601String();
+
+      final response = await _supabase
+          .from('meals')
+          .select('id, name, total_kcal, total_prot, total_gluc, total_lip, image_url, created_at')
+          .eq('user_id', user.id)
+          .gte('created_at', startDate)
+          .order('created_at', ascending: true);
+
+      return (response as List<dynamic>).map((json) => Meal.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Erreur lors de la récupération des tendances : ${e.toString()}');
+    }
+  }
+
   /// Récupère les idées de repas déjà générées aujourd'hui pour cet
   /// utilisateur, si elles existent (cache quotidien) ET si elles ont été
   /// générées avec les mêmes préférences alimentaires qu'actuellement.
