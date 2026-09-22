@@ -244,13 +244,12 @@ class _Header extends ConsumerWidget {
               right: -1,
               bottom: -1,
               child: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: Colors.greenAccent,
+                padding: const EdgeInsets.all(1.5),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 1.5),
                 ),
+                child: const _PulsingDot(color: Colors.greenAccent, size: 10),
               ),
             ),
           ],
@@ -276,7 +275,7 @@ class _RealtimeBanner extends StatelessWidget {
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.circle, color: Color(0xFFF06B9E), size: 10),
+            _PulsingDot(color: Color(0xFFF06B9E), size: 10),
             SizedBox(width: 10),
             Text(
               'ANALYSE EN TEMPS RÉEL',
@@ -289,6 +288,46 @@ class _RealtimeBanner extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Point qui pulse en continu (opacité) pour signaler une activité "en
+/// direct" — utilisé sur les indicateurs qui prétendent montrer du temps
+/// réel mais qui, sans ça, restent visuellement figés.
+class _PulsingDot extends StatefulWidget {
+  final Color color;
+  final double size;
+
+  const _PulsingDot({required this.color, required this.size});
+
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: Tween(begin: 0.35, end: 1.0).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      ),
+      child: Container(
+        width: widget.size,
+        height: widget.size,
+        decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
       ),
     );
   }
@@ -630,6 +669,7 @@ class _CoachChatSheet extends ConsumerStatefulWidget {
 class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _isSending = false;
 
   @override
   void initState() {
@@ -653,11 +693,21 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
 
   Future<void> _sendMessage() async {
     final text = _textController.text.trim();
-    if (text.isEmpty) {
+    if (text.isEmpty || _isSending) {
       return;
     }
-    await ref.read(chatProvider.notifier).sendMessage(text);
     _textController.clear();
+    setState(() => _isSending = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
+    try {
+      await ref.read(chatProvider.notifier).sendMessage(text);
+    } finally {
+      if (mounted) {
+        setState(() => _isSending = false);
+      }
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
     });
@@ -672,6 +722,31 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeOut,
     );
+  }
+
+  Future<void> _resetConversation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Réinitialiser la conversation ?'),
+        content: const Text('Tout l\'historique de discussion avec le coach sera supprimé.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Réinitialiser'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    _textController.clear();
+    await ref.read(chatProvider.notifier).resetConversation();
   }
 
   @override
@@ -742,6 +817,11 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                         ),
                       ),
                       IconButton(
+                        onPressed: _resetConversation,
+                        icon: const Icon(Icons.refresh_rounded),
+                        tooltip: 'Réinitialiser la conversation',
+                      ),
+                      IconButton(
                         onPressed: () => Navigator.pop(context),
                         icon: const Icon(Icons.close_rounded),
                       ),
@@ -786,8 +866,14 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                       : ListView.builder(
                           controller: _scrollController,
                           padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                          itemCount: messages.length,
+                          itemCount: messages.length + (_isSending ? 1 : 0),
                           itemBuilder: (context, index) {
+                            if (index == messages.length) {
+                              return const StaggeredEntrance(
+                                key: ValueKey('typing_indicator'),
+                                child: _TypingBubble(),
+                              );
+                            }
                             final message = messages[index];
                             return StaggeredEntrance(
                               key: ValueKey(message.id),
@@ -824,19 +910,35 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                         ),
                         const SizedBox(width: 10),
                         InkWell(
-                          onTap: _sendMessage,
+                          onTap: _isSending ? null : _sendMessage,
                           borderRadius: BorderRadius.circular(18),
                           child: Container(
                             width: 52,
                             height: 52,
-                            decoration: const BoxDecoration(
-                              color: primaryColor,
+                            decoration: BoxDecoration(
+                              color: _isSending
+                                  ? primaryColor.withValues(alpha: 0.5)
+                                  : primaryColor,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
-                              Icons.send_rounded,
-                              color: Colors.white,
-                              size: 20,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              child: _isSending
+                                  ? const SizedBox(
+                                      key: ValueKey('sending'),
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation(Colors.white),
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.send_rounded,
+                                      key: ValueKey('send'),
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
                             ),
                           ),
                         ),
@@ -869,6 +971,75 @@ class _PromptChip extends StatelessWidget {
         style: const TextStyle(
           color: kCoachPrimaryColor,
           fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+/// Bulle "le coach écrit..." affichée à la place de la réponse pendant
+/// l'attente de l'IA — sans ça l'utilisateur n'a aucun retour entre l'envoi
+/// du message et l'arrivée de la réponse (qui peut prendre plusieurs
+/// secondes, surtout en IA locale).
+class _TypingBubble extends StatefulWidget {
+  const _TypingBubble();
+
+  @override
+  State<_TypingBubble> createState() => _TypingBubbleState();
+}
+
+class _TypingBubbleState extends State<_TypingBubble> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+            bottomRight: Radius.circular(16),
+          ),
+        ),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(3, (index) {
+                final t = (_controller.value - index * 0.2) % 1.0;
+                final bounce = t < 0.5 ? t * 2 : (1 - t) * 2;
+                return Padding(
+                  padding: EdgeInsets.only(right: index < 2 ? 5 : 0),
+                  child: Transform.translate(
+                    offset: Offset(0, -4 * bounce),
+                    child: Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: kCoachPrimaryColor.withValues(alpha: 0.5 + bounce * 0.5),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            );
+          },
         ),
       ),
     );

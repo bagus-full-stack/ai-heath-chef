@@ -22,12 +22,19 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
       return [_buildWelcomeMessage()];
     }
 
-    final rows = await _supabase
-        .from('chat_messages')
-        .select('id, role, text, created_at')
-        .eq('user_id', user.id)
-        .order('created_at', ascending: false)
-        .limit(50);
+    List<Map<String, dynamic>> rows;
+    try {
+      rows = await _supabase
+          .from('chat_messages')
+          .select('id, role, text, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', ascending: false)
+          .limit(50);
+    } catch (_) {
+      // Hors-ligne : pas d'historique cloud disponible, on démarre une
+      // conversation locale plutôt que de rester en erreur.
+      return [_buildWelcomeMessage()];
+    }
     final sortedRows = rows.reversed;
 
     final messages = sortedRows
@@ -110,17 +117,32 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     await _storeMessage(assistantMessage);
   }
 
+  Future<void> resetConversation() async {
+    final user = _supabase.auth.currentUser;
+    if (user != null) {
+      await _supabase.from('chat_messages').delete().eq('user_id', user.id);
+    }
+    state = AsyncData([_buildWelcomeMessage()]);
+  }
+
   Future<void> _storeMessage(ChatMessage message) async {
     final user = _supabase.auth.currentUser;
     if (user == null) {
       throw const AuthException('User must be authenticated to persist chat messages.');
     }
 
-    await _supabase.from('chat_messages').insert({
-      'user_id': user.id,
-      'role': message.isUser ? 'user' : 'assistant',
-      'text': message.text,
-    });
+    try {
+      await _supabase.from('chat_messages').insert({
+        'user_id': user.id,
+        'role': message.isUser ? 'user' : 'assistant',
+        'text': message.text,
+      });
+    } catch (_) {
+      // Hors-ligne : la persistance cloud échoue mais la conversation reste
+      // utilisable localement (l'IA locale est justement conçue pour
+      // fonctionner sans connexion) — seule la synchro cloud est perdue
+      // pour ce message, pas la conversation en cours.
+    }
   }
 
   ChatMessage _buildWelcomeMessage() {
