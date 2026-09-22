@@ -12,6 +12,51 @@ export interface QuotaCheckResult {
 }
 
 /**
+ * True si l'appelant doit passer la limite quotidienne PAR UTILISATEUR
+ * (admin de confiance, voir migration 0007, ou abonné PRO actif côté
+ * RevenueCat). Le disjoncteur GLOBAL (voir `globalDailyLimit`) protège lui
+ * quand même le budget API partagé, même pour ces comptes.
+ *
+ * Repli sur `false` (donc quota normal appliqué) si `REVENUECAT_SECRET_KEY`
+ * n'est pas configuré ou si l'appel à RevenueCat échoue — une panne du
+ * fournisseur d'abonnement ne doit jamais accorder un accès illimité.
+ */
+async function hasUnlimitedQuota(
+    // deno-lint-ignore no-explicit-any
+    serviceClient: any,
+    userId: string,
+): Promise<boolean> {
+    const { data: profile } = await serviceClient
+        .from("profiles")
+        .select("is_admin")
+        .eq("user_id", userId)
+        .maybeSingle();
+    if (profile?.is_admin) {
+        return true;
+    }
+
+    const revenueCatSecretKey = Deno.env.get("REVENUECAT_SECRET_KEY");
+    if (!revenueCatSecretKey) {
+        return false;
+    }
+
+    try {
+        const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${userId}`, {
+            headers: { Authorization: `Bearer ${revenueCatSecretKey}` },
+        });
+        if (!res.ok) {
+            return false;
+        }
+        const body = await res.json();
+        const expiresDate = body?.subscriber?.entitlements?.pro?.expires_date;
+        return expiresDate === null ||
+            (typeof expiresDate === "string" && new Date(expiresDate) > new Date());
+    } catch (_) {
+        return false;
+    }
+}
+
+/**
  * Identifie l'utilisateur appelant à partir du JWT transmis par l'app
  * (transféré automatiquement par supabase_flutter dans l'en-tête
  * Authorization), puis incrémente son compteur d'appels quotidien pour
@@ -66,30 +111,32 @@ export async function checkAndIncrementQuota(
         };
     }
     const userId = userData.user.id;
-
     const serviceClient = createClient(supabaseUrl, serviceRoleKey);
-    const { data: allowed, error: quotaError } = await serviceClient.rpc(
-        "increment_api_usage",
-        { p_user_id: userId, p_function_name: functionName, p_daily_limit: dailyLimit },
-    );
 
-    if (quotaError) {
-        // Une panne sur le mécanisme de quota lui-même ne doit pas bloquer
-        // l'utilisateur — seul un quota effectivement dépassé bloque.
-        console.error(`Erreur quota (${functionName}) :`, quotaError.message);
-        return { ok: true, userId };
-    }
+    if (!(await hasUnlimitedQuota(serviceClient, userId))) {
+        const { data: allowed, error: quotaError } = await serviceClient.rpc(
+            "increment_api_usage",
+            { p_user_id: userId, p_function_name: functionName, p_daily_limit: dailyLimit },
+        );
 
-    if (!allowed) {
-        return {
-            ok: false,
-            response: new Response(
-                JSON.stringify({
-                    error: `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
-                }),
-                { status: 429, headers: jsonHeaders },
-            ),
-        };
+        if (quotaError) {
+            // Une panne sur le mécanisme de quota lui-même ne doit pas bloquer
+            // l'utilisateur — seul un quota effectivement dépassé bloque.
+            console.error(`Erreur quota (${functionName}) :`, quotaError.message);
+            return { ok: true, userId };
+        }
+
+        if (!allowed) {
+            return {
+                ok: false,
+                response: new Response(
+                    JSON.stringify({
+                        error: `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
+                    }),
+                    { status: 429, headers: jsonHeaders },
+                ),
+            };
+        }
     }
 
     if (globalDailyLimit !== undefined) {
