@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../models/meal_reminder.dart';
 import '../providers/custom_reminders_provider.dart';
@@ -10,6 +11,15 @@ import '../l10n/l10n_extensions.dart';
 
 const Color _kPrimaryColor = Color(0xFF6B66FF);
 
+/// Nom du jour de la semaine dans la langue courante ([weekday] : 1 = lundi
+/// ... 7 = dimanche). 2024-01-01 était un lundi, donc `DateTime(2024, 1, weekday)`
+/// tombe toujours sur le bon jour — évite d'écrire 7 clés ARB par langue.
+String _weekdayName(BuildContext context, int weekday, {bool short = false}) {
+  final locale = Localizations.localeOf(context).toString();
+  final date = DateTime(2024, 1, weekday);
+  return short ? DateFormat.E(locale).format(date) : DateFormat.EEEE(locale).format(date);
+}
+
 /// Réglages des rappels : les créneaux fixes (petit-déjeuner/déjeuner/dîner)
 /// avec un interrupteur + une heure chacun, et des rappels personnalisés
 /// (nom + heure) ajoutés librement par l'utilisateur. Chacun déclenche une
@@ -18,14 +28,16 @@ class NotificationSettingsScreen extends ConsumerWidget {
   const NotificationSettingsScreen({super.key});
 
   Future<void> _openAddReminderSheet(BuildContext context, WidgetRef ref) async {
-    final result = await showModalBottomSheet<({String name, int hour, int minute})>(
+    final result = await showModalBottomSheet<({String name, int hour, int minute, int? weekday})>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const _AddReminderSheet(),
     );
     if (result != null) {
-      await ref.read(customRemindersProvider.notifier).add(result.name, result.hour, result.minute);
+      await ref
+          .read(customRemindersProvider.notifier)
+          .add(result.name, result.hour, result.minute, weekday: result.weekday);
     }
   }
 
@@ -126,6 +138,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
                         hour: reminder.hour,
                         minute: reminder.minute,
                         enabled: reminder.enabled,
+                        weekday: reminder.weekday,
                         onToggle: (value) =>
                             ref.read(customRemindersProvider.notifier).setEnabled(reminder.id, value),
                         onPickTime: (hour, minute) =>
@@ -156,6 +169,7 @@ class _ReminderTile extends StatelessWidget {
   final ValueChanged<bool> onToggle;
   final void Function(int hour, int minute) onPickTime;
   final VoidCallback? onDelete;
+  final int? weekday;
 
   const _ReminderTile({
     required this.label,
@@ -165,6 +179,7 @@ class _ReminderTile extends StatelessWidget {
     required this.onToggle,
     required this.onPickTime,
     this.onDelete,
+    this.weekday,
   });
 
   Future<void> _pickTime(BuildContext context) async {
@@ -214,7 +229,11 @@ class _ReminderTile extends StatelessWidget {
                 GestureDetector(
                   onTap: enabled ? () => _pickTime(context) : null,
                   child: Text(
-                    enabled ? context.l10n.notificationSettingsReminderAtLabel(timeLabel) : context.l10n.notificationSettingsDisabledLabel,
+                    enabled
+                        ? (weekday != null
+                            ? context.l10n.notificationSettingsReminderWeeklyAtLabel(_weekdayName(context, weekday!), timeLabel)
+                            : context.l10n.notificationSettingsReminderAtLabel(timeLabel))
+                        : context.l10n.notificationSettingsDisabledLabel,
                     style: TextStyle(
                       color: enabled ? _kPrimaryColor : Colors.grey.shade500,
                       fontWeight: FontWeight.w600,
@@ -252,6 +271,8 @@ class _AddReminderSheet extends StatefulWidget {
 class _AddReminderSheetState extends State<_AddReminderSheet> {
   final _nameController = TextEditingController();
   TimeOfDay _time = const TimeOfDay(hour: 9, minute: 0);
+  bool _isWeekly = false;
+  int _weekday = DateTime.monday;
 
   @override
   void dispose() {
@@ -274,7 +295,12 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
       );
       return;
     }
-    Navigator.of(context).pop((name: name, hour: _time.hour, minute: _time.minute));
+    Navigator.of(context).pop((
+      name: name,
+      hour: _time.hour,
+      minute: _time.minute,
+      weekday: _isWeekly ? _weekday : null,
+    ));
   }
 
   @override
@@ -341,6 +367,43 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
                 ),
               ),
             ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: ChoiceChip(
+                    label: Text(context.l10n.notificationSettingsFrequencyDaily),
+                    selected: !_isWeekly,
+                    selectedColor: _kPrimaryColor.withValues(alpha: 0.15),
+                    onSelected: (_) => setState(() => _isWeekly = false),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ChoiceChip(
+                    label: Text(context.l10n.notificationSettingsFrequencyWeekly),
+                    selected: _isWeekly,
+                    selectedColor: _kPrimaryColor.withValues(alpha: 0.15),
+                    onSelected: (_) => setState(() => _isWeekly = true),
+                  ),
+                ),
+              ],
+            ),
+            if (_isWeekly) ...[
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (var day = DateTime.monday; day <= DateTime.sunday; day++)
+                    ChoiceChip(
+                      label: Text(_weekdayName(context, day, short: true)),
+                      selected: _weekday == day,
+                      selectedColor: _kPrimaryColor.withValues(alpha: 0.15),
+                      onSelected: (_) => setState(() => _weekday = day),
+                    ),
+                ],
+              ),
+            ],
             const SizedBox(height: 22),
             ElevatedButton(
               onPressed: _submit,

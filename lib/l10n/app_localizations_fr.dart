@@ -484,6 +484,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardFatLabel => 'LIPIDES';
 
   @override
+  String dashboardHydrationAddedMessage(int amount) {
+    return '$amount ml ajoutés';
+  }
+
+  @override
+  String dashboardHydrationGoalLabel(int current, int goal) {
+    return '$current / $goal ml';
+  }
+
+  @override
+  String get dashboardHydrationTitle => 'Hydratation';
+
+  @override
+  String get dashboardHydrationUndoButton => 'Annuler';
+
+  @override
   String get dashboardKcalRemainingLabel => 'KCAL RESTANT';
 
   @override
@@ -1023,6 +1039,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get notificationSettingsDisabledLabel => 'Désactivé';
 
   @override
+  String get notificationSettingsFrequencyDaily => 'Chaque jour';
+
+  @override
+  String get notificationSettingsFrequencyWeekly => 'Chaque semaine';
+
+  @override
   String get notificationSettingsIntro =>
       'Reçois un rappel pour penser à logguer chacun de tes repas.';
 
@@ -1052,6 +1074,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get notificationSettingsReminderNameLabel => 'Nom du rappel';
+
+  @override
+  String notificationSettingsReminderWeeklyAtLabel(String day, String time) {
+    return 'Rappel $day à $time';
+  }
 
   @override
   String notificationSettingsTimeLabel(String time) {
@@ -1818,4 +1845,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get weightTrendTitle => 'Suivi du poids';
+
+  @override
+  String get weightTrendWeeklyReminderAddedMessage =>
+      'Rappel de pesée hebdomadaire programmé.';
+
+  @override
+  String get weightTrendWeeklyReminderButton =>
+      'Me rappeler de me peser chaque semaine';
+
+  @override
+  String get weightTrendWeeklyReminderName => 'Pesée hebdomadaire';
 }

@@ -10,12 +10,18 @@ class CustomReminder {
   final int minute;
   final bool enabled;
 
+  /// Null = rappel quotidien. Sinon, jour de la semaine (1 = lundi ...
+  /// 7 = dimanche, voir `DateTime.monday`..`DateTime.sunday`) auquel le
+  /// rappel se répète chaque semaine.
+  final int? weekday;
+
   const CustomReminder({
     required this.id,
     required this.name,
     required this.hour,
     required this.minute,
     this.enabled = true,
+    this.weekday,
   });
 
   CustomReminder copyWith({String? name, int? hour, int? minute, bool? enabled}) {
@@ -25,6 +31,7 @@ class CustomReminder {
       hour: hour ?? this.hour,
       minute: minute ?? this.minute,
       enabled: enabled ?? this.enabled,
+      weekday: weekday,
     );
   }
 
@@ -34,6 +41,7 @@ class CustomReminder {
         'hour': hour,
         'minute': minute,
         'enabled': enabled,
+        'weekday': weekday,
       };
 
   factory CustomReminder.fromJson(Map<String, dynamic> json) {
@@ -43,6 +51,7 @@ class CustomReminder {
       hour: (json['hour'] as num).toInt(),
       minute: (json['minute'] as num).toInt(),
       enabled: json['enabled'] as bool? ?? true,
+      weekday: (json['weekday'] as num?)?.toInt(),
     );
   }
 }

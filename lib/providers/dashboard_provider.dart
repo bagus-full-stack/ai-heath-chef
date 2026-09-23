@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/database_service.dart';
-import '../local_db/app_database.dart' show WeightEntry;
+import '../local_db/app_database.dart' show HydrationEntry, WeightEntry;
 import '../local_db/local_db_provider.dart';
 import '../models/meal.dart';
 
@@ -36,4 +36,10 @@ final nutritionTrends30Provider = FutureProvider<List<Meal>>((ref) async {
 final weightEntriesProvider = FutureProvider<List<WeightEntry>>((ref) async {
   final weightRepository = ref.watch(weightRepositoryProvider);
   return await weightRepository.getEntriesSince(90);
+});
+
+/// Prises d'eau du jour, pour la carte "Hydratation" du dashboard.
+final hydrationTodayProvider = FutureProvider<List<HydrationEntry>>((ref) async {
+  final hydrationRepository = ref.watch(hydrationRepositoryProvider);
+  return await hydrationRepository.getTodayEntries();
 });

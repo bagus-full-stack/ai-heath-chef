@@ -31,9 +31,10 @@ class CustomRemindersNotifier extends AsyncNotifier<List<CustomReminder>> {
   }
 
   /// Ajoute un nouveau rappel (activé par défaut) et programme sa
-  /// notification. Demande la permission système si besoin ; si elle est
-  /// refusée, le rappel n'est pas créé.
-  Future<void> add(String name, int hour, int minute) async {
+  /// notification — quotidien, ou hebdomadaire si [weekday] est fourni
+  /// (voir [CustomReminder.weekday]). Demande la permission système si
+  /// besoin ; si elle est refusée, le rappel n'est pas créé.
+  Future<void> add(String name, int hour, int minute, {int? weekday}) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) {
       return;
@@ -49,14 +50,16 @@ class CustomRemindersNotifier extends AsyncNotifier<List<CustomReminder>> {
       name: trimmed,
       hour: hour,
       minute: minute,
+      weekday: weekday,
     );
 
-    await NotificationService.instance.scheduleDailyReminder(
+    await NotificationService.instance.scheduleReminder(
       id: reminder.id,
       title: 'AI Health Chef',
       body: reminder.name,
       hour: reminder.hour,
       minute: reminder.minute,
+      weekday: reminder.weekday,
     );
 
     final current = state.value ?? const <CustomReminder>[];
@@ -105,12 +108,13 @@ class CustomRemindersNotifier extends AsyncNotifier<List<CustomReminder>> {
 
   Future<void> _applyScheduling(CustomReminder reminder) async {
     if (reminder.enabled) {
-      await NotificationService.instance.scheduleDailyReminder(
+      await NotificationService.instance.scheduleReminder(
         id: reminder.id,
         title: 'AI Health Chef',
         body: reminder.name,
         hour: reminder.hour,
         minute: reminder.minute,
+        weekday: reminder.weekday,
       );
     } else {
       await NotificationService.instance.cancelReminder(reminder.id);

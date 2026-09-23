@@ -1234,11 +1234,324 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
   }
 }
 
+class $HydrationEntriesTable extends HydrationEntries
+    with TableInfo<$HydrationEntriesTable, HydrationEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HydrationEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMlMeta = const VerificationMeta(
+    'amountMl',
+  );
+  @override
+  late final GeneratedColumn<int> amountMl = GeneratedColumn<int>(
+    'amount_ml',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recordedAtMeta = const VerificationMeta(
+    'recordedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> recordedAt = GeneratedColumn<DateTime>(
+    'recorded_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, userId, amountMl, recordedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'hydration_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<HydrationEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('amount_ml')) {
+      context.handle(
+        _amountMlMeta,
+        amountMl.isAcceptableOrUnknown(data['amount_ml']!, _amountMlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMlMeta);
+    }
+    if (data.containsKey('recorded_at')) {
+      context.handle(
+        _recordedAtMeta,
+        recordedAt.isAcceptableOrUnknown(data['recorded_at']!, _recordedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  HydrationEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HydrationEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      amountMl: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount_ml'],
+      )!,
+      recordedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}recorded_at'],
+      )!,
+    );
+  }
+
+  @override
+  $HydrationEntriesTable createAlias(String alias) {
+    return $HydrationEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class HydrationEntry extends DataClass implements Insertable<HydrationEntry> {
+  final String id;
+  final String userId;
+  final int amountMl;
+  final DateTime recordedAt;
+  const HydrationEntry({
+    required this.id,
+    required this.userId,
+    required this.amountMl,
+    required this.recordedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['user_id'] = Variable<String>(userId);
+    map['amount_ml'] = Variable<int>(amountMl);
+    map['recorded_at'] = Variable<DateTime>(recordedAt);
+    return map;
+  }
+
+  HydrationEntriesCompanion toCompanion(bool nullToAbsent) {
+    return HydrationEntriesCompanion(
+      id: Value(id),
+      userId: Value(userId),
+      amountMl: Value(amountMl),
+      recordedAt: Value(recordedAt),
+    );
+  }
+
+  factory HydrationEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HydrationEntry(
+      id: serializer.fromJson<String>(json['id']),
+      userId: serializer.fromJson<String>(json['userId']),
+      amountMl: serializer.fromJson<int>(json['amountMl']),
+      recordedAt: serializer.fromJson<DateTime>(json['recordedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'userId': serializer.toJson<String>(userId),
+      'amountMl': serializer.toJson<int>(amountMl),
+      'recordedAt': serializer.toJson<DateTime>(recordedAt),
+    };
+  }
+
+  HydrationEntry copyWith({
+    String? id,
+    String? userId,
+    int? amountMl,
+    DateTime? recordedAt,
+  }) => HydrationEntry(
+    id: id ?? this.id,
+    userId: userId ?? this.userId,
+    amountMl: amountMl ?? this.amountMl,
+    recordedAt: recordedAt ?? this.recordedAt,
+  );
+  HydrationEntry copyWithCompanion(HydrationEntriesCompanion data) {
+    return HydrationEntry(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      amountMl: data.amountMl.present ? data.amountMl.value : this.amountMl,
+      recordedAt: data.recordedAt.present
+          ? data.recordedAt.value
+          : this.recordedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HydrationEntry(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('amountMl: $amountMl, ')
+          ..write('recordedAt: $recordedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, userId, amountMl, recordedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HydrationEntry &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.amountMl == this.amountMl &&
+          other.recordedAt == this.recordedAt);
+}
+
+class HydrationEntriesCompanion extends UpdateCompanion<HydrationEntry> {
+  final Value<String> id;
+  final Value<String> userId;
+  final Value<int> amountMl;
+  final Value<DateTime> recordedAt;
+  final Value<int> rowid;
+  const HydrationEntriesCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.amountMl = const Value.absent(),
+    this.recordedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HydrationEntriesCompanion.insert({
+    required String id,
+    required String userId,
+    required int amountMl,
+    required DateTime recordedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       userId = Value(userId),
+       amountMl = Value(amountMl),
+       recordedAt = Value(recordedAt);
+  static Insertable<HydrationEntry> custom({
+    Expression<String>? id,
+    Expression<String>? userId,
+    Expression<int>? amountMl,
+    Expression<DateTime>? recordedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (amountMl != null) 'amount_ml': amountMl,
+      if (recordedAt != null) 'recorded_at': recordedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HydrationEntriesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? userId,
+    Value<int>? amountMl,
+    Value<DateTime>? recordedAt,
+    Value<int>? rowid,
+  }) {
+    return HydrationEntriesCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      amountMl: amountMl ?? this.amountMl,
+      recordedAt: recordedAt ?? this.recordedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (amountMl.present) {
+      map['amount_ml'] = Variable<int>(amountMl.value);
+    }
+    if (recordedAt.present) {
+      map['recorded_at'] = Variable<DateTime>(recordedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HydrationEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('amountMl: $amountMl, ')
+          ..write('recordedAt: $recordedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $LocalMealsTable localMeals = $LocalMealsTable(this);
   late final $WeightEntriesTable weightEntries = $WeightEntriesTable(this);
+  late final $HydrationEntriesTable hydrationEntries = $HydrationEntriesTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1246,6 +1559,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     localMeals,
     weightEntries,
+    hydrationEntries,
   ];
 }
 
@@ -1866,6 +2180,204 @@ typedef $$WeightEntriesTableProcessedTableManager =
       WeightEntry,
       PrefetchHooks Function()
     >;
+typedef $$HydrationEntriesTableCreateCompanionBuilder =
+    HydrationEntriesCompanion Function({
+      required String id,
+      required String userId,
+      required int amountMl,
+      required DateTime recordedAt,
+      Value<int> rowid,
+    });
+typedef $$HydrationEntriesTableUpdateCompanionBuilder =
+    HydrationEntriesCompanion Function({
+      Value<String> id,
+      Value<String> userId,
+      Value<int> amountMl,
+      Value<DateTime> recordedAt,
+      Value<int> rowid,
+    });
+
+class $$HydrationEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $HydrationEntriesTable> {
+  $$HydrationEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amountMl => $composableBuilder(
+    column: $table.amountMl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$HydrationEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $HydrationEntriesTable> {
+  $$HydrationEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amountMl => $composableBuilder(
+    column: $table.amountMl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$HydrationEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HydrationEntriesTable> {
+  $$HydrationEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMl =>
+      $composableBuilder(column: $table.amountMl, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$HydrationEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HydrationEntriesTable,
+          HydrationEntry,
+          $$HydrationEntriesTableFilterComposer,
+          $$HydrationEntriesTableOrderingComposer,
+          $$HydrationEntriesTableAnnotationComposer,
+          $$HydrationEntriesTableCreateCompanionBuilder,
+          $$HydrationEntriesTableUpdateCompanionBuilder,
+          (
+            HydrationEntry,
+            BaseReferences<
+              _$AppDatabase,
+              $HydrationEntriesTable,
+              HydrationEntry
+            >,
+          ),
+          HydrationEntry,
+          PrefetchHooks Function()
+        > {
+  $$HydrationEntriesTableTableManager(
+    _$AppDatabase db,
+    $HydrationEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HydrationEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HydrationEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HydrationEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<int> amountMl = const Value.absent(),
+                Value<DateTime> recordedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HydrationEntriesCompanion(
+                id: id,
+                userId: userId,
+                amountMl: amountMl,
+                recordedAt: recordedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String userId,
+                required int amountMl,
+                required DateTime recordedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => HydrationEntriesCompanion.insert(
+                id: id,
+                userId: userId,
+                amountMl: amountMl,
+                recordedAt: recordedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$HydrationEntriesTable, HydrationEntry>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $HydrationEntriesTable,
+                    HydrationEntry
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$HydrationEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HydrationEntriesTable,
+      HydrationEntry,
+      $$HydrationEntriesTableFilterComposer,
+      $$HydrationEntriesTableOrderingComposer,
+      $$HydrationEntriesTableAnnotationComposer,
+      $$HydrationEntriesTableCreateCompanionBuilder,
+      $$HydrationEntriesTableUpdateCompanionBuilder,
+      (
+        HydrationEntry,
+        BaseReferences<_$AppDatabase, $HydrationEntriesTable, HydrationEntry>,
+      ),
+      HydrationEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1874,4 +2386,6 @@ class $AppDatabaseManager {
       $$LocalMealsTableTableManager(_db, _db.localMeals);
   $$WeightEntriesTableTableManager get weightEntries =>
       $$WeightEntriesTableTableManager(_db, _db.weightEntries);
+  $$HydrationEntriesTableTableManager get hydrationEntries =>
+      $$HydrationEntriesTableTableManager(_db, _db.hydrationEntries);
 }

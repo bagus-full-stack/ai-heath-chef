@@ -281,6 +281,27 @@
   "dashboardCarbsLabel": "GLUCIDES",
   "dashboardEmptyMealsMessage": "Aucun repas enregistré aujourd'hui. Scannez votre première assiette !",
   "dashboardFatLabel": "LIPIDES",
+  "dashboardHydrationAddedMessage": "{amount} ml ajoutés",
+  "@dashboardHydrationAddedMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardHydrationGoalLabel": "{current} / {goal} ml",
+  "@dashboardHydrationGoalLabel": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardHydrationTitle": "Hydratation",
+  "dashboardHydrationUndoButton": "Annuler",
   "dashboardKcalRemainingLabel": "KCAL RESTANT",
   "dashboardMealCaloriesLabel": "{kcal} kcal",
   "@dashboardMealCaloriesLabel": {
@@ -556,6 +577,8 @@
   "notificationSettingsCustomRemindersLoadError": "Impossible de charger tes rappels personnalisés.",
   "notificationSettingsCustomRemindersTitle": "RAPPELS PERSONNALISÉS",
   "notificationSettingsDisabledLabel": "Désactivé",
+  "notificationSettingsFrequencyDaily": "Chaque jour",
+  "notificationSettingsFrequencyWeekly": "Chaque semaine",
   "notificationSettingsIntro": "Reçois un rappel pour penser à logguer chacun de tes repas.",
   "notificationSettingsLoadError": "Impossible de charger les réglages de notifications.",
   "notificationSettingsNameRequiredError": "Donne un nom à ton rappel.",
@@ -571,6 +594,17 @@
   },
   "notificationSettingsReminderNameHint": "Ex. Collation, Boire de l'eau...",
   "notificationSettingsReminderNameLabel": "Nom du rappel",
+  "notificationSettingsReminderWeeklyAtLabel": "Rappel {day} à {time}",
+  "@notificationSettingsReminderWeeklyAtLabel": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "notificationSettingsTimeLabel": "Heure : {time}",
   "@notificationSettingsTimeLabel": {
     "placeholders": {
@@ -1025,5 +1059,8 @@
   "weightTrendLogSheetSaveButton": "Enregistrer",
   "weightTrendLogSheetTitle": "Nouvelle pesée",
   "weightTrendTargetLabel": "Objectif",
-  "weightTrendTitle": "Suivi du poids"
+  "weightTrendTitle": "Suivi du poids",
+  "weightTrendWeeklyReminderAddedMessage": "Rappel de pesée hebdomadaire programmé.",
+  "weightTrendWeeklyReminderButton": "Me rappeler de me peser chaque semaine",
+  "weightTrendWeeklyReminderName": "Pesée hebdomadaire"
 }

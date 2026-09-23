@@ -7,6 +7,7 @@ import '../l10n/l10n_extensions.dart';
 import '../local_db/app_database.dart' show WeightEntry;
 import '../local_db/local_db_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/custom_reminders_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/profile_provider.dart';
 
@@ -94,6 +95,27 @@ class WeightTrendScreen extends ConsumerWidget {
     ref.invalidate(profileProvider);
   }
 
+  /// Ajoute (ou, si déjà présent, ouvre les réglages pour) un rappel
+  /// hebdomadaire de pesée — un simple préréglage du système de rappels
+  /// personnalisés existant (voir custom_reminders_provider.dart).
+  Future<void> _setupWeeklyReminder(BuildContext context, WidgetRef ref) async {
+    final reminderName = context.l10n.weightTrendWeeklyReminderName;
+    final reminders = await ref.read(customRemindersProvider.future);
+    final alreadySet = reminders.any((r) => r.name == reminderName);
+
+    if (alreadySet) {
+      if (context.mounted) context.push('/notifications');
+      return;
+    }
+
+    await ref.read(customRemindersProvider.notifier).add(reminderName, 8, 0, weekday: DateTime.monday);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.weightTrendWeeklyReminderAddedMessage)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final entriesAsync = ref.watch(weightEntriesProvider);
@@ -177,6 +199,15 @@ class WeightTrendScreen extends ConsumerWidget {
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  onPressed: () => _setupWeeklyReminder(context, ref),
+                  icon: const Icon(Icons.notifications_active_outlined, color: _primaryColor),
+                  label: Text(
+                    context.l10n.weightTrendWeeklyReminderButton,
+                    style: const TextStyle(color: _primaryColor),
                   ),
                 ),
               ],

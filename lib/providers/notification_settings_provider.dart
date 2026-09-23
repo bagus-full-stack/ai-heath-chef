@@ -65,7 +65,7 @@ class NotificationSettingsNotifier
 
     if (setting.enabled) {
       final locale = ref.read(localeProvider).value ?? const Locale('fr');
-      await NotificationService.instance.scheduleDailyReminder(
+      await NotificationService.instance.scheduleReminder(
         id: slot.notificationId,
         title: 'AI Health Chef',
         body: slot.notificationBody(lookupAppLocalizations(locale)),

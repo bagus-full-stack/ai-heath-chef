@@ -137,6 +137,10 @@
   "dashboardCarbsLabel": "CARBS",
   "dashboardEmptyMealsMessage": "No meals logged today yet. Scan your first plate!",
   "dashboardFatLabel": "FAT",
+  "dashboardHydrationAddedMessage": "{amount} ml added",
+  "dashboardHydrationGoalLabel": "{current} / {goal} ml",
+  "dashboardHydrationTitle": "Hydration",
+  "dashboardHydrationUndoButton": "Undo",
   "dashboardKcalRemainingLabel": "KCAL LEFT",
   "dashboardMealCaloriesLabel": "{kcal} kcal",
   "dashboardMealJournalTitle": "Meal log",
@@ -307,6 +311,8 @@
   "notificationSettingsCustomRemindersLoadError": "We couldn't load your custom reminders.",
   "notificationSettingsCustomRemindersTitle": "CUSTOM REMINDERS",
   "notificationSettingsDisabledLabel": "Off",
+  "notificationSettingsFrequencyDaily": "Every day",
+  "notificationSettingsFrequencyWeekly": "Every week",
   "notificationSettingsIntro": "Get a reminder so you remember to log each of your meals.",
   "notificationSettingsLoadError": "We couldn't load your notification settings.",
   "notificationSettingsNameRequiredError": "Give your reminder a name.",
@@ -315,6 +321,7 @@
   "notificationSettingsReminderAtLabel": "Reminder at {time}",
   "notificationSettingsReminderNameHint": "E.g. Snack, Drink water...",
   "notificationSettingsReminderNameLabel": "Reminder name",
+  "notificationSettingsReminderWeeklyAtLabel": "Reminder {day} at {time}",
   "notificationSettingsTimeLabel": "Time: {time}",
   "notificationSettingsTitle": "Notifications",
   "notificationSettingsSlotBreakfast": "Breakfast",
@@ -648,5 +655,8 @@
   "weightTrendLogSheetSaveButton": "Save",
   "weightTrendLogSheetTitle": "New weigh-in",
   "weightTrendTargetLabel": "Target",
-  "weightTrendTitle": "Weight tracking"
+  "weightTrendTitle": "Weight tracking",
+  "weightTrendWeeklyReminderAddedMessage": "Weekly weigh-in reminder scheduled.",
+  "weightTrendWeeklyReminderButton": "Remind me to weigh in every week",
+  "weightTrendWeeklyReminderName": "Weekly weigh-in"
 }

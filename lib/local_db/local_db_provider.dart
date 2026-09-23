@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_database.dart';
+import 'hydration_repository.dart';
 import 'meal_repository.dart';
 import 'weight_repository.dart';
 
@@ -14,4 +15,8 @@ final mealRepositoryProvider = Provider<MealRepository>((ref) {
 
 final weightRepositoryProvider = Provider<WeightRepository>((ref) {
   return WeightRepository(ref.watch(appDatabaseProvider));
+});
+
+final hydrationRepositoryProvider = Provider<HydrationRepository>((ref) {
+  return HydrationRepository(ref.watch(appDatabaseProvider));
 });

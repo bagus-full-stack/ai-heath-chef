@@ -14,6 +14,9 @@ import '../utils/nutrition_targets.dart';
 import '../widgets/animated_async_value.dart';
 import '../l10n/l10n_extensions.dart';
 
+const _hydrationGoalMl = 2000;
+const _hydrationColor = Color(0xFF4AC6FF);
+
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -50,6 +53,12 @@ class DashboardScreen extends ConsumerWidget {
 
     // On écoute notre base de données (qui renvoie maintenant une List<Meal>)
     final mealsAsyncValue = ref.watch(todayMealsProvider);
+
+    // Total d'eau bue aujourd'hui, pour la carte "Hydratation".
+    final hydrationTotalMl = ref.watch(hydrationTodayProvider).maybeWhen(
+          data: (entries) => entries.fold<int>(0, (sum, e) => sum + e.amountMl),
+          orElse: () => 0,
+        );
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -188,6 +197,10 @@ class DashboardScreen extends ConsumerWidget {
                         _buildMacroCard(context.l10n.dashboardFatLabel, '${totalLip.toInt()}g', '/${targetLip.toInt()}g', percentLip, Colors.pink),
                       ],
                     ),
+                    const SizedBox(height: 16),
+
+                    _buildHydrationCard(context, ref, hydrationTotalMl),
+
                     const SizedBox(height: 30),
 
                     AnimatedSize(
@@ -295,6 +308,91 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   // --- WIDGETS REUTILISABLES ---
+
+  /// Carte "Hydratation" : total du jour vs objectif fixe (2 000 ml — pas
+  /// encore de cible personnalisée dans le profil) + deux boutons d'ajout
+  /// rapide. Chaque ajout se défait via la snackbar ("Annuler").
+  Widget _buildHydrationCard(BuildContext context, WidgetRef ref, int totalMl) {
+    final percent = (totalMl / _hydrationGoalMl).clamp(0.0, 1.0);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.grey.shade100, blurRadius: 10, spreadRadius: 1)],
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(color: _hydrationColor.withValues(alpha: 0.15), shape: BoxShape.circle),
+            child: const Icon(Icons.water_drop_rounded, color: _hydrationColor),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.l10n.dashboardHydrationTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                const SizedBox(height: 6),
+                LinearPercentIndicator(
+                  lineHeight: 6.0,
+                  percent: percent,
+                  backgroundColor: _hydrationColor.withValues(alpha: 0.15),
+                  progressColor: _hydrationColor,
+                  barRadius: const Radius.circular(3),
+                  padding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  context.l10n.dashboardHydrationGoalLabel(totalMl, _hydrationGoalMl),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _buildHydrationQuickAdd(context, ref, 250),
+          const SizedBox(width: 6),
+          _buildHydrationQuickAdd(context, ref, 500),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHydrationQuickAdd(BuildContext context, WidgetRef ref, int amountMl) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => _addHydration(context, ref, amountMl),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(color: _hydrationColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+        child: Text('+$amountMl', style: const TextStyle(color: _hydrationColor, fontWeight: FontWeight.bold, fontSize: 12)),
+      ),
+    );
+  }
+
+  Future<void> _addHydration(BuildContext context, WidgetRef ref, int amountMl) async {
+    final id = await ref.read(hydrationRepositoryProvider).addEntry(amountMl);
+    ref.invalidate(hydrationTodayProvider);
+    if (id == null || !context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.dashboardHydrationAddedMessage(amountMl)),
+        action: SnackBarAction(
+          label: context.l10n.dashboardHydrationUndoButton,
+          onPressed: () async {
+            await ref.read(hydrationRepositoryProvider).deleteEntry(id);
+            ref.invalidate(hydrationTodayProvider);
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _buildBmiCard(BuildContext context, BmiResult bmi) {
     return Container(
       padding: const EdgeInsets.all(14),

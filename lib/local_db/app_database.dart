@@ -64,12 +64,25 @@ class WeightEntries extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [LocalMeals, WeightEntries])
+/// Prises d'eau enregistrées localement (horodatées, en ml), pour la carte
+/// "Hydratation" du dashboard — purement local, comme [WeightEntries] :
+/// aucune donnée d'hydratation n'existait ailleurs dans l'app à réutiliser.
+class HydrationEntries extends Table {
+  TextColumn get id => text()();
+  TextColumn get userId => text()();
+  IntColumn get amountMl => integer()();
+  DateTimeColumn get recordedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [LocalMeals, WeightEntries, HydrationEntries])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -81,6 +94,9 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) {
             await m.createTable(weightEntries);
+          }
+          if (from < 4) {
+            await m.createTable(hydrationEntries);
           }
         },
       );

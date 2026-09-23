@@ -58,20 +58,23 @@ class NotificationService {
     return true;
   }
 
-  /// Programme (ou reprogramme) un rappel quotidien répétable à l'heure
-  /// donnée. Remplace tout rappel déjà programmé avec le même [id].
-  Future<void> scheduleDailyReminder({
+  /// Programme (ou reprogramme) un rappel répétable à l'heure donnée —
+  /// quotidien si [weekday] est null, sinon hebdomadaire ce jour-là
+  /// (1 = lundi ... 7 = dimanche, voir `DateTime.monday`..`DateTime.sunday`).
+  /// Remplace tout rappel déjà programmé avec le même [id].
+  Future<void> scheduleReminder({
     required int id,
     required String title,
     required String body,
     required int hour,
     required int minute,
+    int? weekday,
   }) async {
     await _plugin.zonedSchedule(
       id: id,
       title: title,
       body: body,
-      scheduledDate: _nextInstanceOf(hour, minute),
+      scheduledDate: _nextInstanceOf(hour, minute, weekday),
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'meal_reminders',
@@ -82,17 +85,22 @@ class NotificationService {
         iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
+      matchDateTimeComponents: weekday == null ? DateTimeComponents.time : DateTimeComponents.dayOfWeekAndTime,
     );
   }
 
   Future<void> cancelReminder(int id) => _plugin.cancel(id: id);
 
-  tz.TZDateTime _nextInstanceOf(int hour, int minute) {
+  tz.TZDateTime _nextInstanceOf(int hour, int minute, [int? weekday]) {
     final now = tz.TZDateTime.now(tz.local);
     var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
+    }
+    if (weekday != null) {
+      while (scheduled.weekday != weekday) {
+        scheduled = scheduled.add(const Duration(days: 1));
+      }
     }
     return scheduled;
   }

@@ -920,6 +920,30 @@ abstract class AppLocalizations {
   /// **'LIPIDES'**
   String get dashboardFatLabel;
 
+  /// No description provided for @dashboardHydrationAddedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} ml ajoutés'**
+  String dashboardHydrationAddedMessage(int amount);
+
+  /// No description provided for @dashboardHydrationGoalLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'{current} / {goal} ml'**
+  String dashboardHydrationGoalLabel(int current, int goal);
+
+  /// No description provided for @dashboardHydrationTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hydratation'**
+  String get dashboardHydrationTitle;
+
+  /// No description provided for @dashboardHydrationUndoButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get dashboardHydrationUndoButton;
+
   /// No description provided for @dashboardKcalRemainingLabel.
   ///
   /// In fr, this message translates to:
@@ -1856,6 +1880,18 @@ abstract class AppLocalizations {
   /// **'Désactivé'**
   String get notificationSettingsDisabledLabel;
 
+  /// No description provided for @notificationSettingsFrequencyDaily.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque jour'**
+  String get notificationSettingsFrequencyDaily;
+
+  /// No description provided for @notificationSettingsFrequencyWeekly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque semaine'**
+  String get notificationSettingsFrequencyWeekly;
+
   /// No description provided for @notificationSettingsIntro.
   ///
   /// In fr, this message translates to:
@@ -1903,6 +1939,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Nom du rappel'**
   String get notificationSettingsReminderNameLabel;
+
+  /// No description provided for @notificationSettingsReminderWeeklyAtLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rappel {day} à {time}'**
+  String notificationSettingsReminderWeeklyAtLabel(String day, String time);
 
   /// No description provided for @notificationSettingsTimeLabel.
   ///
@@ -3217,6 +3259,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Suivi du poids'**
   String get weightTrendTitle;
+
+  /// No description provided for @weightTrendWeeklyReminderAddedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rappel de pesée hebdomadaire programmé.'**
+  String get weightTrendWeeklyReminderAddedMessage;
+
+  /// No description provided for @weightTrendWeeklyReminderButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Me rappeler de me peser chaque semaine'**
+  String get weightTrendWeeklyReminderButton;
+
+  /// No description provided for @weightTrendWeeklyReminderName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pesée hebdomadaire'**
+  String get weightTrendWeeklyReminderName;
 }
 
 class _AppLocalizationsDelegate
