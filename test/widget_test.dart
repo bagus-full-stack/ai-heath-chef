@@ -1,6 +1,29 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:ai_health_chef/l10n/app_localizations.dart';
 import 'package:ai_health_chef/models/user_profile.dart';
+
+/// Runs [test] with a [BuildContext] that has French localizations loaded,
+/// since `sexLabel`/`goalLabel` read their strings from `context.l10n`.
+Future<void> _withFrenchContext(
+  WidgetTester tester,
+  void Function(BuildContext context) test,
+) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      locale: const Locale('fr'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      home: Builder(
+        builder: (context) {
+          test(context);
+          return const SizedBox.shrink();
+        },
+      ),
+    ),
+  );
+}
 
 void main() {
   group('UserProfile', () {
@@ -41,34 +64,38 @@ void main() {
       expect(profile.updatedAt, isNull);
     });
 
-    test('sexLabel translates known values and defaults to Autre', () {
-      expect(
-        UserProfile.fromJson({'user_id': '1', 'sex': 'male'}).sexLabel,
-        'Homme',
-      );
-      expect(
-        UserProfile.fromJson({'user_id': '1', 'sex': 'female'}).sexLabel,
-        'Femme',
-      );
-      expect(
-        UserProfile.fromJson({'user_id': '1', 'sex': 'other'}).sexLabel,
-        'Autre',
-      );
+    testWidgets('sexLabel translates known values and defaults to Autre', (tester) async {
+      await _withFrenchContext(tester, (context) {
+        expect(
+          UserProfile.fromJson({'user_id': '1', 'sex': 'male'}).sexLabel(context),
+          'Homme',
+        );
+        expect(
+          UserProfile.fromJson({'user_id': '1', 'sex': 'female'}).sexLabel(context),
+          'Femme',
+        );
+        expect(
+          UserProfile.fromJson({'user_id': '1', 'sex': 'other'}).sexLabel(context),
+          'Autre',
+        );
+      });
     });
 
-    test('goalLabel translates known values and defaults to Maintien', () {
-      expect(
-        UserProfile.fromJson({'user_id': '1', 'goal': 'loseWeight'}).goalLabel,
-        'Perte de poids',
-      );
-      expect(
-        UserProfile.fromJson({'user_id': '1', 'goal': 'gainMuscle'}).goalLabel,
-        'Prise de masse',
-      );
-      expect(
-        UserProfile.fromJson({'user_id': '1', 'goal': 'maintain'}).goalLabel,
-        'Maintien',
-      );
+    testWidgets('goalLabel translates known values and defaults to Maintien', (tester) async {
+      await _withFrenchContext(tester, (context) {
+        expect(
+          UserProfile.fromJson({'user_id': '1', 'goal': 'loseWeight'}).goalLabel(context),
+          'Perte de poids',
+        );
+        expect(
+          UserProfile.fromJson({'user_id': '1', 'goal': 'gainMuscle'}).goalLabel(context),
+          'Prise de masse',
+        );
+        expect(
+          UserProfile.fromJson({'user_id': '1', 'goal': 'maintain'}).goalLabel(context),
+          'Maintien',
+        );
+      });
     });
   });
 }
