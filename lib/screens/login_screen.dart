@@ -109,11 +109,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Container(
                   width: 76,
                   height: 76,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                  padding: const EdgeInsets.all(14),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF3E6B4F),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.bolt, size: 36, color: Colors.black),
+                  child: Image.asset('assets/icon/icon_foreground.png'),
                 ),
               ),
               const SizedBox(height: 24),
