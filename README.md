@@ -8,7 +8,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Onboarding** — questionnaire de profil (objectifs, données physiques dont la taille) utilisé pour calculer les cibles nutritionnelles
 - **Dashboard** — jauges de macros (calories, protéines, glucides, lipides) sur la journée, IMC calculé à partir du profil (catégorie OMS + plage), et journal des repas du jour avec la photo de chaque repas (suppression d'un repas par glissement)
 - **Hors ligne (local-first)** — repas enregistrés d'abord dans une base SQLite locale (fonctionne sans connexion), puis synchronisés vers Supabase dès que le réseau est disponible (au démarrage et à chaque retour de connexion)
-- **Analyse nutritionnelle étendue (PRO)** — en plus des macros principales, fibres/sucres/graisses saturées sont estimés par l'IA (ou lus depuis Open Food Facts pour un scan code-barres) et affichés en moyenne quotidienne dans les Analyses avancées
+- **Analyse nutritionnelle étendue (PRO)** — en plus des macros principales, fibres/sucres/graisses saturées sont estimés par l'IA (ou lus depuis Open Food Facts pour un scan code-barres) et affichés en moyenne quotidienne dans les Analyses avancées, avec un graphique d'évolution des calories sur 30 jours (ligne cible incluse, valeurs au tap)
 - **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
 - **Analyse de produit par photo** — même principe pour un produit emballé (Edge Function `analyze-product`), lit l'étiquette nutritionnelle plutôt qu'une assiette
 - **Scan de code-barres** — recherche instantanée d'un produit (EAN/UPC) via la base publique Open Food Facts, sans appel IA
@@ -25,6 +25,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Quota IA global (protection du budget partagé)** — en plus du quota par utilisateur, `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions` (celles qui appellent la clé `GEMINI_API_KEY`, partagée par toute l'app) respectent aussi un plafond quotidien **agrégé, tous utilisateurs confondus** (500/jour pour `analyze-meal`/`analyze-product`, 1000/jour pour `coach-chat`, 300/jour pour `meal-suggestions`) : un disjoncteur qui évite qu'un usage normal mais nombreux épuise silencieusement le débit/budget gratuit d'une seule clé partagée
 - **Abonnement PRO** — paywall, checkout et gestion des achats in-app via RevenueCat (avec un **mode démo** intégré tant que les clés RevenueCat ne sont pas configurées, permettant de tester tout le parcours Paywall → Checkout → déblocage PRO sans compte Apple/Google payant)
 - **IA locale (scan + chat, optionnelle, gratuite)** — Gemma3n exécuté directement sur l'appareil (`flutter_gemma`), activable depuis Profil > IA locale : analyse photo et chat coach fonctionnent alors sans connexion et sans consommer le quota cloud partagé. Repli automatique sur le cloud si le modèle n'est pas téléchargé ou échoue. Jamais derrière un abonnement PRO — voir [IA locale](#ia-locale) ci-dessous pour la configuration.
+- **Bilingue Français/English** — sélecteur de langue depuis Profil > Langue (persisté), toute l'UI est traduite (ARB + `flutter_localizations`), et la langue choisie est aussi transmise à l'IA (analyse de repas/produit, coach, suggestions de repas — cloud et locale) pour qu'elle réponde dans la même langue
 
 ## Stack technique
 
@@ -43,14 +44,18 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **package_info_plus** — version de l'app affichée dans "À propos"
 - **url_launcher** — ouverture du client mail (contact support)
 - **percent_indicator** — jauges circulaires du dashboard
+- **fl_chart** — graphique d'évolution des calories sur 30 jours (Analyses avancées)
 - **google_fonts**, **shared_preferences**, **flutter_dotenv**
 - **flutter_gemma** / **flutter_gemma_litertlm** — IA locale (Gemma3n, scan + chat) exécutée sur l'appareil, sans connexion
+- **flutter_localizations** / **intl** — localisation FR/EN (ARB, génération native Flutter)
 
 ## Architecture du projet
 
 ```
 lib/
   config/       Paramètres du modèle IA locale (local_ai_config)
+  l10n/         Localisation FR/EN : fichiers source app_fr.arb/app_en.arb, AppLocalizations
+                généré par flutter gen-l10n, extension context.l10n
   local_db/     Base de données locale (drift/SQLite) et synchronisation hors ligne :
                 app_database (schéma + migrations), meal_repository (source de vérité des
                 repas, écrit en local puis pousse vers Supabase), local_db_provider
@@ -59,7 +64,8 @@ lib/
   providers/    State management Riverpod : auth, profile, dashboard (journal du jour, lu
                 depuis la base locale), meal (analyse/scan en cours), meal_suggestions,
                 chat, onboarding, purchase (entitlement PRO/admin), notification_settings,
-                custom_reminders, local_ai (activation/téléchargement de l'IA locale)
+                custom_reminders, local_ai (activation/téléchargement de l'IA locale),
+                locale (langue choisie, persistée)
   screens/      Écrans de l'application (dashboard, coach, profil, compte, onboarding,
                 auth, caméra/scanner, analyse repas/produit, notifications, IA locale,
                 préférences alimentaires, personnalisation coach, paywall/checkout,
