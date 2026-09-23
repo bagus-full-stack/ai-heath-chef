@@ -24,11 +24,13 @@ const Map<String, IconData> _kTimeSlotIcons = {
 class MealSuggestionCard extends StatelessWidget {
   final MealSuggestion suggestion;
   final VoidCallback onAdd;
+  final VoidCallback onAddToShoppingList;
 
   const MealSuggestionCard({
     super.key,
     required this.suggestion,
     required this.onAdd,
+    required this.onAddToShoppingList,
   });
 
   @override
@@ -158,6 +160,19 @@ class MealSuggestionCard extends StatelessWidget {
                         suggestion.lip.toStringAsFixed(0),
                       ),
                     ),
+                    GestureDetector(
+                      onTap: onAddToShoppingList,
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: _kPrimaryColor.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.shopping_cart_outlined, color: _kPrimaryColor, size: 18),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     GestureDetector(
                       onTap: onAdd,
                       child: Container(

@@ -491,12 +491,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardMealJournalTitle => 'Meal log';
 
   @override
+  String dashboardMealRepeatedMessage(String name) {
+    return '$name was added again for today.';
+  }
+
+  @override
   String dashboardMealsLoadError(String error) {
     return 'Error: $error';
   }
 
   @override
   String get dashboardProteinLabel => 'PROTEIN';
+
+  @override
+  String get dashboardRepeatMealTooltip => 'Repeat this meal';
 
   @override
   String get dashboardTodayTitle => 'Today';
@@ -963,6 +971,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mealSuggestionCardProtLabel => 'PROT';
 
   @override
+  String mealSuggestionsAddedToShoppingListMessage(String title) {
+    return '\"$title\" added to your shopping list';
+  }
+
+  @override
   String mealSuggestionsAdjustPresetMessage(String title) {
     return 'Adjust this meal for my goal: $title';
   }
@@ -1374,6 +1387,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileDietaryPrefsTitle => 'Dietary preferences';
 
   @override
+  String get profileExportJournalSubtitle => 'Share my meals (CSV)';
+
+  @override
+  String get profileExportJournalTitle => 'Export my journal';
+
+  @override
   String get profileGoalLabel => 'Goal';
 
   @override
@@ -1476,9 +1495,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileVersionText => 'AI Health Chef v1.0.0';
 
   @override
+  String get profileWeightTrackingSubtitle => 'See my progress chart';
+
+  @override
+  String get profileWeightTrackingTitle => 'Weight tracking';
+
+  @override
   String profileWeightValue(String weight) {
     return '$weight kg';
   }
+
+  @override
+  String get shoppingListClearCheckedButton => 'Remove checked items';
+
+  @override
+  String get shoppingListEmptyState =>
+      'Your shopping list is empty. Add ideas from the AI Coach.';
+
+  @override
+  String get shoppingListTitle => 'Shopping list';
 
   @override
   String get signupAlreadyMember => 'Already a member?';
@@ -1737,4 +1772,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get svcErrorHuggingFaceToken =>
       'Couldn\'t retrieve the Hugging Face token.';
+
+  @override
+  String get weightTrendCurrentLabel => 'Current weight';
+
+  @override
+  String get weightTrendEmptyState =>
+      'No weigh-ins yet. Log your first weight to see your progress.';
+
+  @override
+  String weightTrendErrorMessage(String error) {
+    return 'Loading error: $error';
+  }
+
+  @override
+  String weightTrendKgValue(String value) {
+    return '$value kg';
+  }
+
+  @override
+  String get weightTrendLogButton => 'Log my weight';
+
+  @override
+  String get weightTrendLogSheetSaveButton => 'Save';
+
+  @override
+  String get weightTrendLogSheetTitle => 'New weigh-in';
+
+  @override
+  String get weightTrendTargetLabel => 'Target';
+
+  @override
+  String get weightTrendTitle => 'Weight tracking';
 }

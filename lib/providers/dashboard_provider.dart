@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/database_service.dart';
+import '../local_db/app_database.dart' show WeightEntry;
 import '../local_db/local_db_provider.dart';
 import '../models/meal.dart';
 
@@ -28,4 +29,11 @@ final nutritionTrendsProvider = FutureProvider<List<Meal>>((ref) async {
 final nutritionTrends30Provider = FutureProvider<List<Meal>>((ref) async {
   final mealRepository = ref.watch(mealRepositoryProvider);
   return await mealRepository.getMealsSince(30);
+});
+
+/// Pesées des 90 derniers jours, pour la courbe de progression de l'écran
+/// "Suivi du poids".
+final weightEntriesProvider = FutureProvider<List<WeightEntry>>((ref) async {
+  final weightRepository = ref.watch(weightRepositoryProvider);
+  return await weightRepository.getEntriesSince(90);
 });

@@ -8,6 +8,7 @@ import '../providers/chat_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/meal_suggestions_provider.dart';
 import '../providers/profile_provider.dart';
+import '../providers/shopping_list_provider.dart';
 import '../utils/nutrition_targets.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/meal_suggestion_card.dart';
@@ -185,6 +186,12 @@ class _MealSuggestionsRow extends ConsumerWidget {
                       context,
                       presetMessage: context.l10n.coachAdjustMealPresetMessage(suggestion.title),
                     ),
+                    onAddToShoppingList: () {
+                      ref.read(shoppingListProvider.notifier).addItems([suggestion.title]);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(context.l10n.mealSuggestionsAddedToShoppingListMessage(suggestion.title))),
+                      );
+                    },
                   ),
                 ),
               );

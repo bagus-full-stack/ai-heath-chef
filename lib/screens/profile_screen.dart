@@ -10,6 +10,7 @@ import '../providers/local_ai_provider.dart';
 import '../providers/locale_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart';
+import '../utils/journal_export.dart';
 import '../widgets/animated_async_value.dart';
 import 'coming_soon_screen.dart';
 
@@ -161,6 +162,18 @@ class ProfileScreen extends ConsumerWidget {
                       subtitle: context.l10n.profileAdvancedAnalyticsSubtitle,
                       badge: isPro ? null : context.l10n.profileProBadge,
                       onTap: () => context.push('/nutrition_trends'),
+                    ),
+                    _SettingsItem(
+                      icon: Icons.monitor_weight_outlined,
+                      title: context.l10n.profileWeightTrackingTitle,
+                      subtitle: context.l10n.profileWeightTrackingSubtitle,
+                      onTap: () => context.push('/weight_trend'),
+                    ),
+                    _SettingsItem(
+                      icon: Icons.ios_share_rounded,
+                      title: context.l10n.profileExportJournalTitle,
+                      subtitle: context.l10n.profileExportJournalSubtitle,
+                      onTap: () => exportMealJournalCsv(ref),
                     ),
                     _SettingsItem(
                       icon: Icons.language_rounded,

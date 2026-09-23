@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/meal_suggestions_provider.dart';
+import '../providers/shopping_list_provider.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/meal_suggestion_card.dart';
 import 'coach_screen.dart' show openCoachChatSheet, kCoachPrimaryColor;
@@ -32,6 +33,11 @@ class MealSuggestionsScreen extends ConsumerWidget {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart_outlined, color: kCoachPrimaryColor),
+            tooltip: context.l10n.shoppingListTitle,
+            onPressed: () => context.push('/shopping_list'),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: kCoachPrimaryColor),
             tooltip: context.l10n.mealSuggestionsRegenerateTooltip,
@@ -93,6 +99,12 @@ class MealSuggestionsScreen extends ConsumerWidget {
                       context,
                       presetMessage: context.l10n.mealSuggestionsAdjustPresetMessage(suggestion.title),
                     ),
+                    onAddToShoppingList: () {
+                      ref.read(shoppingListProvider.notifier).addItems([suggestion.title]);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(context.l10n.mealSuggestionsAddedToShoppingListMessage(suggestion.title))),
+                      );
+                    },
                   );
                 },
               ),

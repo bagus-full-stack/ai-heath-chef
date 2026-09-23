@@ -140,8 +140,10 @@
   "dashboardKcalRemainingLabel": "KCAL LEFT",
   "dashboardMealCaloriesLabel": "{kcal} kcal",
   "dashboardMealJournalTitle": "Meal log",
+  "dashboardMealRepeatedMessage": "{name} was added again for today.",
   "dashboardMealsLoadError": "Error: {error}",
   "dashboardProteinLabel": "PROTEIN",
+  "dashboardRepeatMealTooltip": "Repeat this meal",
   "dashboardTodayTitle": "Today",
   "dietaryPreferencesAllergiesDescription": "These will be avoided in the meal ideas suggested by the AI. This doesn't replace your own vigilance in case of a severe allergy.",
   "dietaryPreferencesAllergiesSectionTitle": "ALLERGIES & INTOLERANCES",
@@ -293,6 +295,7 @@
   "mealSuggestionCardKcalLabel": "{kcal} kcal",
   "mealSuggestionCardLipLabel": "LIP",
   "mealSuggestionCardProtLabel": "PROT",
+  "mealSuggestionsAddedToShoppingListMessage": "\"{title}\" added to your shopping list",
   "mealSuggestionsAdjustPresetMessage": "Adjust this meal for my goal: {title}",
   "mealSuggestionsEmptyMessage": "No meal ideas available right now.",
   "mealSuggestionsLoadError": "We couldn't generate meal ideas right now.",
@@ -414,6 +417,8 @@
   "profileDefaultUserName": "User",
   "profileDietaryPrefsSubtitleWithAllergies": "{dietType} · {count} allerg(y/ies)",
   "profileDietaryPrefsTitle": "Dietary preferences",
+  "profileExportJournalSubtitle": "Share my meals (CSV)",
+  "profileExportJournalTitle": "Export my journal",
   "profileGoalLabel": "Goal",
   "profileGoalsSubtitle": "Calories and macros",
   "profileGoalsTitle": "My goals",
@@ -446,7 +451,12 @@
   "profileTitle": "MY PROFILE",
   "profileUnknownUser": "Unknown user",
   "profileVersionText": "AI Health Chef v1.0.0",
+  "profileWeightTrackingSubtitle": "See my progress chart",
+  "profileWeightTrackingTitle": "Weight tracking",
   "profileWeightValue": "{weight} kg",
+  "shoppingListClearCheckedButton": "Remove checked items",
+  "shoppingListEmptyState": "Your shopping list is empty. Add ideas from the AI Coach.",
+  "shoppingListTitle": "Shopping list",
   "signupAlreadyMember": "Already a member?",
   "signupDividerOrSignUpWith": "OR SIGN UP WITH",
   "signupEmailHint": "john.smith@example.com",
@@ -615,5 +625,28 @@
       }
     }
   },
-  "svcErrorHuggingFaceToken": "Couldn't retrieve the Hugging Face token."
+  "svcErrorHuggingFaceToken": "Couldn't retrieve the Hugging Face token.",
+  "weightTrendCurrentLabel": "Current weight",
+  "weightTrendEmptyState": "No weigh-ins yet. Log your first weight to see your progress.",
+  "weightTrendErrorMessage": "Loading error: {error}",
+  "@weightTrendErrorMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "weightTrendKgValue": "{value} kg",
+  "@weightTrendKgValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "weightTrendLogButton": "Log my weight",
+  "weightTrendLogSheetSaveButton": "Save",
+  "weightTrendLogSheetTitle": "New weigh-in",
+  "weightTrendTargetLabel": "Target",
+  "weightTrendTitle": "Weight tracking"
 }

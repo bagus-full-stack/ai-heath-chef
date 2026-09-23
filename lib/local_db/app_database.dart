@@ -50,12 +50,26 @@ class LocalMeals extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [LocalMeals])
+/// Pesées enregistrées localement, pour la courbe de progression de l'écran
+/// "Suivi du poids" — purement local, aucune table miroir côté Supabase
+/// (le poids courant reste synchronisé via `profiles.current_weight`, voir
+/// [WeightRepository]).
+class WeightEntries extends Table {
+  TextColumn get id => text()();
+  TextColumn get userId => text()();
+  RealColumn get weightKg => real()();
+  DateTimeColumn get recordedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [LocalMeals, WeightEntries])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -64,6 +78,9 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(localMeals, localMeals.totalFiber);
             await m.addColumn(localMeals, localMeals.totalSugar);
             await m.addColumn(localMeals, localMeals.totalSatFat);
+          }
+          if (from < 3) {
+            await m.createTable(weightEntries);
           }
         },
       );

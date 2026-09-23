@@ -25,6 +25,8 @@ import '../screens/camera_capture_screen.dart';
 import '../screens/forgot_password_screen.dart';
 import '../screens/paywall_screen.dart';
 import '../screens/nutrition_trends_screen.dart';
+import '../screens/weight_trend_screen.dart';
+import '../screens/shopping_list_screen.dart';
 import '../screens/checkout_screen.dart';
 import '../screens/account_screen.dart';
 import '../screens/coming_soon_screen.dart';
@@ -120,6 +122,14 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/nutrition_trends',
         builder: (context, state) => const NutritionTrendsScreen(),
+      ),
+      GoRoute(
+        path: '/weight_trend',
+        builder: (context, state) => const WeightTrendScreen(),
+      ),
+      GoRoute(
+        path: '/shopping_list',
+        builder: (context, state) => const ShoppingListScreen(),
       ),
       GoRoute(
         path: '/checkout',

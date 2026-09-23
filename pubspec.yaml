@@ -63,6 +63,7 @@ dependencies:
   uuid: ^4.5.1                               # Génère les id (uuid v4) des repas côté client, réutilisés tels quels lors de la synchronisation vers Supabase
   connectivity_plus: ^7.3.1                 # Détecte le retour du réseau pour déclencher la synchronisation des repas en attente
   fl_chart: ^1.1.1                          # Courbe de tendance calories sur 30 jours (Analyses avancées)
+  share_plus: ^13.3.0
 
 dev_dependencies:
   flutter_test:

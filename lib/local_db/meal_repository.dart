@@ -159,6 +159,41 @@ class MealRepository {
     );
   }
 
+  /// Reduplique un repas passé (retrouvé par son id) au jour courant, avec
+  /// les mêmes ingrédients/totaux/photo — pour le bouton "refaire ce repas"
+  /// du journal du dashboard. Ne dépend pas du modèle [Meal] (qui n'expose
+  /// pas les ingrédients) : on repart directement de la ligne locale.
+  Future<void> repeatMeal(String id) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    final row = await (_db.select(_db.localMeals)..where((m) => m.id.equals(id))).getSingleOrNull();
+    if (row == null) return;
+
+    await _db.into(_db.localMeals).insert(LocalMealsCompanion.insert(
+          id: _uuid.v4(),
+          userId: user.id,
+          name: row.name,
+          totalKcal: row.totalKcal,
+          totalProt: Value(row.totalProt),
+          totalGluc: Value(row.totalGluc),
+          totalLip: Value(row.totalLip),
+          totalFiber: Value(row.totalFiber),
+          totalSugar: Value(row.totalSugar),
+          totalSatFat: Value(row.totalSatFat),
+          ingredientsJson: Value(row.ingredientsJson),
+          // On ne recopie que l'URL déjà uploadée, jamais [localImagePath] :
+          // deux lignes partageant le même fichier local casseraient l'image
+          // de l'une dès que l'autre est supprimée (deleteMeal efface le
+          // fichier). Repas pas encore synchronisé -> le doublon repart sans
+          // photo plutôt que de risquer ce partage.
+          imageUrl: Value(row.imageUrl),
+          createdAt: DateTime.now(),
+        ));
+
+    unawaited(syncPendingMeals());
+  }
+
   /// Marque un repas comme supprimé localement — répercuté sur Supabase à
   /// la prochaine synchronisation plutôt qu'effacé immédiatement, pour ne
   /// pas perdre la suppression si elle survient hors ligne.

@@ -255,10 +255,20 @@ class DashboardScreen extends ConsumerWidget {
                                     child: const Icon(Icons.delete_outline, color: Colors.white),
                                   ),
                                   child: _buildMealCard(
+                                    context,
                                     meal.name,
                                     timeString,
                                     context.l10n.dashboardMealCaloriesLabel(meal.totalKcal),
                                     meal.imageUrl,
+                                    () async {
+                                      await ref.read(mealRepositoryProvider).repeatMeal(meal.id);
+                                      ref.invalidate(todayMealsProvider);
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text(context.l10n.dashboardMealRepeatedMessage(meal.name))),
+                                        );
+                                      }
+                                    },
                                   ),
                                 );
                               }).toList(),
@@ -361,7 +371,14 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMealCard(String name, String time, String calories, String? imageUrl) {
+  Widget _buildMealCard(
+    BuildContext context,
+    String name,
+    String time,
+    String calories,
+    String? imageUrl,
+    VoidCallback onRepeat,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -412,6 +429,15 @@ class DashboardScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(color: const Color(0xFF6B66FF).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
             child: Text(calories, style: const TextStyle(color: Color(0xFF6B66FF), fontWeight: FontWeight.bold, fontSize: 12)),
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            visualDensity: VisualDensity.compact,
+            icon: Icon(Icons.replay_rounded, color: Colors.grey.shade400, size: 20),
+            tooltip: context.l10n.dashboardRepeatMealTooltip,
+            onPressed: onRepeat,
           ),
         ],
       ),

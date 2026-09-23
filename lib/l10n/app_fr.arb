@@ -291,6 +291,14 @@
     }
   },
   "dashboardMealJournalTitle": "Journal des repas",
+  "dashboardMealRepeatedMessage": "{name} a été rajouté à aujourd'hui.",
+  "@dashboardMealRepeatedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "dashboardMealsLoadError": "Erreur: {error}",
   "@dashboardMealsLoadError": {
     "placeholders": {
@@ -300,6 +308,7 @@
     }
   },
   "dashboardProteinLabel": "PROTÉINES",
+  "dashboardRepeatMealTooltip": "Refaire ce repas",
   "dashboardTodayTitle": "Aujourd'hui",
   "dietaryPreferencesAllergiesDescription": "Elles seront évitées dans les idées de repas proposées par l’IA. Ne remplace pas la vigilance en cas d’allergie sévère.",
   "dietaryPreferencesAllergiesSectionTitle": "ALLERGIES & INTOLÉRANCES",
@@ -521,6 +530,14 @@
   },
   "mealSuggestionCardLipLabel": "LIP",
   "mealSuggestionCardProtLabel": "PROT",
+  "mealSuggestionsAddedToShoppingListMessage": "\"{title}\" ajouté à la liste de courses",
+  "@mealSuggestionsAddedToShoppingListMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "mealSuggestionsAdjustPresetMessage": "Ajuste ce repas pour mon objectif: {title}",
   "@mealSuggestionsAdjustPresetMessage": {
     "placeholders": {
@@ -721,6 +738,8 @@
     }
   },
   "profileDietaryPrefsTitle": "Préférences alimentaires",
+  "profileExportJournalSubtitle": "Partager mes repas (CSV)",
+  "profileExportJournalTitle": "Exporter mon journal",
   "profileGoalLabel": "Objectif",
   "profileGoalsSubtitle": "Calories et macros",
   "profileGoalsTitle": "Mes objectifs",
@@ -767,6 +786,8 @@
   "profileTitle": "MON PROFIL",
   "profileUnknownUser": "Utilisateur inconnu",
   "profileVersionText": "AI Health Chef v1.0.0",
+  "profileWeightTrackingSubtitle": "Voir ma courbe de progression",
+  "profileWeightTrackingTitle": "Suivi du poids",
   "profileWeightValue": "{weight} kg",
   "@profileWeightValue": {
     "placeholders": {
@@ -775,6 +796,9 @@
       }
     }
   },
+  "shoppingListClearCheckedButton": "Retirer les articles cochés",
+  "shoppingListEmptyState": "Votre liste de courses est vide. Ajoutez des idées depuis le Coach IA.",
+  "shoppingListTitle": "Liste de courses",
   "signupAlreadyMember": "Déjà membre ?",
   "signupDividerOrSignUpWith": "OU S'INSCRIRE AVEC",
   "signupEmailHint": "jean.dupont@exemple.fr",
@@ -978,5 +1002,28 @@
       }
     }
   },
-  "svcErrorHuggingFaceToken": "Impossible de récupérer le token Hugging Face."
+  "svcErrorHuggingFaceToken": "Impossible de récupérer le token Hugging Face.",
+  "weightTrendCurrentLabel": "Poids actuel",
+  "weightTrendEmptyState": "Aucune pesée enregistrée. Ajoutez votre premier poids pour voir votre progression.",
+  "weightTrendErrorMessage": "Erreur de chargement : {error}",
+  "@weightTrendErrorMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "weightTrendKgValue": "{value} kg",
+  "@weightTrendKgValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "weightTrendLogButton": "Enregistrer mon poids",
+  "weightTrendLogSheetSaveButton": "Enregistrer",
+  "weightTrendLogSheetTitle": "Nouvelle pesée",
+  "weightTrendTargetLabel": "Objectif",
+  "weightTrendTitle": "Suivi du poids"
 }

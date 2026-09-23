@@ -938,6 +938,12 @@ abstract class AppLocalizations {
   /// **'Journal des repas'**
   String get dashboardMealJournalTitle;
 
+  /// No description provided for @dashboardMealRepeatedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a été rajouté à aujourd\'hui.'**
+  String dashboardMealRepeatedMessage(String name);
+
   /// No description provided for @dashboardMealsLoadError.
   ///
   /// In fr, this message translates to:
@@ -949,6 +955,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'PROTÉINES'**
   String get dashboardProteinLabel;
+
+  /// No description provided for @dashboardRepeatMealTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refaire ce repas'**
+  String get dashboardRepeatMealTooltip;
 
   /// No description provided for @dashboardTodayTitle.
   ///
@@ -1772,6 +1784,12 @@ abstract class AppLocalizations {
   /// **'PROT'**
   String get mealSuggestionCardProtLabel;
 
+  /// No description provided for @mealSuggestionsAddedToShoppingListMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'\"{title}\" ajouté à la liste de courses'**
+  String mealSuggestionsAddedToShoppingListMessage(String title);
+
   /// No description provided for @mealSuggestionsAdjustPresetMessage.
   ///
   /// In fr, this message translates to:
@@ -2498,6 +2516,18 @@ abstract class AppLocalizations {
   /// **'Préférences alimentaires'**
   String get profileDietaryPrefsTitle;
 
+  /// No description provided for @profileExportJournalSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager mes repas (CSV)'**
+  String get profileExportJournalSubtitle;
+
+  /// No description provided for @profileExportJournalTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter mon journal'**
+  String get profileExportJournalTitle;
+
   /// No description provided for @profileGoalLabel.
   ///
   /// In fr, this message translates to:
@@ -2690,11 +2720,41 @@ abstract class AppLocalizations {
   /// **'AI Health Chef v1.0.0'**
   String get profileVersionText;
 
+  /// No description provided for @profileWeightTrackingSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir ma courbe de progression'**
+  String get profileWeightTrackingSubtitle;
+
+  /// No description provided for @profileWeightTrackingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi du poids'**
+  String get profileWeightTrackingTitle;
+
   /// No description provided for @profileWeightValue.
   ///
   /// In fr, this message translates to:
   /// **'{weight} kg'**
   String profileWeightValue(String weight);
+
+  /// No description provided for @shoppingListClearCheckedButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer les articles cochés'**
+  String get shoppingListClearCheckedButton;
+
+  /// No description provided for @shoppingListEmptyState.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre liste de courses est vide. Ajoutez des idées depuis le Coach IA.'**
+  String get shoppingListEmptyState;
+
+  /// No description provided for @shoppingListTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liste de courses'**
+  String get shoppingListTitle;
 
   /// No description provided for @signupAlreadyMember.
   ///
@@ -3103,6 +3163,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Impossible de récupérer le token Hugging Face.'**
   String get svcErrorHuggingFaceToken;
+
+  /// No description provided for @weightTrendCurrentLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Poids actuel'**
+  String get weightTrendCurrentLabel;
+
+  /// No description provided for @weightTrendEmptyState.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune pesée enregistrée. Ajoutez votre premier poids pour voir votre progression.'**
+  String get weightTrendEmptyState;
+
+  /// No description provided for @weightTrendErrorMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur de chargement : {error}'**
+  String weightTrendErrorMessage(String error);
+
+  /// No description provided for @weightTrendKgValue.
+  ///
+  /// In fr, this message translates to:
+  /// **'{value} kg'**
+  String weightTrendKgValue(String value);
+
+  /// No description provided for @weightTrendLogButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer mon poids'**
+  String get weightTrendLogButton;
+
+  /// No description provided for @weightTrendLogSheetSaveButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get weightTrendLogSheetSaveButton;
+
+  /// No description provided for @weightTrendLogSheetTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle pesée'**
+  String get weightTrendLogSheetTitle;
+
+  /// No description provided for @weightTrendTargetLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif'**
+  String get weightTrendTargetLabel;
+
+  /// No description provided for @weightTrendTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi du poids'**
+  String get weightTrendTitle;
 }
 
 class _AppLocalizationsDelegate
