@@ -12,6 +12,7 @@ import '../local_db/local_db_provider.dart';
 import '../utils/bmi.dart';
 import '../utils/nutrition_targets.dart';
 import '../widgets/animated_async_value.dart';
+import '../l10n/l10n_extensions.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -93,7 +94,7 @@ class DashboardScreen extends ConsumerWidget {
 
       body: mealsAsyncValue.animatedWhen(
           loading: () => const Center(child: CircularProgressIndicator(color: primaryColor)),
-          error: (err, stack) => Center(child: Text('Erreur: $err')),
+          error: (err, stack) => Center(child: Text(context.l10n.dashboardMealsLoadError(err.toString()))),
           data: (List<Meal> meals) { // 🚀 On spécifie bien List<Meal> ici
 
             // --- CALCUL DES TOTAUX ---
@@ -138,7 +139,7 @@ class DashboardScreen extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Aujourd\'hui', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        Text(context.l10n.dashboardTodayTitle, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
@@ -163,13 +164,13 @@ class DashboardScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text('$remainingKcal', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 40)),
-                            const Text('KCAL RESTANT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black54)),
+                            Text(context.l10n.dashboardKcalRemainingLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black54)),
                             const SizedBox(height: 8),
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Icon(Icons.local_fire_department, size: 16, color: primaryColor),
-                                Text(' Objectif: $targetKcal', style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                                Text(context.l10n.dashboardCalorieGoalLabel(targetKcal), style: const TextStyle(color: Colors.black54, fontSize: 12)),
                               ],
                             ),
                           ],
@@ -182,9 +183,9 @@ class DashboardScreen extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildMacroCard('PROTÉINES', '${totalProt.toInt()}g', '/${targetProt.toInt()}g', percentProt, Colors.blue),
-                        _buildMacroCard('GLUCIDES', '${totalGluc.toInt()}g', '/${targetGluc.toInt()}g', percentGluc, Colors.orange),
-                        _buildMacroCard('LIPIDES', '${totalLip.toInt()}g', '/${targetLip.toInt()}g', percentLip, Colors.pink),
+                        _buildMacroCard(context.l10n.dashboardProteinLabel, '${totalProt.toInt()}g', '/${targetProt.toInt()}g', percentProt, Colors.blue),
+                        _buildMacroCard(context.l10n.dashboardCarbsLabel, '${totalGluc.toInt()}g', '/${targetGluc.toInt()}g', percentGluc, Colors.orange),
+                        _buildMacroCard(context.l10n.dashboardFatLabel, '${totalLip.toInt()}g', '/${targetLip.toInt()}g', percentLip, Colors.pink),
                       ],
                     ),
                     const SizedBox(height: 30),
@@ -198,7 +199,7 @@ class DashboardScreen extends ConsumerWidget {
                             ? Padding(
                                 key: const ValueKey('bmi'),
                                 padding: const EdgeInsets.only(bottom: 30),
-                                child: _buildBmiCard(bmi),
+                                child: _buildBmiCard(context, bmi),
                               )
                             : const SizedBox.shrink(key: ValueKey('no-bmi')),
                       ),
@@ -212,7 +213,7 @@ class DashboardScreen extends ConsumerWidget {
                           children: [
                             const Icon(Icons.restaurant, color: primaryColor),
                             const SizedBox(width: 8),
-                            const Text('Journal des repas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            Text(context.l10n.dashboardMealJournalTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ],
@@ -227,7 +228,7 @@ class DashboardScreen extends ConsumerWidget {
                               key: const ValueKey('empty-meals'),
                               child: Padding(
                                 padding: const EdgeInsets.all(20.0),
-                                child: Text("Aucun repas enregistré aujourd'hui. Scannez votre première assiette !", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade500)),
+                                child: Text(context.l10n.dashboardEmptyMealsMessage, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade500)),
                               ),
                             )
                           : Column(
@@ -256,7 +257,7 @@ class DashboardScreen extends ConsumerWidget {
                                   child: _buildMealCard(
                                     meal.name,
                                     timeString,
-                                    '${meal.totalKcal} kcal',
+                                    context.l10n.dashboardMealCaloriesLabel(meal.totalKcal),
                                     meal.imageUrl,
                                   ),
                                 );
@@ -284,7 +285,7 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   // --- WIDGETS REUTILISABLES ---
-  Widget _buildBmiCard(BmiResult bmi) {
+  Widget _buildBmiCard(BuildContext context, BmiResult bmi) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -311,9 +312,9 @@ class DashboardScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('IMC : ${bmi.label}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(context.l10n.dashboardBmiLabel(bmi.label(context)), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                 const SizedBox(height: 2),
-                Text('Plage ${bmi.label.toLowerCase()} : ${bmi.rangeLabel}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text(context.l10n.dashboardBmiRangeLabel(bmi.label(context).toLowerCase(), bmi.rangeLabel), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
               ],
             ),
           ),

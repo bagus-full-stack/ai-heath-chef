@@ -8,6 +8,7 @@ import '../local_db/local_db_provider.dart';
 import '../models/ingredient.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/success_transition_dialog.dart';
+import '../l10n/l10n_extensions.dart';
 
 class MealAnalysisScreen extends ConsumerStatefulWidget {
   final String? imagePath;
@@ -63,7 +64,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          _isProductFlow ? 'ANALYSE DU PRODUIT' : 'ANALYSE DU REPAS',
+          _isProductFlow
+              ? context.l10n.mealAnalysisTitleProduct
+              : context.l10n.mealAnalysisTitleMeal,
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
@@ -77,17 +80,12 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
             onPressed: () => showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text('Comment ça marche ?'),
-                content: const Text(
-                  'Notre IA identifie les ingrédients de ton assiette et estime leurs valeurs '
-                  'nutritionnelles. Ajuste les quantités avec + / - si besoin, retire un '
-                  'ingrédient avec l’icône poubelle, puis valide pour l’enregistrer dans ton '
-                  'journal du jour.',
-                ),
+                title: Text(context.l10n.mealAnalysisHowItWorksTitle),
+                content: Text(context.l10n.mealAnalysisHowItWorksBody),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Compris'),
+                    child: Text(context.l10n.mealAnalysisHowItWorksConfirm),
                   ),
                 ],
               ),
@@ -133,8 +131,8 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                         ),
                         child: Text(
                           widget.barcode != null
-                              ? 'Trouvé via code-barres'
-                              : 'Identifié par l\'IA',
+                              ? context.l10n.mealAnalysisBadgeBarcode
+                              : context.l10n.mealAnalysisBadgeAi,
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -158,10 +156,10 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                       const SizedBox(height: 20),
                       Text(
                         widget.barcode != null
-                            ? 'Recherche du produit...'
+                            ? context.l10n.mealAnalysisLoadingBarcode
                             : widget.isProduct
-                            ? 'L\'IA lit l\'étiquette du produit...'
-                            : 'L\'IA analyse votre assiette...',
+                            ? context.l10n.mealAnalysisLoadingLabel
+                            : context.l10n.mealAnalysisLoadingPlate,
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.grey.shade600,
@@ -170,7 +168,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Cela prend généralement quelques secondes.',
+                        context.l10n.mealAnalysisLoadingHint,
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade400,
@@ -191,9 +189,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                         size: 60,
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Oups !',
-                        style: TextStyle(
+                      Text(
+                        context.l10n.mealAnalysisErrorTitle,
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
@@ -210,9 +208,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                         ),
-                        child: const Text(
-                          'Réessayer',
-                          style: TextStyle(color: Colors.white),
+                        child: Text(
+                          context.l10n.mealAnalysisRetryButton,
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
                     ],
@@ -262,19 +260,19 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Column(
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Ingrédients',
-                                  style: TextStyle(
+                                  context.l10n.mealAnalysisIngredientsTitle,
+                                  style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
-                                  'Modifiez les quantités si nécessaire',
-                                  style: TextStyle(
+                                  context.l10n.mealAnalysisIngredientsSubtitle,
+                                  style: const TextStyle(
                                     color: Colors.grey,
                                     fontSize: 14,
                                   ),
@@ -296,9 +294,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                     ),
                                   ),
                                 ),
-                                const Text(
-                                  'TOTAL KCAL',
-                                  style: TextStyle(
+                                Text(
+                                  context.l10n.mealAnalysisTotalKcalLabel,
+                                  style: const TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black54,
@@ -359,9 +357,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                 Icons.add,
                                 color: Colors.black54,
                               ),
-                              label: const Text(
-                                'Ajouter un ingrédient',
-                                style: TextStyle(
+                              label: Text(
+                                context.l10n.mealAnalysisAddIngredientButton,
+                                style: const TextStyle(
                                   color: Colors.black87,
                                   fontSize: 16,
                                 ),
@@ -398,9 +396,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'RÉSUMÉ NUTRITIONNEL',
-                                style: TextStyle(
+                              Text(
+                                context.l10n.mealAnalysisNutritionSummaryTitle,
+                                style: const TextStyle(
                                   color: primaryColor,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.2,
@@ -413,17 +411,17 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   _buildSummaryMacro(
-                                    'Protéines',
+                                    context.l10n.mealAnalysisMacroProtein,
                                     totalProt,
                                     primaryColor,
                                   ),
                                   _buildSummaryMacro(
-                                    'Glucides',
+                                    context.l10n.mealAnalysisMacroCarbs,
                                     totalGluc,
                                     Colors.orange,
                                   ),
                                   _buildSummaryMacro(
-                                    'Lipides',
+                                    context.l10n.mealAnalysisMacroFat,
                                     totalLip,
                                     Colors.pink,
                                   ),
@@ -435,17 +433,17 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   _buildSummaryMacro(
-                                    'Fibres',
+                                    context.l10n.mealAnalysisMacroFiber,
                                     totalFiber,
                                     Colors.green,
                                   ),
                                   _buildSummaryMacro(
-                                    'Sucres',
+                                    context.l10n.mealAnalysisMacroSugar,
                                     totalSugar,
                                     Colors.redAccent,
                                   ),
                                   _buildSummaryMacro(
-                                    'Sat.',
+                                    context.l10n.mealAnalysisMacroSatFat,
                                     totalSatFat,
                                     Colors.brown,
                                   ),
@@ -477,7 +475,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                               // arrière-plan — voir lib/local_db/meal_repository.dart.
                               final mealName = _isProductFlow
                                   ? ingredients.first.name
-                                  : 'Repas IA';
+                                  : context.l10n.mealAnalysisDefaultMealName;
                               await ref.read(mealRepositoryProvider).saveMeal(
                                 ingredients,
                                 mealName,
@@ -499,9 +497,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                               // On retourne au Dashboard !
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text(
-                                      'Repas sauvegardé avec succès !',
+                                      context.l10n.mealAnalysisSaveSuccessSnackbar,
                                     ),
                                     backgroundColor: Colors.green,
                                   ),
@@ -528,9 +526,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                           ),
-                          child: const Text(
-                            'Valider et sauvegarder',
-                            style: TextStyle(
+                          child: Text(
+                            context.l10n.mealAnalysisSaveButton,
+                            style: const TextStyle(
                               fontSize: 16,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -620,7 +618,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                       duration: const Duration(milliseconds: 300),
                       tween: IntTween(begin: item.currentKcal, end: item.currentKcal),
                       builder: (context, value, child) => Text(
-                        '$value kcal',
+                        context.l10n.mealAnalysisKcalValue(value.toString()),
                         style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 13,
@@ -637,19 +635,19 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                     Row(
                       children: [
                         _buildMacroBadge(
-                          'PROT',
+                          context.l10n.mealAnalysisBadgeProt,
                           item.currentProt,
                           primaryColor,
                         ),
                         const SizedBox(width: 8),
                         _buildMacroBadge(
-                          'GLUC',
+                          context.l10n.mealAnalysisBadgeGluc,
                           item.currentGluc,
                           Colors.orange,
                         ),
                         const SizedBox(width: 8),
                         _buildMacroBadge(
-                          'LIP',
+                          context.l10n.mealAnalysisBadgeLip,
                           item.currentLip,
                           Colors.pink,
                         ),
@@ -677,7 +675,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                             duration: const Duration(milliseconds: 200),
                             tween: IntTween(begin: item.weight, end: item.weight),
                             builder: (context, value, child) => Text(
-                              '$value G',
+                              context.l10n.mealAnalysisWeightValue(value.toString()),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
@@ -723,7 +721,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
           duration: const Duration(milliseconds: 300),
           tween: Tween<double>(begin: value, end: value),
           builder: (context, animatedValue, child) => Text(
-            '${animatedValue.toStringAsFixed(1)}g',
+            context.l10n.mealAnalysisGramsValue(animatedValue.toStringAsFixed(1)),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -748,7 +746,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
           duration: const Duration(milliseconds: 300),
           tween: Tween<double>(begin: value, end: value),
           builder: (context, animatedValue, child) => Text(
-            '${animatedValue.toStringAsFixed(1)}g',
+            context.l10n.mealAnalysisGramsValue(animatedValue.toStringAsFixed(1)),
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           ),
         ),
@@ -822,15 +820,15 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
         double.tryParse(_lipController.text.trim().replaceAll(',', '.')) ?? 0;
 
     if (name.isEmpty) {
-      _showError('Entre le nom de l’ingrédient.');
+      _showError(context.l10n.mealAnalysisErrorNameRequired);
       return;
     }
     if (weight == null || weight <= 0) {
-      _showError('Entre un poids valide (en g).');
+      _showError(context.l10n.mealAnalysisErrorWeightInvalid);
       return;
     }
     if (kcal == null || kcal < 0) {
-      _showError('Entre les calories de cette portion.');
+      _showError(context.l10n.mealAnalysisErrorCaloriesInvalid);
       return;
     }
 
@@ -882,20 +880,20 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
-                'Ajouter un ingrédient',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                context.l10n.mealAnalysisAddIngredientSheetTitle,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
               Text(
-                'Renseigne les valeurs pour la portion que tu ajoutes.',
+                context.l10n.mealAnalysisAddIngredientSubtitle,
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
               ),
               const SizedBox(height: 18),
               TextField(
                 controller: _nameController,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: _fieldDecoration('Nom de l’ingrédient'),
+                decoration: _fieldDecoration(context.l10n.mealAnalysisFieldNameLabel),
               ),
               const SizedBox(height: 12),
               Row(
@@ -904,7 +902,10 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
                     child: TextField(
                       controller: _weightController,
                       keyboardType: TextInputType.number,
-                      decoration: _fieldDecoration('Poids', suffixText: 'g'),
+                      decoration: _fieldDecoration(
+                        context.l10n.mealAnalysisFieldWeightLabel,
+                        suffixText: context.l10n.mealAnalysisUnitGrams,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -915,8 +916,8 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
                         decimal: true,
                       ),
                       decoration: _fieldDecoration(
-                        'Calories',
-                        suffixText: 'kcal',
+                        context.l10n.mealAnalysisFieldCaloriesLabel,
+                        suffixText: context.l10n.mealAnalysisUnitKcal,
                       ),
                     ),
                   ),
@@ -932,8 +933,8 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
                         decimal: true,
                       ),
                       decoration: _fieldDecoration(
-                        'Protéines',
-                        suffixText: 'g',
+                        context.l10n.mealAnalysisMacroProtein,
+                        suffixText: context.l10n.mealAnalysisUnitGrams,
                       ),
                     ),
                   ),
@@ -944,7 +945,10 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: _fieldDecoration('Glucides', suffixText: 'g'),
+                      decoration: _fieldDecoration(
+                        context.l10n.mealAnalysisMacroCarbs,
+                        suffixText: context.l10n.mealAnalysisUnitGrams,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -954,7 +958,10 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: _fieldDecoration('Lipides', suffixText: 'g'),
+                      decoration: _fieldDecoration(
+                        context.l10n.mealAnalysisMacroFat,
+                        suffixText: context.l10n.mealAnalysisUnitGrams,
+                      ),
                     ),
                   ),
                 ],
@@ -970,9 +977,9 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  'Ajouter',
-                  style: TextStyle(
+                child: Text(
+                  context.l10n.mealAnalysisSubmitButton,
+                  style: const TextStyle(
                     fontSize: 16,
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

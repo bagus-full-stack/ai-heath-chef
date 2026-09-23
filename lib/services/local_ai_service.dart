@@ -127,15 +127,22 @@ Le JSON doit avoir cette structure exacte :
     await FlutterGemma.clearActiveInferenceIdentity();
   }
 
-  Future<List<Ingredient>> analyzeMealImage(String imagePath) {
-    return _analyzeImage(imagePath, _promptMeal);
+  static const Map<String, String> _responseLangInstructions = {
+    'en': 'Respond with English text values (ingredient/product names) in the JSON.',
+    'fr': 'Réponds avec des valeurs textuelles en français (noms des ingrédients/produits) dans le JSON.',
+  };
+
+  Future<List<Ingredient>> analyzeMealImage(String imagePath, {String lang = 'fr'}) {
+    return _analyzeImage(imagePath, _promptMeal, lang);
   }
 
-  Future<List<Ingredient>> analyzeProductImage(String imagePath) {
-    return _analyzeImage(imagePath, _promptProduct);
+  Future<List<Ingredient>> analyzeProductImage(String imagePath, {String lang = 'fr'}) {
+    return _analyzeImage(imagePath, _promptProduct, lang);
   }
 
-  Future<List<Ingredient>> _analyzeImage(String imagePath, String prompt) async {
+  Future<List<Ingredient>> _analyzeImage(String imagePath, String promptBase, String lang) async {
+    final prompt =
+        '$promptBase\n${_responseLangInstructions[lang] ?? _responseLangInstructions['fr']!}';
     final imageBytes = await File(imagePath).readAsBytes();
 
     final model = await FlutterGemma.getActiveModel(
@@ -178,6 +185,7 @@ Le JSON doit avoir cette structure exacte :
     String coachTone = 'motivant',
     String dietType = 'none',
     List<String> allergies = const [],
+    String lang = 'fr',
   }) async {
     final toneInstruction = _toneInstructions[coachTone] ?? _toneInstructions['motivant']!;
     final dietLabel = _dietLabels[dietType];
@@ -190,8 +198,10 @@ Le JSON doit avoir cette structure exacte :
       dietaryNote += " L'utilisateur est allergique/intolérant à : ${allergies.join(', ')}. Ne recommande jamais ces aliments.";
     }
 
+    final langInstruction =
+        lang == 'en' ? ' Always respond in English.' : ' Réponds toujours en français.';
     final systemInstruction =
-        "Tu es AI Health Chef, un coach en nutrition expert. $toneInstruction Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.$dietaryNote Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.";
+        "Tu es AI Health Chef, un coach en nutrition expert. $toneInstruction Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.$dietaryNote Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.$langInstruction";
 
     final model = await FlutterGemma.getActiveModel(maxTokens: 2048);
     final chat = await model.createChat();

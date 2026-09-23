@@ -1,3 +1,7 @@
+import 'package:flutter/widgets.dart';
+
+import '../l10n/l10n_extensions.dart';
+
 class UserProfile {
   final String userId;
   final String fullName;
@@ -55,55 +59,55 @@ class UserProfile {
     );
   }
 
-  String get sexLabel {
+  String sexLabel(BuildContext context) {
     switch (sex) {
       case 'male':
-        return 'Homme';
+        return context.l10n.accountSexMale;
       case 'female':
-        return 'Femme';
+        return context.l10n.accountSexFemale;
       default:
-        return 'Autre';
+        return context.l10n.accountSexOther;
     }
   }
 
-  String get goalLabel {
+  String goalLabel(BuildContext context) {
     switch (goal) {
       case 'loseWeight':
-        return 'Perte de poids';
+        return context.l10n.accountGoalLoseWeight;
       case 'gainMuscle':
-        return 'Prise de masse';
+        return context.l10n.accountGoalGainMuscle;
       default:
-        return 'Maintien';
+        return context.l10n.accountGoalMaintain;
     }
   }
 
-  String get dietTypeLabel {
+  String dietTypeLabel(BuildContext context) {
     switch (dietType) {
       case 'vegetarian':
-        return 'Végétarien';
+        return context.l10n.dietaryPreferencesDietVegetarian;
       case 'vegan':
-        return 'Végétalien';
+        return context.l10n.dietaryPreferencesDietVegan;
       case 'pescetarian':
-        return 'Pescétarien';
+        return context.l10n.dietaryPreferencesDietPescetarian;
       case 'halal':
-        return 'Halal';
+        return context.l10n.dietaryPreferencesDietHalal;
       case 'kosher':
-        return 'Kasher';
+        return context.l10n.dietaryPreferencesDietKosher;
       default:
-        return 'Aucune restriction';
+        return context.l10n.dietaryPreferencesDietNone;
     }
   }
 
-  String get coachToneLabel {
+  String coachToneLabel(BuildContext context) {
     switch (coachTone) {
       case 'bienveillant':
-        return 'Bienveillant & calme';
+        return context.l10n.coachPersonalizationToneBienveillantLabel;
       case 'direct':
-        return 'Direct & concis';
+        return context.l10n.coachPersonalizationToneDirectLabel;
       case 'humoristique':
-        return 'Humoristique';
+        return context.l10n.coachPersonalizationToneHumoristiqueLabel;
       default:
-        return 'Motivant & énergique';
+        return context.l10n.coachPersonalizationToneMotivantLabel;
     }
   }
 }

@@ -2,36 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 
 const Color _kPrimaryColor = Color(0xFF6B66FF);
 
-const List<(String value, String label, String description, IconData icon)> _kToneOptions = [
-  (
-    'motivant',
-    'Motivant & énergique',
-    'Encourageant, dynamique, te pousse à avancer.',
-    Icons.bolt_rounded,
-  ),
-  (
-    'bienveillant',
-    'Bienveillant & calme',
-    'Doux, rassurant, sans jugement sur tes écarts.',
-    Icons.favorite_rounded,
-  ),
-  (
-    'direct',
-    'Direct & concis',
-    'Droit au but, des conseils actionnables sans détour.',
-    Icons.bolt_outlined,
-  ),
-  (
-    'humoristique',
-    'Humoristique',
-    'Léger et avec humour, tout en restant utile.',
-    Icons.emoji_emotions_rounded,
-  ),
+const List<(String value, IconData icon)> _kToneOptions = [
+  ('motivant', Icons.bolt_rounded),
+  ('bienveillant', Icons.favorite_rounded),
+  ('direct', Icons.bolt_outlined),
+  ('humoristique', Icons.emoji_emotions_rounded),
 ];
 
 /// Choix du ton adopté par le Coach IA dans ses réponses (chat) — sauvegardé
@@ -51,6 +32,28 @@ class _CoachPersonalizationScreenState extends ConsumerState<CoachPersonalizatio
   void initState() {
     super.initState();
     _coachTone = ref.read(profileProvider).value?.coachTone ?? 'motivant';
+  }
+
+  (String label, String description) _toneCopy(String tone) {
+    return switch (tone) {
+      'motivant' => (
+          context.l10n.coachPersonalizationToneMotivantLabel,
+          context.l10n.coachPersonalizationToneMotivantDescription,
+        ),
+      'bienveillant' => (
+          context.l10n.coachPersonalizationToneBienveillantLabel,
+          context.l10n.coachPersonalizationToneBienveillantDescription,
+        ),
+      'direct' => (
+          context.l10n.coachPersonalizationToneDirectLabel,
+          context.l10n.coachPersonalizationToneDirectDescription,
+        ),
+      'humoristique' => (
+          context.l10n.coachPersonalizationToneHumoristiqueLabel,
+          context.l10n.coachPersonalizationToneHumoristiqueDescription,
+        ),
+      _ => (tone, ''),
+    };
   }
 
   Future<void> _select(String tone) async {
@@ -90,9 +93,9 @@ class _CoachPersonalizationScreenState extends ConsumerState<CoachPersonalizatio
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'Coach IA',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+        title: Text(
+          context.l10n.coachPersonalizationAppBarTitle,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         centerTitle: true,
         actions: [
@@ -114,15 +117,15 @@ class _CoachPersonalizationScreenState extends ConsumerState<CoachPersonalizatio
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           children: [
             Text(
-              'Choisis le ton que le Coach IA adopte dans ses réponses.',
+              context.l10n.coachPersonalizationIntro,
               style: TextStyle(color: Colors.grey.shade600, height: 1.4),
             ),
             const SizedBox(height: 20),
             for (final option in _kToneOptions) ...[
               _ToneCard(
-                icon: option.$4,
-                label: option.$2,
-                description: option.$3,
+                icon: option.$2,
+                label: _toneCopy(option.$1).$1,
+                description: _toneCopy(option.$1).$2,
                 selected: _coachTone == option.$1,
                 onTap: () => _select(option.$1),
               ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../models/meal_analysis_args.dart';
 
 const Color _kPrimaryColor = Color(0xFF6B66FF);
@@ -109,7 +110,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                 ],
               ),
             ),
-            const Positioned(
+            Positioned(
               left: 32,
               right: 32,
               bottom: 120,
@@ -117,20 +118,20 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'SCANNER UN PRODUIT',
+                    context.l10n.barcodeScannerTitleCaption,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.2,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
-                    'Cadre le code-barres du produit',
+                    context.l10n.barcodeScannerHintCaption,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ],
               ),

@@ -6,6 +6,7 @@ import '../services/ai_service.dart';
 import '../services/database_service.dart';
 import '../utils/nutrition_targets.dart';
 import 'dashboard_provider.dart';
+import 'locale_provider.dart';
 import 'profile_provider.dart';
 
 /// Idées de repas générées par l'IA à partir du profil et des objectifs
@@ -56,6 +57,7 @@ class MealSuggestionsNotifier extends AsyncNotifier<List<MealSuggestion>> {
 
     final targets = computeNutritionTargets(profile);
     final aiService = AIService();
+    final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
     final suggestions = await aiService.getMealSuggestions(
       goal: profile?.goal ?? 'maintain',
       targetKcal: targets.kcal,
@@ -65,6 +67,7 @@ class MealSuggestionsNotifier extends AsyncNotifier<List<MealSuggestion>> {
       dietType: dietType,
       allergies: allergies,
       count: 6,
+      lang: lang,
     );
     final illustratedSuggestions = await aiService.getMealImages(suggestions);
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../models/chat_message.dart';
 import '../providers/chat_provider.dart';
 import '../providers/dashboard_provider.dart';
@@ -27,7 +28,7 @@ class CoachScreen extends ConsumerWidget {
         foregroundColor: Colors.white,
         elevation: 0,
         icon: const Icon(Icons.chat_bubble_outline_rounded),
-        label: const Text('Coach IA'),
+        label: Text(context.l10n.coachTitle),
       ),
       body: SafeArea(
         child: CustomScrollView(
@@ -63,18 +64,18 @@ class CoachScreen extends ConsumerWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Idées Prochain Repas',
-                      style: TextStyle(
+                    Text(
+                      context.l10n.coachNextMealIdeasTitle,
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     TextButton(
                       onPressed: () => context.push('/meal_suggestions'),
-                      child: const Text(
-                        'Tout voir',
-                        style: TextStyle(
+                      child: Text(
+                        context.l10n.coachSeeAllButton,
+                        style: const TextStyle(
                           color: kCoachPrimaryColor,
                           fontWeight: FontWeight.w700,
                         ),
@@ -94,9 +95,8 @@ class CoachScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
               sliver: SliverToBoxAdapter(
                 child: _CoachTipCard(
-                  title: 'Conseil du Chef IA',
-                  text:
-                      'Pour optimiser votre perte de gras, privilégiez des sources de protéines maigres comme le blanc de poulet ou le tofu pour votre prochain repas.',
+                  title: context.l10n.coachTipTitle,
+                  text: context.l10n.coachTipFatLossText,
                 ),
               ),
             ),
@@ -144,14 +144,14 @@ class _MealSuggestionsRow extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Impossible de générer des idées de repas pour le moment.',
+                  context.l10n.coachMealSuggestionsErrorText,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: () => ref.invalidate(mealSuggestionsProvider),
-                  child: const Text('Réessayer'),
+                  child: Text(context.l10n.coachRetryButton),
                 ),
               ],
             ),
@@ -161,7 +161,7 @@ class _MealSuggestionsRow extends ConsumerWidget {
           if (suggestions.isEmpty) {
             return Center(
               child: Text(
-                'Aucune idée de repas disponible pour le moment.',
+                context.l10n.coachMealSuggestionsEmptyText,
                 style: TextStyle(color: Colors.grey.shade600),
               ),
             );
@@ -183,7 +183,7 @@ class _MealSuggestionsRow extends ConsumerWidget {
                     suggestion: suggestion,
                     onAdd: () => openCoachChatSheet(
                       context,
-                      presetMessage: 'Ajuste ce repas pour mon objectif: ${suggestion.title}',
+                      presetMessage: context.l10n.coachAdjustMealPresetMessage(suggestion.title),
                     ),
                   ),
                 ),
@@ -218,11 +218,11 @@ class _Header extends ConsumerWidget {
           ),
           child: const Icon(Icons.bolt, color: Colors.white, size: 22),
         ),
-        const Expanded(
+        Expanded(
           child: Text(
-            'COACH NUTRITION',
+            context.l10n.coachHeaderTitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.1,
@@ -272,14 +272,14 @@ class _RealtimeBanner extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: const Color(0xFFF7C6D6)),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _PulsingDot(color: Color(0xFFF06B9E), size: 10),
-            SizedBox(width: 10),
+            const _PulsingDot(color: Color(0xFFF06B9E), size: 10),
+            const SizedBox(width: 10),
             Text(
-              'ANALYSE EN TEMPS RÉEL',
-              style: TextStyle(
+              context.l10n.coachRealtimeBannerLabel,
+              style: const TextStyle(
                 color: Color(0xFFF06B9E),
                 fontWeight: FontWeight.w800,
                 fontSize: 12,
@@ -346,8 +346,8 @@ class _DailyObjectiveCard extends ConsumerWidget {
       orElse: () => NutritionTargets.fallback,
     );
     final goalLabel = profileAsync.maybeWhen(
-      data: (profile) => profile?.goalLabel ?? 'Maintien',
-      orElse: () => 'Maintien',
+      data: (profile) => profile?.goalLabel(context) ?? context.l10n.coachGoalMaintainLabel,
+      orElse: () => context.l10n.coachGoalMaintainLabel,
     );
     final totalKcal = mealsAsync.maybeWhen(
       data: (meals) => meals.fold<int>(0, (sum, meal) => sum + meal.totalKcal),
@@ -374,9 +374,9 @@ class _DailyObjectiveCard extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          const Text(
-            'OBJECTIF QUOTIDIEN',
-            style: TextStyle(
+          Text(
+            context.l10n.coachDailyObjectiveTitle,
+            style: const TextStyle(
               color: Color(0xFF6F7688),
               fontWeight: FontWeight.w800,
               letterSpacing: 1.1,
@@ -396,9 +396,9 @@ class _DailyObjectiveCard extends ConsumerWidget {
                     height: 1,
                   ),
                 ),
-                const TextSpan(
-                  text: ' kcal',
-                  style: TextStyle(
+                TextSpan(
+                  text: context.l10n.coachKcalUnitLabel,
+                  style: const TextStyle(
                     color: Color(0xFFF06B9E),
                     fontSize: 28,
                   ),
@@ -408,8 +408,7 @@ class _DailyObjectiveCard extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Il vous reste $remainingKcal kcal pour atteindre votre objectif de '
-            '$goalLabel.',
+            context.l10n.coachRemainingKcalText(remainingKcal, goalLabel),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.grey.shade600,
@@ -474,10 +473,10 @@ class _NeedsCard extends ConsumerWidget {
             children: [
               Icon(Icons.auto_awesome, color: kCoachPrimaryColor),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'VOS BESOINS',
-                  style: TextStyle(
+                  context.l10n.coachNeedsTitle,
+                  style: const TextStyle(
                     color: kCoachPrimaryColor,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.0,
@@ -490,24 +489,24 @@ class _NeedsCard extends ConsumerWidget {
           _NeedRow(
             icon: Icons.fitness_center,
             iconColor: const Color(0xFF6B66FF),
-            label: 'PROTÉINES',
-            value: '${totalProt.toInt()}/${targets.protein.toInt()}g',
+            label: context.l10n.coachProteinLabel,
+            value: context.l10n.coachNeedValueGrams(totalProt.toInt(), targets.protein.toInt()),
             progress: progressOf(totalProt, targets.protein),
           ),
           const SizedBox(height: 14),
           _NeedRow(
             icon: Icons.grain_rounded,
             iconColor: const Color(0xFFF06B9E),
-            label: 'GLUCIDES',
-            value: '${totalGluc.toInt()}/${targets.carbs.toInt()}g',
+            label: context.l10n.coachCarbsLabel,
+            value: context.l10n.coachNeedValueGrams(totalGluc.toInt(), targets.carbs.toInt()),
             progress: progressOf(totalGluc, targets.carbs),
           ),
           const SizedBox(height: 14),
           _NeedRow(
             icon: Icons.local_fire_department_rounded,
             iconColor: const Color(0xFFFFB54A),
-            label: 'LIPIDES',
-            value: '${totalLip.toInt()}/${targets.fat.toInt()}g',
+            label: context.l10n.coachFatLabel,
+            value: context.l10n.coachNeedValueGrams(totalLip.toInt(), targets.fat.toInt()),
             progress: progressOf(totalLip, targets.fat),
           ),
         ],
@@ -728,16 +727,16 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Réinitialiser la conversation ?'),
-        content: const Text('Tout l\'historique de discussion avec le coach sera supprimé.'),
+        title: Text(context.l10n.coachResetDialogTitle),
+        content: Text(context.l10n.coachResetDialogContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Annuler'),
+            child: Text(context.l10n.coachCancelButton),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Réinitialiser'),
+            child: Text(context.l10n.coachResetButton),
           ),
         ],
       ),
@@ -795,20 +794,20 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Coach IA',
-                              style: TextStyle(
+                              context.l10n.coachTitle,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
-                              'Pose une question sur tes repas',
-                              style: TextStyle(
+                              context.l10n.coachSheetSubtitle,
+                              style: const TextStyle(
                                 color: Colors.black54,
                                 fontSize: 13,
                               ),
@@ -819,7 +818,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                       IconButton(
                         onPressed: _resetConversation,
                         icon: const Icon(Icons.refresh_rounded),
-                        tooltip: 'Réinitialiser la conversation',
+                        tooltip: context.l10n.coachResetTooltip,
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
@@ -835,21 +834,21 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                     runSpacing: 8,
                     children: [
                       _PromptChip(
-                        label: 'Idées repas',
+                        label: context.l10n.coachPromptIdeasLabel,
                         onTap: () {
-                          _textController.text = 'Donne-moi une idée de repas riche en protéines.';
+                          _textController.text = context.l10n.coachPromptIdeasMessage;
                         },
                       ),
                       _PromptChip(
-                        label: 'Après sport',
+                        label: context.l10n.coachPromptPostWorkoutLabel,
                         onTap: () {
-                          _textController.text = 'Que manger après ma séance pour récupérer ?';
+                          _textController.text = context.l10n.coachPromptPostWorkoutMessage;
                         },
                       ),
                       _PromptChip(
-                        label: 'Perte de gras',
+                        label: context.l10n.coachPromptFatLossLabel,
                         onTap: () {
-                          _textController.text = 'Comment optimiser ma perte de gras aujourd’hui ?';
+                          _textController.text = context.l10n.coachPromptFatLossMessage;
                         },
                       ),
                     ],
@@ -894,7 +893,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                             textInputAction: TextInputAction.send,
                             onSubmitted: (_) => _sendMessage(),
                             decoration: InputDecoration(
-                              hintText: 'Écris ta question...',
+                              hintText: context.l10n.coachInputHint,
                               filled: true,
                               fillColor: Colors.grey.shade100,
                               border: OutlineInputBorder(

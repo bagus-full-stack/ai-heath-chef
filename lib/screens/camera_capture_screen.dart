@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../models/meal_analysis_args.dart';
 
 enum _CaptureMode { scanner, repas, produit }
@@ -69,7 +70,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
           return;
         }
         setState(() {
-          _errorMessage = 'Aucune caméra disponible sur cet appareil.';
+          _errorMessage = context.l10n.cameraCaptureNoCameraMessage;
         });
         return;
       }
@@ -108,7 +109,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
         return;
       }
       setState(() {
-        _errorMessage = 'Impossible d’ouvrir la caméra : $e';
+        _errorMessage = context.l10n.cameraCaptureOpenCameraError(e.toString());
       });
     }
   }
@@ -204,7 +205,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Échec de la capture : $e'),
+          content: Text(context.l10n.cameraCaptureCaptureFailedMessage(e.toString())),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -238,7 +239,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Impossible d’ouvrir la galerie : $e'),
+          content: Text(context.l10n.cameraCaptureGalleryOpenError(e.toString())),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -266,11 +267,11 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
   String _modeLabel(_CaptureMode mode) {
     switch (mode) {
       case _CaptureMode.scanner:
-        return 'Scanner';
+        return context.l10n.cameraCaptureModeScanner;
       case _CaptureMode.repas:
-        return 'Repas';
+        return context.l10n.cameraCaptureModeMeal;
       case _CaptureMode.produit:
-        return 'Produit';
+        return context.l10n.cameraCaptureModeProduct;
     }
   }
 
@@ -289,15 +290,13 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Comment ça marche ?',
-              style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.cameraCaptureHelpTitle,
+              style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text(
-              'Centre ton assiette dans le cercle, garde l’appareil stable puis appuie sur le '
-              'déclencheur. Notre IA analyse automatiquement les aliments et leurs valeurs '
-              'nutritionnelles.',
+              context.l10n.cameraCaptureHelpBody,
               style: TextStyle(color: Colors.white.withValues(alpha: 0.75), height: 1.45),
             ),
             const SizedBox(height: 16),
@@ -305,7 +304,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
               width: double.infinity,
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Compris', style: TextStyle(color: Color(0xFF6B66FF))),
+                child: Text(context.l10n.cameraCaptureHelpDismiss, style: const TextStyle(color: Color(0xFF6B66FF))),
               ),
             ),
           ],
@@ -392,7 +391,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                           children: [
                             _BottomActionButton(
                               icon: Icons.photo_library_outlined,
-                              label: 'GALERIE',
+                              label: context.l10n.cameraCaptureGalleryButton,
                               onTap: _pickFromGallery,
                               isLoading: _isPickingFromGallery,
                             ),
@@ -505,7 +504,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
               const Icon(Icons.videocam_off_rounded, color: Colors.white, size: 64),
               const SizedBox(height: 16),
               Text(
-                _errorMessage ?? 'Impossible d’ouvrir la caméra.',
+                _errorMessage ?? context.l10n.cameraCaptureCameraErrorFallback,
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
@@ -519,20 +518,20 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Text('Réessayer'),
+                child: Text(context.l10n.cameraCaptureRetryButton),
               ),
               TextButton(
                 onPressed: _pickFromGallery,
-                child: const Text(
-                  'Choisir une photo depuis la galerie',
-                  style: TextStyle(color: Colors.white70),
+                child: Text(
+                  context.l10n.cameraCaptureChooseGalleryPhotoButton,
+                  style: const TextStyle(color: Colors.white70),
                 ),
               ),
               TextButton(
                 onPressed: _close,
-                child: const Text(
-                  'Retour',
-                  style: TextStyle(color: Colors.white70),
+                child: Text(
+                  context.l10n.cameraCaptureBackButton,
+                  style: const TextStyle(color: Colors.white70),
                 ),
               ),
             ],
@@ -561,10 +560,10 @@ class _FocusCaption extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'ANALYSE NUTRITIONNELLE IA',
+              Text(
+                context.l10n.cameraCaptureAiAnalysisCaption,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
@@ -574,7 +573,9 @@ class _FocusCaption extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                isProduct ? 'Cadrez l’étiquette du produit' : 'Cadrez votre plat au centre',
+                isProduct
+                    ? context.l10n.cameraCaptureFrameProductHint
+                    : context.l10n.cameraCaptureFrameMealHint,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white70,

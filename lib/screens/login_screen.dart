@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 
@@ -32,7 +33,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez remplir tous les champs.')),
+        SnackBar(content: Text(context.l10n.loginErrorFillAllFields)),
       );
       return;
     }
@@ -114,35 +115,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'CONNEXION',
+              Text(
+                context.l10n.loginHeaderLabel,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
-                'Ravi de vous revoir',
+              Text(
+                context.l10n.loginWelcomeBackTitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Connectez-vous pour suivre vos objectifs',
+                context.l10n.loginSubtitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 36),
-              const Text('Email', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text(context.l10n.loginEmailLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  hintText: 'nom@exemple.fr',
+                  hintText: context.l10n.loginEmailHint,
                   prefixIcon: const Icon(Icons.email_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -153,14 +154,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Mot de passe',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                  Text(
+                    context.l10n.loginPasswordLabel,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   GestureDetector(
                     onTap: () => context.push('/forgot_password'),
                     child: Text(
-                      'Mot de passe oublié ?',
+                      context.l10n.loginForgotPasswordLink,
                       style: TextStyle(
                         color: Colors.pink.shade400,
                         fontSize: 12,
@@ -211,28 +212,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Row(
+                    : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Se connecter',
-                            style: TextStyle(
+                            context.l10n.loginSubmitButton,
+                            style: const TextStyle(
                               fontSize: 16,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
                         ],
                       ),
               ),
               const SizedBox(height: 16),
               TextButton(
                 onPressed: _openSignup,
-                child: const Text(
-                  "Pas encore de compte ? S'inscrire",
-                  style: TextStyle(
+                child: Text(
+                  context.l10n.loginSignupPrompt,
+                  style: const TextStyle(
                     color: Colors.black87,
                     fontWeight: FontWeight.bold,
                   ),
@@ -245,7 +246,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      'OU CONTINUER AVEC',
+                      context.l10n.loginDividerOrContinueWith,
                       style: TextStyle(
                         color: Colors.grey.shade500,
                         fontSize: 12,
@@ -295,9 +296,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 onPressed: () =>
                     ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.discord),
                 icon: const Icon(Icons.discord, color: Color(0xFF5865F2)),
-                label: const Text(
-                  'Continuer avec Discord',
-                  style: TextStyle(color: Colors.black),
+                label: Text(
+                  context.l10n.loginContinueWithDiscord,
+                  style: const TextStyle(color: Colors.black),
                 ),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),

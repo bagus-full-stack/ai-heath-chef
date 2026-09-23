@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../l10n/l10n_extensions.dart';
+
 const Color _kPrimaryColor = Color(0xFF6B66FF);
 const String kSupportEmail = 'support@aihealthchef.app';
 
@@ -13,7 +15,7 @@ class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
   Future<void> _contactSupport(BuildContext context) async {
-    final uri = Uri(scheme: 'mailto', path: kSupportEmail, query: 'subject=Contact AI Health Chef');
+    final uri = Uri(scheme: 'mailto', path: kSupportEmail, query: 'subject=${context.l10n.aboutMailtoSubject}');
     bool launched = false;
     try {
       launched = await launchUrl(uri);
@@ -22,7 +24,7 @@ class AboutScreen extends StatelessWidget {
     }
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Aucune app mail configurée. Écris-nous à $kSupportEmail.')),
+        SnackBar(content: Text(context.l10n.aboutNoMailAppSnackbar(kSupportEmail))),
       );
     }
   }
@@ -38,9 +40,9 @@ class AboutScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'À propos',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+        title: Text(
+          context.l10n.aboutAppBarTitle,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         centerTitle: true,
       ),
@@ -61,9 +63,9 @@ class AboutScreen extends StatelessWidget {
                     child: const Icon(Icons.bolt, color: Colors.white, size: 36),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'AI Health Chef',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Text(
+                    context.l10n.aboutAppName,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
                   FutureBuilder<PackageInfo>(
@@ -71,8 +73,8 @@ class AboutScreen extends StatelessWidget {
                     builder: (context, snapshot) {
                       final info = snapshot.data;
                       final versionLabel = info == null
-                          ? '…'
-                          : 'Version ${info.version} (${info.buildNumber})';
+                          ? context.l10n.aboutVersionLoading
+                          : context.l10n.aboutVersionLabel(info.version, info.buildNumber);
                       return Text(
                         versionLabel,
                         style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
@@ -84,34 +86,31 @@ class AboutScreen extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             Text(
-              'AI Health Chef t’aide à suivre tes repas et tes objectifs nutritionnels : '
-              'scanne ton assiette pour une estimation automatique des calories et macros, '
-              'échange avec un coach IA, reçois des idées de repas personnalisées et des '
-              'rappels pour ne rien oublier.',
+              context.l10n.aboutDescription,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade700, height: 1.5),
             ),
             const SizedBox(height: 28),
             _AboutLinkTile(
               icon: Icons.help_outline_rounded,
-              title: 'Centre d’aide',
+              title: context.l10n.aboutHelpCenterLinkTitle,
               onTap: () => context.push('/help'),
             ),
             _AboutLinkTile(
               icon: Icons.description_outlined,
-              title: 'Conditions d’utilisation',
+              title: context.l10n.aboutTermsLinkTitle,
               onTap: () => context.push('/terms'),
             ),
             _AboutLinkTile(
               icon: Icons.mail_outline_rounded,
-              title: 'Contacter le support',
+              title: context.l10n.aboutContactLinkTitle,
               subtitle: kSupportEmail,
               onTap: () => _contactSupport(context),
             ),
             const SizedBox(height: 28),
             Center(
               child: Text(
-                '© ${DateTime.now().year} AI Health Chef',
+                context.l10n.aboutCopyright(DateTime.now().year),
                 style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
               ),
             ),

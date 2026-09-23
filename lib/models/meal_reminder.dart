@@ -1,3 +1,8 @@
+import 'package:flutter/widgets.dart';
+
+import '../l10n/app_localizations.dart';
+import '../l10n/l10n_extensions.dart';
+
 /// Moment de la journée pour lequel on peut programmer un rappel de repas.
 enum MealReminderSlot { breakfast, lunch, dinner }
 
@@ -15,25 +20,25 @@ extension MealReminderSlotInfo on MealReminderSlot {
     }
   }
 
-  String get label {
+  String label(BuildContext context) {
     switch (this) {
       case MealReminderSlot.breakfast:
-        return 'Petit-déjeuner';
+        return context.l10n.notificationSettingsSlotBreakfast;
       case MealReminderSlot.lunch:
-        return 'Déjeuner';
+        return context.l10n.notificationSettingsSlotLunch;
       case MealReminderSlot.dinner:
-        return 'Dîner';
+        return context.l10n.notificationSettingsSlotDinner;
     }
   }
 
-  String get notificationBody {
+  String notificationBody(AppLocalizations l10n) {
     switch (this) {
       case MealReminderSlot.breakfast:
-        return 'Pense à prendre en photo ton petit-déjeuner pour le logguer !';
+        return l10n.notificationSettingsBodyBreakfast;
       case MealReminderSlot.lunch:
-        return 'Pense à prendre en photo ton déjeuner pour le logguer !';
+        return l10n.notificationSettingsBodyLunch;
       case MealReminderSlot.dinner:
-        return 'Pense à prendre en photo ton dîner pour le logguer !';
+        return l10n.notificationSettingsBodyDinner;
     }
   }
 

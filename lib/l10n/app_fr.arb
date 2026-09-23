@@ -1,5 +1,837 @@
 {
   "@@locale": "fr",
   "appTitle": "AI Health Chef",
-  "@appTitle": {"description": "Titre de l'application"}
+  "bmiCategoryUnderweight": "Insuffisance pondérale",
+  "bmiCategoryNormal": "Corpulence normale",
+  "bmiCategoryOverweight": "Surpoids",
+  "bmiCategoryObese": "Obésité",
+  "aboutAppBarTitle": "À propos",
+  "aboutAppName": "AI Health Chef",
+  "aboutContactLinkTitle": "Contacter le support",
+  "aboutCopyright": "© {year} AI Health Chef",
+  "@aboutCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "aboutDescription": "AI Health Chef t’aide à suivre tes repas et tes objectifs nutritionnels : scanne ton assiette pour une estimation automatique des calories et macros, échange avec un coach IA, reçois des idées de repas personnalisées et des rappels pour ne rien oublier.",
+  "aboutHelpCenterLinkTitle": "Centre d’aide",
+  "aboutMailtoSubject": "Contact AI Health Chef",
+  "aboutNoMailAppSnackbar": "Aucune app mail configurée. Écris-nous à {supportEmail}.",
+  "@aboutNoMailAppSnackbar": {
+    "placeholders": {
+      "supportEmail": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutTermsLinkTitle": "Conditions d’utilisation",
+  "aboutVersionLabel": "Version {version} ({buildNumber})",
+  "@aboutVersionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutVersionLoading": "…",
+  "accountAgeLabel": "Âge",
+  "accountAgeSuffix": "ans",
+  "accountBmiLabel": "IMC : {label}",
+  "@accountBmiLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "accountBmiPlaceholder": "Renseigne ton poids et ta taille pour voir ton IMC.",
+  "accountBmiRangeLabel": "Plage {label} : {range}",
+  "@accountBmiRangeLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "accountChooseFromGallery": "Choisir dans la galerie",
+  "accountCurrentWeightLabel": "Poids actuel",
+  "accountErrorInvalidAge": "Entre un âge valide.",
+  "accountErrorInvalidCurrentWeight": "Entre ton poids actuel.",
+  "accountErrorInvalidHeight": "Entre ta taille en cm.",
+  "accountErrorInvalidTargetWeight": "Entre un poids cible valide.",
+  "accountErrorNameEmpty": "Ton nom ne peut pas être vide.",
+  "accountFullNameLabel": "Nom complet",
+  "accountGoalGainMuscle": "Prise de masse",
+  "accountGoalLoseWeight": "Perte de poids",
+  "accountGoalMaintain": "Maintien",
+  "accountHeightLabel": "Taille",
+  "accountHeightSuffix": "cm",
+  "accountLoadError": "Impossible de charger le profil : {error}",
+  "@accountLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountMainGoalLabel": "Objectif principal",
+  "accountSaveButton": "Enregistrer",
+  "accountSaveError": "Impossible d’enregistrer : {error}",
+  "@accountSaveError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountSexFemale": "Femme",
+  "accountSexLabel": "Sexe",
+  "accountSexMale": "Homme",
+  "accountSexOther": "Autre",
+  "accountTakePhoto": "Prendre une photo",
+  "accountTargetWeightLabel": "Poids cible",
+  "accountTitle": "MON COMPTE",
+  "accountUpdateSuccess": "Profil mis à jour.",
+  "accountWeightSuffix": "kg",
+  "barcodeScannerHintCaption": "Cadre le code-barres du produit",
+  "barcodeScannerTitleCaption": "SCANNER UN PRODUIT",
+  "cameraCaptureAiAnalysisCaption": "ANALYSE NUTRITIONNELLE IA",
+  "cameraCaptureBackButton": "Retour",
+  "cameraCaptureCameraErrorFallback": "Impossible d’ouvrir la caméra.",
+  "cameraCaptureCaptureFailedMessage": "Échec de la capture : {error}",
+  "@cameraCaptureCaptureFailedMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cameraCaptureChooseGalleryPhotoButton": "Choisir une photo depuis la galerie",
+  "cameraCaptureFrameMealHint": "Cadrez votre plat au centre",
+  "cameraCaptureFrameProductHint": "Cadrez l’étiquette du produit",
+  "cameraCaptureGalleryButton": "GALERIE",
+  "cameraCaptureGalleryOpenError": "Impossible d’ouvrir la galerie : {error}",
+  "@cameraCaptureGalleryOpenError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cameraCaptureHelpBody": "Centre ton assiette dans le cercle, garde l’appareil stable puis appuie sur le déclencheur. Notre IA analyse automatiquement les aliments et leurs valeurs nutritionnelles.",
+  "cameraCaptureHelpDismiss": "Compris",
+  "cameraCaptureHelpTitle": "Comment ça marche ?",
+  "cameraCaptureModeMeal": "Repas",
+  "cameraCaptureModeProduct": "Produit",
+  "cameraCaptureModeScanner": "Scanner",
+  "cameraCaptureNoCameraMessage": "Aucune caméra disponible sur cet appareil.",
+  "cameraCaptureOpenCameraError": "Impossible d’ouvrir la caméra : {error}",
+  "@cameraCaptureOpenCameraError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cameraCaptureRetryButton": "Réessayer",
+  "checkoutAppBarTitle": "Finaliser la commande",
+  "checkoutConfirmButton": "Confirmer • {price} {period}",
+  "@checkoutConfirmButton": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutDefaultPlanTitle": "Abonnement PRO",
+  "checkoutDemoModeNotice": "Mode démo : cet achat est simulé, aucun paiement ni compte App Store / Google Play n'est sollicité.",
+  "checkoutOrderSummaryBrand": "AI Health Chef PRO",
+  "checkoutOrderSummaryDemoNotice": "Mode démo — l'achat sera simulé, aucun paiement réel",
+  "checkoutPaymentMethodLabel": "MOYEN DE PAIEMENT",
+  "checkoutPendingConfirmation": "Achat effectué, en attente de confirmation.",
+  "checkoutPlanLabel": "Forfait",
+  "checkoutPurchaseError": "Échec de l'achat : {error}",
+  "@checkoutPurchaseError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutRenewalDisclaimer": "L'abonnement se renouvelle automatiquement sauf annulation au moins 24h avant la fin de la période, depuis les réglages de ton compte App Store ou Google Play.",
+  "checkoutRenewalLabel": "Renouvellement",
+  "checkoutRenewalValue": "Automatique, résiliable à tout moment",
+  "checkoutSecurePaymentNotice": "Paiement géré en toute sécurité par l'App Store / Google Play. Aucune information bancaire n'est demandée dans l'application.",
+  "checkoutSuccessDemo": "Achat simulé (mode démo)\nAccès PRO débloqué !",
+  "checkoutSuccessReal": "Abonnement activé !\nBienvenue dans AI Health Chef PRO.",
+  "checkoutSummaryLabel": "RÉCAPITULATIF",
+  "checkoutTotalLabel": "Total",
+  "coachAdjustMealPresetMessage": "Ajuste ce repas pour mon objectif: {mealTitle}",
+  "@coachAdjustMealPresetMessage": {
+    "placeholders": {
+      "mealTitle": {
+        "type": "String"
+      }
+    }
+  },
+  "coachCancelButton": "Annuler",
+  "coachCarbsLabel": "GLUCIDES",
+  "coachDailyObjectiveTitle": "OBJECTIF QUOTIDIEN",
+  "coachFatLabel": "LIPIDES",
+  "coachGoalMaintainLabel": "Maintien",
+  "coachHeaderTitle": "COACH NUTRITION",
+  "coachInputHint": "Écris ta question...",
+  "coachKcalUnitLabel": " kcal",
+  "coachMealSuggestionsEmptyText": "Aucune idée de repas disponible pour le moment.",
+  "coachMealSuggestionsErrorText": "Impossible de générer des idées de repas pour le moment.",
+  "coachNeedValueGrams": "{current}/{target}g",
+  "@coachNeedValueGrams": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "coachNeedsTitle": "VOS BESOINS",
+  "coachNextMealIdeasTitle": "Idées Prochain Repas",
+  "coachPersonalizationAppBarTitle": "Coach IA",
+  "coachPersonalizationIntro": "Choisis le ton que le Coach IA adopte dans ses réponses.",
+  "coachPersonalizationToneBienveillantDescription": "Doux, rassurant, sans jugement sur tes écarts.",
+  "coachPersonalizationToneBienveillantLabel": "Bienveillant & calme",
+  "coachPersonalizationToneDirectDescription": "Droit au but, des conseils actionnables sans détour.",
+  "coachPersonalizationToneDirectLabel": "Direct & concis",
+  "coachPersonalizationToneHumoristiqueDescription": "Léger et avec humour, tout en restant utile.",
+  "coachPersonalizationToneHumoristiqueLabel": "Humoristique",
+  "coachPersonalizationToneMotivantDescription": "Encourageant, dynamique, te pousse à avancer.",
+  "coachPersonalizationToneMotivantLabel": "Motivant & énergique",
+  "coachPromptFatLossLabel": "Perte de gras",
+  "coachPromptFatLossMessage": "Comment optimiser ma perte de gras aujourd'hui ?",
+  "coachPromptIdeasLabel": "Idées repas",
+  "coachPromptIdeasMessage": "Donne-moi une idée de repas riche en protéines.",
+  "coachPromptPostWorkoutLabel": "Après sport",
+  "coachPromptPostWorkoutMessage": "Que manger après ma séance pour récupérer ?",
+  "coachProteinLabel": "PROTÉINES",
+  "coachRealtimeBannerLabel": "ANALYSE EN TEMPS RÉEL",
+  "coachRemainingKcalText": "Il vous reste {remainingKcal} kcal pour atteindre votre objectif de {goalLabel}.",
+  "@coachRemainingKcalText": {
+    "placeholders": {
+      "remainingKcal": {
+        "type": "int"
+      },
+      "goalLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "coachResetButton": "Réinitialiser",
+  "coachResetDialogContent": "Tout l'historique de discussion avec le coach sera supprimé.",
+  "coachResetDialogTitle": "Réinitialiser la conversation ?",
+  "coachResetTooltip": "Réinitialiser la conversation",
+  "coachRetryButton": "Réessayer",
+  "coachSeeAllButton": "Tout voir",
+  "coachSheetSubtitle": "Pose une question sur tes repas",
+  "coachTipFatLossText": "Pour optimiser votre perte de gras, privilégiez des sources de protéines maigres comme le blanc de poulet ou le tofu pour votre prochain repas.",
+  "coachTipTitle": "Conseil du Chef IA",
+  "coachTitle": "Coach IA",
+  "comingSoonDefaultMessage": "Cette fonctionnalité arrive prochainement.",
+  "comingSoonDefaultTitle": "Bientôt disponible",
+  "dashboardBmiLabel": "IMC : {label}",
+  "@dashboardBmiLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardBmiRangeLabel": "Plage {label} : {range}",
+  "@dashboardBmiRangeLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardCalorieGoalLabel": " Objectif: {kcal}",
+  "@dashboardCalorieGoalLabel": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardCarbsLabel": "GLUCIDES",
+  "dashboardEmptyMealsMessage": "Aucun repas enregistré aujourd'hui. Scannez votre première assiette !",
+  "dashboardFatLabel": "LIPIDES",
+  "dashboardKcalRemainingLabel": "KCAL RESTANT",
+  "dashboardMealCaloriesLabel": "{kcal} kcal",
+  "@dashboardMealCaloriesLabel": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardMealJournalTitle": "Journal des repas",
+  "dashboardMealsLoadError": "Erreur: {error}",
+  "@dashboardMealsLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardProteinLabel": "PROTÉINES",
+  "dashboardTodayTitle": "Aujourd'hui",
+  "dietaryPreferencesAllergiesDescription": "Elles seront évitées dans les idées de repas proposées par l’IA. Ne remplace pas la vigilance en cas d’allergie sévère.",
+  "dietaryPreferencesAllergiesSectionTitle": "ALLERGIES & INTOLÉRANCES",
+  "dietaryPreferencesDietHalal": "Halal",
+  "dietaryPreferencesDietKosher": "Kasher",
+  "dietaryPreferencesDietNone": "Aucune restriction",
+  "dietaryPreferencesDietPescetarian": "Pescétarien",
+  "dietaryPreferencesDietSectionTitle": "RÉGIME",
+  "dietaryPreferencesDietVegan": "Végétalien",
+  "dietaryPreferencesDietVegetarian": "Végétarien",
+  "dietaryPreferencesOtherAllergyHint": "Autre allergie...",
+  "dietaryPreferencesSaveButton": "Enregistrer",
+  "dietaryPreferencesSavedSnackbar": "Préférences enregistrées !",
+  "dietaryPreferencesTitle": "Préférences alimentaires",
+  "forgotPasswordBackToLogin": "Retour à la connexion",
+  "forgotPasswordEmailHint": "exemple@email.com",
+  "forgotPasswordEmailLabel": "Adresse e-mail",
+  "forgotPasswordErrorEmailRequired": "Veuillez entrer votre adresse e-mail.",
+  "forgotPasswordSubmitButton": "Envoyer le lien",
+  "forgotPasswordSubtitle": "Ne vous inquiétez pas, cela arrive.\nEntrez votre email pour recevoir un\nlien de réinitialisation.",
+  "forgotPasswordSuccessMessage": "Lien de réinitialisation envoyé ! Vérifiez vos emails.",
+  "forgotPasswordTitle": "Mot de passe oublié",
+  "helpCenterAccountQ1Answer": "Va dans Profil > Compte pour modifier tes informations, ou Profil > Mes objectifs pour ajuster ton objectif (perte de poids, prise de muscle, maintien) et tes données physiques.",
+  "helpCenterAccountQ1Question": "Comment modifier mon profil ou mes objectifs ?",
+  "helpCenterAccountQ2Answer": "Ton abonnement est géré directement par l’App Store ou le Google Play Store (selon ton appareil), pas par l’app elle-même. Rends-toi dans les réglages d’abonnements de ton compte Apple/Google pour le modifier ou le résilier.",
+  "helpCenterAccountQ2Question": "Comment gérer ou annuler mon abonnement PRO ?",
+  "helpCenterAccountQ3Answer": "Écris-nous à {supportEmail} depuis l’adresse email associée à ton compte, on s’occupe de la suppression de tes données.",
+  "@helpCenterAccountQ3Answer": {
+    "placeholders": {
+      "supportEmail": {
+        "type": "String"
+      }
+    }
+  },
+  "helpCenterAccountQ3Question": "Comment supprimer mon compte ?",
+  "helpCenterAppBarTitle": "Centre d’aide",
+  "helpCenterCoachQ1Answer": "Depuis l’onglet Coach, appuie sur le bouton \"Coach IA\" en bas de l’écran pour ouvrir le chat. Tu peux lui poser des questions sur ta nutrition, tes objectifs ou lui demander des conseils.",
+  "helpCenterCoachQ1Question": "Comment parler au Coach IA ?",
+  "helpCenterCoachQ2Answer": "L’onglet Coach propose des idées de repas générées selon ton profil et ton objectif. Appuie sur \"Tout voir\" pour la liste complète, puis sur l’icône de rafraîchissement (ou tire l’écran vers le bas) pour en générer de nouvelles.",
+  "helpCenterCoachQ2Question": "Comment obtenir de nouvelles idées de repas ?",
+  "helpCenterContactButtonLabel": "Contacter le support",
+  "helpCenterMailtoSubject": "Question AI Health Chef",
+  "helpCenterMealsQ1Answer": "Depuis le Dashboard, appuie sur le bouton caméra en bas à droite pour prendre en photo ton assiette. L’IA identifie les ingrédients et estime les calories et macros ; tu peux ajuster les quantités, ajouter ou retirer un ingrédient avant de valider.",
+  "helpCenterMealsQ1Question": "Comment enregistrer un repas ?",
+  "helpCenterMealsQ2Answer": "L’analyse est faite par un modèle d’IA (Google Gemini) à partir de la photo : c’est une estimation, pas une mesure exacte. Ajuste les quantités si besoin, ou ajoute un ingrédient manuellement avec ses valeurs exactes via \"Ajouter un ingrédient\".",
+  "helpCenterMealsQ2Question": "L’estimation des calories est-elle exacte ?",
+  "helpCenterMealsQ3Answer": "Le Dashboard affiche le \"Journal des repas\" du jour, avec les totaux de calories et macros. Il se réinitialise chaque jour à minuit.",
+  "helpCenterMealsQ3Question": "Où voir les repas que j’ai enregistrés aujourd’hui ?",
+  "helpCenterNoMailAppSnackbar": "Aucune app mail configurée. Écris-nous à {supportEmail}.",
+  "@helpCenterNoMailAppSnackbar": {
+    "placeholders": {
+      "supportEmail": {
+        "type": "String"
+      }
+    }
+  },
+  "helpCenterNotFoundSubtitle": "Écris-nous, on te répond directement.",
+  "helpCenterNotFoundTitle": "Tu n’as pas trouvé ta réponse ?",
+  "helpCenterRemindersQ1Answer": "Va dans Profil > Notifications. Active l’interrupteur du repas souhaité (petit-déjeuner, déjeuner, dîner) et choisis l’heure du rappel en appuyant sur l’horaire affiché.",
+  "helpCenterRemindersQ1Question": "Comment activer les rappels de repas ?",
+  "helpCenterRemindersQ2Answer": "Vérifie que les notifications sont autorisées pour l’app dans les réglages de ton téléphone. Sur certains téléphones Android, il faut aussi désactiver l’optimisation de batterie pour l’app afin que les rappels sonnent à l’heure prévue.",
+  "helpCenterRemindersQ2Question": "Je n’ai reçu aucune notification, que faire ?",
+  "helpCenterSectionAccountTitle": "Compte & abonnement",
+  "helpCenterSectionCoachTitle": "Coach IA & idées de repas",
+  "helpCenterSectionMealsTitle": "Repas & analyse IA",
+  "helpCenterSectionRemindersTitle": "Rappels & notifications",
+  "localAiSettingsCancelButton": "Annuler",
+  "localAiSettingsDeleteButton": "Supprimer",
+  "localAiSettingsDeleteDialogBody": "Le modèle sera supprimé de ton téléphone. Les fonctionnalités IA repasseront en mode cloud.",
+  "localAiSettingsDeleteDialogTitle": "Supprimer le modèle IA",
+  "localAiSettingsDeleteModelButton": "Supprimer le modèle",
+  "localAiSettingsDownloadButton": "Télécharger",
+  "localAiSettingsDownloadDialogBody": "Le modèle pèse environ {size}. Nous recommandons une connexion Wi-Fi pour ce téléchargement.",
+  "@localAiSettingsDownloadDialogBody": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "localAiSettingsDownloadDialogTitle": "Télécharger le modèle IA",
+  "localAiSettingsDownloadFailedError": "Échec du téléchargement : {error}",
+  "@localAiSettingsDownloadFailedError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "localAiSettingsDownloadProgressLabel": "{percent}%",
+  "@localAiSettingsDownloadProgressLabel": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "localAiSettingsEnableLabel": "Activer l'IA locale",
+  "localAiSettingsIntro": "Traite tes photos de repas et tes messages du coach directement sur ton téléphone, sans connexion, et sans utiliser le quota IA partagé de l'app. Fonctionnalité optionnelle : sans elle, tout continue de fonctionner via le cloud comme aujourd'hui.",
+  "localAiSettingsLoadError": "Impossible de charger les réglages IA locale.",
+  "localAiSettingsModelDownloadedLabel": "Modèle téléchargé",
+  "localAiSettingsModelNotDownloadedLabel": "Modèle non téléchargé",
+  "localAiSettingsTitle": "IA locale",
+  "loginContinueWithDiscord": "Continuer avec Discord",
+  "loginDividerOrContinueWith": "OU CONTINUER AVEC",
+  "loginEmailHint": "nom@exemple.fr",
+  "loginEmailLabel": "Email",
+  "loginErrorFillAllFields": "Veuillez remplir tous les champs.",
+  "loginForgotPasswordLink": "Mot de passe oublié ?",
+  "loginHeaderLabel": "CONNEXION",
+  "loginPasswordLabel": "Mot de passe",
+  "loginSignupPrompt": "Pas encore de compte ? S'inscrire",
+  "loginSubmitButton": "Se connecter",
+  "loginSubtitle": "Connectez-vous pour suivre vos objectifs",
+  "loginWelcomeBackTitle": "Ravi de vous revoir",
+  "mealAnalysisAddIngredientButton": "Ajouter un ingrédient",
+  "mealAnalysisAddIngredientSheetTitle": "Ajouter un ingrédient",
+  "mealAnalysisAddIngredientSubtitle": "Renseigne les valeurs pour la portion que tu ajoutes.",
+  "mealAnalysisBadgeAi": "Identifié par l'IA",
+  "mealAnalysisBadgeBarcode": "Trouvé via code-barres",
+  "mealAnalysisBadgeGluc": "GLUC",
+  "mealAnalysisBadgeLip": "LIP",
+  "mealAnalysisBadgeProt": "PROT",
+  "mealAnalysisDefaultMealName": "Repas IA",
+  "mealAnalysisErrorCaloriesInvalid": "Entre les calories de cette portion.",
+  "mealAnalysisErrorNameRequired": "Entre le nom de l'ingrédient.",
+  "mealAnalysisErrorTitle": "Oups !",
+  "mealAnalysisErrorWeightInvalid": "Entre un poids valide (en g).",
+  "mealAnalysisFieldCaloriesLabel": "Calories",
+  "mealAnalysisFieldNameLabel": "Nom de l'ingrédient",
+  "mealAnalysisFieldWeightLabel": "Poids",
+  "mealAnalysisGramsValue": "{value}g",
+  "@mealAnalysisGramsValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mealAnalysisHowItWorksBody": "Notre IA identifie les ingrédients de ton assiette et estime leurs valeurs nutritionnelles. Ajuste les quantités avec + / - si besoin, retire un ingrédient avec l’icône poubelle, puis valide pour l’enregistrer dans ton journal du jour.",
+  "mealAnalysisHowItWorksConfirm": "Compris",
+  "mealAnalysisHowItWorksTitle": "Comment ça marche ?",
+  "mealAnalysisIngredientsSubtitle": "Modifiez les quantités si nécessaire",
+  "mealAnalysisIngredientsTitle": "Ingrédients",
+  "mealAnalysisKcalValue": "{value} kcal",
+  "@mealAnalysisKcalValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mealAnalysisLoadingBarcode": "Recherche du produit...",
+  "mealAnalysisLoadingHint": "Cela prend généralement quelques secondes.",
+  "mealAnalysisLoadingLabel": "L'IA lit l'étiquette du produit...",
+  "mealAnalysisLoadingPlate": "L'IA analyse votre assiette...",
+  "mealAnalysisMacroCarbs": "Glucides",
+  "mealAnalysisMacroFat": "Lipides",
+  "mealAnalysisMacroFiber": "Fibres",
+  "mealAnalysisMacroProtein": "Protéines",
+  "mealAnalysisMacroSatFat": "Sat.",
+  "mealAnalysisMacroSugar": "Sucres",
+  "mealAnalysisNutritionSummaryTitle": "RÉSUMÉ NUTRITIONNEL",
+  "mealAnalysisRetryButton": "Réessayer",
+  "mealAnalysisSaveButton": "Valider et sauvegarder",
+  "mealAnalysisSaveSuccessSnackbar": "Repas sauvegardé avec succès !",
+  "mealAnalysisSubmitButton": "Ajouter",
+  "mealAnalysisTitleMeal": "ANALYSE DU REPAS",
+  "mealAnalysisTitleProduct": "ANALYSE DU PRODUIT",
+  "mealAnalysisTotalKcalLabel": "TOTAL KCAL",
+  "mealAnalysisUnitGrams": "g",
+  "mealAnalysisUnitKcal": "kcal",
+  "mealAnalysisWeightValue": "{value} G",
+  "@mealAnalysisWeightValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mealSuggestionCardGlucLabel": "GLUC",
+  "mealSuggestionCardGramsValue": "{value}g",
+  "@mealSuggestionCardGramsValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mealSuggestionCardKcalLabel": "{kcal} kcal",
+  "@mealSuggestionCardKcalLabel": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "mealSuggestionCardLipLabel": "LIP",
+  "mealSuggestionCardProtLabel": "PROT",
+  "mealSuggestionsAdjustPresetMessage": "Ajuste ce repas pour mon objectif: {title}",
+  "@mealSuggestionsAdjustPresetMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "mealSuggestionsEmptyMessage": "Aucune idée de repas disponible pour le moment.",
+  "mealSuggestionsLoadError": "Impossible de générer des idées de repas pour le moment.",
+  "mealSuggestionsRegenerateTooltip": "Régénérer",
+  "mealSuggestionsRetryButton": "Réessayer",
+  "mealSuggestionsTitle": "Idées repas",
+  "notificationSettingsAddButton": "Ajouter",
+  "notificationSettingsAddSubmitButton": "Ajouter",
+  "notificationSettingsCustomRemindersLoadError": "Impossible de charger tes rappels personnalisés.",
+  "notificationSettingsCustomRemindersTitle": "RAPPELS PERSONNALISÉS",
+  "notificationSettingsDisabledLabel": "Désactivé",
+  "notificationSettingsIntro": "Reçois un rappel pour penser à logguer chacun de tes repas.",
+  "notificationSettingsLoadError": "Impossible de charger les réglages de notifications.",
+  "notificationSettingsNameRequiredError": "Donne un nom à ton rappel.",
+  "notificationSettingsNewReminderTitle": "Nouveau rappel",
+  "notificationSettingsNoCustomReminders": "Aucun rappel personnalisé pour l'instant.",
+  "notificationSettingsReminderAtLabel": "Rappel à {time}",
+  "@notificationSettingsReminderAtLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationSettingsReminderNameHint": "Ex. Collation, Boire de l'eau...",
+  "notificationSettingsReminderNameLabel": "Nom du rappel",
+  "notificationSettingsTimeLabel": "Heure : {time}",
+  "@notificationSettingsTimeLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationSettingsTitle": "Notifications",
+  "notificationSettingsSlotBreakfast": "Petit-déjeuner",
+  "notificationSettingsSlotLunch": "Déjeuner",
+  "notificationSettingsSlotDinner": "Dîner",
+  "notificationSettingsBodyBreakfast": "Pense à prendre en photo ton petit-déjeuner pour le logguer !",
+  "notificationSettingsBodyLunch": "Pense à prendre en photo ton déjeuner pour le logguer !",
+  "notificationSettingsBodyDinner": "Pense à prendre en photo ton dîner pour le logguer !",
+  "nutritionTrends30DaySectionTitle": "Tendance calories · 30 derniers jours",
+  "nutritionTrendsCaloriesLabel": "Calories",
+  "nutritionTrendsCaloriesSectionTitle": "Calories · 7 derniers jours",
+  "nutritionTrendsCarbsLabel": "Glucides",
+  "nutritionTrendsDailyAveragesTitle": "Moyennes quotidiennes",
+  "nutritionTrendsDayFri": "Ven",
+  "nutritionTrendsDayMon": "Lun",
+  "nutritionTrendsDaySat": "Sam",
+  "nutritionTrendsDaySun": "Dim",
+  "nutritionTrendsDayThu": "Jeu",
+  "nutritionTrendsDayTue": "Mar",
+  "nutritionTrendsDayWed": "Mer",
+  "nutritionTrendsEmptyState": "Pas encore assez de repas enregistrés cette semaine pour afficher des tendances.",
+  "nutritionTrendsErrorMessage": "Erreur : {error}",
+  "@nutritionTrendsErrorMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "nutritionTrendsExtraNutrientsTitle": "Autres nutriments (moyenne/jour)",
+  "nutritionTrendsFatLabel": "Lipides",
+  "nutritionTrendsFiberLabel": "Fibres",
+  "nutritionTrendsGoProButton": "Passer PRO",
+  "nutritionTrendsMacroDistributionTitle": "Répartition des macros (moyenne)",
+  "nutritionTrendsProLockedDescription": "Débloque les macros détaillées et les tendances nutritionnelles sur 7 jours.",
+  "nutritionTrendsProLockedTitle": "Réservé aux membres PRO",
+  "nutritionTrendsProteinLabel": "Protéines",
+  "nutritionTrendsSatFatLabel": "Graisses sat.",
+  "nutritionTrendsSugarLabel": "Sucres",
+  "nutritionTrendsTitle": "Analyses avancées",
+  "onboardingAgeSectionLabel": "Votre Âge",
+  "onboardingAgeUnitSuffix": "ans",
+  "onboardingErrorGoalRequired": "Choisis ton objectif principal.",
+  "onboardingErrorInvalidAge": "Entre un âge valide.",
+  "onboardingErrorInvalidHeight": "Entre ta taille en cm.",
+  "onboardingErrorInvalidWeight": "Entre ton poids.",
+  "onboardingErrorSaveProfile": "Impossible d'enregistrer le profil : {error}",
+  "@onboardingErrorSaveProfile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingErrorSexRequired": "Choisis ton sexe pour continuer.",
+  "onboardingGoalGainMuscle": "Prendre de la masse",
+  "onboardingGoalGainMuscleDescription": "Augmenter l'apport pour prendre du muscle.",
+  "onboardingGoalLoseWeight": "Perdre du poids",
+  "onboardingGoalLoseWeightDescription": "Réduire l'apport calorique et brûler les graisses.",
+  "onboardingGoalMaintain": "Maintenir mon poids",
+  "onboardingGoalMaintainDescription": "Équilibrer les macros pour une santé stable.",
+  "onboardingGoalSectionLabel": "Quel est votre objectif ?",
+  "onboardingHeightSectionLabel": "Votre Taille",
+  "onboardingSexFemale": "Femme",
+  "onboardingSexMale": "Homme",
+  "onboardingSexOther": "Autre",
+  "onboardingSexSectionLabel": "Vous êtes...",
+  "onboardingStepIndicator": "Étape 1 sur 2",
+  "onboardingSubmitButton": "Calculer mon plan",
+  "onboardingSubtitle": "Ces informations permettent à notre IA de calculer votre besoin calorique précis.",
+  "onboardingTitle": "Apprenons à nous connaître",
+  "onboardingWeightSectionLabel": "Votre Poids",
+  "paywallBadgePopular": "POPULAIRE",
+  "paywallBenefitAdsFreeSubtitle": "Une expérience fluide, premium et concentrée.",
+  "paywallBenefitAdsFreeTitle": "Sans publicité",
+  "paywallBenefitAnalyticsSubtitle": "Macros détaillées et tendances nutritionnelles.",
+  "paywallBenefitAnalyticsTitle": "Analyses avancées",
+  "paywallBenefitCoachSubtitle": "Recevez des recommandations adaptées à votre objectif.",
+  "paywallBenefitCoachTitle": "Coach de repas personnel",
+  "paywallBenefitPhotoSubtitle": "Analysez autant de repas que nécessaire, sans limite.",
+  "paywallBenefitPhotoTitle": "Reconnaissance Photo Illimitée",
+  "paywallChooseForfaitLabel": "CHOISISSEZ VOTRE FORFAIT",
+  "paywallDemoModeNotice": "Mode démo : les achats sont simulés, aucun paiement réel n'est effectué.",
+  "paywallHeaderBadge": "AI-HEALTH-CHEF PRO",
+  "paywallPeriodMonth": "/ mois",
+  "paywallPeriodWeek": "/ semaine",
+  "paywallPeriodYear": "/ an",
+  "paywallPlanAnnualTitle": "Annuel",
+  "paywallPlanLifetimeTitle": "À vie",
+  "paywallPlanMonthlyTitle": "Mensuel",
+  "paywallPlanWeeklyTitle": "Hebdomadaire",
+  "paywallPreviewConfigPending": "Aperçu — configuration RevenueCat en attente",
+  "paywallPreviewDemoMode": "Aperçu — achat simulé en mode démo",
+  "paywallRestoreButton": "Restaurer mes achats",
+  "paywallRestoreError": "Impossible de restaurer les achats : {error}",
+  "@paywallRestoreError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallRestoreNone": "Aucun achat actif trouvé pour ce compte.",
+  "paywallRestoreSuccess": "Achat restauré, ton accès PRO est actif.",
+  "paywallSelectionSummary": "Sélection : {title} • {price} {period}",
+  "@paywallSelectionSummary": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallSubtitle": "Libérez tout le potentiel de votre nutrition avec l'intelligence artificielle de pointe.",
+  "paywallTitle": "Passez au niveau supérieur",
+  "paywallUnlockButton": "Débloquer AI Health Chef PRO",
+  "profileAboutSubtitle": "Version et informations",
+  "profileAboutTitle": "À propos",
+  "profileAccountSubtitle": "Informations personnelles",
+  "profileAccountTitle": "Compte",
+  "profileActiveBadge": "Actif",
+  "profileAdvancedAnalyticsSubtitle": "Macros détaillées et tendances nutritionnelles",
+  "profileAdvancedAnalyticsTitle": "Analyses avancées",
+  "profileAgeLabel": "Âge",
+  "profileAgeValue": "{age} ans",
+  "@profileAgeValue": {
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "profileCoachSubtitle": "Ton : {tone}",
+  "@profileCoachSubtitle": {
+    "placeholders": {
+      "tone": {
+        "type": "String"
+      }
+    }
+  },
+  "profileCoachTitle": "Coach IA",
+  "profileCurrentWeightLabel": "Poids actuel",
+  "profileDefaultUserName": "Utilisateur",
+  "profileDietaryPrefsSubtitleWithAllergies": "{dietType} · {count} allergie(s)",
+  "@profileDietaryPrefsSubtitleWithAllergies": {
+    "placeholders": {
+      "dietType": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileDietaryPrefsTitle": "Préférences alimentaires",
+  "profileGoalLabel": "Objectif",
+  "profileGoalsSubtitle": "Calories et macros",
+  "profileGoalsTitle": "Mes objectifs",
+  "profileHelpCenterSubtitle": "FAQ, guides et tutoriels",
+  "profileHelpCenterTitle": "Centre d’aide",
+  "profileLanguageTitle": "Langue",
+  "profileLoadError": "Impossible de charger le profil : {error}",
+  "@profileLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileLocalAiSubtitleDefault": "Scan et chat sur l'appareil",
+  "profileLocalAiSubtitleDisabled": "Désactivée",
+  "profileLocalAiSubtitleEnabled": "Activée",
+  "profileLocalAiSubtitleEnabledNotDownloaded": "Activée · à télécharger",
+  "profileLocalAiTitle": "IA locale",
+  "profileLogoutButton": "Se déconnecter",
+  "profileLogoutError": "Erreur lors de la déconnexion : {error}",
+  "@profileLogoutError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileNotificationsSubtitle": "Rappels repas et suivi",
+  "profileNotificationsTitle": "Notifications",
+  "profileProBadge": "PRO",
+  "profileProBadgeHeader": "Pro",
+  "profileSectionGeneral": "GÉNÉRAL",
+  "profileSectionPersonalization": "PERSONNALISATION",
+  "profileSectionSupport": "ASSISTANCE",
+  "profileSecurityComingSoonMessage": "Les réglages de sécurité et confidentialité arrivent bientôt.",
+  "profileSecuritySubtitle": "Données et sécurité",
+  "profileSecurityTitle": "Sécurité et Confidentialité",
+  "profileSubscriptionSubtitle": "Plan PRO et facturation",
+  "profileSubscriptionTitle": "Abonnement",
+  "profileTargetWeightLabel": "Poids cible",
+  "profileTermsSubtitle": "CGU et mentions légales",
+  "profileTermsTitle": "Conditions d’utilisation",
+  "profileTitle": "MON PROFIL",
+  "profileUnknownUser": "Utilisateur inconnu",
+  "profileVersionText": "AI Health Chef v1.0.0",
+  "profileWeightValue": "{weight} kg",
+  "@profileWeightValue": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "signupAlreadyMember": "Déjà membre ?",
+  "signupDividerOrSignUpWith": "OU S'INSCRIRE AVEC",
+  "signupEmailHint": "jean.dupont@exemple.fr",
+  "signupEmailLabel": "ADRESSE E-MAIL",
+  "signupErrorAcceptTerms": "Vous devez accepter les conditions d'utilisation.",
+  "signupErrorFillAllFields": "Veuillez remplir tous les champs.",
+  "signupFullNameHint": "Jean Dupont",
+  "signupFullNameLabel": "NOM COMPLET",
+  "signupHeaderLabel": "CRÉER UN COMPTE",
+  "signupLoginLink": "Se connecter",
+  "signupPasswordLabel": "MOT DE PASSE",
+  "signupSecureDataNotice": "données cryptées & sécurisées",
+  "signupSubmitButton": "S'inscrire",
+  "signupSubtitle": "Rejoignez-nous pour transformer votre nutrition avec intelligence artificielle.",
+  "signupSuccessCheckEmail": "Compte créé ! Vérifiez vos emails pour confirmer.",
+  "signupTermsAcceptance": "J'accepte les Conditions d'utilisation et la Politique de confidentialité",
+  "termsAppBarTitle": "Conditions d’utilisation",
+  "termsDraftBanner": "Brouillon : ce document décrit honnêtement le service, mais n’a pas encore été relu par un professionnel du droit et l’identité légale de l’éditeur reste à compléter. À finaliser avant toute publication publique de l’app.",
+  "termsLastUpdated": "Dernière mise à jour : {date}",
+  "@termsLastUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "termsSection10Body": "L’Application est fournie « en l’état ». L’éditeur ne garantit pas l’exactitude, la disponibilité continue ou l’absence d’erreur du service, notamment des estimations générées par IA. L’usage de l’Application se fait sous ta seule responsabilité.",
+  "termsSection10Title": "10. Responsabilité",
+  "termsSection11Body": "Tu peux cesser d’utiliser l’Application et demander la suppression de ton compte à tout moment en écrivant à {supportEmail}. L’éditeur peut suspendre ou supprimer un compte en cas d’usage abusif ou de non-respect des présentes CGU.",
+  "@termsSection11Body": {
+    "placeholders": {
+      "supportEmail": {
+        "type": "String"
+      }
+    }
+  },
+  "termsSection11Title": "11. Résiliation",
+  "termsSection12Body": "Les présentes CGU peuvent évoluer, notamment en fonction des fonctionnalités ajoutées à l’Application. La version en vigueur est toujours celle consultable dans l’Application.",
+  "termsSection12Title": "12. Modification des CGU",
+  "termsSection13Body": "Les présentes CGU sont soumises au droit français.",
+  "termsSection13Title": "13. Droit applicable",
+  "termsSection14Body": "Pour toute question relative à ces CGU ou à tes données : {supportEmail}.",
+  "@termsSection14Body": {
+    "placeholders": {
+      "supportEmail": {
+        "type": "String"
+      }
+    }
+  },
+  "termsSection14Title": "14. Contact",
+  "termsSection1Body": "Éditeur : [Nom de l’éditeur à compléter] — projet actuellement développé à titre personnel, sans société immatriculée à ce jour.\nContact : {supportEmail}\nHébergement des données et du backend : Supabase Inc. (infrastructure cloud tierce). Application distribuée via l’App Store (Apple) et le Google Play Store.",
+  "@termsSection1Body": {
+    "placeholders": {
+      "supportEmail": {
+        "type": "String"
+      }
+    }
+  },
+  "termsSection1Title": "1. Mentions légales",
+  "termsSection2Body": "Les présentes Conditions d’Utilisation (« CGU ») régissent l’accès et l’usage de l’application mobile AI Health Chef (« l’Application »). En créant un compte ou en utilisant l’Application, tu acceptes l’intégralité des présentes CGU.",
+  "termsSection2Title": "2. Objet",
+  "termsSection3Body": "AI Health Chef permet de : suivre ses repas et ses macronutriments au quotidien ; analyser une photo de repas via intelligence artificielle pour estimer les ingrédients et valeurs nutritionnelles ; échanger avec un coach nutritionnel conversationnel basé sur l’IA ; recevoir des idées de repas personnalisées ; configurer des rappels de repas ; et, via un abonnement PRO optionnel, débloquer des fonctionnalités additionnelles.",
+  "termsSection3Title": "3. Description du service",
+  "termsSection4Body": "AI Health Chef fournit des informations et estimations à titre purement informatif et ne constitue en aucun cas un avis médical, un diagnostic ou une prescription. Les calculs de calories, macros et objectifs nutritionnels sont des estimations générales. Consulte un médecin ou un·e diététicien·ne avant tout changement alimentaire significatif, en particulier en cas de pathologie, de grossesse, ou de trouble du comportement alimentaire. L’Application ne doit pas être utilisée comme seul outil de suivi dans un contexte médical.",
+  "termsSection4Title": "4. Ce n’est pas un avis médical",
+  "termsSection5Body": "Les ingrédients détectés sur photo, les valeurs nutritionnelles estimées, les réponses du coach IA et les idées de repas sont générés par des modèles d’IA tiers (actuellement Google Gemini) et peuvent contenir des erreurs, imprécisions ou approximations. Vérifie et ajuste les informations avant de t’y fier, en particulier en cas d’allergie ou de restriction alimentaire.",
+  "termsSection5Title": "5. Contenu généré par intelligence artificielle",
+  "termsSection6Body": "L’utilisation de l’Application nécessite la création d’un compte. Tu es responsable de l’exactitude des informations fournies et de la confidentialité de tes identifiants de connexion. Toute activité réalisée depuis ton compte est présumée effectuée par toi.",
+  "termsSection6Title": "6. Compte utilisateur",
+  "termsSection7Body": "Certaines fonctionnalités sont réservées aux utilisateurs abonnés (« PRO »). L’achat, le renouvellement automatique et l’annulation de l’abonnement sont intégralement gérés par la plateforme de paiement de ton appareil (App Store ou Google Play), pas directement par l’éditeur. L’abonnement se renouvelle automatiquement sauf annulation au moins 24h avant la fin de la période en cours, depuis les réglages de ton compte Apple ou Google. Les demandes de remboursement relèvent des politiques d’Apple/Google, pas de l’éditeur.",
+  "termsSection7Title": "7. Abonnement PRO",
+  "termsSection8Body": "L’Application traite notamment : ton email et ton mot de passe (authentification) ; des données de profil santé (sexe, âge, poids, taille, objectif) ; les photos de repas que tu prends et les données nutritionnelles associées ; ta photo de profil ; et l’historique de tes échanges avec le coach IA. Ces données sont utilisées uniquement pour fournir le service (calcul de tes objectifs, analyse de tes repas, suivi de ton historique) et sont hébergées par Supabase. Les photos de repas sont transmises à Google (modèle Gemini) le temps de l’analyse. Aucune donnée n’est vendue à des tiers. Tu peux demander l’accès, la rectification ou la suppression de tes données à tout moment en écrivant à {supportEmail}.",
+  "@termsSection8Body": {
+    "placeholders": {
+      "supportEmail": {
+        "type": "String"
+      }
+    }
+  },
+  "termsSection8Title": "8. Données personnelles",
+  "termsSection9Body": "Le nom, le logo et les éléments graphiques de l’Application appartiennent à l’éditeur. Le contenu que tu crées (photos, messages) reste ta propriété ; tu accordes à l’éditeur le droit de le traiter uniquement dans le cadre du fonctionnement du service (ex. envoi à un fournisseur d’IA pour analyse).",
+  "termsSection9Title": "9. Propriété intellectuelle"
 }

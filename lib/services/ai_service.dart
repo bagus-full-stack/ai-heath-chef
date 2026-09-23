@@ -8,20 +8,21 @@ class AIService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   /// Fonction principale qui prend le chemin de l'image et retourne une liste d'ingrédients
-  Future<List<Ingredient>> analyzeMealImage(String imagePath) {
-    return _analyzeImage(imagePath, 'analyze-meal', "Erreur lors de l'analyse IA");
+  Future<List<Ingredient>> analyzeMealImage(String imagePath, {String lang = 'fr'}) {
+    return _analyzeImage(imagePath, 'analyze-meal', "Erreur lors de l'analyse IA", lang);
   }
 
   /// Analyse la photo d'un produit emballé (étiquette nutritionnelle) et
   /// retourne un ingrédient représentant le produit entier.
-  Future<List<Ingredient>> analyzeProductImage(String imagePath) {
-    return _analyzeImage(imagePath, 'analyze-product', "Erreur lors de l'analyse du produit");
+  Future<List<Ingredient>> analyzeProductImage(String imagePath, {String lang = 'fr'}) {
+    return _analyzeImage(imagePath, 'analyze-product', "Erreur lors de l'analyse du produit", lang);
   }
 
   Future<List<Ingredient>> _analyzeImage(
     String imagePath,
     String functionName,
     String errorPrefix,
+    String lang,
   ) async {
     try {
       // 1. COMPRESSION DE L'IMAGE
@@ -44,7 +45,7 @@ class AIService {
       // 3. APPEL À SUPABASE EDGE FUNCTIONS
       final response = await _supabase.functions.invoke(
         functionName,
-        body: {'image': base64Image},
+        body: {'image': base64Image, 'lang': lang},
       );
 
       // 4. PARSING DU RÉSULTAT JSON
@@ -75,6 +76,7 @@ class AIService {
     String coachTone = 'motivant',
     String dietType = 'none',
     List<String> allergies = const [],
+    String lang = 'fr',
   }) async {
     try {
       final response = await Supabase.instance.client.functions.invoke(
@@ -85,6 +87,7 @@ class AIService {
           'coachTone': coachTone,
           'dietType': dietType,
           'allergies': allergies,
+          'lang': lang,
         },
       );
 
@@ -106,6 +109,7 @@ class AIService {
     String dietType = 'none',
     List<String> allergies = const [],
     int count = 6,
+    String lang = 'fr',
   }) async {
     try {
       final response = await _supabase.functions.invoke(
@@ -119,6 +123,7 @@ class AIService {
           'dietType': dietType,
           'allergies': allergies,
           'count': count,
+          'lang': lang,
         },
       );
 

@@ -209,10 +209,13 @@ Deno.serve(async (req) => {
             throw new Error("Le corps de la requête est vide ou mal formé.");
         }
 
-        const { image } = body;
+        const { image, lang } = body;
         if (!image) {
             throw new Error("Aucune image n'a été fournie dans la requête.");
         }
+        const langInstruction = lang === 'en'
+            ? "Respond with English text values (ingredient names) in the JSON."
+            : "Réponds avec des valeurs textuelles en français (noms des ingrédients) dans le JSON.";
 
         // === 2. VÉRIFICATION CLÉ API GEMINI ===
         const apiKey = Deno.env.get('GEMINI_API_KEY');
@@ -243,7 +246,8 @@ Le JSON doit avoir cette structure exacte :
       "satFatPer100g": 2.0
     }
   ]
-}`;
+}
+${langInstruction}`;
 
         // === 4. BOUCLE DE TENTATIVES (FALLBACK) ===
         let lastError = null;

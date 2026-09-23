@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../models/meal_suggestion.dart';
 
 const Color _kPrimaryColor = Color(0xFF6B66FF);
@@ -127,7 +128,7 @@ class MealSuggestionCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${suggestion.kcal} kcal',
+                      context.l10n.mealSuggestionCardKcalLabel(suggestion.kcal.toString()),
                       style: const TextStyle(
                         color: _kPrimaryColor,
                         fontWeight: FontWeight.w800,
@@ -139,9 +140,24 @@ class MealSuggestionCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _MacroMini(label: 'PROT', value: '${suggestion.prot.toStringAsFixed(0)}g'),
-                    _MacroMini(label: 'GLUC', value: '${suggestion.gluc.toStringAsFixed(0)}g'),
-                    _MacroMini(label: 'LIP', value: '${suggestion.lip.toStringAsFixed(0)}g'),
+                    _MacroMini(
+                      label: context.l10n.mealSuggestionCardProtLabel,
+                      value: context.l10n.mealSuggestionCardGramsValue(
+                        suggestion.prot.toStringAsFixed(0),
+                      ),
+                    ),
+                    _MacroMini(
+                      label: context.l10n.mealSuggestionCardGlucLabel,
+                      value: context.l10n.mealSuggestionCardGramsValue(
+                        suggestion.gluc.toStringAsFixed(0),
+                      ),
+                    ),
+                    _MacroMini(
+                      label: context.l10n.mealSuggestionCardLipLabel,
+                      value: context.l10n.mealSuggestionCardGramsValue(
+                        suggestion.lip.toStringAsFixed(0),
+                      ),
+                    ),
                     GestureDetector(
                       onTap: onAdd,
                       child: Container(

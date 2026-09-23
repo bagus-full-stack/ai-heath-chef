@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../models/selected_plan.dart';
 import '../providers/purchase_provider.dart';
 import '../services/purchase_service.dart';
@@ -25,45 +26,45 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   /// Plans affichés tant qu'aucune offre RevenueCat n'a pu être chargée
   /// (ex: clés API non configurées en développement). L'achat est désactivé
   /// pour ces plans (SelectedPlan.package == null).
-  static const List<SelectedPlan> _fallbackPlans = [
+  List<SelectedPlan> _fallbackPlans(BuildContext context) => [
     SelectedPlan(
-      title: 'Annuel',
+      title: context.l10n.paywallPlanAnnualTitle,
       priceLabel: '39.99€',
-      periodLabel: '/ an',
-      badge: 'POPULAIRE',
+      periodLabel: context.l10n.paywallPeriodYear,
+      badge: context.l10n.paywallBadgePopular,
     ),
     SelectedPlan(
-      title: 'Mensuel',
+      title: context.l10n.paywallPlanMonthlyTitle,
       priceLabel: '4.99€',
-      periodLabel: '/ mois',
+      periodLabel: context.l10n.paywallPeriodMonth,
     ),
   ];
 
-  List<SelectedPlan> _plansFromOffering(Offering offering) {
+  List<SelectedPlan> _plansFromOffering(BuildContext context, Offering offering) {
     if (offering.availablePackages.isEmpty) {
-      return _fallbackPlans;
+      return _fallbackPlans(context);
     }
     return offering.availablePackages.map((package) {
       final isAnnual = package.packageType == PackageType.annual;
       final periodLabel = switch (package.packageType) {
-        PackageType.annual => '/ an',
-        PackageType.monthly => '/ mois',
-        PackageType.weekly => '/ semaine',
+        PackageType.annual => context.l10n.paywallPeriodYear,
+        PackageType.monthly => context.l10n.paywallPeriodMonth,
+        PackageType.weekly => context.l10n.paywallPeriodWeek,
         PackageType.lifetime => '',
         _ => '',
       };
       final title = switch (package.packageType) {
-        PackageType.annual => 'Annuel',
-        PackageType.monthly => 'Mensuel',
-        PackageType.weekly => 'Hebdomadaire',
-        PackageType.lifetime => 'À vie',
+        PackageType.annual => context.l10n.paywallPlanAnnualTitle,
+        PackageType.monthly => context.l10n.paywallPlanMonthlyTitle,
+        PackageType.weekly => context.l10n.paywallPlanWeeklyTitle,
+        PackageType.lifetime => context.l10n.paywallPlanLifetimeTitle,
         _ => package.storeProduct.title,
       };
       return SelectedPlan(
         title: title,
         priceLabel: package.storeProduct.priceString,
         periodLabel: periodLabel,
-        badge: isAnnual ? 'POPULAIRE' : null,
+        badge: isAnnual ? context.l10n.paywallBadgePopular : null,
         package: package,
       );
     }).toList();
@@ -88,8 +89,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         SnackBar(
           content: Text(
             isEntitled
-                ? 'Achat restauré, ton accès PRO est actif.'
-                : 'Aucun achat actif trouvé pour ce compte.',
+                ? context.l10n.paywallRestoreSuccess
+                : context.l10n.paywallRestoreNone,
           ),
           backgroundColor: isEntitled ? const Color(0xFF45C48C) : null,
         ),
@@ -104,7 +105,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Impossible de restaurer les achats : $e'),
+          content: Text(context.l10n.paywallRestoreError(e.toString())),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -161,7 +162,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          'AI-HEALTH-CHEF PRO',
+                          context.l10n.paywallHeaderBadge,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.75),
                             fontWeight: FontWeight.w700,
@@ -197,10 +198,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           ),
                         ),
                         const SizedBox(height: 22),
-                        const Text(
-                          'Passez au niveau supérieur',
+                        Text(
+                          context.l10n.paywallTitle,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
@@ -209,7 +210,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Libérez tout le potentiel de votre nutrition avec l’intelligence artificielle de pointe.',
+                          context.l10n.paywallSubtitle,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16,
@@ -218,38 +219,38 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           ),
                         ),
                         const SizedBox(height: 28),
-                        const StaggeredEntrance(
+                        StaggeredEntrance(
                           child: _BenefitCard(
                             icon: Icons.photo_camera_back_rounded,
-                            title: 'Reconnaissance Photo Illimitée',
-                            subtitle: 'Analysez autant de repas que nécessaire, sans limite.',
+                            title: context.l10n.paywallBenefitPhotoTitle,
+                            subtitle: context.l10n.paywallBenefitPhotoSubtitle,
                           ),
                         ),
                         const SizedBox(height: 12),
                         StaggeredEntrance(
                           delay: const Duration(milliseconds: 80),
-                          child: const _BenefitCard(
+                          child: _BenefitCard(
                             icon: Icons.bubble_chart_rounded,
-                            title: 'Coach de repas personnel',
-                            subtitle: 'Recevez des recommandations adaptées à votre objectif.',
+                            title: context.l10n.paywallBenefitCoachTitle,
+                            subtitle: context.l10n.paywallBenefitCoachSubtitle,
                           ),
                         ),
                         const SizedBox(height: 12),
                         StaggeredEntrance(
                           delay: const Duration(milliseconds: 160),
-                          child: const _BenefitCard(
+                          child: _BenefitCard(
                             icon: Icons.auto_graph_rounded,
-                            title: 'Analyses avancées',
-                            subtitle: 'Macros détaillées et tendances nutritionnelles.',
+                            title: context.l10n.paywallBenefitAnalyticsTitle,
+                            subtitle: context.l10n.paywallBenefitAnalyticsSubtitle,
                           ),
                         ),
                         const SizedBox(height: 12),
                         StaggeredEntrance(
                           delay: const Duration(milliseconds: 240),
-                          child: const _BenefitCard(
+                          child: _BenefitCard(
                             icon: Icons.no_food_rounded,
-                            title: 'Sans publicité',
-                            subtitle: 'Une expérience fluide, premium et concentrée.',
+                            title: context.l10n.paywallBenefitAdsFreeTitle,
+                            subtitle: context.l10n.paywallBenefitAdsFreeSubtitle,
                           ),
                         ),
                         if (PurchaseService.instance.isDemoMode) ...[
@@ -267,7 +268,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    'Mode démo : les achats sont simulés, aucun paiement réel n’est effectué.',
+                                    context.l10n.paywallDemoModeNotice,
                                     style: TextStyle(color: Colors.amber.shade200, fontSize: 12, height: 1.3),
                                   ),
                                 ),
@@ -276,9 +277,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           ),
                         ],
                         const SizedBox(height: 28),
-                        const Text(
-                          'CHOISISSEZ VOTRE FORFAIT',
-                          style: TextStyle(
+                        Text(
+                          context.l10n.paywallChooseForfaitLabel,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
@@ -293,9 +294,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                               child: CircularProgressIndicator(color: _primaryColor),
                             ),
                           ),
-                          error: (error, stack) => _buildPlans(_fallbackPlans),
+                          error: (error, stack) => _buildPlans(_fallbackPlans(context)),
                           data: (offering) => _buildPlans(
-                            offering == null ? _fallbackPlans : _plansFromOffering(offering),
+                            offering == null ? _fallbackPlans(context) : _plansFromOffering(context, offering),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -312,7 +313,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                     ),
                                   )
                                 : Text(
-                                    'Restaurer mes achats',
+                                    context.l10n.paywallRestoreButton,
                                     style: TextStyle(
                                       color: Colors.grey.shade400,
                                       decoration: TextDecoration.underline,
@@ -361,9 +362,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             ),
             elevation: 0,
           ),
-          child: const Text(
-            'Débloquer AI Health Chef PRO',
-            style: TextStyle(
+          child: Text(
+            context.l10n.paywallUnlockButton,
+            style: const TextStyle(
               fontSize: 16,
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -564,8 +565,8 @@ class _PlanCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       PurchaseService.instance.isDemoMode
-                          ? 'Aperçu — achat simulé en mode démo'
-                          : 'Aperçu — configuration RevenueCat en attente',
+                          ? context.l10n.paywallPreviewDemoMode
+                          : context.l10n.paywallPreviewConfigPending,
                       style: TextStyle(color: Colors.amber.shade200, fontSize: 12),
                     ),
                   ],
@@ -599,7 +600,7 @@ class _SummaryStrip extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Sélection : ${plan.title} • ${plan.priceLabel} ${plan.periodLabel}',
+              context.l10n.paywallSelectionSummary(plan.title, plan.priceLabel, plan.periodLabel),
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
             ),
           ),

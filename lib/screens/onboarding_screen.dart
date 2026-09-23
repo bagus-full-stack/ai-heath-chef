@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 
@@ -52,30 +53,30 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
 
     if (_selectedSex == null) {
-      _showError('Choisis ton sexe pour continuer.');
+      _showError(context.l10n.onboardingErrorSexRequired);
       return;
     }
 
     final age = int.tryParse(_ageController.text.trim());
     if (age == null || age < 10 || age > 120) {
-      _showError('Entre un âge valide.');
+      _showError(context.l10n.onboardingErrorInvalidAge);
       return;
     }
 
     final weight = double.tryParse(_weightController.text.trim().replaceAll(',', '.'));
     if (weight == null || weight <= 0 || weight > 400) {
-      _showError('Entre ton poids.');
+      _showError(context.l10n.onboardingErrorInvalidWeight);
       return;
     }
 
     final height = double.tryParse(_heightController.text.trim().replaceAll(',', '.'));
     if (height == null || height < 100 || height > 250) {
-      _showError('Entre ta taille en cm.');
+      _showError(context.l10n.onboardingErrorInvalidHeight);
       return;
     }
 
     if (_selectedGoal == null) {
-      _showError('Choisis ton objectif principal.');
+      _showError(context.l10n.onboardingErrorGoalRequired);
       return;
     }
 
@@ -121,7 +122,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Impossible d’enregistrer le profil : $e'),
+            content: Text(context.l10n.onboardingErrorSaveProfile(e.toString())),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -136,11 +137,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   String _sexLabel(OnboardingSex sex) {
     switch (sex) {
       case OnboardingSex.male:
-        return 'Homme';
+        return context.l10n.onboardingSexMale;
       case OnboardingSex.female:
-        return 'Femme';
+        return context.l10n.onboardingSexFemale;
       case OnboardingSex.other:
-        return 'Autre';
+        return context.l10n.onboardingSexOther;
     }
   }
 
@@ -158,22 +159,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   String _goalLabel(OnboardingGoal goal) {
     switch (goal) {
       case OnboardingGoal.loseWeight:
-        return 'Perdre du poids';
+        return context.l10n.onboardingGoalLoseWeight;
       case OnboardingGoal.gainMuscle:
-        return 'Prendre de la masse';
+        return context.l10n.onboardingGoalGainMuscle;
       case OnboardingGoal.maintain:
-        return 'Maintenir mon poids';
+        return context.l10n.onboardingGoalMaintain;
     }
   }
 
   String _goalDescription(OnboardingGoal goal) {
     switch (goal) {
       case OnboardingGoal.loseWeight:
-        return 'Réduire l’apport calorique et brûler les graisses.';
+        return context.l10n.onboardingGoalLoseWeightDescription;
       case OnboardingGoal.gainMuscle:
-        return 'Augmenter l’apport pour prendre du muscle.';
+        return context.l10n.onboardingGoalGainMuscleDescription;
       case OnboardingGoal.maintain:
-        return 'Équilibrer les macros pour une santé stable.';
+        return context.l10n.onboardingGoalMaintainDescription;
     }
   }
 
@@ -231,9 +232,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       color: _primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    child: const Text(
-                      'Étape 1 sur 2',
-                      style: TextStyle(
+                    child: Text(
+                      context.l10n.onboardingStepIndicator,
+                      style: const TextStyle(
                         color: _primaryColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -241,9 +242,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Text(
-                    'Apprenons à nous connaître',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.onboardingTitle,
+                    style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       height: 1.15,
@@ -251,7 +252,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Ces informations permettent à notre IA de calculer votre besoin calorique précis.',
+                    context.l10n.onboardingSubtitle,
                     style: TextStyle(
                       fontSize: 15,
                       color: Colors.grey.shade600,
@@ -259,7 +260,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  _SectionHeader(icon: Icons.people_alt_outlined, label: 'Vous êtes...'),
+                  _SectionHeader(icon: Icons.people_alt_outlined, label: context.l10n.onboardingSexSectionLabel),
                   const SizedBox(height: 10),
                   Row(
                     children: [
@@ -285,14 +286,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _SectionHeader(icon: Icons.calendar_today_outlined, label: 'Votre Âge'),
+                            _SectionHeader(icon: Icons.calendar_today_outlined, label: context.l10n.onboardingAgeSectionLabel),
                             const SizedBox(height: 10),
                             TextField(
                               controller: _ageController,
                               keyboardType: TextInputType.number,
                               textInputAction: TextInputAction.next,
                               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                              decoration: _fieldDecoration(hintText: '25', suffixText: 'ans'),
+                              decoration: _fieldDecoration(hintText: '25', suffixText: context.l10n.onboardingAgeUnitSuffix),
                             ),
                           ],
                         ),
@@ -302,7 +303,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _SectionHeader(icon: Icons.balance_outlined, label: 'Votre Poids'),
+                            _SectionHeader(icon: Icons.balance_outlined, label: context.l10n.onboardingWeightSectionLabel),
                             const SizedBox(height: 10),
                             TextField(
                               controller: _weightController,
@@ -317,7 +318,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ],
                   ),
                   const SizedBox(height: 18),
-                  _SectionHeader(icon: Icons.height_outlined, label: 'Votre Taille'),
+                  _SectionHeader(icon: Icons.height_outlined, label: context.l10n.onboardingHeightSectionLabel),
                   const SizedBox(height: 10),
                   TextField(
                     controller: _heightController,
@@ -327,7 +328,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     decoration: _fieldDecoration(hintText: '175', suffixText: 'cm'),
                   ),
                   const SizedBox(height: 24),
-                  _SectionHeader(icon: Icons.track_changes_outlined, label: 'Quel est votre objectif ?'),
+                  _SectionHeader(icon: Icons.track_changes_outlined, label: context.l10n.onboardingGoalSectionLabel),
                   const SizedBox(height: 10),
                   for (final goal in _goalDisplayOrder) ...[
                     _goalCard(goal),
@@ -353,19 +354,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Row(
+                        : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Calculer mon plan',
-                                style: TextStyle(
+                                context.l10n.onboardingSubmitButton,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
-                              SizedBox(width: 8),
-                              Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
                             ],
                           ),
                   ),

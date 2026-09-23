@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../config/local_ai_config.dart';
 import '../providers/local_ai_provider.dart';
 import '../widgets/animated_async_value.dart';
+import '../l10n/l10n_extensions.dart';
 
 const Color _kPrimaryColor = Color(0xFF6B66FF);
 
@@ -20,16 +21,15 @@ class LocalAiSettingsScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Télécharger le modèle IA'),
+        title: Text(context.l10n.localAiSettingsDownloadDialogTitle),
         content: Text(
-          'Le modèle pèse environ ${LocalAiConfig.approxSizeLabel}. '
-          'Nous recommandons une connexion Wi-Fi pour ce téléchargement.',
+          context.l10n.localAiSettingsDownloadDialogBody(LocalAiConfig.approxSizeLabel),
         ),
         actions: [
-          TextButton(onPressed: () => context.pop(false), child: const Text('Annuler')),
+          TextButton(onPressed: () => context.pop(false), child: Text(context.l10n.localAiSettingsCancelButton)),
           TextButton(
             onPressed: () => context.pop(true),
-            child: const Text('Télécharger', style: TextStyle(color: _kPrimaryColor)),
+            child: Text(context.l10n.localAiSettingsDownloadButton, style: const TextStyle(color: _kPrimaryColor)),
           ),
         ],
       ),
@@ -41,7 +41,7 @@ class LocalAiSettingsScreen extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Échec du téléchargement : $e')),
+          SnackBar(content: Text(context.l10n.localAiSettingsDownloadFailedError(e.toString()))),
         );
       }
     }
@@ -51,15 +51,15 @@ class LocalAiSettingsScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Supprimer le modèle IA'),
-        content: const Text(
-          'Le modèle sera supprimé de ton téléphone. Les fonctionnalités IA repasseront en mode cloud.',
+        title: Text(context.l10n.localAiSettingsDeleteDialogTitle),
+        content: Text(
+          context.l10n.localAiSettingsDeleteDialogBody,
         ),
         actions: [
-          TextButton(onPressed: () => context.pop(false), child: const Text('Annuler')),
+          TextButton(onPressed: () => context.pop(false), child: Text(context.l10n.localAiSettingsCancelButton)),
           TextButton(
             onPressed: () => context.pop(true),
-            child: const Text('Supprimer', style: TextStyle(color: Colors.redAccent)),
+            child: Text(context.l10n.localAiSettingsDeleteButton, style: const TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -82,9 +82,9 @@ class LocalAiSettingsScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'IA locale',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+        title: Text(
+          context.l10n.localAiSettingsTitle,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         centerTitle: true,
       ),
@@ -94,7 +94,7 @@ class LocalAiSettingsScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(40.0),
             child: Text(
-              'Impossible de charger les réglages IA locale.',
+              context.l10n.localAiSettingsLoadError,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade600),
             ),
@@ -104,7 +104,7 @@ class LocalAiSettingsScreen extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
           children: [
             Text(
-              'Traite tes photos de repas et tes messages du coach directement sur ton téléphone, sans connexion, et sans utiliser le quota IA partagé de l\'app. Fonctionnalité optionnelle : sans elle, tout continue de fonctionner via le cloud comme aujourd\'hui.',
+              context.l10n.localAiSettingsIntro,
               style: TextStyle(color: Colors.grey.shade600, height: 1.4),
             ),
             const SizedBox(height: 20),
@@ -127,10 +127,10 @@ class LocalAiSettingsScreen extends ConsumerWidget {
                     child: const Icon(Icons.memory_rounded, color: _kPrimaryColor),
                   ),
                   const SizedBox(width: 14),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Activer l\'IA locale',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      context.l10n.localAiSettingsEnableLabel,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                   ),
                   Switch(
@@ -193,7 +193,7 @@ class _ModelStatusCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      settings.isDownloaded ? 'Modèle téléchargé' : 'Modèle non téléchargé',
+                      settings.isDownloaded ? context.l10n.localAiSettingsModelDownloadedLabel : context.l10n.localAiSettingsModelNotDownloadedLabel,
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                     Text(
@@ -214,7 +214,7 @@ class _ModelStatusCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '${(settings.downloadProgress * 100).toStringAsFixed(0)}%',
+              context.l10n.localAiSettingsDownloadProgressLabel((settings.downloadProgress * 100).toStringAsFixed(0)),
               style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
             ),
           ] else if (settings.isDownloaded)
@@ -223,7 +223,7 @@ class _ModelStatusCard extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onDelete,
                 icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
-                label: const Text('Supprimer le modèle', style: TextStyle(color: Colors.redAccent)),
+                label: Text(context.l10n.localAiSettingsDeleteModelButton, style: const TextStyle(color: Colors.redAccent)),
                 style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.redAccent)),
               ),
             )
@@ -233,7 +233,7 @@ class _ModelStatusCard extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onDownload,
                 icon: const Icon(Icons.download_rounded, color: Colors.white),
-                label: const Text('Télécharger', style: TextStyle(color: Colors.white)),
+                label: Text(context.l10n.localAiSettingsDownloadButton, style: const TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(backgroundColor: _kPrimaryColor),
               ),
             ),

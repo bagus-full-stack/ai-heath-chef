@@ -6,6 +6,7 @@ import '../providers/meal_suggestions_provider.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/meal_suggestion_card.dart';
 import 'coach_screen.dart' show openCoachChatSheet, kCoachPrimaryColor;
+import '../l10n/l10n_extensions.dart';
 
 /// Liste complète des idées de repas générées par l'IA, ouverte depuis
 /// "Tout voir" sur l'écran du Coach.
@@ -25,15 +26,15 @@ class MealSuggestionsScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'Idées repas',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+        title: Text(
+          context.l10n.mealSuggestionsTitle,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: kCoachPrimaryColor),
-            tooltip: 'Régénérer',
+            tooltip: context.l10n.mealSuggestionsRegenerateTooltip,
             onPressed: () => ref.read(mealSuggestionsProvider.notifier).regenerate(),
           ),
         ],
@@ -52,7 +53,7 @@ class MealSuggestionsScreen extends ConsumerWidget {
                   const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
                   const SizedBox(height: 16),
                   Text(
-                    'Impossible de générer des idées de repas pour le moment.',
+                    context.l10n.mealSuggestionsLoadError,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
@@ -60,7 +61,7 @@ class MealSuggestionsScreen extends ConsumerWidget {
                   ElevatedButton(
                     onPressed: () => ref.invalidate(mealSuggestionsProvider),
                     style: ElevatedButton.styleFrom(backgroundColor: kCoachPrimaryColor),
-                    child: const Text('Réessayer', style: TextStyle(color: Colors.white)),
+                    child: Text(context.l10n.mealSuggestionsRetryButton, style: const TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
@@ -70,7 +71,7 @@ class MealSuggestionsScreen extends ConsumerWidget {
             if (suggestions.isEmpty) {
               return Center(
                 child: Text(
-                  'Aucune idée de repas disponible pour le moment.',
+                  context.l10n.mealSuggestionsEmptyMessage,
                   style: TextStyle(color: Colors.grey.shade600),
                 ),
               );
@@ -90,7 +91,7 @@ class MealSuggestionsScreen extends ConsumerWidget {
                     suggestion: suggestion,
                     onAdd: () => openCoachChatSheet(
                       context,
-                      presetMessage: 'Ajuste ce repas pour mon objectif: ${suggestion.title}',
+                      presetMessage: context.l10n.mealSuggestionsAdjustPresetMessage(suggestion.title),
                     ),
                   );
                 },

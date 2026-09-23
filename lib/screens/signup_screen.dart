@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 
@@ -36,14 +37,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     if (fullName.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez remplir tous les champs.')),
+        SnackBar(content: Text(context.l10n.signupErrorFillAllFields)),
       );
       return;
     }
 
     if (!_acceptedTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Vous devez accepter les conditions d'utilisation.")),
+        SnackBar(content: Text(context.l10n.signupErrorAcceptTerms)),
       );
       return;
     }
@@ -63,10 +64,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
       if (response.session == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Compte créé ! Vérifiez vos emails pour confirmer.'),
+          SnackBar(
+            content: Text(context.l10n.signupSuccessCheckEmail),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 5),
+            duration: const Duration(seconds: 5),
           ),
         );
         context.go('/');
@@ -129,10 +130,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                'CRÉER UN COMPTE',
+              Text(
+                context.l10n.signupHeaderLabel,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
@@ -158,18 +159,18 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Rejoignez-nous pour transformer votre nutrition avec intelligence artificielle.',
+                context.l10n.signupSubtitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 34),
-              const Text('NOM COMPLET', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text(context.l10n.signupFullNameLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               TextField(
                 controller: _fullNameController,
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
-                  hintText: 'Jean Dupont',
+                  hintText: context.l10n.signupFullNameHint,
                   prefixIcon: const Icon(Icons.person_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -177,14 +178,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 18),
-              const Text('ADRESSE E-MAIL', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text(context.l10n.signupEmailLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
-                  hintText: 'jean.dupont@exemple.fr',
+                  hintText: context.l10n.signupEmailHint,
                   prefixIcon: const Icon(Icons.email_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -192,7 +193,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 18),
-              const Text('MOT DE PASSE', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text(context.l10n.signupPasswordLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               TextField(
                 controller: _passwordController,
@@ -239,7 +240,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        "J'accepte les Conditions d'utilisation et la Politique de confidentialité",
+                        context.l10n.signupTermsAcceptance,
                         style: TextStyle(
                           color: Colors.grey.shade700,
                           height: 1.35,
@@ -270,19 +271,19 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Row(
+                    : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "S'inscrire",
-                            style: TextStyle(
+                            context.l10n.signupSubmitButton,
+                            style: const TextStyle(
                               fontSize: 16,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
                         ],
                       ),
               ),
@@ -293,7 +294,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      "OU S'INSCRIRE AVEC",
+                      context.l10n.signupDividerOrSignUpWith,
                       style: TextStyle(
                         color: Colors.grey.shade500,
                         fontSize: 12,
@@ -343,14 +344,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Déjà membre ?',
+                    context.l10n.signupAlreadyMember,
                     style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w600),
                   ),
                   TextButton(
                     onPressed: _openLogin,
-                    child: const Text(
-                      'Se connecter',
-                      style: TextStyle(
+                    child: Text(
+                      context.l10n.signupLoginLink,
+                      style: const TextStyle(
                         color: Colors.black87,
                         fontWeight: FontWeight.bold,
                       ),
@@ -360,7 +361,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                '© données cryptées & sécurisées',
+                context.l10n.signupSecureDataNotice,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.grey.shade500,

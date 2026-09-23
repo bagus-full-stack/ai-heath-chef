@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n_extensions.dart';
+
 enum BmiCategory { underweight, normal, overweight, obese }
 
 /// Résultat du calcul d'IMC : la valeur brute et sa catégorie selon les
@@ -10,16 +12,16 @@ class BmiResult {
 
   const BmiResult({required this.value, required this.category});
 
-  String get label {
+  String label(BuildContext context) {
     switch (category) {
       case BmiCategory.underweight:
-        return 'Insuffisance pondérale';
+        return context.l10n.bmiCategoryUnderweight;
       case BmiCategory.normal:
-        return 'Corpulence normale';
+        return context.l10n.bmiCategoryNormal;
       case BmiCategory.overweight:
-        return 'Surpoids';
+        return context.l10n.bmiCategoryOverweight;
       case BmiCategory.obese:
-        return 'Obésité';
+        return context.l10n.bmiCategoryObese;
     }
   }
 

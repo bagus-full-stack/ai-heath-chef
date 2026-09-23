@@ -204,7 +204,7 @@ Deno.serve(async (req) => {
             throw new Error("Le corps de la requête est vide ou mal formé.");
         }
 
-        const { message, history, coachTone, dietType, allergies } = body;
+        const { message, history, coachTone, dietType, allergies, lang } = body;
         if (!message) {
             throw new Error("Aucun message n'a été fourni dans la requête.");
         }
@@ -245,7 +245,8 @@ Deno.serve(async (req) => {
             dietaryNote += ` L'utilisateur est allergique/intolérant à : ${allergyList.join(', ')}. Ne recommande jamais ces aliments.`;
         }
 
-        const systemInstruction = `Tu es AI Health Chef, un coach en nutrition expert. ${toneInstruction} Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.${dietaryNote} Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.`;
+        const langInstruction = lang === 'en' ? " Always respond in English." : " Réponds toujours en français.";
+        const systemInstruction = `Tu es AI Health Chef, un coach en nutrition expert. ${toneInstruction} Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.${dietaryNote} Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.${langInstruction}`;
 
         // On prépare le payload exact attendu par l'API REST de Google
         // On combine l'historique (s'il y en a) avec le nouveau message

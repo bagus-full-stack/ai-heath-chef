@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../models/user_profile.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
@@ -83,12 +84,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Prendre une photo'),
+              title: Text(context.l10n.accountTakePhoto),
               onTap: () => Navigator.of(context).pop(ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choisir dans la galerie'),
+              title: Text(context.l10n.accountChooseFromGallery),
               onTap: () => Navigator.of(context).pop(ImageSource.gallery),
             ),
           ],
@@ -135,7 +136,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       }
       setState(() => _avatarUrl = url);
     } catch (e) {
-      _showError('$e');
+      _showError(e.toString());
     } finally {
       if (mounted) {
         setState(() => _isUploadingAvatar = false);
@@ -143,25 +144,25 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     }
   }
 
-  String _sexLabel(OnboardingSex sex) {
+  String _sexLabel(BuildContext context, OnboardingSex sex) {
     switch (sex) {
       case OnboardingSex.male:
-        return 'Homme';
+        return context.l10n.accountSexMale;
       case OnboardingSex.female:
-        return 'Femme';
+        return context.l10n.accountSexFemale;
       case OnboardingSex.other:
-        return 'Autre';
+        return context.l10n.accountSexOther;
     }
   }
 
-  String _goalLabel(OnboardingGoal goal) {
+  String _goalLabel(BuildContext context, OnboardingGoal goal) {
     switch (goal) {
       case OnboardingGoal.loseWeight:
-        return 'Perte de poids';
+        return context.l10n.accountGoalLoseWeight;
       case OnboardingGoal.gainMuscle:
-        return 'Prise de masse';
+        return context.l10n.accountGoalGainMuscle;
       case OnboardingGoal.maintain:
-        return 'Maintien';
+        return context.l10n.accountGoalMaintain;
     }
   }
 
@@ -178,23 +179,23 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final height = double.tryParse(_heightController.text.trim().replaceAll(',', '.'));
 
     if (_fullNameController.text.trim().isEmpty) {
-      _showError('Ton nom ne peut pas être vide.');
+      _showError(context.l10n.accountErrorNameEmpty);
       return;
     }
     if (age == null || age < 10 || age > 120) {
-      _showError('Entre un âge valide.');
+      _showError(context.l10n.accountErrorInvalidAge);
       return;
     }
     if (currentWeight == null || currentWeight <= 0 || currentWeight > 400) {
-      _showError('Entre ton poids actuel.');
+      _showError(context.l10n.accountErrorInvalidCurrentWeight);
       return;
     }
     if (targetWeight == null || targetWeight <= 0 || targetWeight > 400) {
-      _showError('Entre un poids cible valide.');
+      _showError(context.l10n.accountErrorInvalidTargetWeight);
       return;
     }
     if (height == null || height < 100 || height > 250) {
-      _showError('Entre ta taille en cm.');
+      _showError(context.l10n.accountErrorInvalidHeight);
       return;
     }
 
@@ -215,11 +216,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profil mis à jour.')),
+        SnackBar(content: Text(context.l10n.accountUpdateSuccess)),
       );
       context.pop();
     } catch (e) {
-      _showError('Impossible d’enregistrer : $e');
+      _showError(context.l10n.accountSaveError(e.toString()));
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);
@@ -246,9 +247,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'MON COMPTE',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+        title: Text(
+          context.l10n.accountTitle,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
         ),
         centerTitle: true,
       ),
@@ -257,7 +258,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         error: (error, stack) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text('Impossible de charger le profil : $error', textAlign: TextAlign.center),
+            child: Text(context.l10n.accountLoadError(error.toString()), textAlign: TextAlign.center),
           ),
         ),
         data: (profile) {
@@ -307,7 +308,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text('Nom complet', style: TextStyle(fontWeight: FontWeight.w600)),
+                Text(context.l10n.accountFullNameLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _fullNameController,
@@ -315,13 +316,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   decoration: _decoration(),
                 ),
                 const SizedBox(height: 18),
-                const Text('Sexe', style: TextStyle(fontWeight: FontWeight.w600)),
+                Text(context.l10n.accountSexLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 10,
                   children: OnboardingSex.values.map((sex) {
                     return ChoiceChip(
-                      label: Text(_sexLabel(sex)),
+                      label: Text(_sexLabel(context, sex)),
                       selected: _sex == sex,
                       selectedColor: _primaryColor.withValues(alpha: 0.16),
                       onSelected: (_) => setState(() => _sex = sex),
@@ -335,12 +336,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Âge', style: TextStyle(fontWeight: FontWeight.w600)),
+                          Text(context.l10n.accountAgeLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _ageController,
                             keyboardType: TextInputType.number,
-                            decoration: _decoration(suffixText: 'ans'),
+                            decoration: _decoration(suffixText: context.l10n.accountAgeSuffix),
                           ),
                         ],
                       ),
@@ -350,12 +351,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Taille', style: TextStyle(fontWeight: FontWeight.w600)),
+                          Text(context.l10n.accountHeightLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _heightController,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: _decoration(suffixText: 'cm'),
+                            decoration: _decoration(suffixText: context.l10n.accountHeightSuffix),
                             onChanged: (_) => setState(() {}),
                           ),
                         ],
@@ -370,12 +371,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Poids actuel', style: TextStyle(fontWeight: FontWeight.w600)),
+                          Text(context.l10n.accountCurrentWeightLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _currentWeightController,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: _decoration(suffixText: 'kg'),
+                            decoration: _decoration(suffixText: context.l10n.accountWeightSuffix),
                             onChanged: (_) => setState(() {}),
                           ),
                         ],
@@ -386,12 +387,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Poids cible', style: TextStyle(fontWeight: FontWeight.w600)),
+                          Text(context.l10n.accountTargetWeightLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _targetWeightController,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: _decoration(suffixText: 'kg'),
+                            decoration: _decoration(suffixText: context.l10n.accountWeightSuffix),
                           ),
                         ],
                       ),
@@ -401,14 +402,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 const SizedBox(height: 18),
                 _buildBmiCard(),
                 const SizedBox(height: 18),
-                const Text('Objectif principal', style: TextStyle(fontWeight: FontWeight.w600)),
+                Text(context.l10n.accountMainGoalLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 10,
                   runSpacing: 10,
                   children: OnboardingGoal.values.map((goal) {
                     return ChoiceChip(
-                      label: Text(_goalLabel(goal)),
+                      label: Text(_goalLabel(context, goal)),
                       selected: _goal == goal,
                       selectedColor: _primaryColor.withValues(alpha: 0.16),
                       onSelected: (_) => setState(() => _goal = goal),
@@ -430,9 +431,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                         )
-                      : const Text(
-                          'Enregistrer',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                      : Text(
+                          context.l10n.accountSaveButton,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                 ),
               ],
@@ -472,7 +473,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Renseigne ton poids et ta taille pour voir ton IMC.',
+                        context.l10n.accountBmiPlaceholder,
                         style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                       ),
                     ),
@@ -510,12 +511,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'IMC : ${bmi.label}',
+                            context.l10n.accountBmiLabel(bmi.label(context)),
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Plage ${bmi.label.toLowerCase()} : ${bmi.rangeLabel}',
+                            context.l10n.accountBmiRangeLabel(bmi.label(context).toLowerCase(), bmi.rangeLabel),
                             style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                           ),
                         ],

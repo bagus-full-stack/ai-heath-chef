@@ -1,5 +1,6 @@
 import 'package:ai_health_chef/models/chat_message.dart';
 import 'package:ai_health_chef/providers/local_ai_provider.dart';
+import 'package:ai_health_chef/providers/locale_provider.dart';
 import 'package:ai_health_chef/providers/profile_provider.dart';
 import 'package:ai_health_chef/services/ai_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -75,6 +76,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     final dietType = profile?.dietType ?? 'none';
     final allergies = profile?.allergies ?? const <String>[];
     final geminiHistory = _toGeminiHistory(historyForGemini);
+    final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
 
     // IA locale d'abord si activée et téléchargée (pas de connexion requise,
     // n'utilise pas le quota cloud partagé), sinon/en cas d'échec repli sur
@@ -92,6 +94,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
           coachTone: coachTone,
           dietType: dietType,
           allergies: allergies,
+          lang: lang,
         );
       } catch (_) {
         aiReplyText = await _aiService.chatWithCoach(
@@ -100,6 +103,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
           coachTone: coachTone,
           dietType: dietType,
           allergies: allergies,
+          lang: lang,
         );
       }
     } else {
@@ -109,6 +113,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
         coachTone: coachTone,
         dietType: dietType,
         allergies: allergies,
+        lang: lang,
       );
     }
     final assistantMessage = _buildAssistantMessage(aiReplyText);

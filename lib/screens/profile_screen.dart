@@ -3,13 +3,46 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../models/user_profile.dart';
 import '../providers/auth_provider.dart';
 import '../providers/local_ai_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../widgets/animated_async_value.dart';
 import 'coming_soon_screen.dart';
+
+const _kLanguageNames = {'fr': 'Français', 'en': 'English'};
+
+Future<void> _showLanguagePicker(BuildContext context, WidgetRef ref, Locale current) async {
+  await showModalBottomSheet<void>(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (context) {
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final code in supportedLocaleCodes)
+              ListTile(
+                title: Text(_kLanguageNames[code]!),
+                trailing: current.languageCode == code
+                    ? const Icon(Icons.check_rounded, color: Color(0xFF6B66FF))
+                    : null,
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale(Locale(code));
+                  Navigator.pop(context);
+                },
+              ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -32,7 +65,7 @@ class ProfileScreen extends ConsumerWidget {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la déconnexion : $e'),
+            content: Text(context.l10n.profileLogoutError(e.toString())),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -47,6 +80,7 @@ class ProfileScreen extends ConsumerWidget {
     final isPro = entitlementAsync.value ?? false;
     final user = Supabase.instance.client.auth.currentUser;
     final localAiSettings = ref.watch(localAiSettingsProvider).value;
+    final currentLocale = ref.watch(localeProvider).value ?? const Locale('fr');
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -54,9 +88,9 @@ class ProfileScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'MON PROFIL',
-          style: TextStyle(
+        title: Text(
+          context.l10n.profileTitle,
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
@@ -70,7 +104,7 @@ class ProfileScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'Impossible de charger le profil : $error',
+              context.l10n.profileLoadError(error.toString()),
               textAlign: TextAlign.center,
             ),
           ),
@@ -81,8 +115,8 @@ class ProfileScreen extends ConsumerWidget {
                 userId: user?.id ?? '',
                 fullName: user?.userMetadata?['full_name'] as String? ??
                     user?.email?.split('@').first.replaceAll('.', ' ') ??
-                    'Utilisateur',
-                email: user?.email ?? 'Utilisateur inconnu',
+                    context.l10n.profileDefaultUserName,
+                email: user?.email ?? context.l10n.profileUnknownUser,
                 sex: 'other',
                 age: 0,
                 currentWeight: 0,
@@ -100,43 +134,49 @@ class ProfileScreen extends ConsumerWidget {
                 _QuickStatsSection(profile: currentProfile),
                 const SizedBox(height: 18),
                 _SettingsGroup(
-                  title: 'GÉNÉRAL',
+                  title: context.l10n.profileSectionGeneral,
                   items: [
                     _SettingsItem(
                       icon: Icons.person_outline_rounded,
-                      title: 'Compte',
-                      subtitle: 'Informations personnelles',
+                      title: context.l10n.profileAccountTitle,
+                      subtitle: context.l10n.profileAccountSubtitle,
                       onTap: () => context.push('/account'),
                     ),
                     _SettingsItem(
                       icon: Icons.notifications_none_rounded,
-                      title: 'Notifications',
-                      subtitle: 'Rappels repas et suivi',
+                      title: context.l10n.profileNotificationsTitle,
+                      subtitle: context.l10n.profileNotificationsSubtitle,
                       onTap: () => context.push('/notifications'),
                     ),
                     _SettingsItem(
                       icon: Icons.credit_card_outlined,
-                      title: 'Abonnement',
-                      subtitle: 'Plan PRO et facturation',
-                      badge: isPro ? 'Actif' : null,
+                      title: context.l10n.profileSubscriptionTitle,
+                      subtitle: context.l10n.profileSubscriptionSubtitle,
+                      badge: isPro ? context.l10n.profileActiveBadge : null,
                       onTap: () => context.push('/paywall'),
                     ),
                     _SettingsItem(
                       icon: Icons.insights_rounded,
-                      title: 'Analyses avancées',
-                      subtitle: 'Macros détaillées et tendances nutritionnelles',
-                      badge: isPro ? null : 'PRO',
+                      title: context.l10n.profileAdvancedAnalyticsTitle,
+                      subtitle: context.l10n.profileAdvancedAnalyticsSubtitle,
+                      badge: isPro ? null : context.l10n.profileProBadge,
                       onTap: () => context.push('/nutrition_trends'),
                     ),
                     _SettingsItem(
+                      icon: Icons.language_rounded,
+                      title: context.l10n.profileLanguageTitle,
+                      subtitle: _kLanguageNames[currentLocale.languageCode]!,
+                      onTap: () => _showLanguagePicker(context, ref, currentLocale),
+                    ),
+                    _SettingsItem(
                       icon: Icons.shield_outlined,
-                      title: 'Sécurité et Confidentialité',
-                      subtitle: 'Données et sécurité',
+                      title: context.l10n.profileSecurityTitle,
+                      subtitle: context.l10n.profileSecuritySubtitle,
                       onTap: () => context.push(
                         '/coming-soon',
-                        extra: const ComingSoonArgs(
-                          title: 'Sécurité et Confidentialité',
-                          message: 'Les réglages de sécurité et confidentialité arrivent bientôt.',
+                        extra: ComingSoonArgs(
+                          title: context.l10n.profileSecurityTitle,
+                          message: context.l10n.profileSecurityComingSoonMessage,
                           icon: Icons.shield_outlined,
                         ),
                       ),
@@ -145,62 +185,65 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 14),
                 _SettingsGroup(
-                  title: 'ASSISTANCE',
+                  title: context.l10n.profileSectionSupport,
                   items: [
                     _SettingsItem(
                       icon: Icons.help_outline_rounded,
-                      title: 'Centre d’aide',
-                      subtitle: 'FAQ, guides et tutoriels',
+                      title: context.l10n.profileHelpCenterTitle,
+                      subtitle: context.l10n.profileHelpCenterSubtitle,
                       onTap: () => context.push('/help'),
                     ),
                     _SettingsItem(
                       icon: Icons.description_outlined,
-                      title: 'Conditions d’utilisation',
-                      subtitle: 'CGU et mentions légales',
+                      title: context.l10n.profileTermsTitle,
+                      subtitle: context.l10n.profileTermsSubtitle,
                       onTap: () => context.push('/terms'),
                     ),
                   ],
                 ),
                 const SizedBox(height: 14),
                 _SettingsGroup(
-                  title: 'PERSONNALISATION',
+                  title: context.l10n.profileSectionPersonalization,
                   items: [
                     _SettingsItem(
                       icon: Icons.local_fire_department_outlined,
-                      title: 'Mes objectifs',
-                      subtitle: 'Calories et macros',
+                      title: context.l10n.profileGoalsTitle,
+                      subtitle: context.l10n.profileGoalsSubtitle,
                       onTap: () => context.push('/account'),
                     ),
                     _SettingsItem(
                       icon: Icons.restaurant_menu_rounded,
-                      title: 'Préférences alimentaires',
+                      title: context.l10n.profileDietaryPrefsTitle,
                       subtitle: currentProfile.allergies.isEmpty
-                          ? currentProfile.dietTypeLabel
-                          : '${currentProfile.dietTypeLabel} · ${currentProfile.allergies.length} allergie(s)',
+                          ? currentProfile.dietTypeLabel(context)
+                          : context.l10n.profileDietaryPrefsSubtitleWithAllergies(
+                              currentProfile.dietTypeLabel(context),
+                              currentProfile.allergies.length,
+                            ),
                       onTap: () => context.push('/dietary_preferences'),
                     ),
                     _SettingsItem(
                       icon: Icons.auto_awesome_rounded,
-                      title: 'Coach IA',
-                      subtitle: 'Ton : ${currentProfile.coachToneLabel}',
+                      title: context.l10n.profileCoachTitle,
+                      subtitle: context.l10n.profileCoachSubtitle(currentProfile.coachToneLabel(context)),
                       onTap: () => context.push('/coach_personalization'),
                     ),
                     _SettingsItem(
                       icon: Icons.memory_rounded,
-                      title: 'IA locale',
+                      title: context.l10n.profileLocalAiTitle,
                       subtitle: localAiSettings == null
-                          ? 'Scan et chat sur l\'appareil'
+                          ? context.l10n.profileLocalAiSubtitleDefault
                           : !localAiSettings.enabled
-                              ? 'Désactivée'
+                              ? context.l10n.profileLocalAiSubtitleDisabled
                               : localAiSettings.isDownloaded
-                                  ? 'Activée'
-                                  : 'Activée · à télécharger',
+                                  ? context.l10n.profileLocalAiSubtitleEnabled
+                                  : context.l10n.profileLocalAiSubtitleEnabledNotDownloaded,
                       onTap: () => context.push('/local_ai_settings'),
                     ),
                     _SettingsItem(
                       icon: Icons.info_outline_rounded,
-                      title: 'À propos',
-                      subtitle: 'Version et informations',
+                      title: context.l10n.profileAboutTitle,
+                      subtitle: context.l10n.profileAboutSubtitle,
                       onTap: () => context.push('/about'),
                     ),
                   ],
@@ -209,9 +252,9 @@ class ProfileScreen extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => _logout(context, ref),
                   icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
-                  label: const Text(
-                    'Se déconnecter',
-                    style: TextStyle(
+                  label: Text(
+                    context.l10n.profileLogoutButton,
+                    style: const TextStyle(
                       color: Colors.redAccent,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -230,7 +273,7 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 18),
                 Center(
                   child: Text(
-                    'AI Health Chef v1.0.0',
+                    context.l10n.profileVersionText,
                     style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                   ),
                 ),
@@ -307,9 +350,9 @@ class _ProfileHeader extends StatelessWidget {
                   color: primaryColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: const Text(
-                  'Pro',
-                  style: TextStyle(
+                child: Text(
+                  context.l10n.profileProBadgeHeader,
+                  style: const TextStyle(
                     color: primaryColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
@@ -343,8 +386,8 @@ class _QuickStatsSection extends StatelessWidget {
           children: [
             Expanded(
               child: _StatCard(
-                title: 'Âge',
-                value: profile.age == 0 ? '—' : '${profile.age} ans',
+                title: context.l10n.profileAgeLabel,
+                value: profile.age == 0 ? '—' : context.l10n.profileAgeValue(profile.age),
                 icon: Icons.cake_outlined,
                 accentColor: const Color(0xFF6B66FF),
               ),
@@ -352,8 +395,10 @@ class _QuickStatsSection extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _StatCard(
-                title: 'Poids actuel',
-                value: profile.currentWeight == 0 ? '—' : '${profile.currentWeight.toStringAsFixed(1)} kg',
+                title: context.l10n.profileCurrentWeightLabel,
+                value: profile.currentWeight == 0
+                    ? '—'
+                    : context.l10n.profileWeightValue(profile.currentWeight.toStringAsFixed(1)),
                 icon: Icons.monitor_weight_outlined,
                 accentColor: const Color(0xFFF06B9E),
               ),
@@ -365,8 +410,10 @@ class _QuickStatsSection extends StatelessWidget {
           children: [
             Expanded(
               child: _StatCard(
-                title: 'Poids cible',
-                value: profile.targetWeight == 0 ? '—' : '${profile.targetWeight.toStringAsFixed(1)} kg',
+                title: context.l10n.profileTargetWeightLabel,
+                value: profile.targetWeight == 0
+                    ? '—'
+                    : context.l10n.profileWeightValue(profile.targetWeight.toStringAsFixed(1)),
                 icon: Icons.flag_outlined,
                 accentColor: const Color(0xFFFFB54A),
               ),
@@ -374,8 +421,8 @@ class _QuickStatsSection extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _StatCard(
-                title: 'Objectif',
-                value: profile.goalLabel,
+                title: context.l10n.profileGoalLabel,
+                value: profile.goalLabel(context),
                 icon: Icons.track_changes_rounded,
                 accentColor: const Color(0xFF45C48C),
               ),

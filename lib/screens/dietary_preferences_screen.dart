@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 
@@ -56,6 +57,23 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
     super.dispose();
   }
 
+  String _dietLabel(BuildContext context, String value) {
+    switch (value) {
+      case 'vegetarian':
+        return context.l10n.dietaryPreferencesDietVegetarian;
+      case 'vegan':
+        return context.l10n.dietaryPreferencesDietVegan;
+      case 'pescetarian':
+        return context.l10n.dietaryPreferencesDietPescetarian;
+      case 'halal':
+        return context.l10n.dietaryPreferencesDietHalal;
+      case 'kosher':
+        return context.l10n.dietaryPreferencesDietKosher;
+      default:
+        return context.l10n.dietaryPreferencesDietNone;
+    }
+  }
+
   void _addCustomAllergy() {
     final value = _customAllergyController.text.trim();
     if (value.isEmpty) {
@@ -77,7 +95,7 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
       ref.invalidate(profileProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Préférences enregistrées !'), backgroundColor: Color(0xFF45C48C)),
+          SnackBar(content: Text(context.l10n.dietaryPreferencesSavedSnackbar), backgroundColor: const Color(0xFF45C48C)),
         );
         context.pop();
       }
@@ -105,9 +123,9 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'Préférences alimentaires',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+        title: Text(
+          context.l10n.dietaryPreferencesTitle,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         centerTitle: true,
       ),
@@ -115,22 +133,22 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           children: [
-            const Text('RÉGIME', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8, color: Colors.grey)),
+            Text(context.l10n.dietaryPreferencesDietSectionTitle, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8, color: Colors.grey)),
             const SizedBox(height: 12),
             for (final option in _kDietOptions) ...[
               _SelectableRow(
                 icon: option.$3,
-                label: option.$2,
+                label: _dietLabel(context, option.$1),
                 selected: _dietType == option.$1,
                 onTap: () => setState(() => _dietType = option.$1),
               ),
               const SizedBox(height: 10),
             ],
             const SizedBox(height: 12),
-            const Text('ALLERGIES & INTOLÉRANCES', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8, color: Colors.grey)),
+            Text(context.l10n.dietaryPreferencesAllergiesSectionTitle, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8, color: Colors.grey)),
             const SizedBox(height: 4),
             Text(
-              'Elles seront évitées dans les idées de repas proposées par l’IA. Ne remplace pas la vigilance en cas d’allergie sévère.',
+              context.l10n.dietaryPreferencesAllergiesDescription,
               style: TextStyle(color: Colors.grey.shade500, fontSize: 12, height: 1.4),
             ),
             const SizedBox(height: 12),
@@ -178,7 +196,7 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
                     textCapitalization: TextCapitalization.sentences,
                     onSubmitted: (_) => _addCustomAllergy(),
                     decoration: InputDecoration(
-                      hintText: 'Autre allergie...',
+                      hintText: context.l10n.dietaryPreferencesOtherAllergyHint,
                       filled: true,
                       fillColor: Colors.grey.shade50,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -211,7 +229,7 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
                       width: 22,
                       child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
                     )
-                  : const Text('Enregistrer', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  : Text(context.l10n.dietaryPreferencesSaveButton, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
             ),
           ],
         ),

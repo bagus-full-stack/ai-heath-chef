@@ -4,6 +4,7 @@ import '../services/ai_service.dart';
 import '../services/product_lookup_service.dart';
 import '../models/ingredient.dart';
 import 'local_ai_provider.dart';
+import 'locale_provider.dart';
 
 // --- LES SERVICES ---
 final aiServiceProvider = Provider<AIService>((ref) => AIService());
@@ -26,14 +27,15 @@ class MealNotifier extends AsyncNotifier<List<Ingredient>> {
     // 2. On essaie de récupérer les données : IA locale d'abord si activée
     // et téléchargée (pas de connexion requise, n'utilise pas le quota
     // cloud partagé), sinon/en cas d'échec repli sur le cloud comme avant.
+    final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
     state = await AsyncValue.guard(() async {
       final localSettings = ref.read(localAiSettingsProvider).value;
       if (localSettings?.isReadyToUse == true) {
         try {
           final local = ref.read(localAiServiceProvider);
           return isProduct
-              ? await local.analyzeProductImage(imagePath)
-              : await local.analyzeMealImage(imagePath);
+              ? await local.analyzeProductImage(imagePath, lang: lang)
+              : await local.analyzeMealImage(imagePath, lang: lang);
         } catch (_) {
           // IA locale indisponible/échec : on retombe sur le cloud ci-dessous.
         }
@@ -41,8 +43,8 @@ class MealNotifier extends AsyncNotifier<List<Ingredient>> {
 
       final aiService = ref.read(aiServiceProvider);
       return isProduct
-          ? await aiService.analyzeProductImage(imagePath)
-          : await aiService.analyzeMealImage(imagePath);
+          ? await aiService.analyzeProductImage(imagePath, lang: lang)
+          : await aiService.analyzeMealImage(imagePath, lang: lang);
     });
   }
 

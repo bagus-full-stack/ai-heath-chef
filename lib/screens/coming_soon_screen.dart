@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/l10n_extensions.dart';
+
 /// Paramètres d'affichage pour [ComingSoonScreen], passés via `extra` du
-/// GoRoute '/coming-soon'.
+/// GoRoute '/coming-soon'. `message` reste optionnel : quand non fourni,
+/// l'écran affiche `context.l10n.comingSoonDefaultMessage`.
 class ComingSoonArgs {
   final String title;
-  final String message;
+  final String? message;
   final IconData icon;
 
   const ComingSoonArgs({
     required this.title,
-    this.message = 'Cette fonctionnalité arrive prochainement.',
+    this.message,
     this.icon = Icons.hourglass_top_rounded,
   });
 }
@@ -24,7 +27,8 @@ class ComingSoonScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolved = args ?? const ComingSoonArgs(title: 'Bientôt disponible');
+    final resolved = args ?? ComingSoonArgs(title: context.l10n.comingSoonDefaultTitle);
+    final message = resolved.message ?? context.l10n.comingSoonDefaultMessage;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
@@ -63,7 +67,7 @@ class ComingSoonScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                resolved.message,
+                message,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey.shade600, height: 1.4),
               ),

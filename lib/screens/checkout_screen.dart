@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../models/selected_plan.dart';
 import '../providers/purchase_provider.dart';
 import '../services/purchase_service.dart';
@@ -21,8 +22,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   SelectedPlan get _plan =>
       widget.plan ??
-      const SelectedPlan(
-        title: 'Abonnement PRO',
+      SelectedPlan(
+        title: context.l10n.checkoutDefaultPlanTitle,
         priceLabel: '—',
         periodLabel: '',
       );
@@ -45,8 +46,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ref.invalidate(entitlementProvider);
           await _showSuccessMoment(
             PurchaseService.instance.isDemoMode
-                ? 'Achat simulé (mode démo)\nAccès PRO débloqué !'
-                : 'Abonnement activé !\nBienvenue dans AI Health Chef PRO.',
+                ? context.l10n.checkoutSuccessDemo
+                : context.l10n.checkoutSuccessReal,
           );
           if (!mounted) {
             return;
@@ -54,7 +55,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           context.go('/dashboard');
         case PurchaseOutcome.none:
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Achat effectué, en attente de confirmation.')),
+            SnackBar(content: Text(context.l10n.checkoutPendingConfirmation)),
           );
         case PurchaseOutcome.cancelled:
           break;
@@ -65,7 +66,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Échec de l’achat : $e'),
+          content: Text(context.l10n.checkoutPurchaseError(e.toString())),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -107,9 +108,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           icon: const Icon(Icons.close_rounded),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'Finaliser la commande',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        title: Text(
+          context.l10n.checkoutAppBarTitle,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
       body: SingleChildScrollView(
@@ -120,7 +121,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             _OrderSummaryCard(plan: plan),
             const SizedBox(height: 16),
             _SectionCard(
-              title: 'MOYEN DE PAIEMENT',
+              title: context.l10n.checkoutPaymentMethodLabel,
               child: Row(
                 children: [
                   Container(
@@ -141,10 +142,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   Expanded(
                     child: Text(
                       PurchaseService.instance.isDemoMode
-                          ? 'Mode démo : cet achat est simulé, aucun paiement ni compte '
-                              'App Store / Google Play n’est sollicité.'
-                          : 'Paiement géré en toute sécurité par l’App Store / Google Play. '
-                              'Aucune information bancaire n’est demandée dans l’application.',
+                          ? context.l10n.checkoutDemoModeNotice
+                          : context.l10n.checkoutSecurePaymentNotice,
                       style: const TextStyle(color: Colors.black87, height: 1.4),
                     ),
                   ),
@@ -153,20 +152,20 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
             const SizedBox(height: 16),
             _SectionCard(
-              title: 'RÉCAPITULATIF',
+              title: context.l10n.checkoutSummaryLabel,
               child: Column(
                 children: [
-                  _SummaryRow(label: 'Forfait', value: plan.title),
+                  _SummaryRow(label: context.l10n.checkoutPlanLabel, value: plan.title),
                   const SizedBox(height: 10),
                   _SummaryRow(
-                    label: 'Total',
+                    label: context.l10n.checkoutTotalLabel,
                     value: '${plan.priceLabel} ${plan.periodLabel}'.trim(),
                     emphasize: true,
                   ),
                   const SizedBox(height: 10),
-                  const _SummaryRow(
-                    label: 'Renouvellement',
-                    value: 'Automatique, résiliable à tout moment',
+                  _SummaryRow(
+                    label: context.l10n.checkoutRenewalLabel,
+                    value: context.l10n.checkoutRenewalValue,
                   ),
                 ],
               ),
@@ -190,7 +189,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       ),
                     )
                   : Text(
-                      'Confirmer • ${plan.priceLabel} ${plan.periodLabel}'.trim(),
+                      context.l10n.checkoutConfirmButton(plan.priceLabel, plan.periodLabel).trim(),
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.white,
@@ -200,9 +199,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'L’abonnement se renouvelle automatiquement sauf annulation au moins 24h '
-              'avant la fin de la période, depuis les réglages de ton compte App Store '
-              'ou Google Play.',
+              context.l10n.checkoutRenewalDisclaimer,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
@@ -247,7 +244,7 @@ class _OrderSummaryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'AI Health Chef PRO',
+                  context.l10n.checkoutOrderSummaryBrand,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 13,
@@ -266,7 +263,7 @@ class _OrderSummaryCard extends StatelessWidget {
                 if (PurchaseService.instance.isDemoMode) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Mode démo — l’achat sera simulé, aucun paiement réel',
+                    context.l10n.checkoutOrderSummaryDemoNotice,
                     style: TextStyle(color: Colors.amber.shade300, fontSize: 13),
                   ),
                 ],

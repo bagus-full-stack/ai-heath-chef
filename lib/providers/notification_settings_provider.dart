@@ -1,8 +1,11 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/meal_reminder.dart';
 import '../services/notification_service.dart';
+import 'locale_provider.dart';
 
 /// Réglages des rappels de repas (activé + heure, par créneau), persistés
 /// localement et répercutés sur les notifications programmées à chaque
@@ -61,10 +64,11 @@ class NotificationSettingsNotifier
     await prefs.setInt(_minuteKey(slot), setting.minute);
 
     if (setting.enabled) {
+      final locale = ref.read(localeProvider).value ?? const Locale('fr');
       await NotificationService.instance.scheduleDailyReminder(
         id: slot.notificationId,
         title: 'AI Health Chef',
-        body: slot.notificationBody,
+        body: slot.notificationBody(lookupAppLocalizations(locale)),
         hour: setting.hour,
         minute: setting.minute,
       );

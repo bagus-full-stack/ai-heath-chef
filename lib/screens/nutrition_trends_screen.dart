@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../models/meal.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/profile_provider.dart';
@@ -18,7 +19,25 @@ const _lipColor = Colors.pink;
 const _fiberColor = Colors.green;
 const _sugarColor = Colors.redAccent;
 const _satFatColor = Colors.brown;
-const _dayLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+String _dayLabel(BuildContext context, int weekday) {
+  switch (weekday) {
+    case DateTime.monday:
+      return context.l10n.nutritionTrendsDayMon;
+    case DateTime.tuesday:
+      return context.l10n.nutritionTrendsDayTue;
+    case DateTime.wednesday:
+      return context.l10n.nutritionTrendsDayWed;
+    case DateTime.thursday:
+      return context.l10n.nutritionTrendsDayThu;
+    case DateTime.friday:
+      return context.l10n.nutritionTrendsDayFri;
+    case DateTime.saturday:
+      return context.l10n.nutritionTrendsDaySat;
+    default:
+      return context.l10n.nutritionTrendsDaySun;
+  }
+}
 
 class _DaySummary {
   final DateTime day;
@@ -76,9 +95,9 @@ class NutritionTrendsScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Colors.black),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'Analyses avancées',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
+        title: Text(
+          context.l10n.nutritionTrendsTitle,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ),
       body: !isPro
@@ -95,7 +114,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
 
                 return mealsAsync.animatedWhen(
                   loading: () => const Center(child: CircularProgressIndicator(color: _primaryColor)),
-                  error: (err, stack) => Center(child: Text('Erreur : $err')),
+                  error: (err, stack) => Center(child: Text(context.l10n.nutritionTrendsErrorMessage(err.toString()))),
                   data: (meals) {
                     final days = _buildDailySummaries(meals);
 
@@ -104,7 +123,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(32),
                           child: Text(
-                            'Pas encore assez de repas enregistrés cette semaine pour afficher des tendances.',
+                            context.l10n.nutritionTrendsEmptyState,
                             textAlign: TextAlign.center,
                             style: TextStyle(color: Colors.grey.shade600),
                           ),
@@ -127,7 +146,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
                         children: [
                           StaggeredEntrance(
                             child: _SectionCard(
-                              title: 'Calories · 7 derniers jours',
+                              title: context.l10n.nutritionTrendsCaloriesSectionTitle,
                               child: _CaloriesChart(days: days, targetKcal: targets.kcal),
                             ),
                           ),
@@ -135,7 +154,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
                           StaggeredEntrance(
                             delay: const Duration(milliseconds: 30),
                             child: _SectionCard(
-                              title: 'Tendance calories · 30 derniers jours',
+                              title: context.l10n.nutritionTrends30DaySectionTitle,
                               child: mealsAsync30.maybeWhen(
                                 data: (meals30) => _CaloriesTrend30Chart(
                                   days: _buildDailySummaries(meals30, days: 30),
@@ -152,7 +171,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
                           StaggeredEntrance(
                             delay: const Duration(milliseconds: 60),
                             child: _SectionCard(
-                              title: 'Répartition des macros (moyenne)',
+                              title: context.l10n.nutritionTrendsMacroDistributionTitle,
                               child: _MacroDistribution(
                                 totalProt: totalProt,
                                 totalGluc: totalGluc,
@@ -164,7 +183,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
                           StaggeredEntrance(
                             delay: const Duration(milliseconds: 120),
                             child: _SectionCard(
-                              title: 'Moyennes quotidiennes',
+                              title: context.l10n.nutritionTrendsDailyAveragesTitle,
                               child: _DailyAverages(
                                 avgKcal: totalKcal / 7,
                                 avgProt: totalProt / 7,
@@ -178,7 +197,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
                           StaggeredEntrance(
                             delay: const Duration(milliseconds: 180),
                             child: _SectionCard(
-                              title: 'Autres nutriments (moyenne/jour)',
+                              title: context.l10n.nutritionTrendsExtraNutrientsTitle,
                               child: _ExtraNutrients(
                                 avgFiber: totalFiber / 7,
                                 avgSugar: totalSugar / 7,
@@ -219,14 +238,14 @@ class _ProLockedView extends StatelessWidget {
               child: const Icon(Icons.insights_rounded, color: _primaryColor, size: 38),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Réservé aux membres PRO',
+            Text(
+              context.l10n.nutritionTrendsProLockedTitle,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text(
-              'Débloque les macros détaillées et les tendances nutritionnelles sur 7 jours.',
+              context.l10n.nutritionTrendsProLockedDescription,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade600, height: 1.4),
             ),
@@ -239,7 +258,7 @@ class _ProLockedView extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
-              child: const Text('Passer PRO', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(context.l10n.nutritionTrendsGoProButton, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -311,7 +330,7 @@ class _CaloriesChart extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    _dayLabels[d.day.weekday - 1],
+                    _dayLabel(context, d.day.weekday),
                     style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey.shade600),
                   ),
                 ],
@@ -445,9 +464,9 @@ class _MacroDistribution extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _MacroLegend(color: _protColor, label: 'Protéines', percent: protPct),
-            _MacroLegend(color: _glucColor, label: 'Glucides', percent: glucPct),
-            _MacroLegend(color: _lipColor, label: 'Lipides', percent: lipPct),
+            _MacroLegend(color: _protColor, label: context.l10n.nutritionTrendsProteinLabel, percent: protPct),
+            _MacroLegend(color: _glucColor, label: context.l10n.nutritionTrendsCarbsLabel, percent: glucPct),
+            _MacroLegend(color: _lipColor, label: context.l10n.nutritionTrendsFatLabel, percent: lipPct),
           ],
         ),
       ],
@@ -498,13 +517,13 @@ class _DailyAverages extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _AverageRow(label: 'Calories', value: '${avgKcal.round()} kcal', target: '/${targets.kcal} kcal', color: _primaryColor),
+        _AverageRow(label: context.l10n.nutritionTrendsCaloriesLabel, value: '${avgKcal.round()} kcal', target: '/${targets.kcal} kcal', color: _primaryColor),
         const SizedBox(height: 10),
-        _AverageRow(label: 'Protéines', value: '${avgProt.round()}g', target: '/${targets.protein.round()}g', color: _protColor),
+        _AverageRow(label: context.l10n.nutritionTrendsProteinLabel, value: '${avgProt.round()}g', target: '/${targets.protein.round()}g', color: _protColor),
         const SizedBox(height: 10),
-        _AverageRow(label: 'Glucides', value: '${avgGluc.round()}g', target: '/${targets.carbs.round()}g', color: _glucColor),
+        _AverageRow(label: context.l10n.nutritionTrendsCarbsLabel, value: '${avgGluc.round()}g', target: '/${targets.carbs.round()}g', color: _glucColor),
         const SizedBox(height: 10),
-        _AverageRow(label: 'Lipides', value: '${avgLip.round()}g', target: '/${targets.fat.round()}g', color: _lipColor),
+        _AverageRow(label: context.l10n.nutritionTrendsFatLabel, value: '${avgLip.round()}g', target: '/${targets.fat.round()}g', color: _lipColor),
       ],
     );
   }
@@ -523,11 +542,11 @@ class _ExtraNutrients extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _AverageRow(label: 'Fibres', value: '${avgFiber.round()}g', target: '', color: _fiberColor),
+        _AverageRow(label: context.l10n.nutritionTrendsFiberLabel, value: '${avgFiber.round()}g', target: '', color: _fiberColor),
         const SizedBox(height: 10),
-        _AverageRow(label: 'Sucres', value: '${avgSugar.round()}g', target: '', color: _sugarColor),
+        _AverageRow(label: context.l10n.nutritionTrendsSugarLabel, value: '${avgSugar.round()}g', target: '', color: _sugarColor),
         const SizedBox(height: 10),
-        _AverageRow(label: 'Graisses sat.', value: '${avgSatFat.round()}g', target: '', color: _satFatColor),
+        _AverageRow(label: context.l10n.nutritionTrendsSatFatLabel, value: '${avgSatFat.round()}g', target: '', color: _satFatColor),
       ],
     );
   }

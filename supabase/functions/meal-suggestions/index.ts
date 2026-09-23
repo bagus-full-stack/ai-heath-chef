@@ -222,6 +222,7 @@ Deno.serve(async (req) => {
             dietType,
             allergies,
             count,
+            lang,
         } = body;
 
         const suggestionCount = Number.isFinite(count) && count > 0 ? Math.min(count, 10) : 6;
@@ -249,6 +250,9 @@ Deno.serve(async (req) => {
             );
         }
         const constraintsText = constraintLines.length > 0 ? `\n${constraintLines.join('\n')}` : '';
+        const langInstruction = lang === 'en'
+            ? "Respond with English text values (title, description, timeSlot) in the JSON."
+            : "Réponds avec des valeurs textuelles en français (title, description, timeSlot) dans le JSON.";
 
         const promptText = `
 Tu es AI Health Chef, un coach en nutrition expert et créatif.
@@ -268,7 +272,8 @@ Tu DOIS répondre UNIQUEMENT avec un JSON strict, sans balises markdown ni texte
       "description": "Une phrase courte expliquant pourquoi ce repas convient à l'objectif."
     }
   ]
-}`;
+}
+${langInstruction}`;
 
         // === 4. BOUCLE DE TENTATIVES (FALLBACK) ===
         let lastError = null;
