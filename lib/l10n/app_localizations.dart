@@ -464,6 +464,12 @@ abstract class AppLocalizations {
   /// **'Comment ça marche ?'**
   String get cameraCaptureHelpTitle;
 
+  /// No description provided for @cameraCaptureModeManual.
+  ///
+  /// In fr, this message translates to:
+  /// **'Manuel'**
+  String get cameraCaptureModeManual;
+
   /// No description provided for @cameraCaptureModeMeal.
   ///
   /// In fr, this message translates to:
@@ -1028,6 +1034,42 @@ abstract class AppLocalizations {
   /// **'Préférences alimentaires'**
   String get dietaryPreferencesTitle;
 
+  /// No description provided for @foodSearchAddManuallyButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun résultat ? Ajouter manuellement'**
+  String get foodSearchAddManuallyButton;
+
+  /// No description provided for @foodSearchFieldHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. yaourt nature, poulet rôti...'**
+  String get foodSearchFieldHint;
+
+  /// No description provided for @foodSearchInitialPrompt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tape le nom d\'un aliment pour chercher dans la base Open Food Facts.'**
+  String get foodSearchInitialPrompt;
+
+  /// No description provided for @foodSearchKcalPer100g.
+  ///
+  /// In fr, this message translates to:
+  /// **'{value} kcal / 100 g'**
+  String foodSearchKcalPer100g(String value);
+
+  /// No description provided for @foodSearchNoResults.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun résultat pour « {query} ».'**
+  String foodSearchNoResults(String query);
+
+  /// No description provided for @foodSearchTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un aliment'**
+  String get foodSearchTitle;
+
   /// No description provided for @forgotPasswordBackToLogin.
   ///
   /// In fr, this message translates to:
@@ -1466,6 +1508,12 @@ abstract class AppLocalizations {
   /// **'LIP'**
   String get mealAnalysisBadgeLip;
 
+  /// No description provided for @mealAnalysisBadgeManual.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisie manuelle'**
+  String get mealAnalysisBadgeManual;
+
   /// No description provided for @mealAnalysisBadgeProt.
   ///
   /// In fr, this message translates to:
@@ -1651,6 +1699,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ajouter'**
   String get mealAnalysisSubmitButton;
+
+  /// No description provided for @mealAnalysisTitleManual.
+  ///
+  /// In fr, this message translates to:
+  /// **'AJOUT MANUEL'**
+  String get mealAnalysisTitleManual;
 
   /// No description provided for @mealAnalysisTitleMeal.
   ///

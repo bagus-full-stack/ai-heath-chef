@@ -14,12 +14,14 @@ class MealAnalysisScreen extends ConsumerStatefulWidget {
   final String? imagePath;
   final String? barcode;
   final bool isProduct;
+  final List<Ingredient>? manualIngredients;
 
   const MealAnalysisScreen({
     super.key,
     this.imagePath,
     this.barcode,
     this.isProduct = false,
+    this.manualIngredients,
   });
 
   @override
@@ -36,7 +38,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
   }
 
   void _startAnalysis() {
-    if (widget.barcode != null) {
+    if (widget.manualIngredients != null) {
+      ref.read(mealProvider.notifier).loadManual(widget.manualIngredients!);
+    } else if (widget.barcode != null) {
       ref.read(mealProvider.notifier).loadFromBarcode(widget.barcode!);
     } else if (widget.imagePath != null) {
       ref
@@ -45,6 +49,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
     }
   }
 
+  bool get _isManualFlow => widget.manualIngredients != null;
   bool get _isProductFlow => widget.barcode != null || widget.isProduct;
 
   @override
@@ -64,7 +69,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          _isProductFlow
+          _isManualFlow
+              ? context.l10n.mealAnalysisTitleManual
+              : _isProductFlow
               ? context.l10n.mealAnalysisTitleProduct
               : context.l10n.mealAnalysisTitleMeal,
           style: const TextStyle(
@@ -112,6 +119,8 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                       Icon(
                         widget.barcode != null
                             ? Icons.qr_code_scanner_rounded
+                            : _isManualFlow
+                            ? Icons.edit_note_rounded
                             : Icons.fastfood,
                         size: 80,
                         color: Colors.grey,
@@ -132,6 +141,8 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                         child: Text(
                           widget.barcode != null
                               ? context.l10n.mealAnalysisBadgeBarcode
+                              : _isManualFlow
+                              ? context.l10n.mealAnalysisBadgeManual
                               : context.l10n.mealAnalysisBadgeAi,
                           style: const TextStyle(
                             color: Colors.white,
@@ -219,8 +230,12 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
 
                 // ÉTAT 3 : SUCCÈS (On affiche les données !)
                 data: (ingredients) {
-                  if (ingredients.isEmpty)
-                    return const SizedBox.shrink(); // Sécurité
+                  // Sécurité : liste vide inattendue pour les flux photo/
+                  // code-barres. En saisie manuelle, une liste vide est le
+                  // point de départ normal (l'utilisateur ajoute via le
+                  // bouton "Ajouter un ingrédient" ci-dessous).
+                  if (ingredients.isEmpty && !_isManualFlow)
+                    return const SizedBox.shrink();
 
                   // Calculs totaux
                   final totalKcal = ingredients.fold<int>(
@@ -458,7 +473,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
                         child: ElevatedButton(
-                          onPressed: () async {
+                          onPressed: ingredients.isEmpty ? null : () async {
                             final isSuccess = ValueNotifier<bool>(false);
                             try {
                               // On affiche un indicateur de chargement, qui se

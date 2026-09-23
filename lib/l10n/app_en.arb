@@ -61,6 +61,7 @@
   "cameraCaptureHelpBody": "Center your plate in the circle, hold your device steady, then tap the shutter. Our AI automatically analyzes the food and its nutritional values.",
   "cameraCaptureHelpDismiss": "Got it",
   "cameraCaptureHelpTitle": "How does it work?",
+  "cameraCaptureModeManual": "Manual",
   "cameraCaptureModeMeal": "Meal",
   "cameraCaptureModeProduct": "Product",
   "cameraCaptureModeScanner": "Scanner",
@@ -155,6 +156,26 @@
   "dietaryPreferencesSaveButton": "Save",
   "dietaryPreferencesSavedSnackbar": "Preferences saved!",
   "dietaryPreferencesTitle": "Dietary preferences",
+  "foodSearchAddManuallyButton": "No results? Add manually",
+  "foodSearchFieldHint": "E.g. plain yogurt, roast chicken...",
+  "foodSearchInitialPrompt": "Type a food name to search the Open Food Facts database.",
+  "foodSearchKcalPer100g": "{value} kcal / 100 g",
+  "@foodSearchKcalPer100g": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "foodSearchNoResults": "No results for \"{query}\".",
+  "@foodSearchNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "foodSearchTitle": "Search for a food",
   "forgotPasswordBackToLogin": "Back to login",
   "forgotPasswordEmailHint": "example@email.com",
   "forgotPasswordEmailLabel": "Email address",
@@ -228,6 +249,7 @@
   "mealAnalysisBadgeBarcode": "Found via barcode",
   "mealAnalysisBadgeGluc": "CARB",
   "mealAnalysisBadgeLip": "FAT",
+  "mealAnalysisBadgeManual": "Manual entry",
   "mealAnalysisBadgeProt": "PROT",
   "mealAnalysisDefaultMealName": "AI Meal",
   "mealAnalysisErrorCaloriesInvalid": "Enter the calories for this portion.",
@@ -259,6 +281,7 @@
   "mealAnalysisSaveButton": "Confirm and save",
   "mealAnalysisSaveSuccessSnackbar": "Meal saved successfully!",
   "mealAnalysisSubmitButton": "Add",
+  "mealAnalysisTitleManual": "MANUAL ENTRY",
   "mealAnalysisTitleMeal": "MEAL ANALYSIS",
   "mealAnalysisTitleProduct": "PRODUCT ANALYSIS",
   "mealAnalysisTotalKcalLabel": "TOTAL KCAL",

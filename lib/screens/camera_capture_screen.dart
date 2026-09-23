@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/meal_analysis_args.dart';
 
-enum _CaptureMode { scanner, repas, produit }
+enum _CaptureMode { scanner, repas, produit, manuel }
 
 class CameraCaptureScreen extends StatefulWidget {
   const CameraCaptureScreen({super.key});
@@ -251,11 +251,17 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
   }
 
   void _selectMode(_CaptureMode mode) {
-    // Le scan de code-barres utilise sa propre caméra dédiée (mobile_scanner),
-    // incompatible avec le CameraController de cet écran : on ouvre un écran
-    // séparé plutôt que de basculer le mode en place.
+    // Le scan de code-barres et la saisie manuelle utilisent leur propre
+    // écran (le premier a besoin de sa propre caméra dédiée mobile_scanner,
+    // incompatible avec le CameraController de cet écran ; le second n'a pas
+    // besoin de caméra du tout) : on ouvre un écran séparé plutôt que de
+    // basculer le mode en place.
     if (mode == _CaptureMode.scanner) {
       context.push('/barcode_scanner');
+      return;
+    }
+    if (mode == _CaptureMode.manuel) {
+      context.push('/food_search');
       return;
     }
     if (mode == _mode) {
@@ -272,6 +278,8 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
         return context.l10n.cameraCaptureModeMeal;
       case _CaptureMode.produit:
         return context.l10n.cameraCaptureModeProduct;
+      case _CaptureMode.manuel:
+        return context.l10n.cameraCaptureModeManual;
     }
   }
 

@@ -48,6 +48,13 @@ class MealNotifier extends AsyncNotifier<List<Ingredient>> {
     });
   }
 
+  // Charger une liste d'ingrédients déjà connue (résultat d'une recherche
+  // manuelle par nom, ou point de départ vide pour une saisie 100% manuelle)
+  // : pas d'appel réseau/IA, donc pas d'état de chargement intermédiaire.
+  void loadManual(List<Ingredient> ingredients) {
+    state = AsyncValue.data(ingredients);
+  }
+
   // Chercher un produit à partir d'un code-barres scanné (Open Food Facts)
   Future<void> loadFromBarcode(String barcode) async {
     state = const AsyncValue.loading();

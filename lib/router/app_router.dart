@@ -16,6 +16,7 @@ import '../screens/help_center_screen.dart';
 import '../screens/terms_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/barcode_scanner_screen.dart';
+import '../screens/food_search_screen.dart';
 import '../screens/meal_analysis_screen.dart';
 import '../screens/meal_suggestions_screen.dart';
 import '../screens/notification_settings_screen.dart';
@@ -135,6 +136,7 @@ void setupRouter(bool showOnboarding) {
             imagePath: args?.imagePath,
             barcode: args?.barcode,
             isProduct: args?.isProduct ?? false,
+            manualIngredients: args?.manualIngredients,
           );
         },
       ),
@@ -145,6 +147,10 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/barcode_scanner',
         builder: (context, state) => const BarcodeScannerScreen(),
+      ),
+      GoRoute(
+        path: '/food_search',
+        builder: (context, state) => const FoodSearchScreen(),
       ),
       GoRoute(
         path: '/meal_suggestions',

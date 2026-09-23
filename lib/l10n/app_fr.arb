@@ -130,6 +130,7 @@
   "cameraCaptureHelpBody": "Centre ton assiette dans le cercle, garde l’appareil stable puis appuie sur le déclencheur. Notre IA analyse automatiquement les aliments et leurs valeurs nutritionnelles.",
   "cameraCaptureHelpDismiss": "Compris",
   "cameraCaptureHelpTitle": "Comment ça marche ?",
+  "cameraCaptureModeManual": "Manuel",
   "cameraCaptureModeMeal": "Repas",
   "cameraCaptureModeProduct": "Produit",
   "cameraCaptureModeScanner": "Scanner",
@@ -313,6 +314,26 @@
   "dietaryPreferencesSaveButton": "Enregistrer",
   "dietaryPreferencesSavedSnackbar": "Préférences enregistrées !",
   "dietaryPreferencesTitle": "Préférences alimentaires",
+  "foodSearchAddManuallyButton": "Aucun résultat ? Ajouter manuellement",
+  "foodSearchFieldHint": "Ex. yaourt nature, poulet rôti...",
+  "foodSearchInitialPrompt": "Tape le nom d'un aliment pour chercher dans la base Open Food Facts.",
+  "foodSearchKcalPer100g": "{value} kcal / 100 g",
+  "@foodSearchKcalPer100g": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "foodSearchNoResults": "Aucun résultat pour « {query} ».",
+  "@foodSearchNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "foodSearchTitle": "Rechercher un aliment",
   "forgotPasswordBackToLogin": "Retour à la connexion",
   "forgotPasswordEmailHint": "exemple@email.com",
   "forgotPasswordEmailLabel": "Adresse e-mail",
@@ -421,6 +442,7 @@
   "mealAnalysisBadgeBarcode": "Trouvé via code-barres",
   "mealAnalysisBadgeGluc": "GLUC",
   "mealAnalysisBadgeLip": "LIP",
+  "mealAnalysisBadgeManual": "Saisie manuelle",
   "mealAnalysisBadgeProt": "PROT",
   "mealAnalysisDefaultMealName": "Repas IA",
   "mealAnalysisErrorCaloriesInvalid": "Entre les calories de cette portion.",
@@ -466,6 +488,7 @@
   "mealAnalysisSaveButton": "Valider et sauvegarder",
   "mealAnalysisSaveSuccessSnackbar": "Repas sauvegardé avec succès !",
   "mealAnalysisSubmitButton": "Ajouter",
+  "mealAnalysisTitleManual": "AJOUT MANUEL",
   "mealAnalysisTitleMeal": "ANALYSE DU REPAS",
   "mealAnalysisTitleProduct": "ANALYSE DU PRODUIT",
   "mealAnalysisTotalKcalLabel": "TOTAL KCAL",

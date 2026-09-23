@@ -215,6 +215,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cameraCaptureHelpTitle => 'Comment ça marche ?';
 
   @override
+  String get cameraCaptureModeManual => 'Manuel';
+
+  @override
   String get cameraCaptureModeMeal => 'Repas';
 
   @override
@@ -544,6 +547,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dietaryPreferencesTitle => 'Préférences alimentaires';
 
   @override
+  String get foodSearchAddManuallyButton =>
+      'Aucun résultat ? Ajouter manuellement';
+
+  @override
+  String get foodSearchFieldHint => 'Ex. yaourt nature, poulet rôti...';
+
+  @override
+  String get foodSearchInitialPrompt =>
+      'Tape le nom d\'un aliment pour chercher dans la base Open Food Facts.';
+
+  @override
+  String foodSearchKcalPer100g(String value) {
+    return '$value kcal / 100 g';
+  }
+
+  @override
+  String foodSearchNoResults(String query) {
+    return 'Aucun résultat pour « $query ».';
+  }
+
+  @override
+  String get foodSearchTitle => 'Rechercher un aliment';
+
+  @override
   String get forgotPasswordBackToLogin => 'Retour à la connexion';
 
   @override
@@ -797,6 +824,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mealAnalysisBadgeLip => 'LIP';
 
   @override
+  String get mealAnalysisBadgeManual => 'Saisie manuelle';
+
+  @override
   String get mealAnalysisBadgeProt => 'PROT';
 
   @override
@@ -897,6 +927,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mealAnalysisSubmitButton => 'Ajouter';
+
+  @override
+  String get mealAnalysisTitleManual => 'AJOUT MANUEL';
 
   @override
   String get mealAnalysisTitleMeal => 'ANALYSE DU REPAS';
