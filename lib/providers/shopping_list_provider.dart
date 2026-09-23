@@ -45,20 +45,20 @@ class ShoppingListNotifier extends AsyncNotifier<List<ShoppingItem>> {
   }
 
   Future<void> toggle(int index) async {
-    final current = [...state.value ?? []];
+    final current = <ShoppingItem>[...state.value ?? []];
     current[index] = current[index].copyWith(checked: !current[index].checked);
     state = AsyncValue.data(current);
     await _persist(current);
   }
 
   Future<void> remove(int index) async {
-    final current = [...state.value ?? []]..removeAt(index);
+    final current = <ShoppingItem>[...state.value ?? []]..removeAt(index);
     state = AsyncValue.data(current);
     await _persist(current);
   }
 
   Future<void> clearChecked() async {
-    final current = (state.value ?? []).where((i) => !i.checked).toList();
+    final current = (state.value ?? <ShoppingItem>[]).where((i) => !i.checked).toList();
     state = AsyncValue.data(current);
     await _persist(current);
   }
