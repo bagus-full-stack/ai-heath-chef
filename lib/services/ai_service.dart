@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../l10n/app_localizations.dart';
 import '../models/ingredient.dart';
 import '../models/meal_suggestion.dart';
 
@@ -9,21 +11,32 @@ class AIService {
 
   /// Fonction principale qui prend le chemin de l'image et retourne une liste d'ingrédients
   Future<List<Ingredient>> analyzeMealImage(String imagePath, {String lang = 'fr'}) {
-    return _analyzeImage(imagePath, 'analyze-meal', "Erreur lors de l'analyse IA", lang);
+    return _analyzeImage(
+      imagePath,
+      'analyze-meal',
+      (l10n, error) => l10n.svcErrorAnalyzeMeal(error),
+      lang,
+    );
   }
 
   /// Analyse la photo d'un produit emballé (étiquette nutritionnelle) et
   /// retourne un ingrédient représentant le produit entier.
   Future<List<Ingredient>> analyzeProductImage(String imagePath, {String lang = 'fr'}) {
-    return _analyzeImage(imagePath, 'analyze-product', "Erreur lors de l'analyse du produit", lang);
+    return _analyzeImage(
+      imagePath,
+      'analyze-product',
+      (l10n, error) => l10n.svcErrorAnalyzeProduct(error),
+      lang,
+    );
   }
 
   Future<List<Ingredient>> _analyzeImage(
     String imagePath,
     String functionName,
-    String errorPrefix,
+    String Function(AppLocalizations l10n, String error) buildErrorMessage,
     String lang,
   ) async {
+    final l10n = lookupAppLocalizations(Locale(lang));
     try {
       // 1. COMPRESSION DE L'IMAGE
       // On réduit la taille (max 800x800) et la qualité (70%) pour un envoi ultra-rapide
@@ -35,7 +48,7 @@ class AIService {
       );
 
       if (compressedBytes == null) {
-        throw Exception("Impossible de compresser l'image.");
+        throw Exception(l10n.svcErrorCompressImage);
       }
 
       // 2. ENCODAGE EN BASE64
@@ -66,7 +79,7 @@ class AIService {
       )).toList();
 
     } catch (e) {
-      throw Exception("$errorPrefix : ${_describeError(e)}");
+      throw Exception(buildErrorMessage(l10n, _describeError(e)));
     }
   }
 
@@ -93,7 +106,7 @@ class AIService {
 
       return response.data['reply'] as String;
     } catch (e) {
-      throw Exception("Erreur de connexion avec le Coach IA : ${_describeError(e)}");
+      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorCoachChat(_describeError(e)));
     }
   }
 
@@ -132,7 +145,7 @@ class AIService {
           .map((item) => MealSuggestion.fromJson(item as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      throw Exception("Erreur lors de la génération des idées de repas : ${_describeError(e)}");
+      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorMealSuggestions(_describeError(e)));
     }
   }
 

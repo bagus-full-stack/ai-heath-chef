@@ -39,9 +39,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
 
     setState(() => _isLoading = true);
+    final lang = Localizations.localeOf(context).languageCode;
     try {
       final authService = ref.read(authServiceProvider);
-      await authService.signIn(email: email, password: password);
+      await authService.signIn(email: email, password: password, lang: lang);
 
       final onboarding = ref.read(onboardingProvider);
       if (onboarding.isComplete && authService.currentUser != null) {
@@ -52,6 +53,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           targetWeight: onboarding.targetWeight!,
           heightCm: onboarding.heightCm!,
           goal: onboarding.goal!.name,
+          lang: lang,
         );
       }
 
@@ -263,7 +265,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () =>
-                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.google),
+                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.google, lang: Localizations.localeOf(context).languageCode),
                       icon: const Icon(Icons.g_mobiledata, color: Colors.black, size: 28),
                       label: const Text('Google', style: TextStyle(color: Colors.black)),
                       style: OutlinedButton.styleFrom(
@@ -278,7 +280,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () =>
-                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.github),
+                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.github, lang: Localizations.localeOf(context).languageCode),
                       icon: const Icon(Icons.code, color: Colors.black),
                       label: const Text('GitHub', style: TextStyle(color: Colors.black)),
                       style: OutlinedButton.styleFrom(
@@ -294,7 +296,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: 14),
               OutlinedButton.icon(
                 onPressed: () =>
-                    ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.discord),
+                    ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.discord, lang: Localizations.localeOf(context).languageCode),
                 icon: const Icon(Icons.discord, color: Color(0xFF5865F2)),
                 label: Text(
                   context.l10n.loginContinueWithDiscord,

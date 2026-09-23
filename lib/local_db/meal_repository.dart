@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/ingredient.dart';
 import '../models/meal.dart';
 import 'app_database.dart';
@@ -38,10 +40,12 @@ class MealRepository {
     List<Ingredient> ingredients,
     String mealName, {
     String? imagePath,
+    String lang = 'fr',
   }) async {
+    final l10n = lookupAppLocalizations(Locale(lang));
     final user = _supabase.auth.currentUser;
     if (user == null) {
-      throw Exception('Vous devez être connecté pour sauvegarder un repas.');
+      throw Exception(l10n.svcErrorAuthRequired);
     }
 
     final id = _uuid.v4();
@@ -53,7 +57,7 @@ class MealRepository {
     final totalSugar = ingredients.fold<double>(0, (sum, i) => sum + i.currentSugar);
     final totalSatFat = ingredients.fold<double>(0, (sum, i) => sum + i.currentSatFat);
 
-    final localImagePath = imagePath == null ? null : await _storeLocalPhoto(id, imagePath);
+    final localImagePath = imagePath == null ? null : await _storeLocalPhoto(id, imagePath, l10n);
 
     await _db.into(_db.localMeals).insert(LocalMealsCompanion.insert(
           id: id,
@@ -78,7 +82,7 @@ class MealRepository {
 
   /// Compresse la photo et la copie dans le stockage permanent de l'app
   /// (survit au redémarrage), sous un nom dérivé de l'id du repas.
-  Future<String> _storeLocalPhoto(String mealId, String sourcePath) async {
+  Future<String> _storeLocalPhoto(String mealId, String sourcePath, AppLocalizations l10n) async {
     final compressedBytes = await FlutterImageCompress.compressWithFile(
       sourcePath,
       minWidth: 800,
@@ -86,7 +90,7 @@ class MealRepository {
       quality: 70,
     );
     if (compressedBytes == null) {
-      throw Exception("Impossible de compresser l'image.");
+      throw Exception(l10n.svcErrorCompressImage);
     }
 
     final docsDir = await getApplicationDocumentsDirectory();

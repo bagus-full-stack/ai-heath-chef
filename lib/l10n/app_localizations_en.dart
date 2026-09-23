@@ -1612,4 +1612,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsSection9Title => '9. Intellectual property';
+
+  @override
+  String get svcErrorCompressImage => 'Couldn\'t compress the image.';
+
+  @override
+  String svcErrorAnalyzeMeal(String error) {
+    return 'AI analysis error: $error';
+  }
+
+  @override
+  String svcErrorAnalyzeProduct(String error) {
+    return 'Product analysis error: $error';
+  }
+
+  @override
+  String svcErrorCoachChat(String error) {
+    return 'Error connecting to the AI Coach: $error';
+  }
+
+  @override
+  String svcErrorMealSuggestions(String error) {
+    return 'Error generating meal ideas: $error';
+  }
+
+  @override
+  String get svcErrorAuthRequired => 'You must be signed in to do this.';
+
+  @override
+  String get svcErrorInvalidCredentials => 'Incorrect email or password.';
+
+  @override
+  String svcErrorSignup(String error) {
+    return 'Sign-up error: $error';
+  }
+
+  @override
+  String svcErrorSaveProfile(String error) {
+    return 'Error saving profile: $error';
+  }
+
+  @override
+  String svcErrorSavePreferences(String error) {
+    return 'Error saving preferences: $error';
+  }
+
+  @override
+  String svcErrorSaveCoachTone(String error) {
+    return 'Error saving Coach tone: $error';
+  }
+
+  @override
+  String get svcErrorProcessImage => 'Couldn\'t process the image.';
+
+  @override
+  String svcErrorUploadPhoto(String error) {
+    return 'Error uploading photo: $error';
+  }
+
+  @override
+  String svcErrorFetchProfile(String error) {
+    return 'Error fetching profile: $error';
+  }
+
+  @override
+  String get svcErrorResetPassword => 'Error sending the email.';
+
+  @override
+  String svcErrorOAuth(String provider, String error) {
+    return 'Error signing in with $provider: $error';
+  }
+
+  @override
+  String svcErrorProductLookupNetwork(String error) {
+    return 'Couldn\'t reach the product database: $error';
+  }
+
+  @override
+  String svcErrorProductLookupHttp(String status) {
+    return 'Network error while searching for the product ($status).';
+  }
+
+  @override
+  String get svcErrorProductNotFound =>
+      'Product not found for this barcode. Try taking a photo of the product instead, or add it manually.';
+
+  @override
+  String svcErrorLocalAiUnexpectedResponse(String response) {
+    return 'Unexpected local AI response: $response';
+  }
+
+  @override
+  String get svcErrorHuggingFaceToken =>
+      'Couldn\'t retrieve the Hugging Face token.';
 }

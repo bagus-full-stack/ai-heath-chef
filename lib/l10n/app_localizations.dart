@@ -2923,6 +2923,132 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'9. Propriété intellectuelle'**
   String get termsSection9Title;
+
+  /// No description provided for @svcErrorCompressImage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de compresser l\'image.'**
+  String get svcErrorCompressImage;
+
+  /// No description provided for @svcErrorAnalyzeMeal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'analyse IA : {error}'**
+  String svcErrorAnalyzeMeal(String error);
+
+  /// No description provided for @svcErrorAnalyzeProduct.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'analyse du produit : {error}'**
+  String svcErrorAnalyzeProduct(String error);
+
+  /// No description provided for @svcErrorCoachChat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur de connexion avec le Coach IA : {error}'**
+  String svcErrorCoachChat(String error);
+
+  /// No description provided for @svcErrorMealSuggestions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la génération des idées de repas : {error}'**
+  String svcErrorMealSuggestions(String error);
+
+  /// No description provided for @svcErrorAuthRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous devez être connecté pour effectuer cette action.'**
+  String get svcErrorAuthRequired;
+
+  /// No description provided for @svcErrorInvalidCredentials.
+  ///
+  /// In fr, this message translates to:
+  /// **'Email ou mot de passe incorrect.'**
+  String get svcErrorInvalidCredentials;
+
+  /// No description provided for @svcErrorSignup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'inscription : {error}'**
+  String svcErrorSignup(String error);
+
+  /// No description provided for @svcErrorSaveProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la sauvegarde du profil : {error}'**
+  String svcErrorSaveProfile(String error);
+
+  /// No description provided for @svcErrorSavePreferences.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la sauvegarde des préférences : {error}'**
+  String svcErrorSavePreferences(String error);
+
+  /// No description provided for @svcErrorSaveCoachTone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la sauvegarde du ton du Coach : {error}'**
+  String svcErrorSaveCoachTone(String error);
+
+  /// No description provided for @svcErrorProcessImage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de traiter l\'image.'**
+  String get svcErrorProcessImage;
+
+  /// No description provided for @svcErrorUploadPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'envoi de la photo : {error}'**
+  String svcErrorUploadPhoto(String error);
+
+  /// No description provided for @svcErrorFetchProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la récupération du profil : {error}'**
+  String svcErrorFetchProfile(String error);
+
+  /// No description provided for @svcErrorResetPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'envoi de l\'email.'**
+  String get svcErrorResetPassword;
+
+  /// No description provided for @svcErrorOAuth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur de connexion avec {provider} : {error}'**
+  String svcErrorOAuth(String provider, String error);
+
+  /// No description provided for @svcErrorProductLookupNetwork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de contacter la base de données produits : {error}'**
+  String svcErrorProductLookupNetwork(String error);
+
+  /// No description provided for @svcErrorProductLookupHttp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur réseau lors de la recherche du produit ({status}).'**
+  String svcErrorProductLookupHttp(String status);
+
+  /// No description provided for @svcErrorProductNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit introuvable pour ce code-barres. Essaie une photo du produit, ou ajoute-le manuellement.'**
+  String get svcErrorProductNotFound;
+
+  /// No description provided for @svcErrorLocalAiUnexpectedResponse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse IA locale inattendue : {response}'**
+  String svcErrorLocalAiUnexpectedResponse(String response);
+
+  /// No description provided for @svcErrorHuggingFaceToken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de récupérer le token Hugging Face.'**
+  String get svcErrorHuggingFaceToken;
 }
 
 class _AppLocalizationsDelegate

@@ -833,5 +833,127 @@
   },
   "termsSection8Title": "8. Données personnelles",
   "termsSection9Body": "Le nom, le logo et les éléments graphiques de l’Application appartiennent à l’éditeur. Le contenu que tu crées (photos, messages) reste ta propriété ; tu accordes à l’éditeur le droit de le traiter uniquement dans le cadre du fonctionnement du service (ex. envoi à un fournisseur d’IA pour analyse).",
-  "termsSection9Title": "9. Propriété intellectuelle"
+  "termsSection9Title": "9. Propriété intellectuelle",
+  "svcErrorCompressImage": "Impossible de compresser l'image.",
+  "svcErrorAnalyzeMeal": "Erreur lors de l'analyse IA : {error}",
+  "@svcErrorAnalyzeMeal": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorAnalyzeProduct": "Erreur lors de l'analyse du produit : {error}",
+  "@svcErrorAnalyzeProduct": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorCoachChat": "Erreur de connexion avec le Coach IA : {error}",
+  "@svcErrorCoachChat": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorMealSuggestions": "Erreur lors de la génération des idées de repas : {error}",
+  "@svcErrorMealSuggestions": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorAuthRequired": "Vous devez être connecté pour effectuer cette action.",
+  "svcErrorInvalidCredentials": "Email ou mot de passe incorrect.",
+  "svcErrorSignup": "Erreur lors de l'inscription : {error}",
+  "@svcErrorSignup": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorSaveProfile": "Erreur lors de la sauvegarde du profil : {error}",
+  "@svcErrorSaveProfile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorSavePreferences": "Erreur lors de la sauvegarde des préférences : {error}",
+  "@svcErrorSavePreferences": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorSaveCoachTone": "Erreur lors de la sauvegarde du ton du Coach : {error}",
+  "@svcErrorSaveCoachTone": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorProcessImage": "Impossible de traiter l'image.",
+  "svcErrorUploadPhoto": "Erreur lors de l'envoi de la photo : {error}",
+  "@svcErrorUploadPhoto": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorFetchProfile": "Erreur lors de la récupération du profil : {error}",
+  "@svcErrorFetchProfile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorResetPassword": "Erreur lors de l'envoi de l'email.",
+  "svcErrorOAuth": "Erreur de connexion avec {provider} : {error}",
+  "@svcErrorOAuth": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorProductLookupNetwork": "Impossible de contacter la base de données produits : {error}",
+  "@svcErrorProductLookupNetwork": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorProductLookupHttp": "Erreur réseau lors de la recherche du produit ({status}).",
+  "@svcErrorProductLookupHttp": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorProductNotFound": "Produit introuvable pour ce code-barres. Essaie une photo du produit, ou ajoute-le manuellement.",
+  "svcErrorLocalAiUnexpectedResponse": "Réponse IA locale inattendue : {response}",
+  "@svcErrorLocalAiUnexpectedResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorHuggingFaceToken": "Impossible de récupérer le token Hugging Face."
 }

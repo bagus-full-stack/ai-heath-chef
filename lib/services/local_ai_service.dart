@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/local_ai_config.dart';
+import '../l10n/app_localizations.dart';
 import '../models/ingredient.dart';
 
 /// Service IA 100% local (Gemma3n via flutter_gemma), indépendant de
@@ -91,19 +93,22 @@ Le JSON doit avoir cette structure exacte :
 
   /// Extrait le texte d'une [ModelResponse] : notre usage (chat simple, sans
   /// appel de fonction ni mode "thinking") produit toujours un [TextResponse].
-  String _extractText(ModelResponse response) {
+  String _extractText(ModelResponse response, String lang) {
     if (response is TextResponse) return response.token;
-    throw Exception('Réponse IA locale inattendue : $response');
+    throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorLocalAiUnexpectedResponse('$response'));
   }
 
   /// Télécharge le modèle Gemma3n depuis Hugging Face, en récupérant
   /// d'abord le token via l'Edge Function `huggingface-token` (jamais
   /// embarqué dans l'app). [onProgress] reçoit une valeur 0.0-1.0.
-  Future<void> downloadModel({required void Function(double progress) onProgress}) async {
+  Future<void> downloadModel({
+    required void Function(double progress) onProgress,
+    String lang = 'fr',
+  }) async {
     final tokenResponse = await Supabase.instance.client.functions.invoke('huggingface-token');
     final token = tokenResponse.data?['token'] as String?;
     if (token == null || token.isEmpty) {
-      throw Exception("Impossible de récupérer le token Hugging Face.");
+      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorHuggingFaceToken);
     }
 
     await FlutterGemma.installModel(
@@ -156,7 +161,7 @@ Le JSON doit avoir cette structure exacte :
       imageBytes: [imageBytes],
       isUser: true,
     ));
-    final response = _extractText(await chat.generateChatResponse());
+    final response = _extractText(await chat.generateChatResponse(), lang);
 
     final jsonString = response.replaceAll(RegExp(r'```json', caseSensitive: false), '').replaceAll('```', '').trim();
     final parsed = jsonDecode(jsonString) as Map<String, dynamic>;
@@ -221,6 +226,6 @@ Le JSON doit avoir cette structure exacte :
     }
 
     await chat.addQueryChunk(Message.text(text: message, isUser: true));
-    return _extractText(await chat.generateChatResponse());
+    return _extractText(await chat.generateChatResponse(), lang);
   }
 }

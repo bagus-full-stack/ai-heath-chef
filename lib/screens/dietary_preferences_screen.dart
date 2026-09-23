@@ -91,6 +91,7 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
       await ref.read(authServiceProvider).updateDietaryPreferences(
             dietType: _dietType,
             allergies: _allergies.toList(),
+            lang: Localizations.localeOf(context).languageCode,
           );
       ref.invalidate(profileProvider);
       if (mounted) {

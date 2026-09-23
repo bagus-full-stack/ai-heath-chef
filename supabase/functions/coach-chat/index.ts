@@ -65,15 +65,17 @@ async function checkAndIncrementQuota(
     dailyLimit: number,
     corsHeaders: Record<string, string>,
     globalDailyLimit?: number,
+    lang?: string,
 ): Promise<QuotaCheckResult> {
     const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
+    const isEn = lang === "en";
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
         return {
             ok: false,
             response: new Response(
-                JSON.stringify({ error: "Authentification requise." }),
+                JSON.stringify({ error: isEn ? "Authentication required." : "Authentification requise." }),
                 { status: 401, headers: jsonHeaders },
             ),
         };
@@ -91,7 +93,7 @@ async function checkAndIncrementQuota(
         return {
             ok: false,
             response: new Response(
-                JSON.stringify({ error: "Authentification invalide." }),
+                JSON.stringify({ error: isEn ? "Invalid authentication." : "Authentification invalide." }),
                 { status: 401, headers: jsonHeaders },
             ),
         };
@@ -115,7 +117,9 @@ async function checkAndIncrementQuota(
                 ok: false,
                 response: new Response(
                     JSON.stringify({
-                        error: `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
+                        error: isEn
+                            ? `Daily limit reached (${dailyLimit}/day) for this feature. Try again tomorrow.`
+                            : `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
                     }),
                     { status: 429, headers: jsonHeaders },
                 ),
@@ -136,7 +140,9 @@ async function checkAndIncrementQuota(
                 ok: false,
                 response: new Response(
                     JSON.stringify({
-                        error: "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
+                        error: isEn
+                            ? "This AI feature is in high demand today and has reached its shared limit. Try again tomorrow."
+                            : "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
                     }),
                     { status: 429, headers: jsonHeaders },
                 ),
@@ -189,31 +195,38 @@ Deno.serve(async (req) => {
         return new Response('ok', { headers: corsHeaders })
     }
 
+    // === 1. RECUPERATION DU BODY (Le message et l'historique), avant le quota pour connaître la langue ===
+    let body: Record<string, unknown> = {};
+    let bodyParseError = false;
+    try {
+        body = await req.json();
+    } catch (_e) {
+        bodyParseError = true;
+    }
+    const lang = body?.lang === 'en' ? 'en' : 'fr';
+    const isEn = lang === 'en';
+
     // === QUOTA QUOTIDIEN PAR UTILISATEUR ===
-    const quota = await checkAndIncrementQuota(req, 'coach-chat', 50, corsHeaders, 1000);
+    const quota = await checkAndIncrementQuota(req, 'coach-chat', 50, corsHeaders, 1000, lang);
     if (!quota.ok) {
         return quota.response!;
     }
 
     try {
-        // === 1. RECUPERATION DU BODY (Le message et l'historique) ===
-        let body;
-        try {
-            body = await req.json();
-        } catch (e) {
-            throw new Error("Le corps de la requête est vide ou mal formé.");
+        if (bodyParseError) {
+            throw new Error(isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé.");
         }
 
-        const { message, history, coachTone, dietType, allergies, lang } = body;
+        const { message, history, coachTone, dietType, allergies } = body;
         if (!message) {
-            throw new Error("Aucun message n'a été fourni dans la requête.");
+            throw new Error(isEn ? "No message was provided in the request." : "Aucun message n'a été fourni dans la requête.");
         }
 
         // === 2. VÉRIFICATION CLÉ API GEMINI ===
         const apiKey = Deno.env.get('GEMINI_API_KEY');
         if (!apiKey) {
             console.error("ERREUR CRITIQUE: Clé GEMINI_API_KEY introuvable.");
-            throw new Error("Configuration serveur manquante (API Key).");
+            throw new Error(isEn ? "Missing server configuration (API Key)." : "Configuration serveur manquante (API Key).");
         }
 
         // === 3. PRÉPARATION DES INSTRUCTIONS SYSTÈME ===
@@ -309,7 +322,11 @@ Deno.serve(async (req) => {
 
         // === 5. PARSING DU RÉSULTAT FINAL ===
         if (!successData) {
-            throw new Error(`Tous les modèles de chat ont échoué. Dernière erreur : ${lastError}`);
+            throw new Error(
+                isEn
+                    ? `All chat models failed. Last error: ${lastError}`
+                    : `Tous les modèles de chat ont échoué. Dernière erreur : ${lastError}`,
+            );
         }
 
         console.log(`SUCCÈS : Réponse générée avec ${usedModel}`);

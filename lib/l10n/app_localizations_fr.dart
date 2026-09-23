@@ -1624,4 +1624,98 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get termsSection9Title => '9. Propriété intellectuelle';
+
+  @override
+  String get svcErrorCompressImage => 'Impossible de compresser l\'image.';
+
+  @override
+  String svcErrorAnalyzeMeal(String error) {
+    return 'Erreur lors de l\'analyse IA : $error';
+  }
+
+  @override
+  String svcErrorAnalyzeProduct(String error) {
+    return 'Erreur lors de l\'analyse du produit : $error';
+  }
+
+  @override
+  String svcErrorCoachChat(String error) {
+    return 'Erreur de connexion avec le Coach IA : $error';
+  }
+
+  @override
+  String svcErrorMealSuggestions(String error) {
+    return 'Erreur lors de la génération des idées de repas : $error';
+  }
+
+  @override
+  String get svcErrorAuthRequired =>
+      'Vous devez être connecté pour effectuer cette action.';
+
+  @override
+  String get svcErrorInvalidCredentials => 'Email ou mot de passe incorrect.';
+
+  @override
+  String svcErrorSignup(String error) {
+    return 'Erreur lors de l\'inscription : $error';
+  }
+
+  @override
+  String svcErrorSaveProfile(String error) {
+    return 'Erreur lors de la sauvegarde du profil : $error';
+  }
+
+  @override
+  String svcErrorSavePreferences(String error) {
+    return 'Erreur lors de la sauvegarde des préférences : $error';
+  }
+
+  @override
+  String svcErrorSaveCoachTone(String error) {
+    return 'Erreur lors de la sauvegarde du ton du Coach : $error';
+  }
+
+  @override
+  String get svcErrorProcessImage => 'Impossible de traiter l\'image.';
+
+  @override
+  String svcErrorUploadPhoto(String error) {
+    return 'Erreur lors de l\'envoi de la photo : $error';
+  }
+
+  @override
+  String svcErrorFetchProfile(String error) {
+    return 'Erreur lors de la récupération du profil : $error';
+  }
+
+  @override
+  String get svcErrorResetPassword => 'Erreur lors de l\'envoi de l\'email.';
+
+  @override
+  String svcErrorOAuth(String provider, String error) {
+    return 'Erreur de connexion avec $provider : $error';
+  }
+
+  @override
+  String svcErrorProductLookupNetwork(String error) {
+    return 'Impossible de contacter la base de données produits : $error';
+  }
+
+  @override
+  String svcErrorProductLookupHttp(String status) {
+    return 'Erreur réseau lors de la recherche du produit ($status).';
+  }
+
+  @override
+  String get svcErrorProductNotFound =>
+      'Produit introuvable pour ce code-barres. Essaie une photo du produit, ou ajoute-le manuellement.';
+
+  @override
+  String svcErrorLocalAiUnexpectedResponse(String response) {
+    return 'Réponse IA locale inattendue : $response';
+  }
+
+  @override
+  String get svcErrorHuggingFaceToken =>
+      'Impossible de récupérer le token Hugging Face.';
 }

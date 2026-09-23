@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../l10n/app_localizations.dart';
 import 'purchase_service.dart';
 
 class AuthService {
@@ -14,6 +16,7 @@ class AuthService {
     required String email,
     required String password,
     String? fullName,
+    String lang = 'fr',
   }) async {
     try {
       final response = await _supabase.auth.signUp(
@@ -29,12 +32,16 @@ class AuthService {
       }
       return response;
     } catch (e) {
-      throw Exception('Erreur lors de l\'inscription : ${e.toString()}');
+      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorSignup(e.toString()));
     }
   }
 
   /// Connexion avec Email et Mot de passe
-  Future<AuthResponse> signIn({required String email, required String password}) async {
+  Future<AuthResponse> signIn({
+    required String email,
+    required String password,
+    String lang = 'fr',
+  }) async {
     try {
       final response = await _supabase.auth.signInWithPassword(email: email, password: password);
       final userId = response.user?.id;
@@ -43,7 +50,7 @@ class AuthService {
       }
       return response;
     } catch (e) {
-      throw Exception('Email ou mot de passe incorrect.');
+      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorInvalidCredentials);
     }
   }
 
@@ -61,11 +68,13 @@ class AuthService {
     required double heightCm,
     required String goal,
     String? avatarUrl,
+    String lang = 'fr',
   }) async {
+    final l10n = lookupAppLocalizations(Locale(lang));
     try {
       final user = _supabase.auth.currentUser;
       if (user == null) {
-        throw Exception('Vous devez être connecté pour enregistrer votre profil.');
+        throw Exception(l10n.svcErrorAuthRequired);
       }
 
       await _supabase.from('profiles').upsert({
@@ -85,7 +94,7 @@ class AuthService {
         'avatar_url': ?avatarUrl,
       }, onConflict: 'user_id');
     } catch (e) {
-      throw Exception('Erreur lors de la sauvegarde du profil : ${e.toString()}');
+      throw Exception(l10n.svcErrorSaveProfile(e.toString()));
     }
   }
 
@@ -95,10 +104,12 @@ class AuthService {
   Future<void> updateDietaryPreferences({
     required String dietType,
     required List<String> allergies,
+    String lang = 'fr',
   }) async {
+    final l10n = lookupAppLocalizations(Locale(lang));
     final user = _supabase.auth.currentUser;
     if (user == null) {
-      throw Exception('Vous devez être connecté pour enregistrer vos préférences.');
+      throw Exception(l10n.svcErrorAuthRequired);
     }
     try {
       await _supabase
@@ -106,21 +117,22 @@ class AuthService {
           .update({'diet_type': dietType, 'allergies': allergies})
           .eq('user_id', user.id);
     } catch (e) {
-      throw Exception('Erreur lors de la sauvegarde des préférences : ${e.toString()}');
+      throw Exception(l10n.svcErrorSavePreferences(e.toString()));
     }
   }
 
   /// Met à jour uniquement le ton choisi pour le Coach IA, utilisé par
   /// l'écran de personnalisation du Coach.
-  Future<void> updateCoachTone(String coachTone) async {
+  Future<void> updateCoachTone(String coachTone, {String lang = 'fr'}) async {
+    final l10n = lookupAppLocalizations(Locale(lang));
     final user = _supabase.auth.currentUser;
     if (user == null) {
-      throw Exception('Vous devez être connecté pour enregistrer ce réglage.');
+      throw Exception(l10n.svcErrorAuthRequired);
     }
     try {
       await _supabase.from('profiles').update({'coach_tone': coachTone}).eq('user_id', user.id);
     } catch (e) {
-      throw Exception('Erreur lors de la sauvegarde du ton du Coach : ${e.toString()}');
+      throw Exception(l10n.svcErrorSaveCoachTone(e.toString()));
     }
   }
 
@@ -132,10 +144,11 @@ class AuthService {
   /// écrire uniquement dans son propre dossier (`{user_id}/...`). Ce bucket
   /// n'est pas créé automatiquement par ce code, voir le dashboard Supabase
   /// > Storage.
-  Future<String> uploadAvatar(File imageFile) async {
+  Future<String> uploadAvatar(File imageFile, {String lang = 'fr'}) async {
+    final l10n = lookupAppLocalizations(Locale(lang));
     final user = _supabase.auth.currentUser;
     if (user == null) {
-      throw Exception('Vous devez être connecté pour changer ta photo de profil.');
+      throw Exception(l10n.svcErrorAuthRequired);
     }
 
     try {
@@ -146,7 +159,7 @@ class AuthService {
         quality: 80,
       );
       if (compressedBytes == null) {
-        throw Exception("Impossible de traiter l'image.");
+        throw Exception(l10n.svcErrorProcessImage);
       }
 
       final path = '${user.id}/avatar.jpg';
@@ -161,12 +174,12 @@ class AuthService {
       // immédiatement la nouvelle image plutôt qu'une version mise en cache.
       return '$publicUrl?updated=${DateTime.now().millisecondsSinceEpoch}';
     } catch (e) {
-      throw Exception('Erreur lors de l’envoi de la photo : ${e.toString()}');
+      throw Exception(l10n.svcErrorUploadPhoto(e.toString()));
     }
   }
 
   /// Récupère le profil métier de l'utilisateur connecté.
-  Future<Map<String, dynamic>?> fetchMyProfile() async {
+  Future<Map<String, dynamic>?> fetchMyProfile({String lang = 'fr'}) async {
     try {
       final user = _supabase.auth.currentUser;
       if (user == null) {
@@ -181,7 +194,7 @@ class AuthService {
 
       return response == null ? null : Map<String, dynamic>.from(response as Map);
     } catch (e) {
-      throw Exception('Erreur lors de la récupération du profil : ${e.toString()}');
+      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorFetchProfile(e.toString()));
     }
   }
 
@@ -192,16 +205,16 @@ class AuthService {
   }
 
   /// Envoi de l'email pour le mot de passe oublié
-  Future<void> resetPassword(String email) async {
+  Future<void> resetPassword(String email, {String lang = 'fr'}) async {
     try {
       await _supabase.auth.resetPasswordForEmail(email);
     } catch (e) {
-      throw Exception('Erreur lors de l\'envoi de l\'email.');
+      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorResetPassword);
     }
   }
 
   /// Connexion via un fournisseur tiers (Google, GitHub, Discord, etc.)
-  Future<void> signInWithOAuth(OAuthProvider provider) async {
+  Future<void> signInWithOAuth(OAuthProvider provider, {String lang = 'fr'}) async {
     try {
       await _supabase.auth.signInWithOAuth(
         provider,
@@ -210,7 +223,9 @@ class AuthService {
         redirectTo: 'com.aihealthchef.app://login-callback/',
       );
     } catch (e) {
-      throw Exception('Erreur de connexion avec ${provider.name} : ${e.toString()}');
+      throw Exception(
+        lookupAppLocalizations(Locale(lang)).svcErrorOAuth(provider.name, e.toString()),
+      );
     }
   }
 

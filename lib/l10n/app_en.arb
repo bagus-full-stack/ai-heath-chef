@@ -470,5 +470,127 @@
   "termsSection8Body": "The App processes, in particular: your email and password (authentication); health profile data (sex, age, weight, height, goal); the meal photos you take and the associated nutritional data; your profile picture; and your chat history with the AI coach. This data is used solely to provide the service (calculating your goals, analyzing your meals, tracking your history) and is hosted by Supabase. Meal photos are sent to Google (Gemini model) for the duration of the analysis. No data is sold to third parties. You may request access to, correction of, or deletion of your data at any time by writing to {supportEmail}.",
   "termsSection8Title": "8. Personal data",
   "termsSection9Body": "The name, logo, and graphic elements of the App belong to the publisher. The content you create (photos, messages) remains your property; you grant the publisher the right to process it solely for the purpose of operating the service (e.g. sending it to an AI provider for analysis).",
-  "termsSection9Title": "9. Intellectual property"
+  "termsSection9Title": "9. Intellectual property",
+  "svcErrorCompressImage": "Couldn't compress the image.",
+  "svcErrorAnalyzeMeal": "AI analysis error: {error}",
+  "@svcErrorAnalyzeMeal": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorAnalyzeProduct": "Product analysis error: {error}",
+  "@svcErrorAnalyzeProduct": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorCoachChat": "Error connecting to the AI Coach: {error}",
+  "@svcErrorCoachChat": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorMealSuggestions": "Error generating meal ideas: {error}",
+  "@svcErrorMealSuggestions": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorAuthRequired": "You must be signed in to do this.",
+  "svcErrorInvalidCredentials": "Incorrect email or password.",
+  "svcErrorSignup": "Sign-up error: {error}",
+  "@svcErrorSignup": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorSaveProfile": "Error saving profile: {error}",
+  "@svcErrorSaveProfile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorSavePreferences": "Error saving preferences: {error}",
+  "@svcErrorSavePreferences": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorSaveCoachTone": "Error saving Coach tone: {error}",
+  "@svcErrorSaveCoachTone": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorProcessImage": "Couldn't process the image.",
+  "svcErrorUploadPhoto": "Error uploading photo: {error}",
+  "@svcErrorUploadPhoto": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorFetchProfile": "Error fetching profile: {error}",
+  "@svcErrorFetchProfile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorResetPassword": "Error sending the email.",
+  "svcErrorOAuth": "Error signing in with {provider}: {error}",
+  "@svcErrorOAuth": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorProductLookupNetwork": "Couldn't reach the product database: {error}",
+  "@svcErrorProductLookupNetwork": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorProductLookupHttp": "Network error while searching for the product ({status}).",
+  "@svcErrorProductLookupHttp": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorProductNotFound": "Product not found for this barcode. Try taking a photo of the product instead, or add it manually.",
+  "svcErrorLocalAiUnexpectedResponse": "Unexpected local AI response: {response}",
+  "@svcErrorLocalAiUnexpectedResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorHuggingFaceToken": "Couldn't retrieve the Hugging Face token."
 }

@@ -50,12 +50,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
 
     setState(() => _isLoading = true);
+    final lang = Localizations.localeOf(context).languageCode;
     try {
       final authService = ref.read(authServiceProvider);
       final response = await authService.signUp(
             email: email,
             password: password,
             fullName: fullName,
+            lang: lang,
           );
 
       if (!mounted) {
@@ -82,6 +84,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             targetWeight: onboarding.targetWeight!,
             heightCm: onboarding.heightCm!,
             goal: onboarding.goal!.name,
+            lang: lang,
           );
         }
         if (!mounted) {
@@ -311,7 +314,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () =>
-                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.apple),
+                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.apple, lang: Localizations.localeOf(context).languageCode),
                       icon: const Icon(Icons.apple, color: Colors.black),
                       label: const Text('Apple', style: TextStyle(color: Colors.black)),
                       style: OutlinedButton.styleFrom(
@@ -326,7 +329,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () =>
-                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.google),
+                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.google, lang: Localizations.localeOf(context).languageCode),
                       icon: const Icon(Icons.g_mobiledata, color: Colors.black, size: 28),
                       label: const Text('Google', style: TextStyle(color: Colors.black)),
                       style: OutlinedButton.styleFrom(

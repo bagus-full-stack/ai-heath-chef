@@ -1,14 +1,17 @@
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
+import '../l10n/app_localizations.dart';
 import '../models/ingredient.dart';
 
 /// Recherche les informations nutritionnelles d'un produit à partir de son
 /// code-barres, via la base de données publique et gratuite Open Food Facts
 /// (https://world.openfoodfacts.org). Aucune clé API requise.
 class ProductLookupService {
-  Future<Ingredient> lookupBarcode(String barcode) async {
+  Future<Ingredient> lookupBarcode(String barcode, {String lang = 'fr'}) async {
+    final l10n = lookupAppLocalizations(Locale(lang));
     final uri = Uri.parse(
       'https://world.openfoodfacts.org/api/v2/product/$barcode.json'
       '?fields=product_name,brands,serving_quantity,nutriments',
@@ -18,18 +21,16 @@ class ProductLookupService {
     try {
       response = await http.get(uri).timeout(const Duration(seconds: 10));
     } catch (e) {
-      throw Exception('Impossible de contacter la base de données produits : ${e.toString()}');
+      throw Exception(l10n.svcErrorProductLookupNetwork(e.toString()));
     }
 
     if (response.statusCode != 200) {
-      throw Exception('Erreur réseau lors de la recherche du produit (${response.statusCode}).');
+      throw Exception(l10n.svcErrorProductLookupHttp('${response.statusCode}'));
     }
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     if (json['status'] != 1 || json['product'] == null) {
-      throw Exception(
-        'Produit introuvable pour ce code-barres. Essaie une photo du produit, ou ajoute-le manuellement.',
-      );
+      throw Exception(l10n.svcErrorProductNotFound);
     }
 
     final product = json['product'] as Map<String, dynamic>;

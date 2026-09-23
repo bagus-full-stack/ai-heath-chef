@@ -79,15 +79,17 @@ export async function checkAndIncrementQuota(
     dailyLimit: number,
     corsHeaders: Record<string, string>,
     globalDailyLimit?: number,
+    lang?: string,
 ): Promise<QuotaCheckResult> {
     const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
+    const isEn = lang === "en";
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
         return {
             ok: false,
             response: new Response(
-                JSON.stringify({ error: "Authentification requise." }),
+                JSON.stringify({ error: isEn ? "Authentication required." : "Authentification requise." }),
                 { status: 401, headers: jsonHeaders },
             ),
         };
@@ -105,7 +107,7 @@ export async function checkAndIncrementQuota(
         return {
             ok: false,
             response: new Response(
-                JSON.stringify({ error: "Authentification invalide." }),
+                JSON.stringify({ error: isEn ? "Invalid authentication." : "Authentification invalide." }),
                 { status: 401, headers: jsonHeaders },
             ),
         };
@@ -131,7 +133,9 @@ export async function checkAndIncrementQuota(
                 ok: false,
                 response: new Response(
                     JSON.stringify({
-                        error: `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
+                        error: isEn
+                            ? `Daily limit reached (${dailyLimit}/day) for this feature. Try again tomorrow.`
+                            : `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
                     }),
                     { status: 429, headers: jsonHeaders },
                 ),
@@ -152,7 +156,9 @@ export async function checkAndIncrementQuota(
                 ok: false,
                 response: new Response(
                     JSON.stringify({
-                        error: "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
+                        error: isEn
+                            ? "This AI feature is in high demand today and has reached its shared limit. Try again tomorrow."
+                            : "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
                     }),
                     { status: 429, headers: jsonHeaders },
                 ),

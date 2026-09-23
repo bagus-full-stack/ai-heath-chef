@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/local_ai_service.dart';
+import 'locale_provider.dart';
 
 const _enabledKey = 'local_ai_enabled';
 
@@ -79,12 +80,14 @@ class LocalAiSettingsNotifier extends AsyncNotifier<LocalAiSettings> {
     state = AsyncData(current.copyWith(isDownloading: true, downloadProgress: 0));
     try {
       final service = ref.read(localAiServiceProvider);
+      final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
       await service.downloadModel(
         onProgress: (progress) {
           final latest = state.value;
           if (latest == null) return;
           state = AsyncData(latest.copyWith(downloadProgress: progress));
         },
+        lang: lang,
       );
       final latest = state.value ?? current;
       state = AsyncData(latest.copyWith(isDownloading: false, isDownloaded: true, downloadProgress: 1));

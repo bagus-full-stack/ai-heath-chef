@@ -65,15 +65,17 @@ async function checkAndIncrementQuota(
     dailyLimit: number,
     corsHeaders: Record<string, string>,
     globalDailyLimit?: number,
+    lang?: string,
 ): Promise<QuotaCheckResult> {
     const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
+    const isEn = lang === "en";
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
         return {
             ok: false,
             response: new Response(
-                JSON.stringify({ error: "Authentification requise." }),
+                JSON.stringify({ error: isEn ? "Authentication required." : "Authentification requise." }),
                 { status: 401, headers: jsonHeaders },
             ),
         };
@@ -91,7 +93,7 @@ async function checkAndIncrementQuota(
         return {
             ok: false,
             response: new Response(
-                JSON.stringify({ error: "Authentification invalide." }),
+                JSON.stringify({ error: isEn ? "Invalid authentication." : "Authentification invalide." }),
                 { status: 401, headers: jsonHeaders },
             ),
         };
@@ -115,7 +117,9 @@ async function checkAndIncrementQuota(
                 ok: false,
                 response: new Response(
                     JSON.stringify({
-                        error: `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
+                        error: isEn
+                            ? `Daily limit reached (${dailyLimit}/day) for this feature. Try again tomorrow.`
+                            : `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
                     }),
                     { status: 429, headers: jsonHeaders },
                 ),
@@ -136,7 +140,9 @@ async function checkAndIncrementQuota(
                 ok: false,
                 response: new Response(
                     JSON.stringify({
-                        error: "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
+                        error: isEn
+                            ? "This AI feature is in high demand today and has reached its shared limit. Try again tomorrow."
+                            : "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
                     }),
                     { status: 429, headers: jsonHeaders },
                 ),
@@ -198,19 +204,26 @@ Deno.serve(async (req) => {
         return new Response('ok', { headers: corsHeaders })
     }
 
+    // === 1. RECUPERATION DU BODY, avant le quota pour connaître la langue ===
+    let body: Record<string, unknown> = {};
+    let bodyParseError = false;
+    try {
+        body = await req.json();
+    } catch (_e) {
+        bodyParseError = true;
+    }
+    const lang = body?.lang === 'en' ? 'en' : 'fr';
+    const isEn = lang === 'en';
+
     // === QUOTA QUOTIDIEN PAR UTILISATEUR ===
-    const quota = await checkAndIncrementQuota(req, 'meal-suggestions', 10, corsHeaders, 300);
+    const quota = await checkAndIncrementQuota(req, 'meal-suggestions', 10, corsHeaders, 300, lang);
     if (!quota.ok) {
         return quota.response!;
     }
 
     try {
-        // === 1. RECUPERATION DU BODY ===
-        let body;
-        try {
-            body = await req.json();
-        } catch (e) {
-            throw new Error("Le corps de la requête est vide ou mal formé.");
+        if (bodyParseError) {
+            throw new Error(isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé.");
         }
 
         const {
@@ -222,7 +235,6 @@ Deno.serve(async (req) => {
             dietType,
             allergies,
             count,
-            lang,
         } = body;
 
         const suggestionCount = Number.isFinite(count) && count > 0 ? Math.min(count, 10) : 6;
@@ -236,7 +248,7 @@ Deno.serve(async (req) => {
         const apiKey = Deno.env.get('GEMINI_API_KEY');
         if (!apiKey) {
             console.error("ERREUR CRITIQUE: Clé GEMINI_API_KEY introuvable.");
-            throw new Error("Configuration serveur manquante (API Key).");
+            throw new Error(isEn ? "Missing server configuration (API Key)." : "Configuration serveur manquante (API Key).");
         }
 
         // === 3. PRÉPARATION DU PROMPT ===
@@ -325,7 +337,11 @@ ${langInstruction}`;
 
         // === 5. PARSING DU RÉSULTAT FINAL ===
         if (!successData) {
-            throw new Error(`Tous les modèles ont échoué. Dernière erreur : ${lastError}`);
+            throw new Error(
+                isEn
+                    ? `All models failed. Last error: ${lastError}`
+                    : `Tous les modèles ont échoué. Dernière erreur : ${lastError}`,
+            );
         }
 
         console.log(`SUCCÈS : Suggestions générées avec ${usedModel}`);
@@ -337,7 +353,11 @@ ${langInstruction}`;
         try {
             parsedJson = JSON.parse(jsonString);
         } catch (e) {
-            throw new Error(`Le modèle a répondu avec un JSON invalide : ${jsonString}`);
+            throw new Error(
+                isEn
+                    ? `The model replied with invalid JSON: ${jsonString}`
+                    : `Le modèle a répondu avec un JSON invalide : ${jsonString}`,
+            );
         }
 
         return new Response(JSON.stringify(parsedJson), {

@@ -107,6 +107,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           targetWeight: weight,
           heightCm: height,
           goal: goal.name,
+          lang: Localizations.localeOf(context).languageCode,
         );
       }
 

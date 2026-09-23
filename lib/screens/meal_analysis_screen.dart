@@ -480,6 +480,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                 ingredients,
                                 mealName,
                                 imagePath: widget.imagePath,
+                                lang: Localizations.localeOf(context).languageCode,
                               );
 
                               // On invalide le cache du journal pour qu'il recharge

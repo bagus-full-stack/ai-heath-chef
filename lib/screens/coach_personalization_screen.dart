@@ -66,7 +66,10 @@ class _CoachPersonalizationScreenState extends ConsumerState<CoachPersonalizatio
       _saving = true;
     });
     try {
-      await ref.read(authServiceProvider).updateCoachTone(tone);
+      await ref.read(authServiceProvider).updateCoachTone(
+            tone,
+            lang: Localizations.localeOf(context).languageCode,
+          );
       ref.invalidate(profileProvider);
     } catch (e) {
       if (mounted) {

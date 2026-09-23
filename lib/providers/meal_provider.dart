@@ -51,9 +51,10 @@ class MealNotifier extends AsyncNotifier<List<Ingredient>> {
   // Chercher un produit à partir d'un code-barres scanné (Open Food Facts)
   Future<void> loadFromBarcode(String barcode) async {
     state = const AsyncValue.loading();
+    final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
     state = await AsyncValue.guard(() async {
       final productService = ref.read(productLookupServiceProvider);
-      final ingredient = await productService.lookupBarcode(barcode);
+      final ingredient = await productService.lookupBarcode(barcode, lang: lang);
       return [ingredient];
     });
   }

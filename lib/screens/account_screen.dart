@@ -106,9 +106,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     }
 
     setState(() => _isUploadingAvatar = true);
+    final lang = Localizations.localeOf(context).languageCode;
     try {
       final authService = ref.read(authServiceProvider);
-      final url = await authService.uploadAvatar(File(picked.path));
+      final url = await authService.uploadAvatar(File(picked.path), lang: lang);
 
       final age = int.tryParse(_ageController.text.trim());
       final currentWeight =
@@ -127,6 +128,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           heightCm: height,
           goal: _goal.name,
           avatarUrl: url,
+          lang: lang,
         );
         ref.invalidate(profileProvider);
       }
@@ -210,6 +212,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             heightCm: height,
             goal: _goal.name,
             avatarUrl: _avatarUrl,
+            lang: Localizations.localeOf(context).languageCode,
           );
       ref.invalidate(profileProvider);
       if (!mounted) {
