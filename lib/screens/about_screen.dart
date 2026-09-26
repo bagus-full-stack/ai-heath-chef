@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/l10n_extensions.dart';
 
 const Color _kPrimaryColor = Color(0xFF6B66FF);
-const String kSupportEmail = 'support@aihealthchef.app';
+const String kSupportEmail = 'bagaassami009@gmail.com';
 
 /// Écran "À propos" : identité de l'app, version installée (lue en direct
 /// via package_info_plus plutôt que codée en dur, pour rester juste après un

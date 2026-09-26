@@ -15,6 +15,8 @@ import 'services/notification_service.dart';
 import 'services/purchase_service.dart';
 import 'local_db/app_database.dart';
 import 'local_db/meal_repository.dart';
+import 'local_db/weight_repository.dart';
+import 'local_db/hydration_repository.dart';
 import 'local_db/local_db_provider.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
@@ -60,10 +62,16 @@ void main() async {
   // déclenchement de synchronisation au retour du réseau ci-dessous.
   final localDb = AppDatabase();
   final mealRepository = MealRepository(localDb);
+  final weightRepository = WeightRepository(localDb);
+  final hydrationRepository = HydrationRepository(localDb);
   unawaited(mealRepository.syncPendingMeals());
+  unawaited(weightRepository.syncEntries());
+  unawaited(hydrationRepository.syncEntries());
   Connectivity().onConnectivityChanged.listen((results) {
     if (!results.contains(ConnectivityResult.none)) {
       mealRepository.syncPendingMeals();
+      weightRepository.syncEntries();
+      hydrationRepository.syncEntries();
     }
   });
 

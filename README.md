@@ -7,19 +7,20 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Authentification** — inscription, connexion, mot de passe oublié (Supabase Auth)
 - **Onboarding** — questionnaire de profil (objectifs, données physiques dont la taille) utilisé pour calculer les cibles nutritionnelles
 - **Dashboard** — jauges de macros (calories, protéines, glucides, lipides) sur la journée, IMC calculé à partir du profil (catégorie OMS + plage), suivi de l'hydratation (objectif quotidien, ajout rapide en un tap, annulable), et journal des repas du jour avec la photo de chaque repas (suppression d'un repas par glissement, ou relance en un tap pour reloguer un repas déjà mangé)
-- **Hors ligne (local-first)** — repas enregistrés d'abord dans une base SQLite locale (fonctionne sans connexion), puis synchronisés vers Supabase dès que le réseau est disponible (au démarrage et à chaque retour de connexion)
+- **Hors ligne (local-first)** — repas, pesées et prises d'eau enregistrés d'abord dans une base SQLite locale (fonctionne sans connexion), puis synchronisés vers Supabase dès que le réseau est disponible (au démarrage et à chaque retour de connexion) : survivent à une désinstallation et se retrouvent sur un nouvel appareil
 - **Analyse nutritionnelle étendue (PRO)** — en plus des macros principales, fibres/sucres/graisses saturées sont estimés par l'IA (ou lus depuis Open Food Facts pour un scan code-barres) et affichés en moyenne quotidienne dans les Analyses avancées, avec un graphique d'évolution des calories sur 30 jours (ligne cible incluse, valeurs au tap)
 - **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
 - **Analyse de produit par photo** — même principe pour un produit emballé (Edge Function `analyze-product`), lit l'étiquette nutritionnelle plutôt qu'une assiette
 - **Scan de code-barres** — recherche instantanée d'un produit (EAN/UPC) via la base publique Open Food Facts, sans appel IA
 - **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`), et idées de repas personnalisées selon le profil/objectif (Edge Function `meal-suggestions`, mises en cache un jour à la fois), chacune illustrée par une image générée via Pollinations.ai (Edge Function `meal-images`, voir ci-dessous)
 - **Liste de courses** — alimentée en un tap depuis les ingrédients d'une idée de repas du Coach IA, cochable, persistée localement
-- **Suivi du poids** — historique des pesées (base locale) avec courbe de progression, et rappel hebdomadaire de pesée réutilisant le système de rappels personnalisés (voir ci-dessous)
+- **Suivi du poids** — historique des pesées (synchronisé, voir [Hors ligne](#fonctionnalités) ci-dessus) avec courbe de progression, et rappel hebdomadaire de pesée réutilisant le système de rappels personnalisés (voir ci-dessous)
 - **Export du journal alimentaire** — export CSV des repas des N derniers jours, partagé via le sélecteur natif (utilisable avec un nutritionniste, Excel/Sheets)
 - **Personnalisation du Coach IA** — choix du ton des réponses (motivant, bienveillant, direct, humoristique)
 - **Préférences alimentaires** — régime (végétarien, végétalien, pescétarien, halal, kasher) et allergies/intolérances, pris en compte par les idées de repas et le Coach IA
-- **Rappels** — notifications locales quotidiennes pour les repas (petit-déjeuner/déjeuner/dîner, activables et personnalisables individuellement) et rappels personnalisés illimités (nom + heure au choix, quotidien ou un jour de la semaine donné — ex. le rappel de pesée hebdomadaire), réglables depuis Profil > Notifications
+- **Rappels** — notifications locales quotidiennes pour les repas (petit-déjeuner/déjeuner/dîner, activables et personnalisables individuellement) et rappels personnalisés illimités (nom + heure au choix, quotidien ou un jour de la semaine donné — ex. le rappel de pesée hebdomadaire), réglables depuis Profil > Notifications. Les rappels personnalisés sont aussi sauvegardés sur Supabase et restaurés automatiquement sur un appareil "vide" (nouvelle install/nouveau téléphone) ; les créneaux fixes petit-déjeuner/déjeuner/dîner restent purement locaux (rapides à réactiver manuellement)
 - **Profil & compte** — gestion du profil utilisateur, paramètres de compte, photo de profil
+- **Sécurité et confidentialité** — changement du mot de passe depuis Profil > Sécurité (session active requise, pas de ré-saisie de l'ancien mot de passe). Le 2FA n'est pas encore implémenté (chantier séparé : nécessite aussi une vérification à la connexion, pas seulement un écran d'inscription)
 - **Centre d'aide** — FAQ groupée par thème + contact support par email
 - **Conditions d'utilisation** — CGU et mentions légales (⚠️ contenu de brouillon, voir [Notes](#notes) ci-dessous)
 - **À propos** — version de l'app (lue dynamiquement), liens vers l'aide et les CGU
@@ -62,9 +63,9 @@ lib/
                 généré par flutter gen-l10n, extension context.l10n
   local_db/     Base de données locale (drift/SQLite) et synchronisation hors ligne :
                 app_database (schéma + migrations), meal_repository (source de vérité des
-                repas, écrit en local puis pousse vers Supabase), weight_repository
-                (historique des pesées, purement local), hydration_repository (apports
-                d'eau du jour, purement local), local_db_provider
+                repas, écrit en local puis pousse vers Supabase), weight_repository et
+                hydration_repository (même principe : écrivent en local puis synchronisent
+                vers Supabase dans les deux sens, restauration comprise), local_db_provider
   models/       UserProfile, Meal, Ingredient, SelectedPlan, ChatMessage, MealSuggestion,
                 MealReminder, CustomReminder, MealAnalysisArgs, ShoppingItem
   providers/    State management Riverpod : auth, profile, dashboard (journal du jour et
@@ -72,10 +73,11 @@ lib/
                 meal_suggestions, chat, onboarding, purchase (entitlement PRO/admin),
                 notification_settings, custom_reminders, shopping_list, local_ai
                 (activation/téléchargement de l'IA locale), locale (langue choisie, persistée)
-  screens/      Écrans de l'application (dashboard, coach, profil, compte, onboarding,
-                auth, caméra/scanner, analyse repas/produit, notifications, suivi du poids,
-                liste de courses, IA locale, préférences alimentaires, personnalisation
-                coach, paywall/checkout, centre d'aide, CGU, à propos, coming-soon)
+  screens/      Écrans de l'application (dashboard, coach, profil, compte, sécurité,
+                onboarding, auth, caméra/scanner, analyse repas/produit, notifications,
+                suivi du poids, liste de courses, IA locale, préférences alimentaires,
+                personnalisation coach, paywall/checkout, centre d'aide, CGU, à propos,
+                coming-soon)
   services/     Accès Supabase (database_service, supabase_service), IA cloud via Edge
                 Functions (ai_service), IA locale sur l'appareil (local_ai_service),
                 RevenueCat (purchase_service), notifications locales
@@ -85,7 +87,7 @@ lib/
   utils/        Calcul des cibles nutritionnelles (nutrition_targets) et de l'IMC (bmi)
   widgets/      Composants réutilisables (layout principal, carte de suggestion de repas)
 supabase/
-  migrations/   Schéma SQL versionné (0001 à 0010, voir ci-dessous)
+  migrations/   Schéma SQL versionné (0001 à 0011, voir ci-dessous)
   functions/    Edge Functions : analyze-meal, analyze-product, coach-chat, meal-suggestions,
                 meal-images, huggingface-token — chacune déployée depuis l'éditeur du
                 Dashboard Supabase, donc chacune embarque sa propre copie de la vérification
@@ -111,7 +113,7 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0010) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0011) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
    - `0001` : tables `profiles`, `meals`, `chat_messages` + policies RLS + bucket `avatars`
    - `0002` : taille (`height_cm`) sur `profiles`
    - `0003` : table `meal_suggestions` (cache des idées de repas IA)
@@ -122,6 +124,7 @@ flutter pub get
    - `0008` : table `api_usage` + fonction `increment_api_usage`, pour les quotas quotidiens par utilisateur sur les Edge Functions IA (voir ci-dessous)
    - `0009` : table `global_api_usage` + fonction `increment_global_api_usage`, pour le quota global (tous utilisateurs confondus) qui protège le budget/débit partagé de `GEMINI_API_KEY` (voir ci-dessous)
    - `0010` : fibres/sucres/graisses saturées (`total_fiber`/`total_sugar`/`total_sat_fat` sur `meals`), en plus des macros principales
+   - `0011` : tables `weight_entries`, `hydration_entries` et `custom_reminders_backup` — synchronisation cross-device du poids, de l'hydratation et des rappels personnalisés (voir [Notes](#notes))
 3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
    - Chaque fonction est **autonome** (aucun import relatif vers `_shared/`) : un simple copier-coller de son `index.ts` dans l'éditeur du Dashboard Supabase suffit à la déployer/redéployer, sans erreur de bundling.
 4. **Illustrations des idées de repas (optionnel, 100% gratuit)** — `meal-images` génère une image IA par suggestion, en cascade entre deux fournisseurs gratuits :
@@ -189,13 +192,11 @@ flutter test
 
 ## Notes
 
-- **Repas hors ligne** — les repas sont écrits dans une base SQLite locale (`lib/local_db/`) avant toute tentative réseau ; un repas créé ou supprimé hors ligne reste en attente (`isSynced`/`isDeleted`) et se synchronise automatiquement vers Supabase au prochain démarrage ou retour de connexion, sans action de l'utilisateur.
-- **Notifications locales, pas de synchronisation** — les rappels (créneaux fixes et personnalisés) sont programmés en local sur l'appareil (`flutter_local_notifications`) et persistés dans `shared_preferences` : ils ne sont pas sauvegardés dans Supabase, donc ne survivent pas à une désinstallation et ne se synchronisent pas entre appareils.
-- **Poids et hydratation, purement locaux** — l'historique des pesées et les apports d'eau (`lib/local_db/weight_repository.dart` / `hydration_repository.dart`) vivent uniquement dans la base SQLite locale, sans copie Supabase : ils ne survivent pas à une désinstallation ni ne se synchronisent entre appareils. Le poids actuel du profil (`profiles.current_weight`, mis à jour à chaque pesée) reste la seule valeur synchronisée, utilisée pour l'IMC et les cibles caloriques.
+- **Repas, poids et hydratation hors ligne** — écrits dans une base SQLite locale (`lib/local_db/`) avant toute tentative réseau, puis synchronisés vers Supabase (tables `meals`/`weight_entries`/`hydration_entries`) au prochain démarrage ou retour de connexion, sans action de l'utilisateur. Pour le poids et l'hydratation, la synchronisation est aussi descendante (`syncEntries()` rapatrie les lignes présentes sur Supabase mais absentes en local) : l'historique se restaure après une désinstallation et se partage entre appareils. Le poids actuel du profil (`profiles.current_weight`, mis à jour à chaque pesée) reste la valeur utilisée pour l'IMC et les cibles caloriques, indépendamment de cet historique.
+- **Notifications locales, rappels personnalisés sauvegardés** — les rappels (créneaux fixes et personnalisés) sont programmés en local sur l'appareil (`flutter_local_notifications`) et persistés dans `shared_preferences`. Les rappels personnalisés sont en plus sauvegardés dans la table Supabase `custom_reminders_backup` à chaque modification, et restaurés automatiquement (nouvelle installation ou nouvel appareil sans rappel local) — voir `lib/providers/custom_reminders_provider.dart`. ⚠️ Restauration one-shot, pas de fusion en cas d'usage simultané sur deux appareils avant leur première synchronisation ; les créneaux fixes petit-déjeuner/déjeuner/dîner, eux, ne sont pas sauvegardés (à réactiver manuellement après réinstallation).
 - **Photos de repas** — uploadées dans le bucket `meal_photos` uniquement pour les analyses par photo ("Repas"/"Produit") ; un repas issu d'un scan de code-barres n'a pas de photo.
 - **Identité visuelle** — le logo source (`assets/icon/icon.png` / `icon_foreground.png`) alimente à la fois l'icône d'app (générée par `flutter_launcher_icons`, voir `pubspec.yaml`) et, depuis peu, le splash screen (Android/iOS) et l'écran de connexion. L'identifiant d'app est unifié en `com.aihealthchef.app` sur Android/iOS/macOS/Linux (Windows n'a pas d'identifiant de ce type).
-- **CGU/mentions légales à finaliser** — le contenu de `lib/screens/terms_screen.dart` décrit honnêtement le fonctionnement actuel de l'app (données collectées, absence de conseil médical, contenu généré par IA, abonnement), mais reste un brouillon : l'identité légale de l'éditeur (`[Nom de l'éditeur à compléter]`) et l'adresse de contact doivent être complétées, et le texte doit être relu par un professionnel du droit avant toute publication publique — un bandeau d'avertissement s'affiche sur l'écran tant que ce n'est pas fait.
-- **Adresse de contact** — actuellement `support@aihealthchef.app` (`lib/screens/about_screen.dart`, constante `kSupportEmail`), à remplacer par une vraie boîte surveillée avant publication.
+- **CGU/mentions légales à finaliser** — le contenu de `lib/screens/terms_screen.dart` décrit honnêtement le fonctionnement actuel de l'app (données collectées, absence de conseil médical, contenu généré par IA, abonnement) et identifie l'éditeur (Baga Assami, projet personnel sans société immatriculée) et son contact (`kSupportEmail`), mais reste un brouillon : le texte doit être relu par un professionnel du droit avant toute publication publique — un bandeau d'avertissement s'affiche sur l'écran tant que ce n'est pas fait.
 - **Quotas IA** — les limites quotidiennes sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque `supabase/functions/<nom>/index.ts` si besoin (4ᵉ argument = quota par utilisateur, 5ᵉ argument optionnel = quota global partagé par toute l'app, voir migration 0009). Cette fonction est dupliquée dans chaque Edge Function (voir Architecture ci-dessus) — un changement dans `_shared/quota.ts` doit être reporté manuellement dans chaque `index.ts` si tu veux le garder comme référence à jour. Un compte admin (`profiles.is_admin`) n'en est **pas** exempté — le quota s'applique à tout le monde, y compris toi.
 
 ## Ressources Flutter

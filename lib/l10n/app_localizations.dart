@@ -2696,12 +2696,6 @@ abstract class AppLocalizations {
   /// **'ASSISTANCE'**
   String get profileSectionSupport;
 
-  /// No description provided for @profileSecurityComingSoonMessage.
-  ///
-  /// In fr, this message translates to:
-  /// **'Les réglages de sécurité et confidentialité arrivent bientôt.'**
-  String get profileSecurityComingSoonMessage;
-
   /// No description provided for @profileSecuritySubtitle.
   ///
   /// In fr, this message translates to:
@@ -2713,6 +2707,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Sécurité et Confidentialité'**
   String get profileSecurityTitle;
+
+  /// No description provided for @securityPasswordSectionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer le mot de passe'**
+  String get securityPasswordSectionTitle;
+
+  /// No description provided for @securityNewPasswordLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau mot de passe'**
+  String get securityNewPasswordLabel;
+
+  /// No description provided for @securityConfirmPasswordLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le nouveau mot de passe'**
+  String get securityConfirmPasswordLabel;
+
+  /// No description provided for @securityUpdatePasswordButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre à jour le mot de passe'**
+  String get securityUpdatePasswordButton;
+
+  /// No description provided for @securityErrorPasswordTooShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de passe doit contenir au moins 6 caractères.'**
+  String get securityErrorPasswordTooShort;
+
+  /// No description provided for @securityErrorPasswordMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les mots de passe ne correspondent pas.'**
+  String get securityErrorPasswordMismatch;
+
+  /// No description provided for @securityPasswordUpdateSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe mis à jour.'**
+  String get securityPasswordUpdateSuccess;
+
+  /// No description provided for @security2faTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Authentification à deux facteurs'**
+  String get security2faTitle;
+
+  /// No description provided for @security2faMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore disponible — prévue dans une prochaine mise à jour.'**
+  String get security2faMessage;
 
   /// No description provided for @profileSubscriptionSubtitle.
   ///
@@ -2975,7 +3023,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsSection1Body.
   ///
   /// In fr, this message translates to:
-  /// **'Éditeur : [Nom de l’éditeur à compléter] — projet actuellement développé à titre personnel, sans société immatriculée à ce jour.\nContact : {supportEmail}\nHébergement des données et du backend : Supabase Inc. (infrastructure cloud tierce). Application distribuée via l’App Store (Apple) et le Google Play Store.'**
+  /// **'Éditeur : Baga Assami — projet actuellement développé à titre personnel, sans société immatriculée à ce jour.\nContact : {supportEmail}\nHébergement des données et du backend : Supabase Inc. (infrastructure cloud tierce). Application distribuée via l’App Store (Apple) et le Google Play Store.'**
   String termsSection1Body(String supportEmail);
 
   /// No description provided for @termsSection1Title.
@@ -3169,6 +3217,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur lors de l\'envoi de l\'email.'**
   String get svcErrorResetPassword;
+
+  /// No description provided for @svcErrorUpdatePassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de changer le mot de passe. Réessaie de te reconnecter puis recommence.'**
+  String get svcErrorUpdatePassword;
 
   /// No description provided for @svcErrorOAuth.
   ///

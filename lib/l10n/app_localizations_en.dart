@@ -1488,14 +1488,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSectionSupport => 'SUPPORT';
 
   @override
-  String get profileSecurityComingSoonMessage =>
-      'Security and privacy settings are coming soon.';
-
-  @override
   String get profileSecuritySubtitle => 'Data and security';
 
   @override
   String get profileSecurityTitle => 'Security and Privacy';
+
+  @override
+  String get securityPasswordSectionTitle => 'Change password';
+
+  @override
+  String get securityNewPasswordLabel => 'New password';
+
+  @override
+  String get securityConfirmPasswordLabel => 'Confirm new password';
+
+  @override
+  String get securityUpdatePasswordButton => 'Update password';
+
+  @override
+  String get securityErrorPasswordTooShort =>
+      'Password must be at least 6 characters long.';
+
+  @override
+  String get securityErrorPasswordMismatch => 'Passwords don\'t match.';
+
+  @override
+  String get securityPasswordUpdateSuccess => 'Password updated.';
+
+  @override
+  String get security2faTitle => 'Two-factor authentication';
+
+  @override
+  String get security2faMessage =>
+      'Not available yet — coming in a future update.';
 
   @override
   String get profileSubscriptionSubtitle => 'PRO plan and billing';
@@ -1643,7 +1668,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String termsSection1Body(String supportEmail) {
-    return 'Publisher: [Publisher name to be completed] — a project currently developed in a personal capacity, with no registered company to date.\nContact: $supportEmail\nData and backend hosting: Supabase Inc. (third-party cloud infrastructure). App distributed via the App Store (Apple) and the Google Play Store.';
+    return 'Publisher: Baga Assami — a project currently developed in a personal capacity, with no registered company to date.\nContact: $supportEmail\nData and backend hosting: Supabase Inc. (third-party cloud infrastructure). App distributed via the App Store (Apple) and the Google Play Store.';
   }
 
   @override
@@ -1771,6 +1796,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get svcErrorResetPassword => 'Error sending the email.';
+
+  @override
+  String get svcErrorUpdatePassword =>
+      'Couldn\'t change the password. Try signing in again and retry.';
 
   @override
   String svcErrorOAuth(String provider, String error) {

@@ -213,6 +213,17 @@ class AuthService {
     }
   }
 
+  /// Change le mot de passe de l'utilisateur connecté. Ne demande pas le mot
+  /// de passe actuel : la session active suffit à Supabase pour autoriser ce
+  /// changement (même mécanisme que le reste de `updateUser`).
+  Future<void> updatePassword(String newPassword, {String lang = 'fr'}) async {
+    try {
+      await _supabase.auth.updateUser(UserAttributes(password: newPassword));
+    } catch (e) {
+      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorUpdatePassword);
+    }
+  }
+
   /// Connexion via un fournisseur tiers (Google, GitHub, Discord, etc.)
   Future<void> signInWithOAuth(OAuthProvider provider, {String lang = 'fr'}) async {
     try {

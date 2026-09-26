@@ -17,12 +17,10 @@ class _TermsSection {
 // ----------------------------------------------------------------------------
 // Ce texte décrit honnêtement ce que l'app fait réellement (fonctionnalités,
 // sous-traitants techniques, absence de conseil médical, abonnement géré par
-// les stores). Il n'a PAS été relu par un professionnel du droit et l'éditeur
-// n'est pas encore identifié formellement (voir bandeau affiché à l'écran).
+// les stores). Il n'a PAS été relu par un professionnel du droit (voir
+// bandeau affiché à l'écran).
 // À faire avant toute mise en ligne publique :
 //   1. Faire relire/valider par un avocat (droit du numérique / santé).
-//   2. Remplacer "[Nom de l'éditeur à compléter]" par l'identité légale réelle.
-//   3. Mettre à jour l'email de contact si besoin (actuellement kSupportEmail).
 // ============================================================================
 List<_TermsSection> _sections(BuildContext context) {
   final l10n = context.l10n;
@@ -45,10 +43,9 @@ List<_TermsSection> _sections(BuildContext context) {
 }
 
 /// CGU + mentions légales de l'app. Contenu honnête sur ce que fait le
-/// service, mais reste un brouillon tant que l'éditeur n'a pas d'identité
-/// légale formelle et qu'un professionnel du droit ne l'a pas relu — voir le
-/// bandeau affiché en haut de l'écran et le commentaire au-dessus de
-/// [_sections].
+/// service, mais reste un brouillon tant qu'un professionnel du droit ne l'a
+/// pas relu — voir le bandeau affiché en haut de l'écran et le commentaire
+/// au-dessus de [_sections].
 class TermsScreen extends StatelessWidget {
   const TermsScreen({super.key});
 

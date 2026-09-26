@@ -809,9 +809,17 @@
   "profileSectionGeneral": "GÉNÉRAL",
   "profileSectionPersonalization": "PERSONNALISATION",
   "profileSectionSupport": "ASSISTANCE",
-  "profileSecurityComingSoonMessage": "Les réglages de sécurité et confidentialité arrivent bientôt.",
   "profileSecuritySubtitle": "Données et sécurité",
   "profileSecurityTitle": "Sécurité et Confidentialité",
+  "securityPasswordSectionTitle": "Changer le mot de passe",
+  "securityNewPasswordLabel": "Nouveau mot de passe",
+  "securityConfirmPasswordLabel": "Confirmer le nouveau mot de passe",
+  "securityUpdatePasswordButton": "Mettre à jour le mot de passe",
+  "securityErrorPasswordTooShort": "Le mot de passe doit contenir au moins 6 caractères.",
+  "securityErrorPasswordMismatch": "Les mots de passe ne correspondent pas.",
+  "securityPasswordUpdateSuccess": "Mot de passe mis à jour.",
+  "security2faTitle": "Authentification à deux facteurs",
+  "security2faMessage": "Pas encore disponible — prévue dans une prochaine mise à jour.",
   "profileSubscriptionSubtitle": "Plan PRO et facturation",
   "profileSubscriptionTitle": "Abonnement",
   "profileTargetWeightLabel": "Poids cible",
@@ -883,7 +891,7 @@
     }
   },
   "termsSection14Title": "14. Contact",
-  "termsSection1Body": "Éditeur : [Nom de l’éditeur à compléter] — projet actuellement développé à titre personnel, sans société immatriculée à ce jour.\nContact : {supportEmail}\nHébergement des données et du backend : Supabase Inc. (infrastructure cloud tierce). Application distribuée via l’App Store (Apple) et le Google Play Store.",
+  "termsSection1Body": "Éditeur : Baga Assami — projet actuellement développé à titre personnel, sans société immatriculée à ce jour.\nContact : {supportEmail}\nHébergement des données et du backend : Supabase Inc. (infrastructure cloud tierce). Application distribuée via l’App Store (Apple) et le Google Play Store.",
   "@termsSection1Body": {
     "placeholders": {
       "supportEmail": {
@@ -1000,6 +1008,7 @@
     }
   },
   "svcErrorResetPassword": "Erreur lors de l'envoi de l'email.",
+  "svcErrorUpdatePassword": "Impossible de changer le mot de passe. Réessaie de te reconnecter puis recommence.",
   "svcErrorOAuth": "Erreur de connexion avec {provider} : {error}",
   "@svcErrorOAuth": {
     "placeholders": {

@@ -12,7 +12,6 @@ import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../utils/journal_export.dart';
 import '../widgets/animated_async_value.dart';
-import 'coming_soon_screen.dart';
 
 const _kLanguageNames = {'fr': 'Français', 'en': 'English'};
 
@@ -185,14 +184,7 @@ class ProfileScreen extends ConsumerWidget {
                       icon: Icons.shield_outlined,
                       title: context.l10n.profileSecurityTitle,
                       subtitle: context.l10n.profileSecuritySubtitle,
-                      onTap: () => context.push(
-                        '/coming-soon',
-                        extra: ComingSoonArgs(
-                          title: context.l10n.profileSecurityTitle,
-                          message: context.l10n.profileSecurityComingSoonMessage,
-                          icon: Icons.shield_outlined,
-                        ),
-                      ),
+                      onTap: () => context.push('/security'),
                     ),
                   ],
                 ),

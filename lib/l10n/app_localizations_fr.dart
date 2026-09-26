@@ -1499,14 +1499,41 @@ class AppLocalizationsFr extends AppLocalizations {
   String get profileSectionSupport => 'ASSISTANCE';
 
   @override
-  String get profileSecurityComingSoonMessage =>
-      'Les réglages de sécurité et confidentialité arrivent bientôt.';
-
-  @override
   String get profileSecuritySubtitle => 'Données et sécurité';
 
   @override
   String get profileSecurityTitle => 'Sécurité et Confidentialité';
+
+  @override
+  String get securityPasswordSectionTitle => 'Changer le mot de passe';
+
+  @override
+  String get securityNewPasswordLabel => 'Nouveau mot de passe';
+
+  @override
+  String get securityConfirmPasswordLabel =>
+      'Confirmer le nouveau mot de passe';
+
+  @override
+  String get securityUpdatePasswordButton => 'Mettre à jour le mot de passe';
+
+  @override
+  String get securityErrorPasswordTooShort =>
+      'Le mot de passe doit contenir au moins 6 caractères.';
+
+  @override
+  String get securityErrorPasswordMismatch =>
+      'Les mots de passe ne correspondent pas.';
+
+  @override
+  String get securityPasswordUpdateSuccess => 'Mot de passe mis à jour.';
+
+  @override
+  String get security2faTitle => 'Authentification à deux facteurs';
+
+  @override
+  String get security2faMessage =>
+      'Pas encore disponible — prévue dans une prochaine mise à jour.';
 
   @override
   String get profileSubscriptionSubtitle => 'Plan PRO et facturation';
@@ -1656,7 +1683,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String termsSection1Body(String supportEmail) {
-    return 'Éditeur : [Nom de l’éditeur à compléter] — projet actuellement développé à titre personnel, sans société immatriculée à ce jour.\nContact : $supportEmail\nHébergement des données et du backend : Supabase Inc. (infrastructure cloud tierce). Application distribuée via l’App Store (Apple) et le Google Play Store.';
+    return 'Éditeur : Baga Assami — projet actuellement développé à titre personnel, sans société immatriculée à ce jour.\nContact : $supportEmail\nHébergement des données et du backend : Supabase Inc. (infrastructure cloud tierce). Application distribuée via l’App Store (Apple) et le Google Play Store.';
   }
 
   @override
@@ -1785,6 +1812,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get svcErrorResetPassword => 'Erreur lors de l\'envoi de l\'email.';
+
+  @override
+  String get svcErrorUpdatePassword =>
+      'Impossible de changer le mot de passe. Réessaie de te reconnecter puis recommence.';
 
   @override
   String svcErrorOAuth(String provider, String error) {

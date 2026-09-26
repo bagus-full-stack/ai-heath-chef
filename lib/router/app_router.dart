@@ -29,6 +29,7 @@ import '../screens/weight_trend_screen.dart';
 import '../screens/shopping_list_screen.dart';
 import '../screens/checkout_screen.dart';
 import '../screens/account_screen.dart';
+import '../screens/security_screen.dart';
 import '../screens/coming_soon_screen.dart';
 import '../widgets/main_layout.dart';
 import '../models/meal_analysis_args.dart';
@@ -197,6 +198,10 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/account',
         builder: (context, state) => const AccountScreen(),
+      ),
+      GoRoute(
+        path: '/security',
+        builder: (context, state) => const SecurityScreen(),
       ),
       GoRoute(
         path: '/coming-soon',

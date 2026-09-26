@@ -51,27 +51,38 @@ class LocalMeals extends Table {
 }
 
 /// Pesées enregistrées localement, pour la courbe de progression de l'écran
-/// "Suivi du poids" — purement local, aucune table miroir côté Supabase
-/// (le poids courant reste synchronisé via `profiles.current_weight`, voir
-/// [WeightRepository]).
+/// "Suivi du poids", synchronisées vers la table Supabase `weight_entries`
+/// (voir [WeightRepository]) — append-only, jamais modifiées ni supprimées
+/// depuis l'app, donc pas de colonne `isDeleted` ici (contrairement à
+/// [LocalMeals]/[HydrationEntries] qui exposent une suppression).
 class WeightEntries extends Table {
   TextColumn get id => text()();
   TextColumn get userId => text()();
   RealColumn get weightKg => real()();
   DateTimeColumn get recordedAt => dateTime()();
 
+  /// Faux tant que cette pesée n'a pas été poussée vers Supabase.
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
 
 /// Prises d'eau enregistrées localement (horodatées, en ml), pour la carte
-/// "Hydratation" du dashboard — purement local, comme [WeightEntries] :
-/// aucune donnée d'hydratation n'existait ailleurs dans l'app à réutiliser.
+/// "Hydratation" du dashboard, synchronisées vers la table Supabase
+/// `hydration_entries` (voir [HydrationRepository]).
 class HydrationEntries extends Table {
   TextColumn get id => text()();
   TextColumn get userId => text()();
   IntColumn get amountMl => integer()();
   DateTimeColumn get recordedAt => dateTime()();
+
+  /// Faux tant que cette entrée n'a pas été poussée vers Supabase.
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
+
+  /// Suppression différée (voir [LocalMeals.isDeleted]) : le bouton "Annuler"
+  /// de la snackbar peut être tapé avant la fin de la synchronisation.
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -82,7 +93,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -97,6 +108,11 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 4) {
             await m.createTable(hydrationEntries);
+          }
+          if (from < 5) {
+            await m.addColumn(weightEntries, weightEntries.isSynced);
+            await m.addColumn(hydrationEntries, hydrationEntries.isSynced);
+            await m.addColumn(hydrationEntries, hydrationEntries.isDeleted);
           }
         },
       );

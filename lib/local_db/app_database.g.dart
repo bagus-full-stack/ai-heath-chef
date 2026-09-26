@@ -970,8 +970,29 @@ class $WeightEntriesTable extends WeightEntries
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, userId, weightKg, recordedAt];
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    userId,
+    weightKg,
+    recordedAt,
+    isSynced,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1013,6 +1034,12 @@ class $WeightEntriesTable extends WeightEntries
     } else if (isInserting) {
       context.missing(_recordedAtMeta);
     }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
     return context;
   }
 
@@ -1038,6 +1065,10 @@ class $WeightEntriesTable extends WeightEntries
         DriftSqlType.dateTime,
         data['${effectivePrefix}recorded_at'],
       )!,
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
     );
   }
 
@@ -1052,11 +1083,15 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
   final String userId;
   final double weightKg;
   final DateTime recordedAt;
+
+  /// Faux tant que cette pesée n'a pas été poussée vers Supabase.
+  final bool isSynced;
   const WeightEntry({
     required this.id,
     required this.userId,
     required this.weightKg,
     required this.recordedAt,
+    required this.isSynced,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1065,6 +1100,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     map['user_id'] = Variable<String>(userId);
     map['weight_kg'] = Variable<double>(weightKg);
     map['recorded_at'] = Variable<DateTime>(recordedAt);
+    map['is_synced'] = Variable<bool>(isSynced);
     return map;
   }
 
@@ -1074,6 +1110,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       userId: Value(userId),
       weightKg: Value(weightKg),
       recordedAt: Value(recordedAt),
+      isSynced: Value(isSynced),
     );
   }
 
@@ -1087,6 +1124,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       userId: serializer.fromJson<String>(json['userId']),
       weightKg: serializer.fromJson<double>(json['weightKg']),
       recordedAt: serializer.fromJson<DateTime>(json['recordedAt']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
     );
   }
   @override
@@ -1097,6 +1135,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       'userId': serializer.toJson<String>(userId),
       'weightKg': serializer.toJson<double>(weightKg),
       'recordedAt': serializer.toJson<DateTime>(recordedAt),
+      'isSynced': serializer.toJson<bool>(isSynced),
     };
   }
 
@@ -1105,11 +1144,13 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     String? userId,
     double? weightKg,
     DateTime? recordedAt,
+    bool? isSynced,
   }) => WeightEntry(
     id: id ?? this.id,
     userId: userId ?? this.userId,
     weightKg: weightKg ?? this.weightKg,
     recordedAt: recordedAt ?? this.recordedAt,
+    isSynced: isSynced ?? this.isSynced,
   );
   WeightEntry copyWithCompanion(WeightEntriesCompanion data) {
     return WeightEntry(
@@ -1119,6 +1160,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       recordedAt: data.recordedAt.present
           ? data.recordedAt.value
           : this.recordedAt,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
     );
   }
 
@@ -1128,13 +1170,14 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('weightKg: $weightKg, ')
-          ..write('recordedAt: $recordedAt')
+          ..write('recordedAt: $recordedAt, ')
+          ..write('isSynced: $isSynced')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, userId, weightKg, recordedAt);
+  int get hashCode => Object.hash(id, userId, weightKg, recordedAt, isSynced);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1142,7 +1185,8 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           other.id == this.id &&
           other.userId == this.userId &&
           other.weightKg == this.weightKg &&
-          other.recordedAt == this.recordedAt);
+          other.recordedAt == this.recordedAt &&
+          other.isSynced == this.isSynced);
 }
 
 class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
@@ -1150,12 +1194,14 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
   final Value<String> userId;
   final Value<double> weightKg;
   final Value<DateTime> recordedAt;
+  final Value<bool> isSynced;
   final Value<int> rowid;
   const WeightEntriesCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.weightKg = const Value.absent(),
     this.recordedAt = const Value.absent(),
+    this.isSynced = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   WeightEntriesCompanion.insert({
@@ -1163,6 +1209,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     required String userId,
     required double weightKg,
     required DateTime recordedAt,
+    this.isSynced = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        userId = Value(userId),
@@ -1173,6 +1220,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     Expression<String>? userId,
     Expression<double>? weightKg,
     Expression<DateTime>? recordedAt,
+    Expression<bool>? isSynced,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1180,6 +1228,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
       if (userId != null) 'user_id': userId,
       if (weightKg != null) 'weight_kg': weightKg,
       if (recordedAt != null) 'recorded_at': recordedAt,
+      if (isSynced != null) 'is_synced': isSynced,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1189,6 +1238,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     Value<String>? userId,
     Value<double>? weightKg,
     Value<DateTime>? recordedAt,
+    Value<bool>? isSynced,
     Value<int>? rowid,
   }) {
     return WeightEntriesCompanion(
@@ -1196,6 +1246,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
       userId: userId ?? this.userId,
       weightKg: weightKg ?? this.weightKg,
       recordedAt: recordedAt ?? this.recordedAt,
+      isSynced: isSynced ?? this.isSynced,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1215,6 +1266,9 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     if (recordedAt.present) {
       map['recorded_at'] = Variable<DateTime>(recordedAt.value);
     }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1228,6 +1282,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
           ..write('userId: $userId, ')
           ..write('weightKg: $weightKg, ')
           ..write('recordedAt: $recordedAt, ')
+          ..write('isSynced: $isSynced, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1280,8 +1335,45 @@ class $HydrationEntriesTable extends HydrationEntries
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, userId, amountMl, recordedAt];
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    userId,
+    amountMl,
+    recordedAt,
+    isSynced,
+    isDeleted,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1323,6 +1415,18 @@ class $HydrationEntriesTable extends HydrationEntries
     } else if (isInserting) {
       context.missing(_recordedAtMeta);
     }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
     return context;
   }
 
@@ -1348,6 +1452,14 @@ class $HydrationEntriesTable extends HydrationEntries
         DriftSqlType.dateTime,
         data['${effectivePrefix}recorded_at'],
       )!,
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
     );
   }
 
@@ -1362,11 +1474,20 @@ class HydrationEntry extends DataClass implements Insertable<HydrationEntry> {
   final String userId;
   final int amountMl;
   final DateTime recordedAt;
+
+  /// Faux tant que cette entrée n'a pas été poussée vers Supabase.
+  final bool isSynced;
+
+  /// Suppression différée (voir [LocalMeals.isDeleted]) : le bouton "Annuler"
+  /// de la snackbar peut être tapé avant la fin de la synchronisation.
+  final bool isDeleted;
   const HydrationEntry({
     required this.id,
     required this.userId,
     required this.amountMl,
     required this.recordedAt,
+    required this.isSynced,
+    required this.isDeleted,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1375,6 +1496,8 @@ class HydrationEntry extends DataClass implements Insertable<HydrationEntry> {
     map['user_id'] = Variable<String>(userId);
     map['amount_ml'] = Variable<int>(amountMl);
     map['recorded_at'] = Variable<DateTime>(recordedAt);
+    map['is_synced'] = Variable<bool>(isSynced);
+    map['is_deleted'] = Variable<bool>(isDeleted);
     return map;
   }
 
@@ -1384,6 +1507,8 @@ class HydrationEntry extends DataClass implements Insertable<HydrationEntry> {
       userId: Value(userId),
       amountMl: Value(amountMl),
       recordedAt: Value(recordedAt),
+      isSynced: Value(isSynced),
+      isDeleted: Value(isDeleted),
     );
   }
 
@@ -1397,6 +1522,8 @@ class HydrationEntry extends DataClass implements Insertable<HydrationEntry> {
       userId: serializer.fromJson<String>(json['userId']),
       amountMl: serializer.fromJson<int>(json['amountMl']),
       recordedAt: serializer.fromJson<DateTime>(json['recordedAt']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
     );
   }
   @override
@@ -1407,6 +1534,8 @@ class HydrationEntry extends DataClass implements Insertable<HydrationEntry> {
       'userId': serializer.toJson<String>(userId),
       'amountMl': serializer.toJson<int>(amountMl),
       'recordedAt': serializer.toJson<DateTime>(recordedAt),
+      'isSynced': serializer.toJson<bool>(isSynced),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
     };
   }
 
@@ -1415,11 +1544,15 @@ class HydrationEntry extends DataClass implements Insertable<HydrationEntry> {
     String? userId,
     int? amountMl,
     DateTime? recordedAt,
+    bool? isSynced,
+    bool? isDeleted,
   }) => HydrationEntry(
     id: id ?? this.id,
     userId: userId ?? this.userId,
     amountMl: amountMl ?? this.amountMl,
     recordedAt: recordedAt ?? this.recordedAt,
+    isSynced: isSynced ?? this.isSynced,
+    isDeleted: isDeleted ?? this.isDeleted,
   );
   HydrationEntry copyWithCompanion(HydrationEntriesCompanion data) {
     return HydrationEntry(
@@ -1429,6 +1562,8 @@ class HydrationEntry extends DataClass implements Insertable<HydrationEntry> {
       recordedAt: data.recordedAt.present
           ? data.recordedAt.value
           : this.recordedAt,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
     );
   }
 
@@ -1438,13 +1573,16 @@ class HydrationEntry extends DataClass implements Insertable<HydrationEntry> {
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('amountMl: $amountMl, ')
-          ..write('recordedAt: $recordedAt')
+          ..write('recordedAt: $recordedAt, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('isDeleted: $isDeleted')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, userId, amountMl, recordedAt);
+  int get hashCode =>
+      Object.hash(id, userId, amountMl, recordedAt, isSynced, isDeleted);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1452,7 +1590,9 @@ class HydrationEntry extends DataClass implements Insertable<HydrationEntry> {
           other.id == this.id &&
           other.userId == this.userId &&
           other.amountMl == this.amountMl &&
-          other.recordedAt == this.recordedAt);
+          other.recordedAt == this.recordedAt &&
+          other.isSynced == this.isSynced &&
+          other.isDeleted == this.isDeleted);
 }
 
 class HydrationEntriesCompanion extends UpdateCompanion<HydrationEntry> {
@@ -1460,12 +1600,16 @@ class HydrationEntriesCompanion extends UpdateCompanion<HydrationEntry> {
   final Value<String> userId;
   final Value<int> amountMl;
   final Value<DateTime> recordedAt;
+  final Value<bool> isSynced;
+  final Value<bool> isDeleted;
   final Value<int> rowid;
   const HydrationEntriesCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.amountMl = const Value.absent(),
     this.recordedAt = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   HydrationEntriesCompanion.insert({
@@ -1473,6 +1617,8 @@ class HydrationEntriesCompanion extends UpdateCompanion<HydrationEntry> {
     required String userId,
     required int amountMl,
     required DateTime recordedAt,
+    this.isSynced = const Value.absent(),
+    this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        userId = Value(userId),
@@ -1483,6 +1629,8 @@ class HydrationEntriesCompanion extends UpdateCompanion<HydrationEntry> {
     Expression<String>? userId,
     Expression<int>? amountMl,
     Expression<DateTime>? recordedAt,
+    Expression<bool>? isSynced,
+    Expression<bool>? isDeleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1490,6 +1638,8 @@ class HydrationEntriesCompanion extends UpdateCompanion<HydrationEntry> {
       if (userId != null) 'user_id': userId,
       if (amountMl != null) 'amount_ml': amountMl,
       if (recordedAt != null) 'recorded_at': recordedAt,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (isDeleted != null) 'is_deleted': isDeleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1499,6 +1649,8 @@ class HydrationEntriesCompanion extends UpdateCompanion<HydrationEntry> {
     Value<String>? userId,
     Value<int>? amountMl,
     Value<DateTime>? recordedAt,
+    Value<bool>? isSynced,
+    Value<bool>? isDeleted,
     Value<int>? rowid,
   }) {
     return HydrationEntriesCompanion(
@@ -1506,6 +1658,8 @@ class HydrationEntriesCompanion extends UpdateCompanion<HydrationEntry> {
       userId: userId ?? this.userId,
       amountMl: amountMl ?? this.amountMl,
       recordedAt: recordedAt ?? this.recordedAt,
+      isSynced: isSynced ?? this.isSynced,
+      isDeleted: isDeleted ?? this.isDeleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1525,6 +1679,12 @@ class HydrationEntriesCompanion extends UpdateCompanion<HydrationEntry> {
     if (recordedAt.present) {
       map['recorded_at'] = Variable<DateTime>(recordedAt.value);
     }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1538,6 +1698,8 @@ class HydrationEntriesCompanion extends UpdateCompanion<HydrationEntry> {
           ..write('userId: $userId, ')
           ..write('amountMl: $amountMl, ')
           ..write('recordedAt: $recordedAt, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('isDeleted: $isDeleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1994,6 +2156,7 @@ typedef $$WeightEntriesTableCreateCompanionBuilder =
       required String userId,
       required double weightKg,
       required DateTime recordedAt,
+      Value<bool> isSynced,
       Value<int> rowid,
     });
 typedef $$WeightEntriesTableUpdateCompanionBuilder =
@@ -2002,6 +2165,7 @@ typedef $$WeightEntriesTableUpdateCompanionBuilder =
       Value<String> userId,
       Value<double> weightKg,
       Value<DateTime> recordedAt,
+      Value<bool> isSynced,
       Value<int> rowid,
     });
 
@@ -2031,6 +2195,11 @@ class $$WeightEntriesTableFilterComposer
 
   ColumnFilters<DateTime> get recordedAt => $composableBuilder(
     column: $table.recordedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2063,6 +2232,11 @@ class $$WeightEntriesTableOrderingComposer
     column: $table.recordedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$WeightEntriesTableAnnotationComposer
@@ -2087,6 +2261,9 @@ class $$WeightEntriesTableAnnotationComposer
     column: $table.recordedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
 }
 
 class $$WeightEntriesTableTableManager
@@ -2124,12 +2301,14 @@ class $$WeightEntriesTableTableManager
                 Value<String> userId = const Value.absent(),
                 Value<double> weightKg = const Value.absent(),
                 Value<DateTime> recordedAt = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => WeightEntriesCompanion(
                 id: id,
                 userId: userId,
                 weightKg: weightKg,
                 recordedAt: recordedAt,
+                isSynced: isSynced,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2138,12 +2317,14 @@ class $$WeightEntriesTableTableManager
                 required String userId,
                 required double weightKg,
                 required DateTime recordedAt,
+                Value<bool> isSynced = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => WeightEntriesCompanion.insert(
                 id: id,
                 userId: userId,
                 weightKg: weightKg,
                 recordedAt: recordedAt,
+                isSynced: isSynced,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2186,6 +2367,8 @@ typedef $$HydrationEntriesTableCreateCompanionBuilder =
       required String userId,
       required int amountMl,
       required DateTime recordedAt,
+      Value<bool> isSynced,
+      Value<bool> isDeleted,
       Value<int> rowid,
     });
 typedef $$HydrationEntriesTableUpdateCompanionBuilder =
@@ -2194,6 +2377,8 @@ typedef $$HydrationEntriesTableUpdateCompanionBuilder =
       Value<String> userId,
       Value<int> amountMl,
       Value<DateTime> recordedAt,
+      Value<bool> isSynced,
+      Value<bool> isDeleted,
       Value<int> rowid,
     });
 
@@ -2223,6 +2408,16 @@ class $$HydrationEntriesTableFilterComposer
 
   ColumnFilters<DateTime> get recordedAt => $composableBuilder(
     column: $table.recordedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2255,6 +2450,16 @@ class $$HydrationEntriesTableOrderingComposer
     column: $table.recordedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$HydrationEntriesTableAnnotationComposer
@@ -2279,6 +2484,12 @@ class $$HydrationEntriesTableAnnotationComposer
     column: $table.recordedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
 }
 
 class $$HydrationEntriesTableTableManager
@@ -2322,12 +2533,16 @@ class $$HydrationEntriesTableTableManager
                 Value<String> userId = const Value.absent(),
                 Value<int> amountMl = const Value.absent(),
                 Value<DateTime> recordedAt = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => HydrationEntriesCompanion(
                 id: id,
                 userId: userId,
                 amountMl: amountMl,
                 recordedAt: recordedAt,
+                isSynced: isSynced,
+                isDeleted: isDeleted,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2336,12 +2551,16 @@ class $$HydrationEntriesTableTableManager
                 required String userId,
                 required int amountMl,
                 required DateTime recordedAt,
+                Value<bool> isSynced = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => HydrationEntriesCompanion.insert(
                 id: id,
                 userId: userId,
                 amountMl: amountMl,
                 recordedAt: recordedAt,
+                isSynced: isSynced,
+                isDeleted: isDeleted,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
