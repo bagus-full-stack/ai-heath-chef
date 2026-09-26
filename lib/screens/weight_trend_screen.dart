@@ -341,7 +341,14 @@ class _ProgressPhotoGallery extends StatelessWidget {
           final entry = withPhoto[i];
           final image = entry.localImagePath != null
               ? Image.file(File(entry.localImagePath!), width: 80, height: 80, fit: BoxFit.cover)
-              : Image.network(entry.imageUrl!, width: 80, height: 80, fit: BoxFit.cover);
+              : Image.network(
+                  entry.imageUrl!,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                );
 
           return Column(
             children: [
