@@ -7,6 +7,8 @@ class MealSuggestion {
   final double lip;
   final String description;
   final String? imageUrl;
+  final List<String> ingredients;
+  final List<String> steps;
 
   const MealSuggestion({
     required this.timeSlot,
@@ -17,6 +19,8 @@ class MealSuggestion {
     required this.lip,
     required this.description,
     this.imageUrl,
+    this.ingredients = const [],
+    this.steps = const [],
   });
 
   factory MealSuggestion.fromJson(Map<String, dynamic> json) {
@@ -29,6 +33,16 @@ class MealSuggestion {
       lip: (json['lip'] as num?)?.toDouble() ?? 0,
       description: json['description'] as String? ?? '',
       imageUrl: json['imageUrl'] as String?,
+      ingredients:
+          (json['ingredients'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      steps:
+          (json['steps'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
     );
   }
 
@@ -44,6 +58,8 @@ class MealSuggestion {
       lip: lip,
       description: description,
       imageUrl: imageUrl,
+      ingredients: ingredients,
+      steps: steps,
     );
   }
 }

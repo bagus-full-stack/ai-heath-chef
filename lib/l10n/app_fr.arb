@@ -330,6 +330,22 @@
   },
   "dashboardProteinLabel": "PROTÉINES",
   "dashboardRepeatMealTooltip": "Refaire ce repas",
+  "dashboardStreakLabel": "{count} j",
+  "@dashboardStreakLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardStreakMilestoneReached": "🏆 Palier de {milestone} jours atteint !",
+  "@dashboardStreakMilestoneReached": {
+    "placeholders": {
+      "milestone": {
+        "type": "int"
+      }
+    }
+  },
   "dashboardTodayTitle": "Aujourd'hui",
   "dietaryPreferencesAllergiesDescription": "Elles seront évitées dans les idées de repas proposées par l’IA. Ne remplace pas la vigilance en cas d’allergie sévère.",
   "dietaryPreferencesAllergiesSectionTitle": "ALLERGIES & INTOLÉRANCES",
@@ -567,6 +583,8 @@
       }
     }
   },
+  "mealSuggestionRecipeIngredientsTitle": "INGRÉDIENTS",
+  "mealSuggestionRecipeStepsTitle": "PRÉPARATION",
   "mealSuggestionsEmptyMessage": "Aucune idée de repas disponible pour le moment.",
   "mealSuggestionsLoadError": "Impossible de générer des idées de repas pour le moment.",
   "mealSuggestionsRegenerateTooltip": "Régénérer",
@@ -620,6 +638,8 @@
   "notificationSettingsBodyBreakfast": "Pense à prendre en photo ton petit-déjeuner pour le logguer !",
   "notificationSettingsBodyLunch": "Pense à prendre en photo ton déjeuner pour le logguer !",
   "notificationSettingsBodyDinner": "Pense à prendre en photo ton dîner pour le logguer !",
+  "notificationSettingsSlotNoLog": "Pas encore loggé",
+  "notificationSettingsBodyNoLog": "Tu n'as pas encore loggé de repas aujourd'hui. Un petit rappel pour garder ton streak !",
   "nutritionTrends30DaySectionTitle": "Tendance calories · 30 derniers jours",
   "nutritionTrendsCaloriesLabel": "Calories",
   "nutritionTrendsCaloriesSectionTitle": "Calories · 7 derniers jours",
@@ -650,6 +670,8 @@
   "nutritionTrendsProLockedTitle": "Réservé aux membres PRO",
   "nutritionTrendsProteinLabel": "Protéines",
   "nutritionTrendsSatFatLabel": "Graisses sat.",
+  "nutritionTrendsShareButton": "Partager mon résumé de la semaine",
+  "nutritionTrendsShareCardTitle": "Résumé de la semaine",
   "nutritionTrendsSugarLabel": "Sucres",
   "nutritionTrendsTitle": "Analyses avancées",
   "onboardingAgeSectionLabel": "Votre Âge",
@@ -1046,6 +1068,30 @@
     }
   },
   "svcErrorHuggingFaceToken": "Impossible de récupérer le token Hugging Face.",
+  "weeklySummaryBodyWithWeight": "Cette semaine : {weightDelta} · {avgKcal} kcal/jour en moyenne",
+  "@weeklySummaryBodyWithWeight": {
+    "placeholders": {
+      "weightDelta": {
+        "type": "String"
+      },
+      "avgKcal": {
+        "type": "int"
+      }
+    }
+  },
+  "weeklySummaryBodyNoWeight": "Cette semaine : {avgKcal} kcal/jour en moyenne",
+  "@weeklySummaryBodyNoWeight": {
+    "placeholders": {
+      "avgKcal": {
+        "type": "int"
+      }
+    }
+  },
+  "weightStagnationCoachMessage": "J'ai remarqué que votre poids n'a presque pas bougé ces deux dernières semaines. C'est normal, le corps a parfois besoin de temps — voulez-vous qu'on revoie ensemble votre alimentation ou votre activité pour relancer la progression ?",
+  "weightTrendAddPhotoCameraButton": "Photo",
+  "weightTrendAddPhotoGalleryButton": "Galerie",
+  "weightTrendPhotoAttachedLabel": "Photo de progression ajoutée",
+  "weightTrendProgressPhotosTitle": "Photos de progression",
   "weightTrendCurrentLabel": "Poids actuel",
   "weightTrendEmptyState": "Aucune pesée enregistrée. Ajoutez votre premier poids pour voir votre progression.",
   "weightTrendErrorMessage": "Erreur de chargement : {error}",

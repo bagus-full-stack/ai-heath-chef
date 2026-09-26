@@ -985,6 +985,28 @@ class $WeightEntriesTable extends WeightEntries
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
+    'imageUrl',
+  );
+  @override
+  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
+    'image_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _localImagePathMeta = const VerificationMeta(
+    'localImagePath',
+  );
+  @override
+  late final GeneratedColumn<String> localImagePath = GeneratedColumn<String>(
+    'local_image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -992,6 +1014,8 @@ class $WeightEntriesTable extends WeightEntries
     weightKg,
     recordedAt,
     isSynced,
+    imageUrl,
+    localImagePath,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1040,6 +1064,21 @@ class $WeightEntriesTable extends WeightEntries
         isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
       );
     }
+    if (data.containsKey('image_url')) {
+      context.handle(
+        _imageUrlMeta,
+        imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
+      );
+    }
+    if (data.containsKey('local_image_path')) {
+      context.handle(
+        _localImagePathMeta,
+        localImagePath.isAcceptableOrUnknown(
+          data['local_image_path']!,
+          _localImagePathMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1069,6 +1108,14 @@ class $WeightEntriesTable extends WeightEntries
         DriftSqlType.bool,
         data['${effectivePrefix}is_synced'],
       )!,
+      imageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_url'],
+      ),
+      localImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_image_path'],
+      ),
     );
   }
 
@@ -1086,12 +1133,23 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
 
   /// Faux tant que cette pesée n'a pas été poussée vers Supabase.
   final bool isSynced;
+
+  /// URL publique une fois la photo de progression uploadée vers Supabase
+  /// Storage. Null tant que l'upload n'a pas eu lieu (ou si la pesée n'a pas
+  /// de photo) — voir [LocalMeals.imageUrl].
+  final String? imageUrl;
+
+  /// Chemin du fichier photo compressé sur le disque local, en attente
+  /// d'upload — voir [LocalMeals.localImagePath].
+  final String? localImagePath;
   const WeightEntry({
     required this.id,
     required this.userId,
     required this.weightKg,
     required this.recordedAt,
     required this.isSynced,
+    this.imageUrl,
+    this.localImagePath,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1101,6 +1159,12 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     map['weight_kg'] = Variable<double>(weightKg);
     map['recorded_at'] = Variable<DateTime>(recordedAt);
     map['is_synced'] = Variable<bool>(isSynced);
+    if (!nullToAbsent || imageUrl != null) {
+      map['image_url'] = Variable<String>(imageUrl);
+    }
+    if (!nullToAbsent || localImagePath != null) {
+      map['local_image_path'] = Variable<String>(localImagePath);
+    }
     return map;
   }
 
@@ -1111,6 +1175,12 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       weightKg: Value(weightKg),
       recordedAt: Value(recordedAt),
       isSynced: Value(isSynced),
+      imageUrl: imageUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imageUrl),
+      localImagePath: localImagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localImagePath),
     );
   }
 
@@ -1125,6 +1195,8 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       weightKg: serializer.fromJson<double>(json['weightKg']),
       recordedAt: serializer.fromJson<DateTime>(json['recordedAt']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
+      imageUrl: serializer.fromJson<String?>(json['imageUrl']),
+      localImagePath: serializer.fromJson<String?>(json['localImagePath']),
     );
   }
   @override
@@ -1136,6 +1208,8 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       'weightKg': serializer.toJson<double>(weightKg),
       'recordedAt': serializer.toJson<DateTime>(recordedAt),
       'isSynced': serializer.toJson<bool>(isSynced),
+      'imageUrl': serializer.toJson<String?>(imageUrl),
+      'localImagePath': serializer.toJson<String?>(localImagePath),
     };
   }
 
@@ -1145,12 +1219,18 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     double? weightKg,
     DateTime? recordedAt,
     bool? isSynced,
+    Value<String?> imageUrl = const Value.absent(),
+    Value<String?> localImagePath = const Value.absent(),
   }) => WeightEntry(
     id: id ?? this.id,
     userId: userId ?? this.userId,
     weightKg: weightKg ?? this.weightKg,
     recordedAt: recordedAt ?? this.recordedAt,
     isSynced: isSynced ?? this.isSynced,
+    imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
+    localImagePath: localImagePath.present
+        ? localImagePath.value
+        : this.localImagePath,
   );
   WeightEntry copyWithCompanion(WeightEntriesCompanion data) {
     return WeightEntry(
@@ -1161,6 +1241,10 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           ? data.recordedAt.value
           : this.recordedAt,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
+      localImagePath: data.localImagePath.present
+          ? data.localImagePath.value
+          : this.localImagePath,
     );
   }
 
@@ -1171,13 +1255,23 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           ..write('userId: $userId, ')
           ..write('weightKg: $weightKg, ')
           ..write('recordedAt: $recordedAt, ')
-          ..write('isSynced: $isSynced')
+          ..write('isSynced: $isSynced, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('localImagePath: $localImagePath')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, userId, weightKg, recordedAt, isSynced);
+  int get hashCode => Object.hash(
+    id,
+    userId,
+    weightKg,
+    recordedAt,
+    isSynced,
+    imageUrl,
+    localImagePath,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1186,7 +1280,9 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           other.userId == this.userId &&
           other.weightKg == this.weightKg &&
           other.recordedAt == this.recordedAt &&
-          other.isSynced == this.isSynced);
+          other.isSynced == this.isSynced &&
+          other.imageUrl == this.imageUrl &&
+          other.localImagePath == this.localImagePath);
 }
 
 class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
@@ -1195,6 +1291,8 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
   final Value<double> weightKg;
   final Value<DateTime> recordedAt;
   final Value<bool> isSynced;
+  final Value<String?> imageUrl;
+  final Value<String?> localImagePath;
   final Value<int> rowid;
   const WeightEntriesCompanion({
     this.id = const Value.absent(),
@@ -1202,6 +1300,8 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     this.weightKg = const Value.absent(),
     this.recordedAt = const Value.absent(),
     this.isSynced = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.localImagePath = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   WeightEntriesCompanion.insert({
@@ -1210,6 +1310,8 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     required double weightKg,
     required DateTime recordedAt,
     this.isSynced = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.localImagePath = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        userId = Value(userId),
@@ -1221,6 +1323,8 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     Expression<double>? weightKg,
     Expression<DateTime>? recordedAt,
     Expression<bool>? isSynced,
+    Expression<String>? imageUrl,
+    Expression<String>? localImagePath,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1229,6 +1333,8 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
       if (weightKg != null) 'weight_kg': weightKg,
       if (recordedAt != null) 'recorded_at': recordedAt,
       if (isSynced != null) 'is_synced': isSynced,
+      if (imageUrl != null) 'image_url': imageUrl,
+      if (localImagePath != null) 'local_image_path': localImagePath,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1239,6 +1345,8 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     Value<double>? weightKg,
     Value<DateTime>? recordedAt,
     Value<bool>? isSynced,
+    Value<String?>? imageUrl,
+    Value<String?>? localImagePath,
     Value<int>? rowid,
   }) {
     return WeightEntriesCompanion(
@@ -1247,6 +1355,8 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
       weightKg: weightKg ?? this.weightKg,
       recordedAt: recordedAt ?? this.recordedAt,
       isSynced: isSynced ?? this.isSynced,
+      imageUrl: imageUrl ?? this.imageUrl,
+      localImagePath: localImagePath ?? this.localImagePath,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1269,6 +1379,12 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     if (isSynced.present) {
       map['is_synced'] = Variable<bool>(isSynced.value);
     }
+    if (imageUrl.present) {
+      map['image_url'] = Variable<String>(imageUrl.value);
+    }
+    if (localImagePath.present) {
+      map['local_image_path'] = Variable<String>(localImagePath.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1283,6 +1399,8 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
           ..write('weightKg: $weightKg, ')
           ..write('recordedAt: $recordedAt, ')
           ..write('isSynced: $isSynced, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('localImagePath: $localImagePath, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2157,6 +2275,8 @@ typedef $$WeightEntriesTableCreateCompanionBuilder =
       required double weightKg,
       required DateTime recordedAt,
       Value<bool> isSynced,
+      Value<String?> imageUrl,
+      Value<String?> localImagePath,
       Value<int> rowid,
     });
 typedef $$WeightEntriesTableUpdateCompanionBuilder =
@@ -2166,6 +2286,8 @@ typedef $$WeightEntriesTableUpdateCompanionBuilder =
       Value<double> weightKg,
       Value<DateTime> recordedAt,
       Value<bool> isSynced,
+      Value<String?> imageUrl,
+      Value<String?> localImagePath,
       Value<int> rowid,
     });
 
@@ -2200,6 +2322,16 @@ class $$WeightEntriesTableFilterComposer
 
   ColumnFilters<bool> get isSynced => $composableBuilder(
     column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localImagePath => $composableBuilder(
+    column: $table.localImagePath,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2237,6 +2369,16 @@ class $$WeightEntriesTableOrderingComposer
     column: $table.isSynced,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localImagePath => $composableBuilder(
+    column: $table.localImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$WeightEntriesTableAnnotationComposer
@@ -2264,6 +2406,14 @@ class $$WeightEntriesTableAnnotationComposer
 
   GeneratedColumn<bool> get isSynced =>
       $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<String> get imageUrl =>
+      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get localImagePath => $composableBuilder(
+    column: $table.localImagePath,
+    builder: (column) => column,
+  );
 }
 
 class $$WeightEntriesTableTableManager
@@ -2302,6 +2452,8 @@ class $$WeightEntriesTableTableManager
                 Value<double> weightKg = const Value.absent(),
                 Value<DateTime> recordedAt = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+                Value<String?> localImagePath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => WeightEntriesCompanion(
                 id: id,
@@ -2309,6 +2461,8 @@ class $$WeightEntriesTableTableManager
                 weightKg: weightKg,
                 recordedAt: recordedAt,
                 isSynced: isSynced,
+                imageUrl: imageUrl,
+                localImagePath: localImagePath,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2318,6 +2472,8 @@ class $$WeightEntriesTableTableManager
                 required double weightKg,
                 required DateTime recordedAt,
                 Value<bool> isSynced = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+                Value<String?> localImagePath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => WeightEntriesCompanion.insert(
                 id: id,
@@ -2325,6 +2481,8 @@ class $$WeightEntriesTableTableManager
                 weightKg: weightKg,
                 recordedAt: recordedAt,
                 isSynced: isSynced,
+                imageUrl: imageUrl,
+                localImagePath: localImagePath,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -17,7 +17,9 @@ const Color _kPrimaryColor = Color(0xFF6B66FF);
 String _weekdayName(BuildContext context, int weekday, {bool short = false}) {
   final locale = Localizations.localeOf(context).toString();
   final date = DateTime(2024, 1, weekday);
-  return short ? DateFormat.E(locale).format(date) : DateFormat.EEEE(locale).format(date);
+  return short
+      ? DateFormat.E(locale).format(date)
+      : DateFormat.EEEE(locale).format(date);
 }
 
 /// Réglages des rappels : les créneaux fixes (petit-déjeuner/déjeuner/dîner)
@@ -27,17 +29,28 @@ String _weekdayName(BuildContext context, int weekday, {bool short = false}) {
 class NotificationSettingsScreen extends ConsumerWidget {
   const NotificationSettingsScreen({super.key});
 
-  Future<void> _openAddReminderSheet(BuildContext context, WidgetRef ref) async {
-    final result = await showModalBottomSheet<({String name, int hour, int minute, int? weekday})>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const _AddReminderSheet(),
-    );
+  Future<void> _openAddReminderSheet(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final result =
+        await showModalBottomSheet<
+          ({String name, int hour, int minute, int? weekday})
+        >(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => const _AddReminderSheet(),
+        );
     if (result != null) {
       await ref
           .read(customRemindersProvider.notifier)
-          .add(result.name, result.hour, result.minute, weekday: result.weekday);
+          .add(
+            result.name,
+            result.hour,
+            result.minute,
+            weekday: result.weekday,
+          );
     }
   }
 
@@ -45,6 +58,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsAsync = ref.watch(notificationSettingsProvider);
     final customRemindersAsync = ref.watch(customRemindersProvider);
+    final noLogReminderAsync = ref.watch(noLogReminderProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -57,12 +71,18 @@ class NotificationSettingsScreen extends ConsumerWidget {
         ),
         title: Text(
           context.l10n.notificationSettingsTitle,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
         centerTitle: true,
       ),
       body: settingsAsync.animatedWhen(
-        loading: () => const Center(child: CircularProgressIndicator(color: _kPrimaryColor)),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: _kPrimaryColor),
+        ),
         error: (error, stackTrace) => Center(
           child: Padding(
             padding: const EdgeInsets.all(40.0),
@@ -87,9 +107,26 @@ class NotificationSettingsScreen extends ConsumerWidget {
                 hour: settings[slot]!.hour,
                 minute: settings[slot]!.minute,
                 enabled: settings[slot]!.enabled,
-                onToggle: (value) => ref.read(notificationSettingsProvider.notifier).setEnabled(slot, value),
-                onPickTime: (hour, minute) =>
-                    ref.read(notificationSettingsProvider.notifier).setTime(slot, hour, minute),
+                onToggle: (value) => ref
+                    .read(notificationSettingsProvider.notifier)
+                    .setEnabled(slot, value),
+                onPickTime: (hour, minute) => ref
+                    .read(notificationSettingsProvider.notifier)
+                    .setTime(slot, hour, minute),
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (noLogReminderAsync.value != null) ...[
+              _ReminderTile(
+                label: context.l10n.notificationSettingsSlotNoLog,
+                hour: noLogReminderAsync.value!.hour,
+                minute: noLogReminderAsync.value!.minute,
+                enabled: noLogReminderAsync.value!.enabled,
+                onToggle: (value) =>
+                    ref.read(noLogReminderProvider.notifier).setEnabled(value),
+                onPickTime: (hour, minute) => ref
+                    .read(noLogReminderProvider.notifier)
+                    .setTime(hour, minute),
               ),
               const SizedBox(height: 12),
             ],
@@ -109,7 +146,10 @@ class NotificationSettingsScreen extends ConsumerWidget {
                 TextButton.icon(
                   onPressed: () => _openAddReminderSheet(context, ref),
                   icon: const Icon(Icons.add, size: 18, color: _kPrimaryColor),
-                  label: Text(context.l10n.notificationSettingsAddButton, style: const TextStyle(color: _kPrimaryColor)),
+                  label: Text(
+                    context.l10n.notificationSettingsAddButton,
+                    style: const TextStyle(color: _kPrimaryColor),
+                  ),
                 ),
               ],
             ),
@@ -117,7 +157,9 @@ class NotificationSettingsScreen extends ConsumerWidget {
             customRemindersAsync.animatedWhen(
               loading: () => const Padding(
                 padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(child: CircularProgressIndicator(color: _kPrimaryColor)),
+                child: Center(
+                  child: CircularProgressIndicator(color: _kPrimaryColor),
+                ),
               ),
               error: (error, stackTrace) => Text(
                 context.l10n.notificationSettingsCustomRemindersLoadError,
@@ -139,11 +181,15 @@ class NotificationSettingsScreen extends ConsumerWidget {
                         minute: reminder.minute,
                         enabled: reminder.enabled,
                         weekday: reminder.weekday,
-                        onToggle: (value) =>
-                            ref.read(customRemindersProvider.notifier).setEnabled(reminder.id, value),
-                        onPickTime: (hour, minute) =>
-                            ref.read(customRemindersProvider.notifier).setTime(reminder.id, hour, minute),
-                        onDelete: () => ref.read(customRemindersProvider.notifier).remove(reminder.id),
+                        onToggle: (value) => ref
+                            .read(customRemindersProvider.notifier)
+                            .setEnabled(reminder.id, value),
+                        onPickTime: (hour, minute) => ref
+                            .read(customRemindersProvider.notifier)
+                            .setTime(reminder.id, hour, minute),
+                        onDelete: () => ref
+                            .read(customRemindersProvider.notifier)
+                            .remove(reminder.id),
                       ),
                       const SizedBox(height: 12),
                     ],
@@ -195,7 +241,8 @@ class _ReminderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timeLabel = '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+    final timeLabel =
+        '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -213,7 +260,10 @@ class _ReminderTile extends StatelessWidget {
               color: _kPrimaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.notifications_none_rounded, color: _kPrimaryColor),
+            child: const Icon(
+              Icons.notifications_none_rounded,
+              color: _kPrimaryColor,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -223,7 +273,10 @@ class _ReminderTile extends StatelessWidget {
                 Text(
                   label,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 GestureDetector(
@@ -231,8 +284,15 @@ class _ReminderTile extends StatelessWidget {
                   child: Text(
                     enabled
                         ? (weekday != null
-                            ? context.l10n.notificationSettingsReminderWeeklyAtLabel(_weekdayName(context, weekday!), timeLabel)
-                            : context.l10n.notificationSettingsReminderAtLabel(timeLabel))
+                              ? context.l10n
+                                    .notificationSettingsReminderWeeklyAtLabel(
+                                      _weekdayName(context, weekday!),
+                                      timeLabel,
+                                    )
+                              : context.l10n
+                                    .notificationSettingsReminderAtLabel(
+                                      timeLabel,
+                                    ))
                         : context.l10n.notificationSettingsDisabledLabel,
                     style: TextStyle(
                       color: enabled ? _kPrimaryColor : Colors.grey.shade500,
@@ -251,7 +311,10 @@ class _ReminderTile extends StatelessWidget {
           ),
           if (onDelete != null)
             IconButton(
-              icon: Icon(Icons.delete_outline_rounded, color: Colors.grey.shade400),
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                color: Colors.grey.shade400,
+              ),
               onPressed: onDelete,
             ),
         ],
@@ -291,7 +354,10 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.notificationSettingsNameRequiredError), backgroundColor: Colors.redAccent),
+        SnackBar(
+          content: Text(context.l10n.notificationSettingsNameRequiredError),
+          backgroundColor: Colors.redAccent,
+        ),
       );
       return;
     }
@@ -306,7 +372,9 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
         decoration: const BoxDecoration(
@@ -321,11 +389,17 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
               child: Container(
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
             const SizedBox(height: 18),
-            Text(context.l10n.notificationSettingsNewReminderTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              context.l10n.notificationSettingsNewReminderTitle,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 18),
             TextField(
               controller: _nameController,
@@ -347,7 +421,10 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
               onTap: _pickTime,
               borderRadius: BorderRadius.circular(14),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50,
                   borderRadius: BorderRadius.circular(14),
@@ -355,7 +432,10 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.access_time_rounded, color: _kPrimaryColor),
+                    const Icon(
+                      Icons.access_time_rounded,
+                      color: _kPrimaryColor,
+                    ),
                     const SizedBox(width: 10),
                     Text(
                       context.l10n.notificationSettingsTimeLabel(
@@ -372,7 +452,9 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
               children: [
                 Expanded(
                   child: ChoiceChip(
-                    label: Text(context.l10n.notificationSettingsFrequencyDaily),
+                    label: Text(
+                      context.l10n.notificationSettingsFrequencyDaily,
+                    ),
                     selected: !_isWeekly,
                     selectedColor: _kPrimaryColor.withValues(alpha: 0.15),
                     onSelected: (_) => setState(() => _isWeekly = false),
@@ -381,7 +463,9 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ChoiceChip(
-                    label: Text(context.l10n.notificationSettingsFrequencyWeekly),
+                    label: Text(
+                      context.l10n.notificationSettingsFrequencyWeekly,
+                    ),
                     selected: _isWeekly,
                     selectedColor: _kPrimaryColor.withValues(alpha: 0.15),
                     onSelected: (_) => setState(() => _isWeekly = true),
@@ -410,12 +494,18 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: _kPrimaryColor,
                 minimumSize: const Size(double.infinity, 54),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 elevation: 0,
               ),
               child: Text(
                 context.l10n.notificationSettingsAddSubmitButton,
-                style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],

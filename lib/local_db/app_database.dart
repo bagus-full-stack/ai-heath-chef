@@ -64,6 +64,15 @@ class WeightEntries extends Table {
   /// Faux tant que cette pesée n'a pas été poussée vers Supabase.
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 
+  /// URL publique une fois la photo de progression uploadée vers Supabase
+  /// Storage. Null tant que l'upload n'a pas eu lieu (ou si la pesée n'a pas
+  /// de photo) — voir [LocalMeals.imageUrl].
+  TextColumn get imageUrl => text().nullable()();
+
+  /// Chemin du fichier photo compressé sur le disque local, en attente
+  /// d'upload — voir [LocalMeals.localImagePath].
+  TextColumn get localImagePath => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -93,7 +102,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -113,6 +122,10 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(weightEntries, weightEntries.isSynced);
             await m.addColumn(hydrationEntries, hydrationEntries.isSynced);
             await m.addColumn(hydrationEntries, hydrationEntries.isDeleted);
+          }
+          if (from < 6) {
+            await m.addColumn(weightEntries, weightEntries.imageUrl);
+            await m.addColumn(weightEntries, weightEntries.localImagePath);
           }
         },
       );

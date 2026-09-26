@@ -11,7 +11,8 @@ class NotificationService {
   NotificationService._();
   static final NotificationService instance = NotificationService._();
 
-  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
   Future<void> initialize() async {
@@ -44,13 +45,17 @@ class NotificationService {
   Future<bool> requestPermission() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
       final granted = await _plugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.requestNotificationsPermission();
       return granted ?? false;
     }
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       final granted = await _plugin
-          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >()
           ?.requestPermissions(alert: true, badge: true, sound: true);
       return granted ?? false;
     }
@@ -79,21 +84,55 @@ class NotificationService {
         android: AndroidNotificationDetails(
           'meal_reminders',
           'Rappels de repas',
-          channelDescription: 'Rappels quotidiens pour penser à logguer tes repas',
+          channelDescription:
+              'Rappels quotidiens pour penser à logguer tes repas',
           importance: Importance.defaultImportance,
         ),
         iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: weekday == null ? DateTimeComponents.time : DateTimeComponents.dayOfWeekAndTime,
+      matchDateTimeComponents: weekday == null
+          ? DateTimeComponents.time
+          : DateTimeComponents.dayOfWeekAndTime,
     );
   }
 
   Future<void> cancelReminder(int id) => _plugin.cancel(id: id);
 
+  /// Affiche une notification immédiatement (pas de programmation) — utilisé
+  /// pour les résumés (poids/kcal) calculés au moment où l'app est ouverte,
+  /// plutôt que programmés à l'avance avec des chiffres qui seraient obsolètes.
+  Future<void> showNotification({
+    required int id,
+    required String title,
+    required String body,
+  }) {
+    return _plugin.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'summaries',
+          'Résumés',
+          channelDescription: 'Résumés hebdomadaires de progression',
+          importance: Importance.defaultImportance,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
+  }
+
   tz.TZDateTime _nextInstanceOf(int hour, int minute, [int? weekday]) {
     final now = tz.TZDateTime.now(tz.local);
-    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    var scheduled = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }

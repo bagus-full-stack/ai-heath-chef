@@ -2,17 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 import '../providers/dashboard_provider.dart';
+import '../providers/notification_settings_provider.dart';
 import '../providers/profile_provider.dart';
+import '../providers/weekly_summary_provider.dart';
+import '../providers/weight_stagnation_provider.dart';
 import '../models/meal.dart'; // 🚀 On importe notre nouveau modèle !
 import '../local_db/meal_repository.dart' show localImagePrefix;
 import '../local_db/local_db_provider.dart';
 import '../utils/bmi.dart';
 import '../utils/nutrition_targets.dart';
+import '../utils/streak.dart';
 import '../widgets/animated_async_value.dart';
 import '../l10n/l10n_extensions.dart';
+
+const _kLastCelebratedStreakMilestoneKey =
+    'streak_last_celebrated_milestone';
+
+/// Affiche un toast au premier chargement du dashboard suivant le
+/// franchissement d'un palier de streak ([streakMilestones]) — dédupliqué via
+/// SharedPreferences pour ne pas répéter le toast tant que le streak reste au
+/// même palier.
+Future<void> _maybeCelebrateStreakMilestone(
+  BuildContext context,
+  int streak,
+) async {
+  final milestone = highestStreakMilestone(streak);
+  if (milestone == null) return;
+
+  final prefs = await SharedPreferences.getInstance();
+  final lastCelebrated = prefs.getInt(_kLastCelebratedStreakMilestoneKey) ?? 0;
+  if (milestone <= lastCelebrated) return;
+
+  await prefs.setInt(_kLastCelebratedStreakMilestoneKey, milestone);
+  if (!context.mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(context.l10n.dashboardStreakMilestoneReached(milestone)),
+      backgroundColor: Colors.deepOrange,
+    ),
+  );
+}
 
 const _hydrationGoalMl = 2000;
 const _hydrationColor = Color(0xFF4AC6FF);
@@ -46,7 +79,10 @@ class DashboardScreen extends ConsumerWidget {
     // tant que le profil n'est pas chargé ou incomplet (voir lib/utils/bmi.dart).
     final bmi = profileAsync.maybeWhen(
       data: (profile) => profile != null
-          ? computeBmi(weightKg: profile.currentWeight, heightCm: profile.heightCm)
+          ? computeBmi(
+              weightKg: profile.currentWeight,
+              heightCm: profile.heightCm,
+            )
           : null,
       orElse: () => null,
     );
@@ -54,8 +90,33 @@ class DashboardScreen extends ConsumerWidget {
     // On écoute notre base de données (qui renvoie maintenant une List<Meal>)
     final mealsAsyncValue = ref.watch(todayMealsProvider);
 
+    // Effets de bord best-effort déclenchés à chaque ouverture du dashboard :
+    // rappel "pas encore loggé aujourd'hui", résumé hebdomadaire et message du
+    // coach en cas de stagnation du poids (voir ces providers pour le détail).
+    ref.watch(noLogReminderReconcilerProvider);
+    ref.watch(weeklySummaryReconcilerProvider);
+    ref.watch(weightStagnationReconcilerProvider);
+
+    // Toast de célébration au franchissement d'un palier de streak (7/30/100
+    // jours) — voir _maybeCelebrateStreakMilestone.
+    ref.listen<AsyncValue<int>>(currentStreakProvider, (previous, next) {
+      final streak = next.value;
+      if (streak != null) {
+        _maybeCelebrateStreakMilestone(context, streak);
+      }
+    });
+
+    // Streak actuel (jours consécutifs loggés) et suffixe "🏆" affiché sur le
+    // badge une fois un palier atteint (voir highestStreakMilestone).
+    final currentStreak = ref.watch(currentStreakProvider).value ?? 0;
+    final streakMilestoneBadge = highestStreakMilestone(currentStreak) != null
+        ? ' 🏆'
+        : '';
+
     // Total d'eau bue aujourd'hui, pour la carte "Hydratation".
-    final hydrationTotalMl = ref.watch(hydrationTodayProvider).maybeWhen(
+    final hydrationTotalMl = ref
+        .watch(hydrationTodayProvider)
+        .maybeWhen(
           data: (entries) => entries.fold<int>(0, (sum, e) => sum + e.amountMl),
           orElse: () => 0,
         );
@@ -68,7 +129,10 @@ class DashboardScreen extends ConsumerWidget {
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
-            decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: const Icon(Icons.bolt, color: Colors.white),
           ),
         ),
@@ -97,213 +161,355 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
 
       body: mealsAsyncValue.animatedWhen(
-          loading: () => const Center(child: CircularProgressIndicator(color: primaryColor)),
-          error: (err, stack) => Center(child: Text(context.l10n.dashboardMealsLoadError(err.toString()))),
-          data: (List<Meal> meals) { // 🚀 On spécifie bien List<Meal> ici
+        loading: () =>
+            const Center(child: CircularProgressIndicator(color: primaryColor)),
+        error: (err, stack) => Center(
+          child: Text(context.l10n.dashboardMealsLoadError(err.toString())),
+        ),
+        data: (List<Meal> meals) {
+          // 🚀 On spécifie bien List<Meal> ici
 
-            // --- CALCUL DES TOTAUX ---
-            int totalKcal = 0;
-            double totalProt = 0;
-            double totalGluc = 0;
-            double totalLip = 0;
+          // --- CALCUL DES TOTAUX ---
+          int totalKcal = 0;
+          double totalProt = 0;
+          double totalGluc = 0;
+          double totalLip = 0;
 
-            // C'est tellement plus propre avec des objets !
-            for (var meal in meals) {
-              totalKcal += meal.totalKcal;
-              totalProt += meal.totalProt;
-              totalGluc += meal.totalGluc;
-              totalLip += meal.totalLip;
-            }
-
-            // --- CALCUL DES RESTANTS ET POURCENTAGES ---
-            int remainingKcal = targetKcal - totalKcal;
-            if (remainingKcal < 0) remainingKcal = 0;
-
-            double percentKcal = totalKcal / targetKcal;
-            if (percentKcal > 1.0) percentKcal = 1.0;
-
-            double percentProt = totalProt / targetProt;
-            if (percentProt > 1.0) percentProt = 1.0;
-
-            double percentGluc = totalGluc / targetGluc;
-            if (percentGluc > 1.0) percentGluc = 1.0;
-
-            double percentLip = totalLip / targetLip;
-            if (percentLip > 1.0) percentLip = 1.0;
-
-            return RefreshIndicator(
-              onRefresh: () async => ref.refresh(todayMealsProvider),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(context.l10n.dashboardTodayTitle, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
-                          child: Text('${DateTime.now().day} / ${DateTime.now().month}', style: const TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 12)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 40),
-
-                    // Jauge Circulaire
-                    Center(
-                      child: CircularPercentIndicator(
-                        radius: 130.0,
-                        lineWidth: 20.0,
-                        animation: true,
-                        percent: percentKcal,
-                        arcType: ArcType.HALF,
-                        arcBackgroundColor: Colors.grey.shade200,
-                        circularStrokeCap: CircularStrokeCap.round,
-                        progressColor: primaryColor,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('$remainingKcal', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 40)),
-                            Text(context.l10n.dashboardKcalRemainingLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black54)),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.local_fire_department, size: 16, color: primaryColor),
-                                Text(context.l10n.dashboardCalorieGoalLabel(targetKcal), style: const TextStyle(color: Colors.black54, fontSize: 12)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Cartes de Macronutriments
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildMacroCard(context.l10n.dashboardProteinLabel, '${totalProt.toInt()}g', '/${targetProt.toInt()}g', percentProt, Colors.blue),
-                        _buildMacroCard(context.l10n.dashboardCarbsLabel, '${totalGluc.toInt()}g', '/${targetGluc.toInt()}g', percentGluc, Colors.orange),
-                        _buildMacroCard(context.l10n.dashboardFatLabel, '${totalLip.toInt()}g', '/${targetLip.toInt()}g', percentLip, Colors.pink),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    _buildHydrationCard(context, ref, hydrationTotalMl),
-
-                    const SizedBox(height: 30),
-
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      alignment: Alignment.topCenter,
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: bmi != null
-                            ? Padding(
-                                key: const ValueKey('bmi'),
-                                padding: const EdgeInsets.only(bottom: 30),
-                                child: _buildBmiCard(context, bmi),
-                              )
-                            : const SizedBox.shrink(key: ValueKey('no-bmi')),
-                      ),
-                    ),
-
-                    // Section Journal des repas
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.restaurant, color: primaryColor),
-                            const SizedBox(width: 8),
-                            Text(context.l10n.dashboardMealJournalTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Liste dynamique des repas sauvegardés
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: meals.isEmpty
-                          ? Center(
-                              key: const ValueKey('empty-meals'),
-                              child: Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Text(context.l10n.dashboardEmptyMealsMessage, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade500)),
-                              ),
-                            )
-                          : Column(
-                              key: ValueKey('meals-${meals.length}'),
-                              children: meals.map((meal) {
-                                // 🚀 L'objet meal gère déjà la date proprement
-                                final timeString = '${meal.createdAt.hour.toString().padLeft(2, '0')}:${meal.createdAt.minute.toString().padLeft(2, '0')}';
-
-                                return Dismissible(
-                                  key: ValueKey(meal.id),
-                                  direction: DismissDirection.endToStart,
-                                  onDismissed: (_) {
-                                    ref.read(mealRepositoryProvider).deleteMeal(meal.id);
-                                    ref.invalidate(todayMealsProvider);
-                                  },
-                                  background: Container(
-                                    margin: const EdgeInsets.only(bottom: 12),
-                                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                                    alignment: Alignment.centerRight,
-                                    decoration: BoxDecoration(
-                                      color: Colors.redAccent,
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: const Icon(Icons.delete_outline, color: Colors.white),
-                                  ),
-                                  child: _buildMealCard(
-                                    context,
-                                    meal.name,
-                                    timeString,
-                                    context.l10n.dashboardMealCaloriesLabel(meal.totalKcal),
-                                    meal.imageUrl,
-                                    () async {
-                                      await ref.read(mealRepositoryProvider).repeatMeal(meal.id);
-                                      ref.invalidate(todayMealsProvider);
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(context.l10n.dashboardMealRepeatedMessage(meal.name))),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                    ),
-
-                    const SizedBox(height: 100), // Espace pour le bouton flottant
-                  ],
-                ),
-              ),
-            );
+          // C'est tellement plus propre avec des objets !
+          for (var meal in meals) {
+            totalKcal += meal.totalKcal;
+            totalProt += meal.totalProt;
+            totalGluc += meal.totalGluc;
+            totalLip += meal.totalLip;
           }
+
+          // --- CALCUL DES RESTANTS ET POURCENTAGES ---
+          int remainingKcal = targetKcal - totalKcal;
+          if (remainingKcal < 0) remainingKcal = 0;
+
+          double percentKcal = totalKcal / targetKcal;
+          if (percentKcal > 1.0) percentKcal = 1.0;
+
+          double percentProt = totalProt / targetProt;
+          if (percentProt > 1.0) percentProt = 1.0;
+
+          double percentGluc = totalGluc / targetGluc;
+          if (percentGluc > 1.0) percentGluc = 1.0;
+
+          double percentLip = totalLip / targetLip;
+          if (percentLip > 1.0) percentLip = 1.0;
+
+          return RefreshIndicator(
+            onRefresh: () async => ref.refresh(todayMealsProvider),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        context.l10n.dashboardTodayTitle,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          if (currentStreak > 0) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.local_fire_department_rounded,
+                                    color: Colors.deepOrange,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    context.l10n.dashboardStreakLabel(
+                                          currentStreak,
+                                        ) +
+                                        streakMilestoneBadge,
+                                    style: const TextStyle(
+                                      color: Colors.deepOrange,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: primaryColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '${DateTime.now().day} / ${DateTime.now().month}',
+                              style: const TextStyle(
+                                color: primaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+
+                  // Jauge Circulaire
+                  Center(
+                    child: CircularPercentIndicator(
+                      radius: 130.0,
+                      lineWidth: 20.0,
+                      animation: true,
+                      percent: percentKcal,
+                      arcType: ArcType.HALF,
+                      arcBackgroundColor: Colors.grey.shade200,
+                      circularStrokeCap: CircularStrokeCap.round,
+                      progressColor: primaryColor,
+                      center: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '$remainingKcal',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 40,
+                            ),
+                          ),
+                          Text(
+                            context.l10n.dashboardKcalRemainingLabel,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.local_fire_department,
+                                size: 16,
+                                color: primaryColor,
+                              ),
+                              Text(
+                                context.l10n.dashboardCalorieGoalLabel(
+                                  targetKcal,
+                                ),
+                                style: const TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Cartes de Macronutriments
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildMacroCard(
+                        context.l10n.dashboardProteinLabel,
+                        '${totalProt.toInt()}g',
+                        '/${targetProt.toInt()}g',
+                        percentProt,
+                        Colors.blue,
+                      ),
+                      _buildMacroCard(
+                        context.l10n.dashboardCarbsLabel,
+                        '${totalGluc.toInt()}g',
+                        '/${targetGluc.toInt()}g',
+                        percentGluc,
+                        Colors.orange,
+                      ),
+                      _buildMacroCard(
+                        context.l10n.dashboardFatLabel,
+                        '${totalLip.toInt()}g',
+                        '/${targetLip.toInt()}g',
+                        percentLip,
+                        Colors.pink,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  _buildHydrationCard(context, ref, hydrationTotalMl),
+
+                  const SizedBox(height: 30),
+
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    alignment: Alignment.topCenter,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: bmi != null
+                          ? Padding(
+                              key: const ValueKey('bmi'),
+                              padding: const EdgeInsets.only(bottom: 30),
+                              child: _buildBmiCard(context, bmi),
+                            )
+                          : const SizedBox.shrink(key: ValueKey('no-bmi')),
+                    ),
+                  ),
+
+                  // Section Journal des repas
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.restaurant, color: primaryColor),
+                          const SizedBox(width: 8),
+                          Text(
+                            context.l10n.dashboardMealJournalTitle,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Liste dynamique des repas sauvegardés
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: meals.isEmpty
+                        ? Center(
+                            key: const ValueKey('empty-meals'),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Text(
+                                context.l10n.dashboardEmptyMealsMessage,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.grey.shade500),
+                              ),
+                            ),
+                          )
+                        : Column(
+                            key: ValueKey('meals-${meals.length}'),
+                            children: meals.map((meal) {
+                              // 🚀 L'objet meal gère déjà la date proprement
+                              final timeString =
+                                  '${meal.createdAt.hour.toString().padLeft(2, '0')}:${meal.createdAt.minute.toString().padLeft(2, '0')}';
+
+                              return Dismissible(
+                                key: ValueKey(meal.id),
+                                direction: DismissDirection.endToStart,
+                                onDismissed: (_) {
+                                  ref
+                                      .read(mealRepositoryProvider)
+                                      .deleteMeal(meal.id);
+                                  ref.invalidate(todayMealsProvider);
+                                },
+                                background: Container(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
+                                  alignment: Alignment.centerRight,
+                                  decoration: BoxDecoration(
+                                    color: Colors.redAccent,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                child: _buildMealCard(
+                                  context,
+                                  meal.name,
+                                  timeString,
+                                  context.l10n.dashboardMealCaloriesLabel(
+                                    meal.totalKcal,
+                                  ),
+                                  meal.imageUrl,
+                                  () async {
+                                    await ref
+                                        .read(mealRepositoryProvider)
+                                        .repeatMeal(meal.id);
+                                    ref.invalidate(todayMealsProvider);
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            context.l10n
+                                                .dashboardMealRepeatedMessage(
+                                                  meal.name,
+                                                ),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                  ),
+
+                  const SizedBox(height: 100), // Espace pour le bouton flottant
+                ],
+              ),
+            ),
+          );
+        },
       ),
 
       // Bouton Flottant
-      floatingActionButton: mealsAsyncValue.isLoading ? null : FloatingActionButton(
-        onPressed: () => _openCameraCapture(context),
-        backgroundColor: Colors.pink.shade400,
-        shape: const CircleBorder(),
-        elevation: 4,
-        child: const Icon(Icons.camera_alt, color: Colors.white, size: 28),
-      ),
+      floatingActionButton: mealsAsyncValue.isLoading
+          ? null
+          : FloatingActionButton(
+              onPressed: () => _openCameraCapture(context),
+              backgroundColor: Colors.pink.shade400,
+              shape: const CircleBorder(),
+              elevation: 4,
+              child: const Icon(
+                Icons.camera_alt,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
     );
   }
 
@@ -319,7 +525,13 @@ class DashboardScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.grey.shade100, blurRadius: 10, spreadRadius: 1)],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade100,
+            blurRadius: 10,
+            spreadRadius: 1,
+          ),
+        ],
         border: Border.all(color: Colors.grey.shade100),
       ),
       child: Row(
@@ -327,7 +539,10 @@ class DashboardScreen extends ConsumerWidget {
           Container(
             width: 48,
             height: 48,
-            decoration: BoxDecoration(color: _hydrationColor.withValues(alpha: 0.15), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: _hydrationColor.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
             child: const Icon(Icons.water_drop_rounded, color: _hydrationColor),
           ),
           const SizedBox(width: 12),
@@ -335,7 +550,13 @@ class DashboardScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(context.l10n.dashboardHydrationTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(
+                  context.l10n.dashboardHydrationTitle,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 LinearPercentIndicator(
                   lineHeight: 6.0,
@@ -347,7 +568,10 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  context.l10n.dashboardHydrationGoalLabel(totalMl, _hydrationGoalMl),
+                  context.l10n.dashboardHydrationGoalLabel(
+                    totalMl,
+                    _hydrationGoalMl,
+                  ),
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
               ],
@@ -362,19 +586,37 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHydrationQuickAdd(BuildContext context, WidgetRef ref, int amountMl) {
+  Widget _buildHydrationQuickAdd(
+    BuildContext context,
+    WidgetRef ref,
+    int amountMl,
+  ) {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () => _addHydration(context, ref, amountMl),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(color: _hydrationColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-        child: Text('+$amountMl', style: const TextStyle(color: _hydrationColor, fontWeight: FontWeight.bold, fontSize: 12)),
+        decoration: BoxDecoration(
+          color: _hydrationColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          '+$amountMl',
+          style: const TextStyle(
+            color: _hydrationColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+        ),
       ),
     );
   }
 
-  Future<void> _addHydration(BuildContext context, WidgetRef ref, int amountMl) async {
+  Future<void> _addHydration(
+    BuildContext context,
+    WidgetRef ref,
+    int amountMl,
+  ) async {
     final id = await ref.read(hydrationRepositoryProvider).addEntry(amountMl);
     ref.invalidate(hydrationTodayProvider);
     if (id == null || !context.mounted) return;
@@ -399,7 +641,13 @@ class DashboardScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.grey.shade100, blurRadius: 10, spreadRadius: 1)],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade100,
+            blurRadius: 10,
+            spreadRadius: 1,
+          ),
+        ],
         border: Border.all(color: Colors.grey.shade100),
       ),
       child: Row(
@@ -411,7 +659,11 @@ class DashboardScreen extends ConsumerWidget {
             child: Center(
               child: Text(
                 bmi.value.toStringAsFixed(1),
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
             ),
           ),
@@ -420,9 +672,21 @@ class DashboardScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(context.l10n.dashboardBmiLabel(bmi.label(context)), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(
+                  context.l10n.dashboardBmiLabel(bmi.label(context)),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(context.l10n.dashboardBmiRangeLabel(bmi.label(context).toLowerCase(), bmi.rangeLabel), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text(
+                  context.l10n.dashboardBmiRangeLabel(
+                    bmi.label(context).toLowerCase(),
+                    bmi.rangeLabel,
+                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
               ],
             ),
           ),
@@ -431,11 +695,27 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMacroCard(String title, String current, String total, double percent, Color color) {
+  Widget _buildMacroCard(
+    String title,
+    String current,
+    String total,
+    double percent,
+    Color color,
+  ) {
     return Container(
       width: 105,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 10, spreadRadius: 2)]),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -443,7 +723,14 @@ class DashboardScreen extends ConsumerWidget {
             children: [
               CircleAvatar(radius: 6, backgroundColor: color),
               const SizedBox(width: 6),
-              Text(title, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black54)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -451,8 +738,17 @@ class DashboardScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(current, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              Text(total, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+              Text(
+                current,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                total,
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -480,7 +776,18 @@ class DashboardScreen extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.grey.shade100, blurRadius: 10, spreadRadius: 1)], border: Border.all(color: Colors.grey.shade100)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade100,
+            blurRadius: 10,
+            spreadRadius: 1,
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade100),
+      ),
       child: Row(
         children: [
           ClipRRect(
@@ -491,18 +798,18 @@ class DashboardScreen extends ConsumerWidget {
               color: Colors.grey.shade200,
               child: imageUrl != null
                   ? (imageUrl.startsWith(localImagePrefix)
-                      ? Image.file(
-                          File(imageUrl.substring(localImagePrefix.length)),
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.fastfood, color: Colors.grey),
-                        )
-                      : Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.fastfood, color: Colors.grey),
-                        ))
+                        ? Image.file(
+                            File(imageUrl.substring(localImagePrefix.length)),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.fastfood, color: Colors.grey),
+                          )
+                        : Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.fastfood, color: Colors.grey),
+                          ))
                   : const Icon(Icons.fastfood, color: Colors.grey),
             ),
           ),
@@ -511,29 +818,52 @@ class DashboardScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     const Icon(Icons.access_time, size: 14, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text(time, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                    Text(
+                      time,
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
                   ],
-                )
+                ),
               ],
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: const Color(0xFF6B66FF).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-            child: Text(calories, style: const TextStyle(color: Color(0xFF6B66FF), fontWeight: FontWeight.bold, fontSize: 12)),
+            decoration: BoxDecoration(
+              color: const Color(0xFF6B66FF).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              calories,
+              style: const TextStyle(
+                color: Color(0xFF6B66FF),
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
           ),
           const SizedBox(width: 4),
           IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             visualDensity: VisualDensity.compact,
-            icon: Icon(Icons.replay_rounded, color: Colors.grey.shade400, size: 20),
+            icon: Icon(
+              Icons.replay_rounded,
+              color: Colors.grey.shade400,
+              size: 20,
+            ),
             tooltip: context.l10n.dashboardRepeatMealTooltip,
             onPressed: onRepeat,
           ),

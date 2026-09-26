@@ -263,14 +263,15 @@ Deno.serve(async (req) => {
         }
         const constraintsText = constraintLines.length > 0 ? `\n${constraintLines.join('\n')}` : '';
         const langInstruction = lang === 'en'
-            ? "Respond with English text values (title, description, timeSlot) in the JSON."
-            : "Réponds avec des valeurs textuelles en français (title, description, timeSlot) dans le JSON.";
+            ? "Respond with English text values (title, description, timeSlot, ingredients, steps) in the JSON."
+            : "Réponds avec des valeurs textuelles en français (title, description, timeSlot, ingredients, steps) dans le JSON.";
 
         const promptText = `
 Tu es AI Health Chef, un coach en nutrition expert et créatif.
 Propose ${suggestionCount} idées de repas variées et réalistes, adaptées à un objectif de ${goalLabel}.
 L'utilisateur vise environ ${targetKcal ?? 2200} kcal, ${targetProt ?? 160}g de protéines, ${targetGluc ?? 250}g de glucides et ${targetLip ?? 75}g de lipides par jour au total.${constraintsText}
 Varie les moments de la journée (Petit-déjeuner, Déjeuner, Dîner, Collation) et les types de plats — ne propose jamais deux fois le même plat.
+Pour chaque plat, donne aussi la liste des ingrédients (avec quantités approximatives) et les étapes de préparation, courtes et actionnables.
 Tu DOIS répondre UNIQUEMENT avec un JSON strict, sans balises markdown ni texte autour, au format exact suivant :
 {
   "suggestions": [
@@ -281,7 +282,9 @@ Tu DOIS répondre UNIQUEMENT avec un JSON strict, sans balises markdown ni texte
       "prot": 32,
       "gluc": 25,
       "lip": 18,
-      "description": "Une phrase courte expliquant pourquoi ce repas convient à l'objectif."
+      "description": "Une phrase courte expliquant pourquoi ce repas convient à l'objectif.",
+      "ingredients": ["150g de blanc de poulet", "100g de riz basmati", "..."],
+      "steps": ["Faire cuire le riz...", "Assaisonner le poulet...", "..."]
     }
   ]
 }

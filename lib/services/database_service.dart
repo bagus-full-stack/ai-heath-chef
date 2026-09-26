@@ -26,7 +26,9 @@ class DatabaseService {
         .maybeSingle();
 
     if (response == null) return null;
-    if ((response['preferences_signature'] as String?) != preferencesSignature) return null;
+    if ((response['preferences_signature'] as String?) != preferencesSignature) {
+      return null;
+    }
 
     final suggestions = response['suggestions'] as List<dynamic>;
     if (suggestions.isEmpty) return null;
@@ -46,25 +48,28 @@ class DatabaseService {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 
-    final suggestionsJson = suggestions.map((s) => {
-      'timeSlot': s.timeSlot,
-      'title': s.title,
-      'kcal': s.kcal,
-      'prot': s.prot,
-      'gluc': s.gluc,
-      'lip': s.lip,
-      'description': s.description,
-      'imageUrl': s.imageUrl,
-    }).toList();
+    final suggestionsJson = suggestions
+        .map(
+          (s) => {
+            'timeSlot': s.timeSlot,
+            'title': s.title,
+            'kcal': s.kcal,
+            'prot': s.prot,
+            'gluc': s.gluc,
+            'lip': s.lip,
+            'description': s.description,
+            'imageUrl': s.imageUrl,
+            'ingredients': s.ingredients,
+            'steps': s.steps,
+          },
+        )
+        .toList();
 
-    await _supabase.from('meal_suggestions').upsert(
-      {
-        'user_id': user.id,
-        'day': dayKey,
-        'suggestions': suggestionsJson,
-        'preferences_signature': preferencesSignature,
-      },
-      onConflict: 'user_id,day',
-    );
+    await _supabase.from('meal_suggestions').upsert({
+      'user_id': user.id,
+      'day': dayKey,
+      'suggestions': suggestionsJson,
+      'preferences_signature': preferencesSignature,
+    }, onConflict: 'user_id,day');
   }
 }

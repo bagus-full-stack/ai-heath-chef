@@ -12,6 +12,7 @@ import 'package:uuid/uuid.dart';
 import '../l10n/app_localizations.dart';
 import '../models/ingredient.dart';
 import '../models/meal.dart';
+import '../utils/streak.dart';
 import 'app_database.dart';
 
 const _uuid = Uuid();
@@ -50,30 +51,56 @@ class MealRepository {
 
     final id = _uuid.v4();
     final totalKcal = ingredients.fold<int>(0, (sum, i) => sum + i.currentKcal);
-    final totalProt = ingredients.fold<double>(0, (sum, i) => sum + i.currentProt);
-    final totalGluc = ingredients.fold<double>(0, (sum, i) => sum + i.currentGluc);
-    final totalLip = ingredients.fold<double>(0, (sum, i) => sum + i.currentLip);
-    final totalFiber = ingredients.fold<double>(0, (sum, i) => sum + i.currentFiber);
-    final totalSugar = ingredients.fold<double>(0, (sum, i) => sum + i.currentSugar);
-    final totalSatFat = ingredients.fold<double>(0, (sum, i) => sum + i.currentSatFat);
+    final totalProt = ingredients.fold<double>(
+      0,
+      (sum, i) => sum + i.currentProt,
+    );
+    final totalGluc = ingredients.fold<double>(
+      0,
+      (sum, i) => sum + i.currentGluc,
+    );
+    final totalLip = ingredients.fold<double>(
+      0,
+      (sum, i) => sum + i.currentLip,
+    );
+    final totalFiber = ingredients.fold<double>(
+      0,
+      (sum, i) => sum + i.currentFiber,
+    );
+    final totalSugar = ingredients.fold<double>(
+      0,
+      (sum, i) => sum + i.currentSugar,
+    );
+    final totalSatFat = ingredients.fold<double>(
+      0,
+      (sum, i) => sum + i.currentSatFat,
+    );
 
-    final localImagePath = imagePath == null ? null : await _storeLocalPhoto(id, imagePath, l10n);
+    final localImagePath = imagePath == null
+        ? null
+        : await _storeLocalPhoto(id, imagePath, l10n);
 
-    await _db.into(_db.localMeals).insert(LocalMealsCompanion.insert(
-          id: id,
-          userId: user.id,
-          name: mealName,
-          totalKcal: totalKcal,
-          totalProt: Value(totalProt),
-          totalGluc: Value(totalGluc),
-          totalLip: Value(totalLip),
-          totalFiber: Value(totalFiber),
-          totalSugar: Value(totalSugar),
-          totalSatFat: Value(totalSatFat),
-          ingredientsJson: Value(jsonEncode(ingredients.map((i) => i.toJson()).toList())),
-          localImagePath: Value(localImagePath),
-          createdAt: DateTime.now(),
-        ));
+    await _db
+        .into(_db.localMeals)
+        .insert(
+          LocalMealsCompanion.insert(
+            id: id,
+            userId: user.id,
+            name: mealName,
+            totalKcal: totalKcal,
+            totalProt: Value(totalProt),
+            totalGluc: Value(totalGluc),
+            totalLip: Value(totalLip),
+            totalFiber: Value(totalFiber),
+            totalSugar: Value(totalSugar),
+            totalSatFat: Value(totalSatFat),
+            ingredientsJson: Value(
+              jsonEncode(ingredients.map((i) => i.toJson()).toList()),
+            ),
+            localImagePath: Value(localImagePath),
+            createdAt: DateTime.now(),
+          ),
+        );
 
     // Meilleur effort : autant synchroniser tout de suite si le réseau est
     // là plutôt que d'attendre le prochain déclenchement (retour réseau).
@@ -82,7 +109,11 @@ class MealRepository {
 
   /// Compresse la photo et la copie dans le stockage permanent de l'app
   /// (survit au redémarrage), sous un nom dérivé de l'id du repas.
-  Future<String> _storeLocalPhoto(String mealId, String sourcePath, AppLocalizations l10n) async {
+  Future<String> _storeLocalPhoto(
+    String mealId,
+    String sourcePath,
+    AppLocalizations l10n,
+  ) async {
     final compressedBytes = await FlutterImageCompress.compressWithFile(
       sourcePath,
       minWidth: 800,
@@ -112,11 +143,13 @@ class MealRepository {
     final endOfDay = startOfDay.add(const Duration(days: 1));
 
     final query = _db.select(_db.localMeals)
-      ..where((m) =>
-          m.userId.equals(user.id) &
-          m.isDeleted.equals(false) &
-          m.createdAt.isBiggerOrEqualValue(startOfDay) &
-          m.createdAt.isSmallerThanValue(endOfDay))
+      ..where(
+        (m) =>
+            m.userId.equals(user.id) &
+            m.isDeleted.equals(false) &
+            m.createdAt.isBiggerOrEqualValue(startOfDay) &
+            m.createdAt.isSmallerThanValue(endOfDay),
+      )
       ..orderBy([(m) => OrderingTerm.desc(m.createdAt)]);
 
     final rows = await query.get();
@@ -130,17 +163,48 @@ class MealRepository {
     if (user == null) return [];
 
     final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day).subtract(Duration(days: days - 1));
+    final startDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: days - 1));
 
     final query = _db.select(_db.localMeals)
-      ..where((m) =>
-          m.userId.equals(user.id) &
-          m.isDeleted.equals(false) &
-          m.createdAt.isBiggerOrEqualValue(startDate))
+      ..where(
+        (m) =>
+            m.userId.equals(user.id) &
+            m.isDeleted.equals(false) &
+            m.createdAt.isBiggerOrEqualValue(startDate),
+      )
       ..orderBy([(m) => OrderingTerm.asc(m.createdAt)]);
 
     final rows = await query.get();
     return rows.map(_toMeal).toList();
+  }
+
+  /// Nombre de jours consécutifs (aujourd'hui ou hier inclus, pour ne pas
+  /// casser le streak avant la fin de la journée) avec au moins un repas
+  /// loggé — calculé à partir des repas déjà en base, sans donnée nouvelle.
+  Future<int> getCurrentStreak() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return 0;
+
+    final query = _db.selectOnly(_db.localMeals)
+      ..addColumns([_db.localMeals.createdAt])
+      ..where(
+        _db.localMeals.userId.equals(user.id) &
+            _db.localMeals.isDeleted.equals(false),
+      );
+    final rows = await query
+        .map((row) => row.read(_db.localMeals.createdAt)!)
+        .get();
+
+    final loggedDays = rows
+        .map((dt) => DateTime(dt.year, dt.month, dt.day))
+        .toSet();
+    if (loggedDays.isEmpty) return 0;
+
+    return computeStreak(loggedDays, DateTime.now());
   }
 
   Meal _toMeal(LocalMeal row) {
@@ -154,7 +218,11 @@ class MealRepository {
       totalFiber: row.totalFiber,
       totalSugar: row.totalSugar,
       totalSatFat: row.totalSatFat,
-      imageUrl: row.imageUrl ?? (row.localImagePath != null ? '$localImagePrefix${row.localImagePath}' : null),
+      imageUrl:
+          row.imageUrl ??
+          (row.localImagePath != null
+              ? '$localImagePrefix${row.localImagePath}'
+              : null),
       createdAt: row.createdAt,
     );
   }
@@ -167,29 +235,35 @@ class MealRepository {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 
-    final row = await (_db.select(_db.localMeals)..where((m) => m.id.equals(id))).getSingleOrNull();
+    final row = await (_db.select(
+      _db.localMeals,
+    )..where((m) => m.id.equals(id))).getSingleOrNull();
     if (row == null) return;
 
-    await _db.into(_db.localMeals).insert(LocalMealsCompanion.insert(
-          id: _uuid.v4(),
-          userId: user.id,
-          name: row.name,
-          totalKcal: row.totalKcal,
-          totalProt: Value(row.totalProt),
-          totalGluc: Value(row.totalGluc),
-          totalLip: Value(row.totalLip),
-          totalFiber: Value(row.totalFiber),
-          totalSugar: Value(row.totalSugar),
-          totalSatFat: Value(row.totalSatFat),
-          ingredientsJson: Value(row.ingredientsJson),
-          // On ne recopie que l'URL déjà uploadée, jamais [localImagePath] :
-          // deux lignes partageant le même fichier local casseraient l'image
-          // de l'une dès que l'autre est supprimée (deleteMeal efface le
-          // fichier). Repas pas encore synchronisé -> le doublon repart sans
-          // photo plutôt que de risquer ce partage.
-          imageUrl: Value(row.imageUrl),
-          createdAt: DateTime.now(),
-        ));
+    await _db
+        .into(_db.localMeals)
+        .insert(
+          LocalMealsCompanion.insert(
+            id: _uuid.v4(),
+            userId: user.id,
+            name: row.name,
+            totalKcal: row.totalKcal,
+            totalProt: Value(row.totalProt),
+            totalGluc: Value(row.totalGluc),
+            totalLip: Value(row.totalLip),
+            totalFiber: Value(row.totalFiber),
+            totalSugar: Value(row.totalSugar),
+            totalSatFat: Value(row.totalSatFat),
+            ingredientsJson: Value(row.ingredientsJson),
+            // On ne recopie que l'URL déjà uploadée, jamais [localImagePath] :
+            // deux lignes partageant le même fichier local casseraient l'image
+            // de l'une dès que l'autre est supprimée (deleteMeal efface le
+            // fichier). Repas pas encore synchronisé -> le doublon repart sans
+            // photo plutôt que de risquer ce partage.
+            imageUrl: Value(row.imageUrl),
+            createdAt: DateTime.now(),
+          ),
+        );
 
     unawaited(syncPendingMeals());
   }
@@ -198,8 +272,9 @@ class MealRepository {
   /// la prochaine synchronisation plutôt qu'effacé immédiatement, pour ne
   /// pas perdre la suppression si elle survient hors ligne.
   Future<void> deleteMeal(String id) async {
-    await (_db.update(_db.localMeals)..where((m) => m.id.equals(id)))
-        .write(const LocalMealsCompanion(isDeleted: Value(true)));
+    await (_db.update(_db.localMeals)..where((m) => m.id.equals(id))).write(
+      const LocalMealsCompanion(isDeleted: Value(true)),
+    );
     unawaited(syncPendingMeals());
   }
 
@@ -211,10 +286,13 @@ class MealRepository {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 
-    final pending = await (_db.select(_db.localMeals)
-          ..where((m) =>
-              m.userId.equals(user.id) & (m.isSynced.equals(false) | m.isDeleted.equals(true))))
-        .get();
+    final pending =
+        await (_db.select(_db.localMeals)..where(
+              (m) =>
+                  m.userId.equals(user.id) &
+                  (m.isSynced.equals(false) | m.isDeleted.equals(true)),
+            ))
+            .get();
 
     for (final row in pending) {
       try {
@@ -226,7 +304,9 @@ class MealRepository {
             final file = File(row.localImagePath!);
             if (await file.exists()) await file.delete();
           }
-          await (_db.delete(_db.localMeals)..where((m) => m.id.equals(row.id))).go();
+          await (_db.delete(
+            _db.localMeals,
+          )..where((m) => m.id.equals(row.id))).go();
           continue;
         }
 
@@ -251,8 +331,13 @@ class MealRepository {
           'created_at': row.createdAt.toUtc().toIso8601String(),
         });
 
-        await (_db.update(_db.localMeals)..where((m) => m.id.equals(row.id))).write(
-          LocalMealsCompanion(isSynced: const Value(true), imageUrl: Value(imageUrl)),
+        await (_db.update(
+          _db.localMeals,
+        )..where((m) => m.id.equals(row.id))).write(
+          LocalMealsCompanion(
+            isSynced: const Value(true),
+            imageUrl: Value(imageUrl),
+          ),
         );
       } catch (_) {
         // Échec (réseau, serveur...) : ce repas reste en attente et sera
@@ -261,13 +346,22 @@ class MealRepository {
     }
   }
 
-  Future<String> _uploadPhoto(String userId, String mealId, String localPath) async {
+  Future<String> _uploadPhoto(
+    String userId,
+    String mealId,
+    String localPath,
+  ) async {
     final bytes = await File(localPath).readAsBytes();
     final storagePath = '$userId/$mealId.jpg';
-    await _supabase.storage.from('meal_photos').uploadBinary(
+    await _supabase.storage
+        .from('meal_photos')
+        .uploadBinary(
           storagePath,
           bytes,
-          fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+          fileOptions: const FileOptions(
+            contentType: 'image/jpeg',
+            upsert: true,
+          ),
         );
     return _supabase.storage.from('meal_photos').getPublicUrl(storagePath);
   }

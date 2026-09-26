@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../utils/photo_storage.dart';
 import 'app_database.dart';
 
 const _uuid = Uuid();
@@ -22,15 +24,24 @@ class WeightRepository {
   final AppDatabase _db;
   SupabaseClient get _supabase => Supabase.instance.client;
 
-  Future<void> addEntry(double weightKg) async {
+  /// [photoPath] est le chemin d'une photo de progression tout juste prise
+  /// (caméra/galerie), optionnelle — compressée et copiée dans le stockage
+  /// permanent de l'app avant d'être uploadée par [syncEntries].
+  Future<void> addEntry(double weightKg, {String? photoPath}) async {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 
+    final id = _uuid.v4();
+    final localImagePath = photoPath == null
+        ? null
+        : await compressAndStorePhoto('weight_photos', id, photoPath);
+
     await _db.into(_db.weightEntries).insert(WeightEntriesCompanion.insert(
-          id: _uuid.v4(),
+          id: id,
           userId: user.id,
           weightKg: weightKg,
           recordedAt: DateTime.now(),
+          localImagePath: Value(localImagePath),
         ));
 
     unawaited(syncEntries());
@@ -63,14 +74,20 @@ class WeightRepository {
 
     for (final row in pending) {
       try {
+        var imageUrl = row.imageUrl;
+        if (imageUrl == null && row.localImagePath != null) {
+          imageUrl = await _uploadPhoto(user.id, row.id, row.localImagePath!);
+        }
+
         await _supabase.from('weight_entries').upsert({
           'id': row.id,
           'user_id': row.userId,
           'weight_kg': row.weightKg,
           'recorded_at': row.recordedAt.toUtc().toIso8601String(),
+          'image_url': imageUrl,
         });
         await (_db.update(_db.weightEntries)..where((w) => w.id.equals(row.id)))
-            .write(const WeightEntriesCompanion(isSynced: Value(true)));
+            .write(WeightEntriesCompanion(isSynced: const Value(true), imageUrl: Value(imageUrl)));
       } catch (_) {
         // Réessayé au prochain appel (voir main.dart : démarrage + retour réseau).
       }
@@ -92,6 +109,7 @@ class WeightRepository {
                 weightKg: (row['weight_kg'] as num).toDouble(),
                 recordedAt: DateTime.parse(row['recorded_at'] as String),
                 isSynced: const Value(true),
+                imageUrl: Value(row['image_url'] as String?),
               ),
               mode: InsertMode.insertOrIgnore,
             );
@@ -100,5 +118,16 @@ class WeightRepository {
       // Pas de réseau ou erreur serveur : la restauration sera retentée au
       // prochain appel.
     }
+  }
+
+  Future<String> _uploadPhoto(String userId, String entryId, String localPath) async {
+    final bytes = await File(localPath).readAsBytes();
+    final storagePath = '$userId/$entryId.jpg';
+    await _supabase.storage.from('weight_photos').uploadBinary(
+          storagePath,
+          bytes,
+          fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+        );
+    return _supabase.storage.from('weight_photos').getPublicUrl(storagePath);
   }
 }

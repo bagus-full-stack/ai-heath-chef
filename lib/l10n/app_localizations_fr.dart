@@ -527,6 +527,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardRepeatMealTooltip => 'Refaire ce repas';
 
   @override
+  String dashboardStreakLabel(int count) {
+    return '$count j';
+  }
+
+  @override
+  String dashboardStreakMilestoneReached(int milestone) {
+    return '🏆 Palier de $milestone jours atteint !';
+  }
+
+  @override
   String get dashboardTodayTitle => 'Aujourd\'hui';
 
   @override
@@ -1005,6 +1015,12 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get mealSuggestionRecipeIngredientsTitle => 'INGRÉDIENTS';
+
+  @override
+  String get mealSuggestionRecipeStepsTitle => 'PRÉPARATION';
+
+  @override
   String get mealSuggestionsEmptyMessage =>
       'Aucune idée de repas disponible pour le moment.';
 
@@ -1110,6 +1126,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Pense à prendre en photo ton dîner pour le logguer !';
 
   @override
+  String get notificationSettingsSlotNoLog => 'Pas encore loggé';
+
+  @override
+  String get notificationSettingsBodyNoLog =>
+      'Tu n\'as pas encore loggé de repas aujourd\'hui. Un petit rappel pour garder ton streak !';
+
+  @override
   String get nutritionTrends30DaySectionTitle =>
       'Tendance calories · 30 derniers jours';
 
@@ -1185,6 +1208,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get nutritionTrendsSatFatLabel => 'Graisses sat.';
+
+  @override
+  String get nutritionTrendsShareButton => 'Partager mon résumé de la semaine';
+
+  @override
+  String get nutritionTrendsShareCardTitle => 'Résumé de la semaine';
 
   @override
   String get nutritionTrendsSugarLabel => 'Sucres';
@@ -1844,6 +1873,32 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get svcErrorHuggingFaceToken =>
       'Impossible de récupérer le token Hugging Face.';
+
+  @override
+  String weeklySummaryBodyWithWeight(String weightDelta, int avgKcal) {
+    return 'Cette semaine : $weightDelta · $avgKcal kcal/jour en moyenne';
+  }
+
+  @override
+  String weeklySummaryBodyNoWeight(int avgKcal) {
+    return 'Cette semaine : $avgKcal kcal/jour en moyenne';
+  }
+
+  @override
+  String get weightStagnationCoachMessage =>
+      'J\'ai remarqué que votre poids n\'a presque pas bougé ces deux dernières semaines. C\'est normal, le corps a parfois besoin de temps — voulez-vous qu\'on revoie ensemble votre alimentation ou votre activité pour relancer la progression ?';
+
+  @override
+  String get weightTrendAddPhotoCameraButton => 'Photo';
+
+  @override
+  String get weightTrendAddPhotoGalleryButton => 'Galerie';
+
+  @override
+  String get weightTrendPhotoAttachedLabel => 'Photo de progression ajoutée';
+
+  @override
+  String get weightTrendProgressPhotosTitle => 'Photos de progression';
 
   @override
   String get weightTrendCurrentLabel => 'Poids actuel';

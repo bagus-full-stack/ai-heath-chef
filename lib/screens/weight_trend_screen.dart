@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../local_db/app_database.dart' show WeightEntry;
@@ -25,57 +28,111 @@ class WeightTrendScreen extends ConsumerWidget {
     final controller = TextEditingController(
       text: defaultValue > 0 ? defaultValue.toStringAsFixed(1) : '',
     );
-    final weight = await showModalBottomSheet<double>(
+    String? photoPath;
+
+    final result = await showModalBottomSheet<(double, String?)>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (sheetContext) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(sheetContext).viewInsets.bottom + 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                sheetContext.l10n.weightTrendLogSheetTitle,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        return StatefulBuilder(
+          builder: (sheetContext, setSheetState) {
+            Future<void> pickPhoto(ImageSource source) async {
+              final image = await ImagePicker().pickImage(source: source, imageQuality: 85);
+              if (image == null) return;
+              setSheetState(() => photoPath = image.path);
+            }
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(sheetContext).viewInsets.bottom + 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    sheetContext.l10n.weightTrendLogSheetTitle,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      suffixText: 'kg',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (photoPath != null)
+                    Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.file(File(photoPath!), width: 56, height: 56, fit: BoxFit.cover),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            sheetContext.l10n.weightTrendPhotoAttachedLabel,
+                            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          onPressed: () => setSheetState(() => photoPath = null),
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => pickPhoto(ImageSource.camera),
+                            icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                            label: Text(sheetContext.l10n.weightTrendAddPhotoCameraButton),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => pickPhoto(ImageSource.gallery),
+                            icon: const Icon(Icons.photo_library_outlined, size: 18),
+                            label: Text(sheetContext.l10n.weightTrendAddPhotoGalleryButton),
+                          ),
+                        ),
+                      ],
+                    ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    onPressed: () {
+                      final value = double.tryParse(controller.text.trim().replaceAll(',', '.'));
+                      if (value == null || value <= 0 || value > 400) return;
+                      Navigator.pop(sheetContext, (value, photoPath));
+                    },
+                    child: Text(sheetContext.l10n.weightTrendLogSheetSaveButton),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controller,
-                autofocus: true,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  suffixText: 'kg',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                onPressed: () {
-                  final value = double.tryParse(controller.text.trim().replaceAll(',', '.'));
-                  if (value == null || value <= 0 || value > 400) return;
-                  Navigator.pop(sheetContext, value);
-                },
-                child: Text(sheetContext.l10n.weightTrendLogSheetSaveButton),
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
     controller.dispose();
-    if (weight == null || !context.mounted) return;
+    if (result == null || !context.mounted) return;
+    final (weight, capturedPhotoPath) = result;
 
-    await ref.read(weightRepositoryProvider).addEntry(weight);
+    await ref.read(weightRepositoryProvider).addEntry(weight, photoPath: capturedPhotoPath);
 
     final profile = await ref.read(profileProvider.future);
     if (profile != null) {
@@ -189,6 +246,15 @@ class WeightTrendScreen extends ConsumerWidget {
                     ),
                     child: _WeightChart(entries: entries, targetWeight: targetWeight),
                   ),
+                if (entries.any((e) => e.localImagePath != null || e.imageUrl != null)) ...[
+                  const SizedBox(height: 24),
+                  Text(
+                    context.l10n.weightTrendProgressPhotosTitle,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  _ProgressPhotoGallery(entries: entries),
+                ],
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: () => _logWeight(context, ref, latestWeight),
@@ -247,6 +313,47 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ],
+      ),
+    );
+  }
+}
+
+/// Galerie horizontale des pesées avec photo, de la plus récente à la plus
+/// ancienne — [WeightEntry.localImagePath] sert de source immédiate (dispo
+/// hors ligne, avant upload), [WeightEntry.imageUrl] prend le relais une fois
+/// synchronisé.
+class _ProgressPhotoGallery extends StatelessWidget {
+  final List<WeightEntry> entries;
+  const _ProgressPhotoGallery({required this.entries});
+
+  @override
+  Widget build(BuildContext context) {
+    final withPhoto =
+        entries.where((e) => e.localImagePath != null || e.imageUrl != null).toList().reversed.toList();
+
+    return SizedBox(
+      height: 96,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: withPhoto.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (_, i) {
+          final entry = withPhoto[i];
+          final image = entry.localImagePath != null
+              ? Image.file(File(entry.localImagePath!), width: 80, height: 80, fit: BoxFit.cover)
+              : Image.network(entry.imageUrl!, width: 80, height: 80, fit: BoxFit.cover);
+
+          return Column(
+            children: [
+              ClipRRect(borderRadius: BorderRadius.circular(12), child: image),
+              const SizedBox(height: 4),
+              Text(
+                '${entry.recordedAt.day}/${entry.recordedAt.month}',
+                style: const TextStyle(fontSize: 10, color: Colors.black45),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

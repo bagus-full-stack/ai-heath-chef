@@ -986,6 +986,18 @@ abstract class AppLocalizations {
   /// **'Refaire ce repas'**
   String get dashboardRepeatMealTooltip;
 
+  /// No description provided for @dashboardStreakLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} j'**
+  String dashboardStreakLabel(int count);
+
+  /// No description provided for @dashboardStreakMilestoneReached.
+  ///
+  /// In fr, this message translates to:
+  /// **'🏆 Palier de {milestone} jours atteint !'**
+  String dashboardStreakMilestoneReached(int milestone);
+
   /// No description provided for @dashboardTodayTitle.
   ///
   /// In fr, this message translates to:
@@ -1820,6 +1832,18 @@ abstract class AppLocalizations {
   /// **'Ajuste ce repas pour mon objectif: {title}'**
   String mealSuggestionsAdjustPresetMessage(String title);
 
+  /// No description provided for @mealSuggestionRecipeIngredientsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'INGRÉDIENTS'**
+  String get mealSuggestionRecipeIngredientsTitle;
+
+  /// No description provided for @mealSuggestionRecipeStepsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'PRÉPARATION'**
+  String get mealSuggestionRecipeStepsTitle;
+
   /// No description provided for @mealSuggestionsEmptyMessage.
   ///
   /// In fr, this message translates to:
@@ -1994,6 +2018,18 @@ abstract class AppLocalizations {
   /// **'Pense à prendre en photo ton dîner pour le logguer !'**
   String get notificationSettingsBodyDinner;
 
+  /// No description provided for @notificationSettingsSlotNoLog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore loggé'**
+  String get notificationSettingsSlotNoLog;
+
+  /// No description provided for @notificationSettingsBodyNoLog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu n\'as pas encore loggé de repas aujourd\'hui. Un petit rappel pour garder ton streak !'**
+  String get notificationSettingsBodyNoLog;
+
   /// No description provided for @nutritionTrends30DaySectionTitle.
   ///
   /// In fr, this message translates to:
@@ -2131,6 +2167,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Graisses sat.'**
   String get nutritionTrendsSatFatLabel;
+
+  /// No description provided for @nutritionTrendsShareButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager mon résumé de la semaine'**
+  String get nutritionTrendsShareButton;
+
+  /// No description provided for @nutritionTrendsShareCardTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résumé de la semaine'**
+  String get nutritionTrendsShareCardTitle;
 
   /// No description provided for @nutritionTrendsSugarLabel.
   ///
@@ -3259,6 +3307,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Impossible de récupérer le token Hugging Face.'**
   String get svcErrorHuggingFaceToken;
+
+  /// No description provided for @weeklySummaryBodyWithWeight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette semaine : {weightDelta} · {avgKcal} kcal/jour en moyenne'**
+  String weeklySummaryBodyWithWeight(String weightDelta, int avgKcal);
+
+  /// No description provided for @weeklySummaryBodyNoWeight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette semaine : {avgKcal} kcal/jour en moyenne'**
+  String weeklySummaryBodyNoWeight(int avgKcal);
+
+  /// No description provided for @weightStagnationCoachMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai remarqué que votre poids n\'a presque pas bougé ces deux dernières semaines. C\'est normal, le corps a parfois besoin de temps — voulez-vous qu\'on revoie ensemble votre alimentation ou votre activité pour relancer la progression ?'**
+  String get weightStagnationCoachMessage;
+
+  /// No description provided for @weightTrendAddPhotoCameraButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo'**
+  String get weightTrendAddPhotoCameraButton;
+
+  /// No description provided for @weightTrendAddPhotoGalleryButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Galerie'**
+  String get weightTrendAddPhotoGalleryButton;
+
+  /// No description provided for @weightTrendPhotoAttachedLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo de progression ajoutée'**
+  String get weightTrendPhotoAttachedLabel;
+
+  /// No description provided for @weightTrendProgressPhotosTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos de progression'**
+  String get weightTrendProgressPhotosTitle;
 
   /// No description provided for @weightTrendCurrentLabel.
   ///

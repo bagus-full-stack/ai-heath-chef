@@ -1,13 +1,20 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../models/meal.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart';
+import '../providers/weekly_summary_provider.dart';
 import '../utils/nutrition_targets.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/staggered_entrance.dart';
@@ -204,6 +211,11 @@ class NutritionTrendsScreen extends ConsumerWidget {
                                 avgSatFat: totalSatFat / 7,
                               ),
                             ),
+                          ),
+                          const SizedBox(height: 16),
+                          const StaggeredEntrance(
+                            delay: Duration(milliseconds: 240),
+                            child: _WeeklySummaryShareSection(),
                           ),
                         ],
                       ),
@@ -547,6 +559,76 @@ class _ExtraNutrients extends StatelessWidget {
         _AverageRow(label: context.l10n.nutritionTrendsSugarLabel, value: '${avgSugar.round()}g', target: '', color: _sugarColor),
         const SizedBox(height: 10),
         _AverageRow(label: context.l10n.nutritionTrendsSatFatLabel, value: '${avgSatFat.round()}g', target: '', color: _satFatColor),
+      ],
+    );
+  }
+}
+
+/// Carte "résumé de la semaine" exportable en image — réutilise le même
+/// texte que la notification hebdomadaire (voir [weeklySummaryBodyText]),
+/// capturée via [RepaintBoundary] puis partagée avec `share_plus` (même
+/// pattern que [exportMealJournalCsv] dans journal_export.dart, pour un
+/// fichier image plutôt que CSV).
+class _WeeklySummaryShareSection extends ConsumerWidget {
+  const _WeeklySummaryShareSection();
+
+  Future<void> _share(GlobalKey boundaryKey) async {
+    try {
+      final boundary = boundaryKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final image = await boundary.toImage(pixelRatio: 2.5);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final bytes = byteData!.buffer.asUint8List();
+
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/resume_semaine.png');
+      await file.writeAsBytes(bytes);
+
+      await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+    } catch (_) {
+      // Best-effort : capture ou partage annulé/échoué, pas bloquant.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final data = ref.watch(weeklySummaryDataProvider).value;
+    if (data == null) return const SizedBox.shrink();
+
+    final boundaryKey = GlobalKey();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        RepaintBoundary(
+          key: boundaryKey,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [_primaryColor, Color(0xFF9C6BFF)]),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.nutritionTrendsShareCardTitle,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  weeklySummaryBodyText(context.l10n, data),
+                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          onPressed: () => _share(boundaryKey),
+          icon: const Icon(Icons.ios_share_rounded, size: 18),
+          label: Text(context.l10n.nutritionTrendsShareButton),
+        ),
       ],
     );
   }

@@ -122,6 +122,16 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     await _storeMessage(assistantMessage);
   }
 
+  /// Insère un message du coach sans intervention de l'utilisateur (ex :
+  /// alerte de stagnation de poids) — même stockage que les réponses IA, pour
+  /// que le message survive au redémarrage et à la synchro multi-appareil.
+  Future<void> pushCoachMessage(String text) async {
+    final message = _buildAssistantMessage(text);
+    final current = state.value ?? const <ChatMessage>[];
+    state = AsyncData([...current, message]);
+    await _storeMessage(message);
+  }
+
   Future<void> resetConversation() async {
     final user = _supabase.auth.currentUser;
     if (user != null) {

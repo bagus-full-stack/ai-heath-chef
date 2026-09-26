@@ -17,6 +17,14 @@ final todayMealsProvider = FutureProvider<List<Meal>>((ref) async {
   return await mealRepository.getTodayMeals();
 });
 
+/// Jours consécutifs avec au moins un repas loggé — recalculé à chaque
+/// changement des repas du jour (voir [MealRepository.getCurrentStreak]).
+final currentStreakProvider = FutureProvider<int>((ref) async {
+  ref.watch(todayMealsProvider);
+  final mealRepository = ref.watch(mealRepositoryProvider);
+  return await mealRepository.getCurrentStreak();
+});
+
 /// Repas des 7 derniers jours, pour l'écran "Analyses avancées" (PRO) —
 /// tendances nutritionnelles et macros détaillées.
 final nutritionTrendsProvider = FutureProvider<List<Meal>>((ref) async {
@@ -39,7 +47,9 @@ final weightEntriesProvider = FutureProvider<List<WeightEntry>>((ref) async {
 });
 
 /// Prises d'eau du jour, pour la carte "Hydratation" du dashboard.
-final hydrationTodayProvider = FutureProvider<List<HydrationEntry>>((ref) async {
+final hydrationTodayProvider = FutureProvider<List<HydrationEntry>>((
+  ref,
+) async {
   final hydrationRepository = ref.watch(hydrationRepositoryProvider);
   return await hydrationRepository.getTodayEntries();
 });

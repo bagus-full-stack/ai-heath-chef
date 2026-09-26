@@ -523,6 +523,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardRepeatMealTooltip => 'Repeat this meal';
 
   @override
+  String dashboardStreakLabel(int count) {
+    return '${count}d';
+  }
+
+  @override
+  String dashboardStreakMilestoneReached(int milestone) {
+    return '🏆 $milestone-day streak milestone reached!';
+  }
+
+  @override
   String get dashboardTodayTitle => 'Today';
 
   @override
@@ -997,6 +1007,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get mealSuggestionRecipeIngredientsTitle => 'INGREDIENTS';
+
+  @override
+  String get mealSuggestionRecipeStepsTitle => 'PREPARATION';
+
+  @override
   String get mealSuggestionsEmptyMessage =>
       'No meal ideas available right now.';
 
@@ -1101,6 +1117,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Don\'t forget to snap a photo of your dinner to log it!';
 
   @override
+  String get notificationSettingsSlotNoLog => 'Not logged yet';
+
+  @override
+  String get notificationSettingsBodyNoLog =>
+      'You haven\'t logged any meal today. A little reminder to keep your streak going!';
+
+  @override
   String get nutritionTrends30DaySectionTitle => 'Calorie trend · last 30 days';
 
   @override
@@ -1173,6 +1196,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutritionTrendsSatFatLabel => 'Sat. fat';
+
+  @override
+  String get nutritionTrendsShareButton => 'Share my weekly summary';
+
+  @override
+  String get nutritionTrendsShareCardTitle => 'Weekly summary';
 
   @override
   String get nutritionTrendsSugarLabel => 'Sugar';
@@ -1828,6 +1857,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get svcErrorHuggingFaceToken =>
       'Couldn\'t retrieve the Hugging Face token.';
+
+  @override
+  String weeklySummaryBodyWithWeight(String weightDelta, int avgKcal) {
+    return 'This week: $weightDelta · $avgKcal kcal/day on average';
+  }
+
+  @override
+  String weeklySummaryBodyNoWeight(int avgKcal) {
+    return 'This week: $avgKcal kcal/day on average';
+  }
+
+  @override
+  String get weightStagnationCoachMessage =>
+      'I noticed your weight has barely moved over the past two weeks. That\'s normal, the body sometimes needs time — want to review your diet or activity together to get things moving again?';
+
+  @override
+  String get weightTrendAddPhotoCameraButton => 'Photo';
+
+  @override
+  String get weightTrendAddPhotoGalleryButton => 'Gallery';
+
+  @override
+  String get weightTrendPhotoAttachedLabel => 'Progress photo attached';
+
+  @override
+  String get weightTrendProgressPhotosTitle => 'Progress photos';
 
   @override
   String get weightTrendCurrentLabel => 'Current weight';

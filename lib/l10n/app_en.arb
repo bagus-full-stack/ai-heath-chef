@@ -148,6 +148,22 @@
   "dashboardMealsLoadError": "Error: {error}",
   "dashboardProteinLabel": "PROTEIN",
   "dashboardRepeatMealTooltip": "Repeat this meal",
+  "dashboardStreakLabel": "{count}d",
+  "@dashboardStreakLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardStreakMilestoneReached": "🏆 {milestone}-day streak milestone reached!",
+  "@dashboardStreakMilestoneReached": {
+    "placeholders": {
+      "milestone": {
+        "type": "int"
+      }
+    }
+  },
   "dashboardTodayTitle": "Today",
   "dietaryPreferencesAllergiesDescription": "These will be avoided in the meal ideas suggested by the AI. This doesn't replace your own vigilance in case of a severe allergy.",
   "dietaryPreferencesAllergiesSectionTitle": "ALLERGIES & INTOLERANCES",
@@ -301,6 +317,8 @@
   "mealSuggestionCardProtLabel": "PROT",
   "mealSuggestionsAddedToShoppingListMessage": "\"{title}\" added to your shopping list",
   "mealSuggestionsAdjustPresetMessage": "Adjust this meal for my goal: {title}",
+  "mealSuggestionRecipeIngredientsTitle": "INGREDIENTS",
+  "mealSuggestionRecipeStepsTitle": "PREPARATION",
   "mealSuggestionsEmptyMessage": "No meal ideas available right now.",
   "mealSuggestionsLoadError": "We couldn't generate meal ideas right now.",
   "mealSuggestionsRegenerateTooltip": "Regenerate",
@@ -330,6 +348,8 @@
   "notificationSettingsBodyBreakfast": "Don't forget to snap a photo of your breakfast to log it!",
   "notificationSettingsBodyLunch": "Don't forget to snap a photo of your lunch to log it!",
   "notificationSettingsBodyDinner": "Don't forget to snap a photo of your dinner to log it!",
+  "notificationSettingsSlotNoLog": "Not logged yet",
+  "notificationSettingsBodyNoLog": "You haven't logged any meal today. A little reminder to keep your streak going!",
   "nutritionTrends30DaySectionTitle": "Calorie trend · last 30 days",
   "nutritionTrendsCaloriesLabel": "Calories",
   "nutritionTrendsCaloriesSectionTitle": "Calories · last 7 days",
@@ -353,6 +373,8 @@
   "nutritionTrendsProLockedTitle": "PRO members only",
   "nutritionTrendsProteinLabel": "Protein",
   "nutritionTrendsSatFatLabel": "Sat. fat",
+  "nutritionTrendsShareButton": "Share my weekly summary",
+  "nutritionTrendsShareCardTitle": "Weekly summary",
   "nutritionTrendsSugarLabel": "Sugar",
   "nutritionTrendsTitle": "Advanced analytics",
   "onboardingAgeSectionLabel": "Your Age",
@@ -642,6 +664,30 @@
     }
   },
   "svcErrorHuggingFaceToken": "Couldn't retrieve the Hugging Face token.",
+  "weeklySummaryBodyWithWeight": "This week: {weightDelta} · {avgKcal} kcal/day on average",
+  "@weeklySummaryBodyWithWeight": {
+    "placeholders": {
+      "weightDelta": {
+        "type": "String"
+      },
+      "avgKcal": {
+        "type": "int"
+      }
+    }
+  },
+  "weeklySummaryBodyNoWeight": "This week: {avgKcal} kcal/day on average",
+  "@weeklySummaryBodyNoWeight": {
+    "placeholders": {
+      "avgKcal": {
+        "type": "int"
+      }
+    }
+  },
+  "weightStagnationCoachMessage": "I noticed your weight has barely moved over the past two weeks. That's normal, the body sometimes needs time — want to review your diet or activity together to get things moving again?",
+  "weightTrendAddPhotoCameraButton": "Photo",
+  "weightTrendAddPhotoGalleryButton": "Gallery",
+  "weightTrendPhotoAttachedLabel": "Progress photo attached",
+  "weightTrendProgressPhotosTitle": "Progress photos",
   "weightTrendCurrentLabel": "Current weight",
   "weightTrendEmptyState": "No weigh-ins yet. Log your first weight to see your progress.",
   "weightTrendErrorMessage": "Loading error: {error}",
