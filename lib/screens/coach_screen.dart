@@ -9,6 +9,7 @@ import '../providers/dashboard_provider.dart';
 import '../providers/meal_suggestions_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/shopping_list_provider.dart';
+import '../utils/image_data_uri.dart';
 import '../utils/nutrition_targets.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/meal_suggestion_card.dart';
@@ -1062,6 +1063,7 @@ class _ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.isUser;
+    final imageBytes = decodeImageDataUri(message.imageUrl);
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -1080,13 +1082,26 @@ class _ChatBubble extends StatelessWidget {
             bottomRight: Radius.circular(isUser ? 0 : 16),
           ),
         ),
-        child: Text(
-          message.text,
-          style: TextStyle(
-            color: isUser ? Colors.white : Colors.black87,
-            fontSize: 14,
-            height: 1.35,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (imageBytes != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.memory(imageBytes, height: 140, width: double.infinity, fit: BoxFit.cover),
+              ),
+              const SizedBox(height: 10),
+            ],
+            Text(
+              message.text,
+              style: TextStyle(
+                color: isUser ? Colors.white : Colors.black87,
+                fontSize: 14,
+                height: 1.35,
+              ),
+            ),
+          ],
         ),
       ),
     );

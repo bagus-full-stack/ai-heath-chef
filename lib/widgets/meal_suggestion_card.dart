@@ -1,10 +1,8 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../models/meal_suggestion.dart';
+import '../utils/image_data_uri.dart';
 import '../utils/ingredient_substitution.dart';
 
 const Color _kPrimaryColor = Color(0xFF6B66FF);
@@ -43,7 +41,7 @@ class MealSuggestionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final icon =
         _kTimeSlotIcons[suggestion.timeSlot] ?? Icons.restaurant_rounded;
-    final imageBytes = _decodeDataUri(suggestion.imageUrl);
+    final imageBytes = decodeImageDataUri(suggestion.imageUrl);
 
     return Container(
       clipBehavior: Clip.antiAlias,
@@ -412,17 +410,6 @@ class _IngredientRow extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-Uint8List? _decodeDataUri(String? dataUri) {
-  if (dataUri == null || dataUri.isEmpty) return null;
-  final commaIndex = dataUri.indexOf(',');
-  if (commaIndex == -1) return null;
-  try {
-    return base64Decode(dataUri.substring(commaIndex + 1));
-  } catch (_) {
-    return null;
   }
 }
 

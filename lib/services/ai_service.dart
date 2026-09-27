@@ -108,7 +108,11 @@ class AIService {
     }
   }
 
-  Future<String> chatWithCoach(
+  /// `suggestedDish` est le nom du plat recommandé par le coach dans sa
+  /// réponse, extrait côté edge function (balise `[DISH: ...]`), ou `null`
+  /// si aucun plat précis n'a été recommandé. Utilisé par chat_provider.dart
+  /// pour illustrer la réponse via [getDishImage].
+  Future<({String reply, String? suggestedDish})> chatWithCoach(
     String message,
     List<Map<String, dynamic>> history, {
     String coachTone = 'motivant',
@@ -129,9 +133,33 @@ class AIService {
         },
       );
 
-      return response.data['reply'] as String;
+      return (
+        reply: response.data['reply'] as String,
+        suggestedDish: response.data['suggestedDish'] as String?,
+      );
     } catch (e) {
       throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorCoachChat(_describeError(e)));
+    }
+  }
+
+  /// Génère une illustration IA pour un plat unique recommandé par le coach
+  /// (voir chat_provider.dart), en réutilisant l'edge function `meal-images`.
+  /// Comme [getMealImages], c'est un bonus visuel : repli sur `null` en cas
+  /// d'échec plutôt que de faire échouer la réponse du coach.
+  Future<String?> getDishImage(String dishName) async {
+    try {
+      final response = await _supabase.functions.invoke(
+        'meal-images',
+        body: {
+          'meals': [
+            {'title': dishName},
+          ],
+        },
+      );
+      final List<dynamic> images = response.data['images'];
+      return images.isNotEmpty ? images.first as String? : null;
+    } catch (_) {
+      return null;
     }
   }
 

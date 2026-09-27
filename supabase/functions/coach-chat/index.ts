@@ -259,7 +259,10 @@ Deno.serve(async (req) => {
         }
 
         const langInstruction = lang === 'en' ? " Always respond in English." : " Réponds toujours en français.";
-        const systemInstruction = `Tu es AI Health Chef, un coach en nutrition expert. ${toneInstruction} Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.${dietaryNote} Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.${langInstruction}`;
+        const dishTagInstruction = isEn
+            ? " If, and only if, you recommend one specific dish or recipe the user could cook or order, end your reply with a separate line in the exact format \"[DISH: Dish name]\" (short name, no description). Never add this tag for general advice, questions, or encouragement."
+            : " Si, et seulement si, tu recommandes un plat ou une recette précise que l'utilisateur pourrait cuisiner ou commander, termine ta réponse par une ligne séparée au format exact \"[DISH: Nom du plat]\" (nom court, sans description). N'ajoute JAMAIS cette balise pour un conseil général, une question ou un encouragement.";
+        const systemInstruction = `Tu es AI Health Chef, un coach en nutrition expert. ${toneInstruction} Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.${dietaryNote} Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.${langInstruction}${dishTagInstruction}`;
 
         // On prépare le payload exact attendu par l'API REST de Google
         // On combine l'historique (s'il y en a) avec le nouveau message
@@ -331,8 +334,20 @@ Deno.serve(async (req) => {
 
         console.log(`SUCCÈS : Réponse générée avec ${usedModel}`);
 
+        // Extrait la balise "[DISH: ...]" ajoutée par le modèle en fin de
+        // réponse quand il recommande un plat précis (voir dishTagInstruction
+        // ci-dessus), pour que Flutter puisse générer une illustration via
+        // meal-images sans avoir à parser le texte affiché à l'utilisateur.
+        let replyText = successData.trim();
+        let suggestedDish: string | null = null;
+        const dishMatch = replyText.match(/\[DISH:\s*([^\]]+)\]\s*$/i);
+        if (dishMatch) {
+            suggestedDish = dishMatch[1].trim();
+            replyText = replyText.slice(0, dishMatch.index).trim();
+        }
+
         // On renvoie la réponse de l'IA à l'application Flutter
-        return new Response(JSON.stringify({ reply: successData }), {
+        return new Response(JSON.stringify({ reply: replyText, suggestedDish }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
         })

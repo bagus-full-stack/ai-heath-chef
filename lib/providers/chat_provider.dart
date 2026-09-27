@@ -27,7 +27,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     try {
       rows = await _supabase
           .from('chat_messages')
-          .select('id, role, text, created_at')
+          .select('id, role, text, created_at, image_url')
           .eq('user_id', user.id)
           .order('created_at', ascending: false)
           .limit(50);
@@ -45,6 +45,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
               isUser: (row['role'] as String?) == 'user',
               createdAt: DateTime.tryParse(row['created_at']?.toString() ?? '') ??
                   DateTime.now(),
+              imageUrl: row['image_url'] as String?,
             ))
         .where((message) => message.text.isNotEmpty)
         .toList();
@@ -84,6 +85,10 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     // local — nécessaire pour savoir quand replier, pas un élargissement du
     // périmètre de cette fonction.
     String aiReplyText;
+    // Non-null seulement pour une réponse cloud recommandant un plat précis
+    // (voir coach-chat/index.ts) : l'IA locale ne produit pas cette balise,
+    // donc pas d'illustration pour les réponses générées hors-ligne.
+    String? suggestedDish;
     final localSettings = ref.read(localAiSettingsProvider).value;
     if (localSettings?.isReadyToUse == true) {
       try {
@@ -97,7 +102,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
           lang: lang,
         );
       } catch (_) {
-        aiReplyText = await _aiService.chatWithCoach(
+        final cloudReply = await _aiService.chatWithCoach(
           trimmed,
           geminiHistory,
           coachTone: coachTone,
@@ -105,9 +110,11 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
           allergies: allergies,
           lang: lang,
         );
+        aiReplyText = cloudReply.reply;
+        suggestedDish = cloudReply.suggestedDish;
       }
     } else {
-      aiReplyText = await _aiService.chatWithCoach(
+      final cloudReply = await _aiService.chatWithCoach(
         trimmed,
         geminiHistory,
         coachTone: coachTone,
@@ -115,8 +122,14 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
         allergies: allergies,
         lang: lang,
       );
+      aiReplyText = cloudReply.reply;
+      suggestedDish = cloudReply.suggestedDish;
     }
-    final assistantMessage = _buildAssistantMessage(aiReplyText);
+
+    final imageUrl = (suggestedDish != null && suggestedDish.isNotEmpty)
+        ? await _aiService.getDishImage(suggestedDish)
+        : null;
+    final assistantMessage = _buildAssistantMessage(aiReplyText, imageUrl: imageUrl);
 
     state = AsyncData([...(state.value ?? currentMessages), assistantMessage]);
     await _storeMessage(assistantMessage);
@@ -151,6 +164,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
         'user_id': user.id,
         'role': message.isUser ? 'user' : 'assistant',
         'text': message.text,
+        'image_url': message.imageUrl,
       });
     } catch (_) {
       // Hors-ligne : la persistance cloud échoue mais la conversation reste
@@ -178,12 +192,13 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     );
   }
 
-  ChatMessage _buildAssistantMessage(String text) {
+  ChatMessage _buildAssistantMessage(String text, {String? imageUrl}) {
     return ChatMessage(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       text: text,
       isUser: false,
       createdAt: DateTime.now(),
+      imageUrl: imageUrl,
     );
   }
 
