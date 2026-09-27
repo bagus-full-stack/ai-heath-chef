@@ -11,23 +11,27 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Analyse nutritionnelle étendue (PRO)** — en plus des macros principales, fibres/sucres/graisses saturées sont estimés par l'IA (ou lus depuis Open Food Facts pour un scan code-barres) et affichés en moyenne quotidienne dans les Analyses avancées, avec un graphique d'évolution des calories sur 30 jours (ligne cible incluse, valeurs au tap)
 - **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
 - **Analyse de produit par photo** — même principe pour un produit emballé (Edge Function `analyze-product`), lit l'étiquette nutritionnelle plutôt qu'une assiette
+- **Scan de menu restaurant** — photo de la carte d'un restaurant (Edge Function `analyze-menu`) : un plat détecté = une carte indépendante (portion + macros estimées), affichée sans total combiné puisque les plats d'une carte ne sont pas mangés ensemble, ajoutable individuellement au journal
+- **Recette à partir du frigo/placard** — photo de l'intérieur d'un frigo ou d'un placard (Edge Function `analyze-pantry`) : inventaire des aliments identifiés, corrigible (ajout/suppression manuelle) avant de lancer la génération de 3 recettes (`meal-suggestions`) qui priorisent ces ingrédients déjà disponibles
 - **Scan de code-barres** — recherche instantanée d'un produit (EAN/UPC) via la base publique Open Food Facts, sans appel IA
-- **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`), et idées de repas personnalisées selon le profil/objectif (Edge Function `meal-suggestions`, mises en cache un jour à la fois), chacune illustrée par une image générée via Pollinations.ai (Edge Function `meal-images`, voir ci-dessous)
-- **Plan de repas hebdomadaire** — génère en un seul appel IA un plan complet (7 jours × 3 repas) adapté au profil/régime/allergies, mis en cache par semaine, ouvert depuis l'icône calendrier de l'écran "Idées repas" ; chaque repas garde recette/macros et peut être ajouté individuellement à la liste de courses, ou la semaine entière en un tap. Pas d'illustrations IA générées pour ce plan (21 repas d'un coup serait trop coûteux/lent) — les cartes retombent sur l'icône du moment de la journée
+- **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`), et idées de repas personnalisées selon le profil/objectif (Edge Function `meal-suggestions`, mises en cache un jour à la fois), chacune illustrée par une image générée via Pollinations.ai (Edge Function `meal-images`, voir ci-dessous). Chaque ingrédient d'une recette signale une correspondance avec une allergie déclarée et propose un substitut (mots-clés locaux, ex. lait → lait d'avoine), aussi utilisable en dépannage ("je n'ai pas ça dans mon placard") même sans allergie
+- **Plan de repas hebdomadaire** — génère en un seul appel IA un plan complet (7 jours × 3 repas) adapté au profil/régime/allergies, mis en cache par semaine, ouvert depuis l'icône calendrier de l'écran "Idées repas" ; chaque repas garde recette/macros et peut être ajouté individuellement à la liste de courses, ou la semaine entière en un tap. Pas d'illustrations IA générées pour ce plan (21 repas d'un coup serait trop coûteux/lent) — les cartes retombent sur l'icône du moment de la journée. Export du plan en calendrier (`.ics`, un événement par repas à des heures par défaut) importable dans Google/Apple/Outlook Calendar via le partage natif
 - **Liste de courses** — alimentée en un tap depuis les ingrédients d'une idée de repas du Coach IA (ou du plan hebdomadaire), cochable, persistée localement
 - **Suivi du poids** — historique des pesées (synchronisé, voir [Hors ligne](#fonctionnalités) ci-dessus) avec courbe de progression, et rappel hebdomadaire de pesée réutilisant le système de rappels personnalisés (voir ci-dessous)
-- **Export du journal alimentaire** — export CSV des repas des N derniers jours, partagé via le sélecteur natif (utilisable avec un nutritionniste, Excel/Sheets)
+- **Jeûne intermittent** — minuteur avec objectif de durée au choix (12h à 24h), démarrage/arrêt manuel, anneau de progression coloré une fois l'objectif atteint (état purement local, pas de tâche de fond : le minuteur ne tourne qu'à l'écran ouvert)
+- **Widget écran d'accueil (Android)** — calories du jour/objectif et streak actuel, mis à jour à chaque ouverture du dashboard ; pas d'équivalent iOS (nécessiterait une extension WidgetKit distincte, hors périmètre sans Mac)
+- **Export du journal alimentaire** — export CSV des repas des N derniers jours (utilisable avec un nutritionniste, Excel/Sheets), ou bilan nutritionnel en PDF (hebdomadaire ou mensuel : moyennes de macros, cibles, évolution du poids pour le mensuel), tous partagés via le sélecteur natif
 - **Personnalisation du Coach IA** — choix du ton des réponses (motivant, bienveillant, direct, humoristique)
 - **Préférences alimentaires** — régime (végétarien, végétalien, pescétarien, halal, kasher) et allergies/intolérances, pris en compte par les idées de repas et le Coach IA
-- **Rappels** — notifications locales quotidiennes pour les repas (petit-déjeuner/déjeuner/dîner, activables et personnalisables individuellement) et rappels personnalisés illimités (nom + heure au choix, quotidien ou un jour de la semaine donné — ex. le rappel de pesée hebdomadaire), réglables depuis Profil > Notifications. Les rappels personnalisés sont aussi sauvegardés sur Supabase et restaurés automatiquement sur un appareil "vide" (nouvelle install/nouveau téléphone) ; les créneaux fixes petit-déjeuner/déjeuner/dîner restent purement locaux (rapides à réactiver manuellement)
+- **Rappels** — notifications locales quotidiennes pour les repas (petit-déjeuner/déjeuner/dîner, activables et personnalisables individuellement) et rappels personnalisés illimités (nom + heure au choix, quotidien ou un jour de la semaine donné — ex. le rappel de pesée hebdomadaire), réglables depuis Profil > Notifications. Tant qu'un créneau repas n'a jamais été réglé manuellement, son heure par défaut est déduite de l'historique de repas de l'utilisateur (heure habituelle sur les 30 derniers jours) plutôt qu'un horaire fixe générique. Les rappels personnalisés sont aussi sauvegardés sur Supabase et restaurés automatiquement sur un appareil "vide" (nouvelle install/nouveau téléphone) ; les créneaux fixes petit-déjeuner/déjeuner/dîner restent purement locaux (rapides à réactiver manuellement)
 - **Profil & compte** — gestion du profil utilisateur, paramètres de compte, photo de profil
 - **Sécurité et confidentialité** — changement du mot de passe depuis Profil > Sécurité (session active requise, pas de ré-saisie de l'ancien mot de passe). Le 2FA n'est pas encore implémenté (chantier séparé : nécessite aussi une vérification à la connexion, pas seulement un écran d'inscription)
 - **Centre d'aide** — FAQ groupée par thème + contact support par email
 - **Conditions d'utilisation** — CGU et mentions légales (⚠️ contenu de brouillon, voir [Notes](#notes) ci-dessous)
 - **À propos** — version de l'app (lue dynamiquement), liens vers l'aide et les CGU
 - **Compte admin** — accès complet aux fonctionnalités PRO sans abonnement réel, activable uniquement depuis le SQL Editor Supabase (jamais depuis l'app)
-- **Quotas IA par utilisateur** — limite quotidienne d'appels par utilisateur sur chaque Edge Function IA (20/jour pour `analyze-meal`/`analyze-product`, 50/jour pour `coach-chat`, 10/jour pour `meal-suggestions`/`meal-images`), pour contenir les coûts en cas d'abus
-- **Quota IA global (protection du budget partagé)** — en plus du quota par utilisateur, `analyze-meal`, `analyze-product`, `coach-chat` et `meal-suggestions` (celles qui appellent la clé `GEMINI_API_KEY`, partagée par toute l'app) respectent aussi un plafond quotidien **agrégé, tous utilisateurs confondus** (500/jour pour `analyze-meal`/`analyze-product`, 1000/jour pour `coach-chat`, 300/jour pour `meal-suggestions`) : un disjoncteur qui évite qu'un usage normal mais nombreux épuise silencieusement le débit/budget gratuit d'une seule clé partagée
+- **Quotas IA par utilisateur** — limite quotidienne d'appels par utilisateur sur chaque Edge Function IA (20/jour pour `analyze-meal`/`analyze-product`/`analyze-menu`/`analyze-pantry`, 50/jour pour `coach-chat`, 10/jour pour `meal-suggestions`/`meal-images`), pour contenir les coûts en cas d'abus
+- **Quota IA global (protection du budget partagé)** — en plus du quota par utilisateur, `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat` et `meal-suggestions` (celles qui appellent la clé `GEMINI_API_KEY`, partagée par toute l'app) respectent aussi un plafond quotidien **agrégé, tous utilisateurs confondus** (500/jour pour `analyze-meal`/`analyze-product`/`analyze-menu`/`analyze-pantry`, 1000/jour pour `coach-chat`, 300/jour pour `meal-suggestions`) : un disjoncteur qui évite qu'un usage normal mais nombreux épuise silencieusement le débit/budget gratuit d'une seule clé partagée
 - **Abonnement PRO** — paywall, checkout et gestion des achats in-app via RevenueCat (avec un **mode démo** intégré tant que les clés RevenueCat ne sont pas configurées, permettant de tester tout le parcours Paywall → Checkout → déblocage PRO sans compte Apple/Google payant)
 - **IA locale (scan + chat, optionnelle, gratuite)** — Gemma3n exécuté directement sur l'appareil (`flutter_gemma`), activable depuis Profil > IA locale : analyse photo et chat coach fonctionnent alors sans connexion et sans consommer le quota cloud partagé. Repli automatique sur le cloud si le modèle n'est pas téléchargé ou échoue. Jamais derrière un abonnement PRO — voir [IA locale](#ia-locale) ci-dessous pour la configuration.
 - **Bilingue Français/English** — sélecteur de langue depuis Profil > Langue (persisté), toute l'UI est traduite (ARB + `flutter_localizations`), et la langue choisie est aussi transmise à l'IA (analyse de repas/produit, coach, suggestions de repas — cloud et locale) pour qu'elle réponde dans la même langue
@@ -48,7 +52,9 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **flutter_local_notifications** / **timezone** / **flutter_timezone** — notifications locales programmées (rappels)
 - **package_info_plus** — version de l'app affichée dans "À propos"
 - **url_launcher** — ouverture du client mail (contact support)
-- **share_plus** / **path_provider** — export CSV du journal alimentaire et partage via le sélecteur natif
+- **share_plus** / **path_provider** — export CSV/PDF/.ics du journal alimentaire et partage via le sélecteur natif
+- **pdf** — génération des bilans nutritionnels PDF (hebdomadaire/mensuel)
+- **home_widget** — widget écran d'accueil Android (macros du jour + streak)
 - **percent_indicator** — jauges circulaires du dashboard
 - **fl_chart** — graphique d'évolution des calories sur 30 jours (Analyses avancées)
 - **google_fonts**, **shared_preferences**, **flutter_dotenv**
@@ -69,40 +75,56 @@ lib/
                 vers Supabase dans les deux sens, restauration comprise), local_db_provider
   models/       UserProfile, Meal, Ingredient, SelectedPlan, ChatMessage, MealSuggestion,
                 MealReminder, CustomReminder, MealAnalysisArgs, ShoppingItem
-  providers/    State management Riverpod : auth, profile, dashboard (journal du jour et
-                hydratation, lus depuis la base locale), meal (analyse/scan en cours),
-                meal_suggestions, weekly_meal_plan, chat, onboarding, purchase (entitlement PRO/admin),
-                notification_settings, custom_reminders, shopping_list, local_ai
-                (activation/téléchargement de l'IA locale), locale (langue choisie, persistée)
+  providers/    State management Riverpod : auth, profile, dashboard (journal du jour,
+                hydratation et widget écran d'accueil, lus depuis la base locale), meal
+                (analyse/scan en cours : repas, produit, menu ou frigo/placard),
+                meal_suggestions, weekly_meal_plan, pantry_recipes (recettes générées à
+                partir d'un inventaire détecté), fasting (jeûne intermittent), chat,
+                onboarding, purchase (entitlement PRO/admin), notification_settings,
+                custom_reminders, shopping_list, local_ai (activation/téléchargement de
+                l'IA locale), locale (langue choisie, persistée)
   screens/      Écrans de l'application (dashboard, coach, profil, compte, sécurité,
-                onboarding, auth, caméra/scanner, analyse repas/produit, notifications,
-                suivi du poids, liste de courses, IA locale, préférences alimentaires,
-                personnalisation coach, paywall/checkout, centre d'aide, CGU, à propos,
-                coming-soon)
+                onboarding, auth, caméra/scanner, analyse repas/produit, scan de menu,
+                scan de frigo/placard + recettes générées, jeûne intermittent,
+                notifications, suivi du poids, liste de courses, IA locale, préférences
+                alimentaires, personnalisation coach, paywall/checkout, centre d'aide,
+                CGU, à propos, coming-soon)
   services/     Accès Supabase (database_service, supabase_service), IA cloud via Edge
                 Functions (ai_service), IA locale sur l'appareil (local_ai_service),
                 RevenueCat (purchase_service), notifications locales
                 (notification_service), lookup produit Open Food Facts
-                (product_lookup_service)
+                (product_lookup_service), widget écran d'accueil Android
+                (home_widget_service)
   router/       Configuration go_router (routes + redirections auth)
-  utils/        Calcul des cibles nutritionnelles (nutrition_targets) et de l'IMC (bmi)
+  utils/        Calcul des cibles nutritionnelles (nutrition_targets) et de l'IMC (bmi),
+                résumés nutritionnels journaliers pour les exports PDF
+                (daily_nutrition_summary), export calendrier .ics du plan hebdomadaire
+                (ics_export), heures de repas habituelles déduites de l'historique
+                (typical_meal_times), suggestion de substitut d'ingrédient par mots-clés
+                (ingredient_substitution)
   widgets/      Composants réutilisables (layout principal, carte de suggestion de repas)
+android/app/src/main/kotlin/.../HealthChefWidgetProvider.kt
+                Rendu natif du widget écran d'accueil (RemoteViews), alimenté par les
+                données poussées depuis home_widget_service.dart
 supabase/
-  migrations/   Schéma SQL versionné (0001 à 0011, voir ci-dessous)
-  functions/    Edge Functions : analyze-meal, analyze-product, coach-chat, meal-suggestions,
-                meal-images, huggingface-token — chacune déployée depuis l'éditeur du
-                Dashboard Supabase, donc chacune embarque sa propre copie de la vérification
+  migrations/   Schéma SQL versionné (0001 à 0013, voir ci-dessous)
+  functions/    Edge Functions : analyze-meal, analyze-product, analyze-menu,
+                analyze-pantry, coach-chat, meal-suggestions, meal-images,
+                huggingface-token — chacune déployée depuis l'éditeur du Dashboard
+                Supabase, donc chacune embarque sa propre copie de la vérification
                 d'identité et du quota (quotidien par utilisateur + global partagé) dans son
                 index.ts, sans dépendre d'un dossier partagé. _shared/quota.ts reste dans le
                 repo comme référence/copie canonique de cette logique, mais n'est importé par
-                aucune fonction.
+                aucune fonction. analyze-menu et analyze-pantry sont des quasi-copies
+                d'analyze-meal (même contrat JSON `{ ingredients: [...] }`), seul le prompt
+                change (carte de restaurant / inventaire de frigo plutôt qu'assiette).
 test/           Tests unitaires (providers, utils)
 ```
 
 ## Prérequis
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (compatible Dart ^3.12.0 — bump récent, requis par `flutter_gemma`)
-- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` déployées (voir ci-dessous)
+- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` déployées (voir ci-dessous)
 - (Optionnel) Un projet [RevenueCat](https://www.revenuecat.com) pour activer les achats réels
 
 ## Installation
@@ -128,7 +150,7 @@ flutter pub get
    - `0011` : tables `weight_entries`, `hydration_entries` et `custom_reminders_backup` — synchronisation cross-device du poids, de l'hydratation et des rappels personnalisés (voir [Notes](#notes))
    - `0012` : photo de progression (`image_url`/`local_image_path` sur `weight_entries`) + bucket `weight_photos`
    - `0013` : table `weekly_meal_plans` (cache du plan de repas hebdomadaire généré par l'IA)
-3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
+3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
    - Chaque fonction est **autonome** (aucun import relatif vers `_shared/`) : un simple copier-coller de son `index.ts` dans l'éditeur du Dashboard Supabase suffit à la déployer/redéployer, sans erreur de bundling.
 4. **Illustrations des idées de repas (optionnel, 100% gratuit)** — `meal-images` génère une image IA par suggestion, en cascade entre deux fournisseurs gratuits :
    - **Cloudflare Workers AI (FLUX.1 [schnell])**, essayé en premier — meilleure qualité, gratuit jusqu'à ~10 000 Neurons/jour (~100 images, partagées entre tous les utilisateurs de l'app), sans carte bancaire requise. Crée un compte gratuit sur [dash.cloudflare.com](https://dash.cloudflare.com), récupère ton **Account ID** (visible sur le Dashboard) et crée un **API Token** avec la permission "Workers AI" (My Profile > API Tokens), puis configure les secrets `CLOUDFLARE_ACCOUNT_ID` et `CLOUDFLARE_API_TOKEN`.

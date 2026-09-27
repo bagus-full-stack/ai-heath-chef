@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
+import '../local_db/local_db_provider.dart';
 import '../models/meal_reminder.dart';
 import '../services/notification_service.dart';
 import 'dashboard_provider.dart';
@@ -27,12 +28,26 @@ class NotificationSettingsNotifier
   @override
   Future<Map<MealReminderSlot, MealReminderSetting>> build() async {
     final prefs = await SharedPreferences.getInstance();
+    // Tant que l'utilisateur n'a jamais réglé un créneau lui-même (pas de
+    // valeur en prefs), on propose l'heure habituelle déduite de son
+    // historique de repas plutôt que l'horaire fixe par défaut — dès qu'il
+    // règle/active un créneau, cette heure est persistée et n'est plus
+    // recalculée (voir _applyAndPersist).
+    final typicalTimes = await ref
+        .read(mealRepositoryProvider)
+        .getTypicalMealTimes();
     return {
       for (final slot in MealReminderSlot.values)
         slot: MealReminderSetting(
           enabled: prefs.getBool(_enabledKey(slot)) ?? false,
-          hour: prefs.getInt(_hourKey(slot)) ?? slot.defaultHour,
-          minute: prefs.getInt(_minuteKey(slot)) ?? slot.defaultMinute,
+          hour:
+              prefs.getInt(_hourKey(slot)) ??
+              typicalTimes[slot]?.hour ??
+              slot.defaultHour,
+          minute:
+              prefs.getInt(_minuteKey(slot)) ??
+              typicalTimes[slot]?.minute ??
+              slot.defaultMinute,
         ),
     };
   }

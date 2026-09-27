@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nom affiché dans le sélecteur de widgets Android -->
+    <string name="health_chef_widget_label">AI Health Chef</string>
+</resources>

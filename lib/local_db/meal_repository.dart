@@ -12,7 +12,9 @@ import 'package:uuid/uuid.dart';
 import '../l10n/app_localizations.dart';
 import '../models/ingredient.dart';
 import '../models/meal.dart';
+import '../models/meal_reminder.dart';
 import '../utils/streak.dart';
+import '../utils/typical_meal_times.dart';
 import 'app_database.dart';
 
 const _uuid = Uuid();
@@ -180,6 +182,23 @@ class MealRepository {
 
     final rows = await query.get();
     return rows.map(_toMeal).toList();
+  }
+
+  /// Heure habituelle de repas par créneau, déduite des repas loggés sur les
+  /// [days] derniers jours — sert de valeur par défaut aux rappels plutôt
+  /// que des horaires fixes (voir notification_settings_provider.dart).
+  Future<Map<MealReminderSlot, ({int hour, int minute})>>
+  getTypicalMealTimes({int days = 30}) async {
+    final meals = await getMealsSince(days);
+    final minutesBySlot = <MealReminderSlot, List<int>>{};
+    for (final meal in meals) {
+      final slot = mealSlotForHour(meal.createdAt.hour);
+      if (slot == null) continue;
+      minutesBySlot
+          .putIfAbsent(slot, () => [])
+          .add(meal.createdAt.hour * 60 + meal.createdAt.minute);
+    }
+    return typicalMealTimesFromMinutes(minutesBySlot);
   }
 
   /// Nombre de jours consécutifs (aujourd'hui ou hier inclus, pour ne pas

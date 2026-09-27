@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../models/meal_suggestion.dart';
+import '../utils/ingredient_substitution.dart';
 
 const Color _kPrimaryColor = Color(0xFF6B66FF);
 
@@ -25,12 +26,17 @@ class MealSuggestionCard extends StatelessWidget {
   final MealSuggestion suggestion;
   final VoidCallback onAdd;
   final VoidCallback onAddToShoppingList;
+  /// Allergies déclarées par l'utilisateur (voir user_profile.dart) — pour
+  /// signaler un ingrédient à risque dans la feuille recette et proposer un
+  /// substitut (voir lib/utils/ingredient_substitution.dart).
+  final List<String> allergies;
 
   const MealSuggestionCard({
     super.key,
     required this.suggestion,
     required this.onAdd,
     required this.onAddToShoppingList,
+    this.allergies = const [],
   });
 
   @override
@@ -223,7 +229,7 @@ class MealSuggestionCard extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _RecipeSheet(suggestion: suggestion),
+      builder: (context) => _RecipeSheet(suggestion: suggestion, allergies: allergies),
     );
   }
 }
@@ -233,8 +239,9 @@ class MealSuggestionCard extends StatelessWidget {
 /// (voir supabase/functions/meal-suggestions).
 class _RecipeSheet extends StatelessWidget {
   final MealSuggestion suggestion;
+  final List<String> allergies;
 
-  const _RecipeSheet({required this.suggestion});
+  const _RecipeSheet({required this.suggestion, this.allergies = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -283,29 +290,7 @@ class _RecipeSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 for (final ingredient in suggestion.ingredients)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(top: 6),
-                          child: Icon(
-                            Icons.circle,
-                            size: 5,
-                            color: _kPrimaryColor,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            ingredient,
-                            style: const TextStyle(fontSize: 13.5, height: 1.4),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _IngredientRow(text: ingredient, allergies: allergies),
               ],
               if (suggestion.steps.isNotEmpty) ...[
                 const SizedBox(height: 12),
@@ -360,6 +345,76 @@ class _RecipeSheet extends StatelessWidget {
 /// Décode une data URI base64 (`data:image/...;base64,...`) en octets bruts.
 /// Retourne `null` si `dataUri` est nul/vide ou mal formé, plutôt que de
 /// lever une exception — la carte retombe alors sur l'icône par défaut.
+/// Ligne d'ingrédient dans la feuille recette, signalant un allergène
+/// déclaré (icône orange + substitut suggéré) ou proposant un substitut sur
+/// demande via une icône d'échange (dépannage "je n'ai pas ça dans mon
+/// placard") — voir lib/utils/ingredient_substitution.dart.
+class _IngredientRow extends StatelessWidget {
+  final String text;
+  final List<String> allergies;
+
+  const _IngredientRow({required this.text, required this.allergies});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasAllergyMatch = ingredientMatchesAllergy(text, allergies);
+    final substitute = suggestSubstitute(text);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 5),
+                child: Icon(
+                  hasAllergyMatch ? Icons.warning_amber_rounded : Icons.circle,
+                  size: hasAllergyMatch ? 15 : 5,
+                  color: hasAllergyMatch ? Colors.deepOrange : _kPrimaryColor,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  text,
+                  style: const TextStyle(fontSize: 13.5, height: 1.4),
+                ),
+              ),
+              if (!hasAllergyMatch && substitute != null)
+                GestureDetector(
+                  onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(context.l10n.mealSuggestionRecipeSubstituteMessage(substitute)),
+                    ),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.only(left: 8),
+                    child: Icon(Icons.swap_horiz_rounded, size: 18, color: Colors.grey),
+                  ),
+                ),
+            ],
+          ),
+          if (hasAllergyMatch && substitute != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 25, top: 2),
+              child: Text(
+                context.l10n.mealSuggestionRecipeAllergyWarning(substitute),
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  color: Colors.deepOrange,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 Uint8List? _decodeDataUri(String? dataUri) {
   if (dataUri == null || dataUri.isEmpty) return null;
   final commaIndex = dataUri.indexOf(',');

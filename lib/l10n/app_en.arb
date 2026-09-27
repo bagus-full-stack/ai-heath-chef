@@ -56,6 +56,8 @@
   "cameraCaptureChooseGalleryPhotoButton": "Choose a photo from the gallery",
   "cameraCaptureFrameMealHint": "Frame your dish in the center",
   "cameraCaptureFrameProductHint": "Frame the product's label",
+  "cameraCaptureFrameMenuHint": "Frame the restaurant menu",
+  "cameraCaptureFrameFridgeHint": "Frame the inside of your fridge or pantry",
   "cameraCaptureGalleryButton": "GALLERY",
   "cameraCaptureGalleryOpenError": "Couldn't open the gallery: {error}",
   "cameraCaptureHelpBody": "Center your plate in the circle, hold your device steady, then tap the shutter. Our AI automatically analyzes the food and its nutritional values.",
@@ -64,6 +66,8 @@
   "cameraCaptureModeManual": "Manual",
   "cameraCaptureModeMeal": "Meal",
   "cameraCaptureModeProduct": "Product",
+  "cameraCaptureModeMenu": "Menu",
+  "cameraCaptureModeFridge": "Fridge",
   "cameraCaptureModeScanner": "Scanner",
   "cameraCaptureNoCameraMessage": "No camera available on this device.",
   "cameraCaptureOpenCameraError": "Couldn't open the camera: {error}",
@@ -319,6 +323,22 @@
   "mealSuggestionsAdjustPresetMessage": "Adjust this meal for my goal: {title}",
   "mealSuggestionRecipeIngredientsTitle": "INGREDIENTS",
   "mealSuggestionRecipeStepsTitle": "PREPARATION",
+  "mealSuggestionRecipeAllergyWarning": "Contains a declared allergen — swap for: {substitute}",
+  "@mealSuggestionRecipeAllergyWarning": {
+    "placeholders": {
+      "substitute": {
+        "type": "String"
+      }
+    }
+  },
+  "mealSuggestionRecipeSubstituteMessage": "Don't have that on hand? Swap for: {substitute}",
+  "@mealSuggestionRecipeSubstituteMessage": {
+    "placeholders": {
+      "substitute": {
+        "type": "String"
+      }
+    }
+  },
   "mealSuggestionsEmptyMessage": "No meal ideas available right now.",
   "mealSuggestionsLoadError": "We couldn't generate meal ideas right now.",
   "mealSuggestionsRegenerateTooltip": "Regenerate",
@@ -330,6 +350,8 @@
   "weeklyMealPlanLoadError": "Couldn't generate the meal plan right now.",
   "weeklyMealPlanRetryButton": "Try again",
   "weeklyMealPlanRegenerateTooltip": "Regenerate",
+  "weeklyMealPlanExportCalendarTooltip": "Export to calendar",
+  "weeklyMealPlanExportCalendarError": "Couldn't export the meal plan to your calendar.",
   "weeklyMealPlanAddAllButton": "Add everything to the shopping list",
   "weeklyMealPlanAddAllMessage": "{count} meals added to the shopping list",
   "@weeklyMealPlanAddAllMessage": {
@@ -463,6 +485,8 @@
   "profileDietaryPrefsTitle": "Dietary preferences",
   "profileExportJournalSubtitle": "Share my meals (CSV)",
   "profileExportJournalTitle": "Export my journal",
+  "profileExportPdfSubtitle": "Weekly summary for your nutritionist (PDF)",
+  "profileExportPdfTitle": "Export weekly summary",
   "profileGoalLabel": "Goal",
   "profileGoalsSubtitle": "Calories and macros",
   "profileGoalsTitle": "My goals",
@@ -567,6 +591,22 @@
   },
   "svcErrorAnalyzeProduct": "Product analysis error: {error}",
   "@svcErrorAnalyzeProduct": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorAnalyzeMenu": "Menu analysis error: {error}",
+  "@svcErrorAnalyzeMenu": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorAnalyzePantry": "Fridge/pantry analysis error: {error}",
+  "@svcErrorAnalyzePantry": {
     "placeholders": {
       "error": {
         "type": "String"
@@ -728,5 +768,56 @@
   "weightTrendTitle": "Weight tracking",
   "weightTrendWeeklyReminderAddedMessage": "Weekly weigh-in reminder scheduled.",
   "weightTrendWeeklyReminderButton": "Remind me to weigh in every week",
-  "weightTrendWeeklyReminderName": "Weekly weigh-in"
+  "weightTrendWeeklyReminderName": "Weekly weigh-in",
+  "menuScanTitle": "Menu scan",
+  "menuScanLoadingMessage": "The AI is reading the restaurant menu...",
+  "menuScanEmptyMessage": "No dish detected on this photo. Try again with a clearer photo of the menu.",
+  "menuScanAddButton": "Add to journal",
+  "menuScanAddedMessage": "\"{name}\" added to journal.",
+  "@menuScanAddedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fastingTitle": "Intermittent fasting",
+  "fastingStatusFasting": "Fasting in progress",
+  "fastingStatusIdle": "No fast in progress",
+  "fastingGoalLabel": "Goal",
+  "fastingHoursValue": "{hours}h",
+  "@fastingHoursValue": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "fastingElapsedValue": "{hours}h{minutes}",
+  "@fastingElapsedValue": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "fastingStartButton": "Start fasting",
+  "fastingStopButton": "End fast",
+  "fastingGoalReachedMessage": "Goal reached 🎉",
+  "profileFastingTitle": "Intermittent fasting",
+  "profileFastingSubtitle": "Time window and timer",
+  "profileExportMonthlyPdfTitle": "Export monthly summary",
+  "profileExportMonthlyPdfSubtitle": "30-day summary for your nutritionist",
+  "pantryScanTitle": "Fridge scan",
+  "pantryScanLoadingMessage": "AI is identifying the available food...",
+  "pantryScanEmptyMessage": "No food detected in this photo. Try a clearer photo, or add items manually.",
+  "pantryScanAddHint": "Add a food item manually",
+  "pantryScanGenerateButton": "Generate recipes",
+  "pantryRecipesTitle": "Suggested recipes",
+  "pantryRecipesLoadError": "Couldn't generate recipes right now.",
+  "pantryRecipesRetryButton": "Retry",
+  "pantryRecipesEmptyMessage": "No recipe generated."
 }

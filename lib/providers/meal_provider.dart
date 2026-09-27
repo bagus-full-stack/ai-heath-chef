@@ -19,16 +19,32 @@ class MealNotifier extends AsyncNotifier<List<Ingredient>> {
     return [];
   }
 
-  // Lancer l'analyse IA d'une photo (repas, ou produit emballé si isProduct)
-  Future<void> analyzeImage(String imagePath, {bool isProduct = false}) async {
+  // Lancer l'analyse IA d'une photo (repas, produit emballé si isProduct,
+  // carte de restaurant si isMenu, ou frigo/placard si isPantry — un
+  // "ingrédient" par plat/aliment identifié).
+  Future<void> analyzeImage(
+    String imagePath, {
+    bool isProduct = false,
+    bool isMenu = false,
+    bool isPantry = false,
+  }) async {
     // 1. On passe en état de chargement
     state = const AsyncValue.loading();
 
     // 2. On essaie de récupérer les données : IA locale d'abord si activée
     // et téléchargée (pas de connexion requise, n'utilise pas le quota
     // cloud partagé), sinon/en cas d'échec repli sur le cloud comme avant.
+    // ponytail: le scan de menu/frigo ne passe pas par l'IA locale (modèle
+    // local pas entraîné/testé pour ces prompts) — cloud uniquement.
     final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
     state = await AsyncValue.guard(() async {
+      if (isMenu) {
+        return ref.read(aiServiceProvider).analyzeMenuImage(imagePath, lang: lang);
+      }
+      if (isPantry) {
+        return ref.read(aiServiceProvider).analyzePantryImage(imagePath, lang: lang);
+      }
+
       final localSettings = ref.read(localAiSettingsProvider).value;
       if (localSettings?.isReadyToUse == true) {
         try {

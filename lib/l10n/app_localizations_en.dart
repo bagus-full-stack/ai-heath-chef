@@ -196,6 +196,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraCaptureFrameProductHint => 'Frame the product\'s label';
 
   @override
+  String get cameraCaptureFrameMenuHint => 'Frame the restaurant menu';
+
+  @override
+  String get cameraCaptureFrameFridgeHint =>
+      'Frame the inside of your fridge or pantry';
+
+  @override
   String get cameraCaptureGalleryButton => 'GALLERY';
 
   @override
@@ -221,6 +228,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cameraCaptureModeProduct => 'Product';
+
+  @override
+  String get cameraCaptureModeMenu => 'Menu';
+
+  @override
+  String get cameraCaptureModeFridge => 'Fridge';
 
   @override
   String get cameraCaptureModeScanner => 'Scanner';
@@ -1013,6 +1026,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mealSuggestionRecipeStepsTitle => 'PREPARATION';
 
   @override
+  String mealSuggestionRecipeAllergyWarning(String substitute) {
+    return 'Contains a declared allergen — swap for: $substitute';
+  }
+
+  @override
+  String mealSuggestionRecipeSubstituteMessage(String substitute) {
+    return 'Don\'t have that on hand? Swap for: $substitute';
+  }
+
+  @override
   String get mealSuggestionsEmptyMessage =>
       'No meal ideas available right now.';
 
@@ -1047,6 +1070,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weeklyMealPlanRegenerateTooltip => 'Regenerate';
+
+  @override
+  String get weeklyMealPlanExportCalendarTooltip => 'Export to calendar';
+
+  @override
+  String get weeklyMealPlanExportCalendarError =>
+      'Couldn\'t export the meal plan to your calendar.';
 
   @override
   String get weeklyMealPlanAddAllButton =>
@@ -1477,6 +1507,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileExportJournalTitle => 'Export my journal';
 
   @override
+  String get profileExportPdfSubtitle =>
+      'Weekly summary for your nutritionist (PDF)';
+
+  @override
+  String get profileExportPdfTitle => 'Export weekly summary';
+
+  @override
   String get profileGoalLabel => 'Goal';
 
   @override
@@ -1803,6 +1840,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String svcErrorAnalyzeMenu(String error) {
+    return 'Menu analysis error: $error';
+  }
+
+  @override
+  String svcErrorAnalyzePantry(String error) {
+    return 'Fridge/pantry analysis error: $error';
+  }
+
+  @override
   String svcErrorCoachChat(String error) {
     return 'Error connecting to the AI Coach: $error';
   }
@@ -1954,4 +2001,96 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weightTrendWeeklyReminderName => 'Weekly weigh-in';
+
+  @override
+  String get menuScanTitle => 'Menu scan';
+
+  @override
+  String get menuScanLoadingMessage =>
+      'The AI is reading the restaurant menu...';
+
+  @override
+  String get menuScanEmptyMessage =>
+      'No dish detected on this photo. Try again with a clearer photo of the menu.';
+
+  @override
+  String get menuScanAddButton => 'Add to journal';
+
+  @override
+  String menuScanAddedMessage(String name) {
+    return '\"$name\" added to journal.';
+  }
+
+  @override
+  String get fastingTitle => 'Intermittent fasting';
+
+  @override
+  String get fastingStatusFasting => 'Fasting in progress';
+
+  @override
+  String get fastingStatusIdle => 'No fast in progress';
+
+  @override
+  String get fastingGoalLabel => 'Goal';
+
+  @override
+  String fastingHoursValue(String hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String fastingElapsedValue(String hours, String minutes) {
+    return '${hours}h$minutes';
+  }
+
+  @override
+  String get fastingStartButton => 'Start fasting';
+
+  @override
+  String get fastingStopButton => 'End fast';
+
+  @override
+  String get fastingGoalReachedMessage => 'Goal reached 🎉';
+
+  @override
+  String get profileFastingTitle => 'Intermittent fasting';
+
+  @override
+  String get profileFastingSubtitle => 'Time window and timer';
+
+  @override
+  String get profileExportMonthlyPdfTitle => 'Export monthly summary';
+
+  @override
+  String get profileExportMonthlyPdfSubtitle =>
+      '30-day summary for your nutritionist';
+
+  @override
+  String get pantryScanTitle => 'Fridge scan';
+
+  @override
+  String get pantryScanLoadingMessage =>
+      'AI is identifying the available food...';
+
+  @override
+  String get pantryScanEmptyMessage =>
+      'No food detected in this photo. Try a clearer photo, or add items manually.';
+
+  @override
+  String get pantryScanAddHint => 'Add a food item manually';
+
+  @override
+  String get pantryScanGenerateButton => 'Generate recipes';
+
+  @override
+  String get pantryRecipesTitle => 'Suggested recipes';
+
+  @override
+  String get pantryRecipesLoadError => 'Couldn\'t generate recipes right now.';
+
+  @override
+  String get pantryRecipesRetryButton => 'Retry';
+
+  @override
+  String get pantryRecipesEmptyMessage => 'No recipe generated.';
 }

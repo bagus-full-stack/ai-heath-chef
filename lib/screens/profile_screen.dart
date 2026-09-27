@@ -169,10 +169,28 @@ class ProfileScreen extends ConsumerWidget {
                       onTap: () => context.push('/weight_trend'),
                     ),
                     _SettingsItem(
+                      icon: Icons.timer_outlined,
+                      title: context.l10n.profileFastingTitle,
+                      subtitle: context.l10n.profileFastingSubtitle,
+                      onTap: () => context.push('/fasting'),
+                    ),
+                    _SettingsItem(
                       icon: Icons.ios_share_rounded,
                       title: context.l10n.profileExportJournalTitle,
                       subtitle: context.l10n.profileExportJournalSubtitle,
                       onTap: () => exportMealJournalCsv(ref),
+                    ),
+                    _SettingsItem(
+                      icon: Icons.picture_as_pdf_outlined,
+                      title: context.l10n.profileExportPdfTitle,
+                      subtitle: context.l10n.profileExportPdfSubtitle,
+                      onTap: () => exportWeeklyNutritionSummaryPdf(ref),
+                    ),
+                    _SettingsItem(
+                      icon: Icons.picture_as_pdf_rounded,
+                      title: context.l10n.profileExportMonthlyPdfTitle,
+                      subtitle: context.l10n.profileExportMonthlyPdfSubtitle,
+                      onTap: () => exportMonthlyNutritionSummaryPdf(ref),
                     ),
                     _SettingsItem(
                       icon: Icons.language_rounded,

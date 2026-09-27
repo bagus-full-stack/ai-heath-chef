@@ -96,6 +96,7 @@ class DashboardScreen extends ConsumerWidget {
     ref.watch(noLogReminderReconcilerProvider);
     ref.watch(weeklySummaryReconcilerProvider);
     ref.watch(weightStagnationReconcilerProvider);
+    ref.watch(homeWidgetReconcilerProvider);
 
     // Toast de célébration au franchissement d'un palier de streak (7/30/100
     // jours) — voir _maybeCelebrateStreakMilestone.

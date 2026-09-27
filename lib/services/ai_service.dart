@@ -30,6 +30,31 @@ class AIService {
     );
   }
 
+  /// Analyse la photo d'une carte de restaurant et retourne un "ingrédient"
+  /// par plat identifié (portion estimée + macros pour cette portion) —
+  /// même contrat JSON que [analyzeMealImage], voir analyze-menu/index.ts.
+  Future<List<Ingredient>> analyzeMenuImage(String imagePath, {String lang = 'fr'}) {
+    return _analyzeImage(
+      imagePath,
+      'analyze-menu',
+      (l10n, error) => l10n.svcErrorAnalyzeMenu(error),
+      lang,
+    );
+  }
+
+  /// Analyse la photo d'un frigo/placard et retourne un "ingrédient" par
+  /// aliment identifié (inventaire, pas un repas à consommer) — même contrat
+  /// JSON que [analyzeMealImage], voir analyze-pantry/index.ts. Seul `name`
+  /// est réellement utilisé côté client (voir pantry_scan_screen.dart).
+  Future<List<Ingredient>> analyzePantryImage(String imagePath, {String lang = 'fr'}) {
+    return _analyzeImage(
+      imagePath,
+      'analyze-pantry',
+      (l10n, error) => l10n.svcErrorAnalyzePantry(error),
+      lang,
+    );
+  }
+
   Future<List<Ingredient>> _analyzeImage(
     String imagePath,
     String functionName,
@@ -127,6 +152,10 @@ class AIService {
     // avec son champ `day` (1..days) rempli.
     int? days,
     int? mealsPerDay,
+    // Recette à partir d'une photo de frigo/placard (voir
+    // pantry_recipes_provider.dart) : ingrédients déjà disponibles à
+    // prioriser dans les recettes générées.
+    List<String>? availableIngredients,
     String lang = 'fr',
   }) async {
     try {
@@ -143,6 +172,8 @@ class AIService {
           'count': count,
           if (days != null) 'days': days,
           if (mealsPerDay != null) 'mealsPerDay': mealsPerDay,
+          if (availableIngredients != null && availableIngredients.isNotEmpty)
+            'availableIngredients': availableIngredients,
           'lang': lang,
         },
       );

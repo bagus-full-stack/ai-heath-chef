@@ -64,6 +64,8 @@ dependencies:
   connectivity_plus: ^7.3.1                 # Détecte le retour du réseau pour déclencher la synchronisation des repas en attente
   fl_chart: ^1.1.1                          # Courbe de tendance calories sur 30 jours (Analyses avancées)
   share_plus: ^13.3.0
+  pdf: ^3.13.1                               # Génère le PDF du bilan nutritionnel hebdo (voir journal_export.dart)
+  home_widget: ^0.10.0                       # Widget écran d'accueil Android (macros du jour + streak)
 
 dev_dependencies:
   flutter_test:

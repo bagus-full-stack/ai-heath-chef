@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/meal_suggestions_provider.dart';
+import '../providers/profile_provider.dart';
 import '../providers/shopping_list_provider.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/meal_suggestion_card.dart';
@@ -17,6 +18,7 @@ class MealSuggestionsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final suggestionsAsync = ref.watch(mealSuggestionsProvider);
+    final allergies = ref.watch(profileProvider).value?.allergies ?? const [];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -100,6 +102,7 @@ class MealSuggestionsScreen extends ConsumerWidget {
                   final suggestion = suggestions[index];
                   return MealSuggestionCard(
                     suggestion: suggestion,
+                    allergies: allergies,
                     onAdd: () => openCoachChatSheet(
                       context,
                       presetMessage: context.l10n.mealSuggestionsAdjustPresetMessage(suggestion.title),

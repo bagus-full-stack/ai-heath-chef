@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/meal_analysis_args.dart';
 
-enum _CaptureMode { scanner, repas, produit, manuel }
+enum _CaptureMode { scanner, repas, produit, menu, frigo, manuel }
 
 class CameraCaptureScreen extends StatefulWidget {
   const CameraCaptureScreen({super.key});
@@ -195,10 +195,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
       if (!mounted) {
         return;
       }
-      context.pushReplacement(
-        '/meal_analysis',
-        extra: MealAnalysisArgs(imagePath: image.path, isProduct: _mode == _CaptureMode.produit),
-      );
+      _goToAnalysis(image.path);
     } catch (e) {
       if (!mounted) {
         return;
@@ -229,10 +226,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
       if (!mounted || image == null) {
         return;
       }
-      context.pushReplacement(
-        '/meal_analysis',
-        extra: MealAnalysisArgs(imagePath: image.path, isProduct: _mode == _CaptureMode.produit),
-      );
+      _goToAnalysis(image.path);
     } catch (e) {
       if (!mounted) {
         return;
@@ -248,6 +242,25 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
         setState(() => _isPickingFromGallery = false);
       }
     }
+  }
+
+  // Le scan de menu/frigo ouvre son propre écran de résultats plutôt que
+  // meal_analysis_screen : un menu liste des plats indépendants (pas un
+  // total combiné qui aurait un sens), un frigo liste un inventaire (pas un
+  // repas à consommer tel quel).
+  void _goToAnalysis(String imagePath) {
+    if (_mode == _CaptureMode.menu) {
+      context.pushReplacement('/menu_scan', extra: imagePath);
+      return;
+    }
+    if (_mode == _CaptureMode.frigo) {
+      context.pushReplacement('/pantry_scan', extra: imagePath);
+      return;
+    }
+    context.pushReplacement(
+      '/meal_analysis',
+      extra: MealAnalysisArgs(imagePath: imagePath, isProduct: _mode == _CaptureMode.produit),
+    );
   }
 
   void _selectMode(_CaptureMode mode) {
@@ -278,6 +291,10 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
         return context.l10n.cameraCaptureModeMeal;
       case _CaptureMode.produit:
         return context.l10n.cameraCaptureModeProduct;
+      case _CaptureMode.menu:
+        return context.l10n.cameraCaptureModeMenu;
+      case _CaptureMode.frigo:
+        return context.l10n.cameraCaptureModeFridge;
       case _CaptureMode.manuel:
         return context.l10n.cameraCaptureModeManual;
     }
@@ -385,7 +402,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                       ],
                     ),
                   ),
-                  _FocusCaption(isProduct: _mode == _CaptureMode.produit),
+                  _FocusCaption(mode: _mode),
                   Positioned(
                     left: 20,
                     right: 20,
@@ -551,9 +568,9 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
 }
 
 class _FocusCaption extends StatelessWidget {
-  final bool isProduct;
+  final _CaptureMode mode;
 
-  const _FocusCaption({required this.isProduct});
+  const _FocusCaption({required this.mode});
 
   @override
   Widget build(BuildContext context) {
@@ -581,9 +598,12 @@ class _FocusCaption extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                isProduct
-                    ? context.l10n.cameraCaptureFrameProductHint
-                    : context.l10n.cameraCaptureFrameMealHint,
+                switch (mode) {
+                  _CaptureMode.produit => context.l10n.cameraCaptureFrameProductHint,
+                  _CaptureMode.menu => context.l10n.cameraCaptureFrameMenuHint,
+                  _CaptureMode.frigo => context.l10n.cameraCaptureFrameFridgeHint,
+                  _ => context.l10n.cameraCaptureFrameMealHint,
+                },
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white70,

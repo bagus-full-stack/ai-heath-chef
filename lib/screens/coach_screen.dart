@@ -131,6 +131,7 @@ class _MealSuggestionsRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final suggestionsAsync = ref.watch(mealSuggestionsProvider);
+    final allergies = ref.watch(profileProvider).value?.allergies ?? const [];
 
     return SizedBox(
       height: 285,
@@ -182,6 +183,7 @@ class _MealSuggestionsRow extends ConsumerWidget {
                   width: 280,
                   child: MealSuggestionCard(
                     suggestion: suggestion,
+                    allergies: allergies,
                     onAdd: () => openCoachChatSheet(
                       context,
                       presetMessage: context.l10n.coachAdjustMealPresetMessage(suggestion.title),

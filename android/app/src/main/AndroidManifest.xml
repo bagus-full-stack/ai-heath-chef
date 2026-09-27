@@ -48,6 +48,18 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <!-- Widget écran d'accueil (macros du jour + streak) — voir
+             HealthChefWidgetProvider.kt et lib/services/home_widget_service.dart. -->
+        <receiver android:name=".HealthChefWidgetProvider"
+            android:label="@string/health_chef_widget_label"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/health_chef_widget_info" />
+        </receiver>
+
         <!-- Requis par flutter_local_notifications pour déclencher les
              rappels de repas programmés, y compris après un redémarrage. -->
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />

@@ -23,6 +23,10 @@ import '../screens/weekly_meal_plan_screen.dart';
 import '../screens/notification_settings_screen.dart';
 import '../screens/local_ai_settings_screen.dart';
 import '../screens/camera_capture_screen.dart';
+import '../screens/menu_scan_screen.dart';
+import '../screens/pantry_scan_screen.dart';
+import '../screens/pantry_recipes_screen.dart';
+import '../screens/fasting_screen.dart';
 import '../screens/forgot_password_screen.dart';
 import '../screens/paywall_screen.dart';
 import '../screens/nutrition_trends_screen.dart';
@@ -155,6 +159,22 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/camera_capture',
         builder: (context, state) => const CameraCaptureScreen(),
+      ),
+      GoRoute(
+        path: '/menu_scan',
+        builder: (context, state) => MenuScanScreen(imagePath: state.extra as String),
+      ),
+      GoRoute(
+        path: '/pantry_scan',
+        builder: (context, state) => PantryScanScreen(imagePath: state.extra as String),
+      ),
+      GoRoute(
+        path: '/pantry_recipes',
+        builder: (context, state) => PantryRecipesScreen(ingredientNames: state.extra as List<String>),
+      ),
+      GoRoute(
+        path: '/fasting',
+        builder: (context, state) => const FastingScreen(),
       ),
       GoRoute(
         path: '/barcode_scanner',

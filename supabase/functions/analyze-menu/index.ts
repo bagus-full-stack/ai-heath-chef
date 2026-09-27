@@ -8,6 +8,12 @@ import { createClient } from "jsr:@supabase/supabase-js@2"
  * fonction et ne voit pas le dossier `_shared` partagé par les autres. La
  * dupliquer ici évite l'erreur "Module not found .../_shared/quota.ts" au
  * déploiement (voir aussi meal-images/index.ts, même pattern).
+ *
+ * Cette fonction est par ailleurs une quasi-copie de analyze-meal/index.ts :
+ * même contrat JSON de sortie ({ ingredients: [...] }) pour rester
+ * compatible avec le parsing existant de AIService._analyzeImage côté
+ * Flutter, seul le prompt change (photo de carte de restaurant plutôt que
+ * d'assiette).
  */
 interface QuotaCheckResult {
     ok: boolean;
@@ -159,7 +165,7 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// 2. Liste de priorité des modèles (Les plus récents/performants en premier)
+// 2. Liste de priorité des modèles
 const MODELS = [
     "gemini-2.5-flash",
     "gemini-2.5-pro",
@@ -171,32 +177,28 @@ const MODELS = [
     "gemini-2.0-flash-lite-preview-02-05",
     "gemini-2.0-flash-lite-preview",
     "gemini-exp-1206",
+    "gemini-2.5-flash-preview-tts",
+    "gemini-2.5-pro-preview-tts",
     "gemma-3-1b-it",
     "gemma-3-4b-it",
     "gemma-3-12b-it",
     "gemma-3-27b-it",
+    "gemma-3n-e4b-it",
+    "gemma-3n-e2b-it",
     "gemini-flash-latest",
     "gemini-flash-lite-latest",
     "gemini-pro-latest",
     "gemini-2.5-flash-lite",
+    "gemini-2.5-flash-image-preview",
+    "gemini-2.5-flash-image",
+    "gemini-2.5-flash-preview-09-2025",
+    "gemini-2.5-flash-lite-preview-09-2025",
     "gemini-3-pro-preview",
     "gemini-3-flash-preview",
-    "gemini-1.5-flash" // Sécurité ultime (le plus stable)
+    "gemini-3-pro-image-preview",
+    "nano-banana-pro-preview",
+    "gemini-1.5-flash" // Sécurité ultime
 ];
-
-const GOAL_LABELS: Record<string, string> = {
-    loseWeight: "perte de poids (repas riches en protéines, rassasiants, modérés en calories)",
-    gainMuscle: "prise de muscle (repas riches en protéines et en calories)",
-    maintain: "maintien du poids (repas équilibrés)",
-};
-
-const DIET_LABELS: Record<string, string> = {
-    vegetarian: "végétarien (sans viande ni poisson)",
-    vegan: "végétalien (sans aucun produit d'origine animale)",
-    pescetarian: "pescétarien (sans viande, poisson autorisé)",
-    halal: "halal",
-    kosher: "kasher",
-};
 
 Deno.serve(async (req) => {
     // === GESTION DU PREFLIGHT (CORS) ===
@@ -204,7 +206,7 @@ Deno.serve(async (req) => {
         return new Response('ok', { headers: corsHeaders })
     }
 
-    // === 1. RECUPERATION DU BODY, avant le quota pour connaître la langue ===
+    // === 1. RECUPERATION DU BODY (L'image de Flutter), avant le quota pour connaître la langue ===
     let body: Record<string, unknown> = {};
     let bodyParseError = false;
     try {
@@ -216,7 +218,7 @@ Deno.serve(async (req) => {
     const isEn = lang === 'en';
 
     // === QUOTA QUOTIDIEN PAR UTILISATEUR ===
-    const quota = await checkAndIncrementQuota(req, 'meal-suggestions', 10, corsHeaders, 300, lang);
+    const quota = await checkAndIncrementQuota(req, 'analyze-menu', 20, corsHeaders, 500, lang);
     if (!quota.ok) {
         return quota.response!;
     }
@@ -226,39 +228,13 @@ Deno.serve(async (req) => {
             throw new Error(isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé.");
         }
 
-        const {
-            goal,
-            targetKcal,
-            targetProt,
-            targetGluc,
-            targetLip,
-            dietType,
-            allergies,
-            count,
-            days,
-            mealsPerDay,
-            availableIngredients,
-        } = body;
-
-        // Plan hebdomadaire (weekly_meal_plan_provider.dart) : `days` remplace
-        // `count`, plafonné pour rester dans une seule réponse IA raisonnable.
-        const isWeeklyPlan = Number.isFinite(days) && (days as number) > 1;
-        const weeklyMealsPerDay = Number.isFinite(mealsPerDay) && (mealsPerDay as number) > 0
-            ? Math.min(mealsPerDay as number, 5)
-            : 3;
-        const suggestionCount = isWeeklyPlan
-            ? Math.min((days as number) * weeklyMealsPerDay, 35)
-            : (Number.isFinite(count) && count > 0 ? Math.min(count, 10) : 6);
-        const goalLabel = GOAL_LABELS[goal as string] ?? GOAL_LABELS.maintain;
-        const dietLabel = DIET_LABELS[dietType as string];
-        const allergyList: string[] = Array.isArray(allergies)
-            ? allergies.filter((a) => typeof a === 'string' && a.trim().length > 0)
-            : [];
-        // Photo frigo/placard (voir analyze-pantry/index.ts) : priorise ces
-        // ingrédients déjà disponibles plutôt que d'en proposer de nouveaux.
-        const availableIngredientsList: string[] = Array.isArray(availableIngredients)
-            ? availableIngredients.filter((a) => typeof a === 'string' && a.trim().length > 0)
-            : [];
+        const { image } = body;
+        if (!image) {
+            throw new Error(isEn ? "No image was provided in the request." : "Aucune image n'a été fournie dans la requête.");
+        }
+        const langInstruction = isEn
+            ? "Respond with English text values (ingredient names) in the JSON."
+            : "Réponds avec des valeurs textuelles en français (noms des ingrédients) dans le JSON.";
 
         // === 2. VÉRIFICATION CLÉ API GEMINI ===
         const apiKey = Deno.env.get('GEMINI_API_KEY');
@@ -267,50 +243,27 @@ Deno.serve(async (req) => {
             throw new Error(isEn ? "Missing server configuration (API Key)." : "Configuration serveur manquante (API Key).");
         }
 
-        // === 3. PRÉPARATION DU PROMPT ===
-        const constraintLines = [];
-        if (dietLabel) {
-            constraintLines.push(`Régime à respecter STRICTEMENT : ${dietLabel}.`);
-        }
-        if (allergyList.length > 0) {
-            constraintLines.push(
-                `Allergies/intolérances à éviter ABSOLUMENT, dans aucun ingrédient : ${allergyList.join(', ')}.`,
-            );
-        }
-        if (availableIngredientsList.length > 0) {
-            constraintLines.push(
-                `Utilise EN PRIORITÉ ces ingrédients déjà disponibles dans le frigo/placard de l'utilisateur : ${availableIngredientsList.join(', ')}. Chaque recette proposée doit utiliser un maximum de ces ingrédients ; tu peux compléter avec quelques ingrédients de base courants (sel, huile, épices, eau...) si nécessaire.`,
-            );
-        }
-        const constraintsText = constraintLines.length > 0 ? `\n${constraintLines.join('\n')}` : '';
-        const langInstruction = lang === 'en'
-            ? "Respond with English text values (title, description, timeSlot, ingredients, steps) in the JSON."
-            : "Réponds avec des valeurs textuelles en français (title, description, timeSlot, ingredients, steps) dans le JSON.";
-
-        const weeklyPlanInstruction = isWeeklyPlan
-            ? `\nRépartis ces ${suggestionCount} repas sur ${days} jours (${weeklyMealsPerDay} repas/jour), en indiquant pour chacun le numéro du jour dans le champ "day" (1 = premier jour, ${days} = dernier). Varie les plats d'un jour à l'autre, ne répète jamais le même plat sur deux jours différents.`
-            : '';
-        const dayFieldExample = isWeeklyPlan ? '\n      "day": 1,' : '';
-
+        // === 3. PRÉPARATION DU PROMPT NUTRITION ===
         const promptText = `
-Tu es AI Health Chef, un coach en nutrition expert et créatif.
-Propose ${suggestionCount} idées de repas variées et réalistes, adaptées à un objectif de ${goalLabel}.
-L'utilisateur vise environ ${targetKcal ?? 2200} kcal, ${targetProt ?? 160}g de protéines, ${targetGluc ?? 250}g de glucides et ${targetLip ?? 75}g de lipides par jour au total.${constraintsText}${weeklyPlanInstruction}
-Varie les moments de la journée (Petit-déjeuner, Déjeuner, Dîner, Collation) et les types de plats — ne propose jamais deux fois le même plat.
-Pour chaque plat, donne aussi la liste des ingrédients (avec quantités approximatives) et les étapes de préparation, courtes et actionnables.
-Tu DOIS répondre UNIQUEMENT avec un JSON strict, sans balises markdown ni texte autour, au format exact suivant :
+Tu es un nutritionniste expert et un chef cuisinier.
+Cette photo montre le menu (carte) d'un restaurant : une liste de plats, chacun avec un nom, parfois une description et un prix — CE N'EST PAS une photo d'assiette.
+Identifie chaque plat proposé au menu. Pour CHACUN, estime une portion typique servie au restaurant en grammes (weight), et fournis les macronutriments (kcal, protéines, glucides, lipides, fibres, sucres, acides gras saturés) POUR 100 GRAMMES de ce plat, en te basant sur des plats similaires courants.
+Ignore les lignes qui ne sont pas des plats (titres de section, prix seuls, allergènes, coordonnées du restaurant).
+Tu DOIS répondre UNIQUEMENT au format JSON strict, sans aucun autre texte autour ni balises markdown.
+Le JSON doit avoir cette structure exacte :
 {
-  "suggestions": [
+  "ingredients": [
     {
-      "timeSlot": "Déjeuner",
-      "title": "Nom court et appétissant du plat",
-      "kcal": 380,
-      "prot": 32,
-      "gluc": 25,
-      "lip": 18,
-      "description": "Une phrase courte expliquant pourquoi ce repas convient à l'objectif.",
-      "ingredients": ["150g de blanc de poulet", "100g de riz basmati", "..."],
-      "steps": ["Faire cuire le riz...", "Assaisonner le poulet...", "..."]${dayFieldExample}
+      "id": "1",
+      "name": "Nom du plat",
+      "weight": 350,
+      "kcalPer100g": 180,
+      "protPer100g": 12.0,
+      "glucPer100g": 15.0,
+      "lipPer100g": 8.0,
+      "fiberPer100g": 2.0,
+      "sugarPer100g": 3.0,
+      "satFatPer100g": 3.0
     }
   ]
 }
@@ -331,9 +284,15 @@ ${langInstruction}`;
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            contents: [{ parts: [{ text: promptText }] }],
+                            contents: [{
+                                parts: [
+                                    { text: promptText },
+                                    // Gemini attend l'image dans ce format spécifique "inlineData"
+                                    { inlineData: { mimeType: "image/jpeg", data: image } }
+                                ]
+                            }],
                             generationConfig: {
-                                temperature: 0.8 // Un peu de créativité pour varier les suggestions
+                                temperature: 0.2 // Température basse pour avoir un JSON consistant
                             }
                         })
                     }
@@ -349,10 +308,10 @@ ${langInstruction}`;
 
                 const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!textResponse) {
-                    console.warn(`Échec ${modelName} : Réponse vide.`);
-                    continue;
+                    throw new Error(isEn ? "Empty response or no text generated." : "Réponse vide ou sans texte généré.");
                 }
 
+                // Si ça marche, on sauvegarde le texte et on casse la boucle !
                 successData = textResponse;
                 usedModel = modelName;
                 break;
@@ -373,10 +332,10 @@ ${langInstruction}`;
             );
         }
 
-        console.log(`SUCCÈS : Suggestions générées avec ${usedModel}`);
+        console.log(`SUCCÈS : Analyse générée avec ${usedModel}`);
 
-        // Nettoyage : on retire les éventuelles balises ```json que l'IA pourrait ajouter
-        const jsonString = successData.replace(/```json/gi, '').replace(/```/g, '').trim();
+        // Nettoyage : On retire les éventuelles balises ```json que l'IA pourrait ajouter
+        let jsonString = successData.replace(/```json/gi, '').replace(/```/g, '').trim();
 
         let parsedJson;
         try {
@@ -389,14 +348,16 @@ ${langInstruction}`;
             );
         }
 
+        // On renvoie le JSON propre à notre application Flutter
         return new Response(JSON.stringify(parsedJson), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
         })
 
     } catch (error) {
-        console.error("Erreur fatale Edge Function (Meal Suggestions):", error.message);
+        console.error("Erreur fatale Edge Function:", error.message);
 
+        // On renvoie l'erreur au format JSON pour que Flutter puisse l'afficher dans le SnackBar
         return new Response(JSON.stringify({ error: error.message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400,

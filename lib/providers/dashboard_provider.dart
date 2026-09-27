@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/database_service.dart';
+import '../services/home_widget_service.dart';
 import '../local_db/app_database.dart' show HydrationEntry, WeightEntry;
 import '../local_db/local_db_provider.dart';
 import '../models/meal.dart';
+import '../utils/nutrition_targets.dart';
+import 'profile_provider.dart';
 
 // On rend le service accessible
 final databaseServiceProvider = Provider<DatabaseService>((ref) {
@@ -52,4 +55,22 @@ final hydrationTodayProvider = FutureProvider<List<HydrationEntry>>((
 ) async {
   final hydrationRepository = ref.watch(hydrationRepositoryProvider);
   return await hydrationRepository.getTodayEntries();
+});
+
+/// Pousse les macros du jour et le streak vers le widget écran d'accueil
+/// Android à chaque changement des repas/profil/streak — même pattern que
+/// les autres reconcilers du dashboard (voir weightStagnationReconcilerProvider).
+final homeWidgetReconcilerProvider = FutureProvider<void>((ref) async {
+  final meals = await ref.watch(todayMealsProvider.future);
+  final profile = await ref.watch(profileProvider.future);
+  final streak = await ref.watch(currentStreakProvider.future);
+
+  final targets = computeNutritionTargets(profile);
+  final totalKcal = meals.fold<int>(0, (sum, meal) => sum + meal.totalKcal);
+
+  await HomeWidgetService.update(
+    kcal: totalKcal,
+    targetKcal: targets.kcal,
+    streak: streak,
+  );
 });

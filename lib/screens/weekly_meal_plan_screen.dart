@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/meal_suggestion.dart';
+import '../providers/profile_provider.dart';
 import '../providers/shopping_list_provider.dart';
 import '../providers/weekly_meal_plan_provider.dart';
+import '../utils/journal_export.dart';
 import '../utils/weekday_name.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/meal_suggestion_card.dart';
@@ -19,6 +21,7 @@ class WeeklyMealPlanScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final planAsync = ref.watch(weeklyMealPlanProvider);
+    final allergies = ref.watch(profileProvider).value?.allergies ?? const [];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -35,6 +38,20 @@ class WeeklyMealPlanScreen extends ConsumerWidget {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.event_available_outlined, color: kCoachPrimaryColor),
+            tooltip: context.l10n.weeklyMealPlanExportCalendarTooltip,
+            onPressed: () async {
+              try {
+                await exportWeeklyMealPlanIcs(ref);
+              } catch (_) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(context.l10n.weeklyMealPlanExportCalendarError)),
+                );
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: kCoachPrimaryColor),
             tooltip: context.l10n.weeklyMealPlanRegenerateTooltip,
@@ -123,6 +140,7 @@ class WeeklyMealPlanScreen extends ConsumerWidget {
                     for (final meal in byDay[day]!) ...[
                       MealSuggestionCard(
                         suggestion: meal,
+                        allergies: allergies,
                         onAdd: () => openCoachChatSheet(
                           context,
                           presetMessage: context.l10n.mealSuggestionsAdjustPresetMessage(meal.title),

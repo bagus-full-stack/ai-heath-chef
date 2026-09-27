@@ -118,6 +118,8 @@
   "cameraCaptureChooseGalleryPhotoButton": "Choisir une photo depuis la galerie",
   "cameraCaptureFrameMealHint": "Cadrez votre plat au centre",
   "cameraCaptureFrameProductHint": "Cadrez l’étiquette du produit",
+  "cameraCaptureFrameMenuHint": "Cadrez la carte du restaurant",
+  "cameraCaptureFrameFridgeHint": "Cadrez l'intérieur du frigo ou du placard",
   "cameraCaptureGalleryButton": "GALERIE",
   "cameraCaptureGalleryOpenError": "Impossible d’ouvrir la galerie : {error}",
   "@cameraCaptureGalleryOpenError": {
@@ -133,6 +135,8 @@
   "cameraCaptureModeManual": "Manuel",
   "cameraCaptureModeMeal": "Repas",
   "cameraCaptureModeProduct": "Produit",
+  "cameraCaptureModeMenu": "Menu",
+  "cameraCaptureModeFridge": "Frigo",
   "cameraCaptureModeScanner": "Scanner",
   "cameraCaptureNoCameraMessage": "Aucune caméra disponible sur cet appareil.",
   "cameraCaptureOpenCameraError": "Impossible d’ouvrir la caméra : {error}",
@@ -585,6 +589,22 @@
   },
   "mealSuggestionRecipeIngredientsTitle": "INGRÉDIENTS",
   "mealSuggestionRecipeStepsTitle": "PRÉPARATION",
+  "mealSuggestionRecipeAllergyWarning": "Contient un allergène déclaré — remplacer par : {substitute}",
+  "@mealSuggestionRecipeAllergyWarning": {
+    "placeholders": {
+      "substitute": {
+        "type": "String"
+      }
+    }
+  },
+  "mealSuggestionRecipeSubstituteMessage": "Pas ça sous la main ? Remplacer par : {substitute}",
+  "@mealSuggestionRecipeSubstituteMessage": {
+    "placeholders": {
+      "substitute": {
+        "type": "String"
+      }
+    }
+  },
   "mealSuggestionsEmptyMessage": "Aucune idée de repas disponible pour le moment.",
   "mealSuggestionsLoadError": "Impossible de générer des idées de repas pour le moment.",
   "mealSuggestionsRegenerateTooltip": "Régénérer",
@@ -596,6 +616,8 @@
   "weeklyMealPlanLoadError": "Impossible de générer le plan de repas pour le moment.",
   "weeklyMealPlanRetryButton": "Réessayer",
   "weeklyMealPlanRegenerateTooltip": "Régénérer",
+  "weeklyMealPlanExportCalendarTooltip": "Exporter vers le calendrier",
+  "weeklyMealPlanExportCalendarError": "Impossible d'exporter le plan de repas vers le calendrier.",
   "weeklyMealPlanAddAllButton": "Tout ajouter à la liste de courses",
   "weeklyMealPlanAddAllMessage": "{count} repas ajoutés à la liste de courses",
   "@weeklyMealPlanAddAllMessage": {
@@ -811,6 +833,8 @@
   "profileDietaryPrefsTitle": "Préférences alimentaires",
   "profileExportJournalSubtitle": "Partager mes repas (CSV)",
   "profileExportJournalTitle": "Exporter mon journal",
+  "profileExportPdfSubtitle": "Bilan hebdo pour ton nutritionniste (PDF)",
+  "profileExportPdfTitle": "Exporter le bilan hebdo",
   "profileGoalLabel": "Objectif",
   "profileGoalsSubtitle": "Calories et macros",
   "profileGoalsTitle": "Mes objectifs",
@@ -977,6 +1001,22 @@
       }
     }
   },
+  "svcErrorAnalyzeMenu": "Erreur lors de l'analyse du menu : {error}",
+  "@svcErrorAnalyzeMenu": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorAnalyzePantry": "Erreur lors de l'analyse du frigo/placard : {error}",
+  "@svcErrorAnalyzePantry": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "svcErrorCoachChat": "Erreur de connexion avec le Coach IA : {error}",
   "@svcErrorCoachChat": {
     "placeholders": {
@@ -1132,5 +1172,56 @@
   "weightTrendTitle": "Suivi du poids",
   "weightTrendWeeklyReminderAddedMessage": "Rappel de pesée hebdomadaire programmé.",
   "weightTrendWeeklyReminderButton": "Me rappeler de me peser chaque semaine",
-  "weightTrendWeeklyReminderName": "Pesée hebdomadaire"
+  "weightTrendWeeklyReminderName": "Pesée hebdomadaire",
+  "menuScanTitle": "Scan du menu",
+  "menuScanLoadingMessage": "L'IA lit la carte du restaurant...",
+  "menuScanEmptyMessage": "Aucun plat détecté sur cette photo. Réessaie avec une photo plus nette de la carte.",
+  "menuScanAddButton": "Ajouter au journal",
+  "menuScanAddedMessage": "\"{name}\" ajouté au journal.",
+  "@menuScanAddedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fastingTitle": "Jeûne intermittent",
+  "fastingStatusFasting": "Jeûne en cours",
+  "fastingStatusIdle": "Aucun jeûne en cours",
+  "fastingGoalLabel": "Objectif",
+  "fastingHoursValue": "{hours}h",
+  "@fastingHoursValue": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "fastingElapsedValue": "{hours}h{minutes}",
+  "@fastingElapsedValue": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "fastingStartButton": "Démarrer le jeûne",
+  "fastingStopButton": "Terminer le jeûne",
+  "fastingGoalReachedMessage": "Objectif atteint 🎉",
+  "profileFastingTitle": "Jeûne intermittent",
+  "profileFastingSubtitle": "Fenêtre horaire et minuteur",
+  "profileExportMonthlyPdfTitle": "Exporter le bilan mensuel",
+  "profileExportMonthlyPdfSubtitle": "Bilan de 30 jours pour ton nutritionniste",
+  "pantryScanTitle": "Scan du frigo",
+  "pantryScanLoadingMessage": "L'IA identifie les aliments disponibles...",
+  "pantryScanEmptyMessage": "Aucun aliment détecté sur cette photo. Réessaie avec une photo plus nette, ou ajoute-les manuellement.",
+  "pantryScanAddHint": "Ajouter un aliment manuellement",
+  "pantryScanGenerateButton": "Générer des recettes",
+  "pantryRecipesTitle": "Recettes suggérées",
+  "pantryRecipesLoadError": "Impossible de générer des recettes pour le moment.",
+  "pantryRecipesRetryButton": "Réessayer",
+  "pantryRecipesEmptyMessage": "Aucune recette générée."
 }

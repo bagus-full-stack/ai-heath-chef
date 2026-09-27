@@ -197,6 +197,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cameraCaptureFrameProductHint => 'Cadrez l’étiquette du produit';
 
   @override
+  String get cameraCaptureFrameMenuHint => 'Cadrez la carte du restaurant';
+
+  @override
+  String get cameraCaptureFrameFridgeHint =>
+      'Cadrez l\'intérieur du frigo ou du placard';
+
+  @override
   String get cameraCaptureGalleryButton => 'GALERIE';
 
   @override
@@ -222,6 +229,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cameraCaptureModeProduct => 'Produit';
+
+  @override
+  String get cameraCaptureModeMenu => 'Menu';
+
+  @override
+  String get cameraCaptureModeFridge => 'Frigo';
 
   @override
   String get cameraCaptureModeScanner => 'Scanner';
@@ -1021,6 +1034,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mealSuggestionRecipeStepsTitle => 'PRÉPARATION';
 
   @override
+  String mealSuggestionRecipeAllergyWarning(String substitute) {
+    return 'Contient un allergène déclaré — remplacer par : $substitute';
+  }
+
+  @override
+  String mealSuggestionRecipeSubstituteMessage(String substitute) {
+    return 'Pas ça sous la main ? Remplacer par : $substitute';
+  }
+
+  @override
   String get mealSuggestionsEmptyMessage =>
       'Aucune idée de repas disponible pour le moment.';
 
@@ -1056,6 +1079,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get weeklyMealPlanRegenerateTooltip => 'Régénérer';
+
+  @override
+  String get weeklyMealPlanExportCalendarTooltip =>
+      'Exporter vers le calendrier';
+
+  @override
+  String get weeklyMealPlanExportCalendarError =>
+      'Impossible d\'exporter le plan de repas vers le calendrier.';
 
   @override
   String get weeklyMealPlanAddAllButton => 'Tout ajouter à la liste de courses';
@@ -1488,6 +1519,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get profileExportJournalTitle => 'Exporter mon journal';
 
   @override
+  String get profileExportPdfSubtitle =>
+      'Bilan hebdo pour ton nutritionniste (PDF)';
+
+  @override
+  String get profileExportPdfTitle => 'Exporter le bilan hebdo';
+
+  @override
   String get profileGoalLabel => 'Objectif';
 
   @override
@@ -1818,6 +1856,16 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String svcErrorAnalyzeMenu(String error) {
+    return 'Erreur lors de l\'analyse du menu : $error';
+  }
+
+  @override
+  String svcErrorAnalyzePantry(String error) {
+    return 'Erreur lors de l\'analyse du frigo/placard : $error';
+  }
+
+  @override
   String svcErrorCoachChat(String error) {
     return 'Erreur de connexion avec le Coach IA : $error';
   }
@@ -1970,4 +2018,96 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get weightTrendWeeklyReminderName => 'Pesée hebdomadaire';
+
+  @override
+  String get menuScanTitle => 'Scan du menu';
+
+  @override
+  String get menuScanLoadingMessage => 'L\'IA lit la carte du restaurant...';
+
+  @override
+  String get menuScanEmptyMessage =>
+      'Aucun plat détecté sur cette photo. Réessaie avec une photo plus nette de la carte.';
+
+  @override
+  String get menuScanAddButton => 'Ajouter au journal';
+
+  @override
+  String menuScanAddedMessage(String name) {
+    return '\"$name\" ajouté au journal.';
+  }
+
+  @override
+  String get fastingTitle => 'Jeûne intermittent';
+
+  @override
+  String get fastingStatusFasting => 'Jeûne en cours';
+
+  @override
+  String get fastingStatusIdle => 'Aucun jeûne en cours';
+
+  @override
+  String get fastingGoalLabel => 'Objectif';
+
+  @override
+  String fastingHoursValue(String hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String fastingElapsedValue(String hours, String minutes) {
+    return '${hours}h$minutes';
+  }
+
+  @override
+  String get fastingStartButton => 'Démarrer le jeûne';
+
+  @override
+  String get fastingStopButton => 'Terminer le jeûne';
+
+  @override
+  String get fastingGoalReachedMessage => 'Objectif atteint 🎉';
+
+  @override
+  String get profileFastingTitle => 'Jeûne intermittent';
+
+  @override
+  String get profileFastingSubtitle => 'Fenêtre horaire et minuteur';
+
+  @override
+  String get profileExportMonthlyPdfTitle => 'Exporter le bilan mensuel';
+
+  @override
+  String get profileExportMonthlyPdfSubtitle =>
+      'Bilan de 30 jours pour ton nutritionniste';
+
+  @override
+  String get pantryScanTitle => 'Scan du frigo';
+
+  @override
+  String get pantryScanLoadingMessage =>
+      'L\'IA identifie les aliments disponibles...';
+
+  @override
+  String get pantryScanEmptyMessage =>
+      'Aucun aliment détecté sur cette photo. Réessaie avec une photo plus nette, ou ajoute-les manuellement.';
+
+  @override
+  String get pantryScanAddHint => 'Ajouter un aliment manuellement';
+
+  @override
+  String get pantryScanGenerateButton => 'Générer des recettes';
+
+  @override
+  String get pantryRecipesTitle => 'Recettes suggérées';
+
+  @override
+  String get pantryRecipesLoadError =>
+      'Impossible de générer des recettes pour le moment.';
+
+  @override
+  String get pantryRecipesRetryButton => 'Réessayer';
+
+  @override
+  String get pantryRecipesEmptyMessage => 'Aucune recette générée.';
 }

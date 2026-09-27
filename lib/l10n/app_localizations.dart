@@ -434,6 +434,18 @@ abstract class AppLocalizations {
   /// **'Cadrez l’étiquette du produit'**
   String get cameraCaptureFrameProductHint;
 
+  /// No description provided for @cameraCaptureFrameMenuHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadrez la carte du restaurant'**
+  String get cameraCaptureFrameMenuHint;
+
+  /// No description provided for @cameraCaptureFrameFridgeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadrez l\'intérieur du frigo ou du placard'**
+  String get cameraCaptureFrameFridgeHint;
+
   /// No description provided for @cameraCaptureGalleryButton.
   ///
   /// In fr, this message translates to:
@@ -481,6 +493,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Produit'**
   String get cameraCaptureModeProduct;
+
+  /// No description provided for @cameraCaptureModeMenu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Menu'**
+  String get cameraCaptureModeMenu;
+
+  /// No description provided for @cameraCaptureModeFridge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frigo'**
+  String get cameraCaptureModeFridge;
 
   /// No description provided for @cameraCaptureModeScanner.
   ///
@@ -1844,6 +1868,18 @@ abstract class AppLocalizations {
   /// **'PRÉPARATION'**
   String get mealSuggestionRecipeStepsTitle;
 
+  /// No description provided for @mealSuggestionRecipeAllergyWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contient un allergène déclaré — remplacer par : {substitute}'**
+  String mealSuggestionRecipeAllergyWarning(String substitute);
+
+  /// No description provided for @mealSuggestionRecipeSubstituteMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas ça sous la main ? Remplacer par : {substitute}'**
+  String mealSuggestionRecipeSubstituteMessage(String substitute);
+
   /// No description provided for @mealSuggestionsEmptyMessage.
   ///
   /// In fr, this message translates to:
@@ -1909,6 +1945,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Régénérer'**
   String get weeklyMealPlanRegenerateTooltip;
+
+  /// No description provided for @weeklyMealPlanExportCalendarTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter vers le calendrier'**
+  String get weeklyMealPlanExportCalendarTooltip;
+
+  /// No description provided for @weeklyMealPlanExportCalendarError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'exporter le plan de repas vers le calendrier.'**
+  String get weeklyMealPlanExportCalendarError;
 
   /// No description provided for @weeklyMealPlanAddAllButton.
   ///
@@ -2666,6 +2714,18 @@ abstract class AppLocalizations {
   /// **'Exporter mon journal'**
   String get profileExportJournalTitle;
 
+  /// No description provided for @profileExportPdfSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan hebdo pour ton nutritionniste (PDF)'**
+  String get profileExportPdfSubtitle;
+
+  /// No description provided for @profileExportPdfTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter le bilan hebdo'**
+  String get profileExportPdfTitle;
+
   /// No description provided for @profileGoalLabel.
   ///
   /// In fr, this message translates to:
@@ -3242,6 +3302,18 @@ abstract class AppLocalizations {
   /// **'Erreur lors de l\'analyse du produit : {error}'**
   String svcErrorAnalyzeProduct(String error);
 
+  /// No description provided for @svcErrorAnalyzeMenu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'analyse du menu : {error}'**
+  String svcErrorAnalyzeMenu(String error);
+
+  /// No description provided for @svcErrorAnalyzePantry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'analyse du frigo/placard : {error}'**
+  String svcErrorAnalyzePantry(String error);
+
   /// No description provided for @svcErrorCoachChat.
   ///
   /// In fr, this message translates to:
@@ -3469,6 +3541,168 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Pesée hebdomadaire'**
   String get weightTrendWeeklyReminderName;
+
+  /// No description provided for @menuScanTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scan du menu'**
+  String get menuScanTitle;
+
+  /// No description provided for @menuScanLoadingMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'IA lit la carte du restaurant...'**
+  String get menuScanLoadingMessage;
+
+  /// No description provided for @menuScanEmptyMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun plat détecté sur cette photo. Réessaie avec une photo plus nette de la carte.'**
+  String get menuScanEmptyMessage;
+
+  /// No description provided for @menuScanAddButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter au journal'**
+  String get menuScanAddButton;
+
+  /// No description provided for @menuScanAddedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'\"{name}\" ajouté au journal.'**
+  String menuScanAddedMessage(String name);
+
+  /// No description provided for @fastingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeûne intermittent'**
+  String get fastingTitle;
+
+  /// No description provided for @fastingStatusFasting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeûne en cours'**
+  String get fastingStatusFasting;
+
+  /// No description provided for @fastingStatusIdle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun jeûne en cours'**
+  String get fastingStatusIdle;
+
+  /// No description provided for @fastingGoalLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif'**
+  String get fastingGoalLabel;
+
+  /// No description provided for @fastingHoursValue.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hours}h'**
+  String fastingHoursValue(String hours);
+
+  /// No description provided for @fastingElapsedValue.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hours}h{minutes}'**
+  String fastingElapsedValue(String hours, String minutes);
+
+  /// No description provided for @fastingStartButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Démarrer le jeûne'**
+  String get fastingStartButton;
+
+  /// No description provided for @fastingStopButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminer le jeûne'**
+  String get fastingStopButton;
+
+  /// No description provided for @fastingGoalReachedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif atteint 🎉'**
+  String get fastingGoalReachedMessage;
+
+  /// No description provided for @profileFastingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeûne intermittent'**
+  String get profileFastingTitle;
+
+  /// No description provided for @profileFastingSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fenêtre horaire et minuteur'**
+  String get profileFastingSubtitle;
+
+  /// No description provided for @profileExportMonthlyPdfTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter le bilan mensuel'**
+  String get profileExportMonthlyPdfTitle;
+
+  /// No description provided for @profileExportMonthlyPdfSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan de 30 jours pour ton nutritionniste'**
+  String get profileExportMonthlyPdfSubtitle;
+
+  /// No description provided for @pantryScanTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scan du frigo'**
+  String get pantryScanTitle;
+
+  /// No description provided for @pantryScanLoadingMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'IA identifie les aliments disponibles...'**
+  String get pantryScanLoadingMessage;
+
+  /// No description provided for @pantryScanEmptyMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun aliment détecté sur cette photo. Réessaie avec une photo plus nette, ou ajoute-les manuellement.'**
+  String get pantryScanEmptyMessage;
+
+  /// No description provided for @pantryScanAddHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un aliment manuellement'**
+  String get pantryScanAddHint;
+
+  /// No description provided for @pantryScanGenerateButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Générer des recettes'**
+  String get pantryScanGenerateButton;
+
+  /// No description provided for @pantryRecipesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recettes suggérées'**
+  String get pantryRecipesTitle;
+
+  /// No description provided for @pantryRecipesLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de générer des recettes pour le moment.'**
+  String get pantryRecipesLoadError;
+
+  /// No description provided for @pantryRecipesRetryButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get pantryRecipesRetryButton;
+
+  /// No description provided for @pantryRecipesEmptyMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune recette générée.'**
+  String get pantryRecipesEmptyMessage;
 }
 
 class _AppLocalizationsDelegate
