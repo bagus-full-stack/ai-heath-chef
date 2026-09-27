@@ -13,7 +13,8 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Analyse de produit par photo** — même principe pour un produit emballé (Edge Function `analyze-product`), lit l'étiquette nutritionnelle plutôt qu'une assiette
 - **Scan de code-barres** — recherche instantanée d'un produit (EAN/UPC) via la base publique Open Food Facts, sans appel IA
 - **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`), et idées de repas personnalisées selon le profil/objectif (Edge Function `meal-suggestions`, mises en cache un jour à la fois), chacune illustrée par une image générée via Pollinations.ai (Edge Function `meal-images`, voir ci-dessous)
-- **Liste de courses** — alimentée en un tap depuis les ingrédients d'une idée de repas du Coach IA, cochable, persistée localement
+- **Plan de repas hebdomadaire** — génère en un seul appel IA un plan complet (7 jours × 3 repas) adapté au profil/régime/allergies, mis en cache par semaine, ouvert depuis l'icône calendrier de l'écran "Idées repas" ; chaque repas garde recette/macros et peut être ajouté individuellement à la liste de courses, ou la semaine entière en un tap. Pas d'illustrations IA générées pour ce plan (21 repas d'un coup serait trop coûteux/lent) — les cartes retombent sur l'icône du moment de la journée
+- **Liste de courses** — alimentée en un tap depuis les ingrédients d'une idée de repas du Coach IA (ou du plan hebdomadaire), cochable, persistée localement
 - **Suivi du poids** — historique des pesées (synchronisé, voir [Hors ligne](#fonctionnalités) ci-dessus) avec courbe de progression, et rappel hebdomadaire de pesée réutilisant le système de rappels personnalisés (voir ci-dessous)
 - **Export du journal alimentaire** — export CSV des repas des N derniers jours, partagé via le sélecteur natif (utilisable avec un nutritionniste, Excel/Sheets)
 - **Personnalisation du Coach IA** — choix du ton des réponses (motivant, bienveillant, direct, humoristique)
@@ -70,7 +71,7 @@ lib/
                 MealReminder, CustomReminder, MealAnalysisArgs, ShoppingItem
   providers/    State management Riverpod : auth, profile, dashboard (journal du jour et
                 hydratation, lus depuis la base locale), meal (analyse/scan en cours),
-                meal_suggestions, chat, onboarding, purchase (entitlement PRO/admin),
+                meal_suggestions, weekly_meal_plan, chat, onboarding, purchase (entitlement PRO/admin),
                 notification_settings, custom_reminders, shopping_list, local_ai
                 (activation/téléchargement de l'IA locale), locale (langue choisie, persistée)
   screens/      Écrans de l'application (dashboard, coach, profil, compte, sécurité,
@@ -113,7 +114,7 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0011) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0013) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
    - `0001` : tables `profiles`, `meals`, `chat_messages` + policies RLS + bucket `avatars`
    - `0002` : taille (`height_cm`) sur `profiles`
    - `0003` : table `meal_suggestions` (cache des idées de repas IA)
@@ -125,6 +126,8 @@ flutter pub get
    - `0009` : table `global_api_usage` + fonction `increment_global_api_usage`, pour le quota global (tous utilisateurs confondus) qui protège le budget/débit partagé de `GEMINI_API_KEY` (voir ci-dessous)
    - `0010` : fibres/sucres/graisses saturées (`total_fiber`/`total_sugar`/`total_sat_fat` sur `meals`), en plus des macros principales
    - `0011` : tables `weight_entries`, `hydration_entries` et `custom_reminders_backup` — synchronisation cross-device du poids, de l'hydratation et des rappels personnalisés (voir [Notes](#notes))
+   - `0012` : photo de progression (`image_url`/`local_image_path` sur `weight_entries`) + bucket `weight_photos`
+   - `0013` : table `weekly_meal_plans` (cache du plan de repas hebdomadaire généré par l'IA)
 3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
    - Chaque fonction est **autonome** (aucun import relatif vers `_shared/`) : un simple copier-coller de son `index.ts` dans l'éditeur du Dashboard Supabase suffit à la déployer/redéployer, sans erreur de bundling.
 4. **Illustrations des idées de repas (optionnel, 100% gratuit)** — `meal-images` génère une image IA par suggestion, en cascade entre deux fournisseurs gratuits :

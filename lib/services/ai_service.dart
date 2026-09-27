@@ -122,6 +122,11 @@ class AIService {
     String dietType = 'none',
     List<String> allergies = const [],
     int count = 6,
+    // Plan hebdomadaire (voir weekly_meal_plan_provider.dart) : quand fourni,
+    // `days`/`mealsPerDay` remplacent `count` et chaque suggestion revient
+    // avec son champ `day` (1..days) rempli.
+    int? days,
+    int? mealsPerDay,
     String lang = 'fr',
   }) async {
     try {
@@ -136,6 +141,8 @@ class AIService {
           'dietType': dietType,
           'allergies': allergies,
           'count': count,
+          if (days != null) 'days': days,
+          if (mealsPerDay != null) 'mealsPerDay': mealsPerDay,
           'lang': lang,
         },
       );

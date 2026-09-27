@@ -324,6 +324,21 @@
   "mealSuggestionsRegenerateTooltip": "Regenerate",
   "mealSuggestionsRetryButton": "Try again",
   "mealSuggestionsTitle": "Meal ideas",
+  "mealSuggestionsWeeklyPlanTooltip": "Weekly plan",
+  "weeklyMealPlanTitle": "This week's meal plan",
+  "weeklyMealPlanEmptyMessage": "No meal plan available right now.",
+  "weeklyMealPlanLoadError": "Couldn't generate the meal plan right now.",
+  "weeklyMealPlanRetryButton": "Try again",
+  "weeklyMealPlanRegenerateTooltip": "Regenerate",
+  "weeklyMealPlanAddAllButton": "Add everything to the shopping list",
+  "weeklyMealPlanAddAllMessage": "{count} meals added to the shopping list",
+  "@weeklyMealPlanAddAllMessage": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "notificationSettingsAddButton": "Add",
   "notificationSettingsAddSubmitButton": "Add",
   "notificationSettingsCustomRemindersLoadError": "We couldn't load your custom reminders.",

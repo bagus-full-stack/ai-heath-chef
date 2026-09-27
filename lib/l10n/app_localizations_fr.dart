@@ -1038,6 +1038,34 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mealSuggestionsTitle => 'Idées repas';
 
   @override
+  String get mealSuggestionsWeeklyPlanTooltip => 'Plan de la semaine';
+
+  @override
+  String get weeklyMealPlanTitle => 'Plan de repas de la semaine';
+
+  @override
+  String get weeklyMealPlanEmptyMessage =>
+      'Aucun plan de repas disponible pour le moment.';
+
+  @override
+  String get weeklyMealPlanLoadError =>
+      'Impossible de générer le plan de repas pour le moment.';
+
+  @override
+  String get weeklyMealPlanRetryButton => 'Réessayer';
+
+  @override
+  String get weeklyMealPlanRegenerateTooltip => 'Régénérer';
+
+  @override
+  String get weeklyMealPlanAddAllButton => 'Tout ajouter à la liste de courses';
+
+  @override
+  String weeklyMealPlanAddAllMessage(String count) {
+    return '$count repas ajoutés à la liste de courses';
+  }
+
+  @override
   String get notificationSettingsAddButton => 'Ajouter';
 
   @override

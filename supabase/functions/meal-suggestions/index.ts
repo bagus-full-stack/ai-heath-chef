@@ -235,9 +235,19 @@ Deno.serve(async (req) => {
             dietType,
             allergies,
             count,
+            days,
+            mealsPerDay,
         } = body;
 
-        const suggestionCount = Number.isFinite(count) && count > 0 ? Math.min(count, 10) : 6;
+        // Plan hebdomadaire (weekly_meal_plan_provider.dart) : `days` remplace
+        // `count`, plafonné pour rester dans une seule réponse IA raisonnable.
+        const isWeeklyPlan = Number.isFinite(days) && (days as number) > 1;
+        const weeklyMealsPerDay = Number.isFinite(mealsPerDay) && (mealsPerDay as number) > 0
+            ? Math.min(mealsPerDay as number, 5)
+            : 3;
+        const suggestionCount = isWeeklyPlan
+            ? Math.min((days as number) * weeklyMealsPerDay, 35)
+            : (Number.isFinite(count) && count > 0 ? Math.min(count, 10) : 6);
         const goalLabel = GOAL_LABELS[goal as string] ?? GOAL_LABELS.maintain;
         const dietLabel = DIET_LABELS[dietType as string];
         const allergyList: string[] = Array.isArray(allergies)
@@ -266,10 +276,15 @@ Deno.serve(async (req) => {
             ? "Respond with English text values (title, description, timeSlot, ingredients, steps) in the JSON."
             : "Réponds avec des valeurs textuelles en français (title, description, timeSlot, ingredients, steps) dans le JSON.";
 
+        const weeklyPlanInstruction = isWeeklyPlan
+            ? `\nRépartis ces ${suggestionCount} repas sur ${days} jours (${weeklyMealsPerDay} repas/jour), en indiquant pour chacun le numéro du jour dans le champ "day" (1 = premier jour, ${days} = dernier). Varie les plats d'un jour à l'autre, ne répète jamais le même plat sur deux jours différents.`
+            : '';
+        const dayFieldExample = isWeeklyPlan ? '\n      "day": 1,' : '';
+
         const promptText = `
 Tu es AI Health Chef, un coach en nutrition expert et créatif.
 Propose ${suggestionCount} idées de repas variées et réalistes, adaptées à un objectif de ${goalLabel}.
-L'utilisateur vise environ ${targetKcal ?? 2200} kcal, ${targetProt ?? 160}g de protéines, ${targetGluc ?? 250}g de glucides et ${targetLip ?? 75}g de lipides par jour au total.${constraintsText}
+L'utilisateur vise environ ${targetKcal ?? 2200} kcal, ${targetProt ?? 160}g de protéines, ${targetGluc ?? 250}g de glucides et ${targetLip ?? 75}g de lipides par jour au total.${constraintsText}${weeklyPlanInstruction}
 Varie les moments de la journée (Petit-déjeuner, Déjeuner, Dîner, Collation) et les types de plats — ne propose jamais deux fois le même plat.
 Pour chaque plat, donne aussi la liste des ingrédients (avec quantités approximatives) et les étapes de préparation, courtes et actionnables.
 Tu DOIS répondre UNIQUEMENT avec un JSON strict, sans balises markdown ni texte autour, au format exact suivant :
@@ -284,7 +299,7 @@ Tu DOIS répondre UNIQUEMENT avec un JSON strict, sans balises markdown ni texte
       "lip": 18,
       "description": "Une phrase courte expliquant pourquoi ce repas convient à l'objectif.",
       "ingredients": ["150g de blanc de poulet", "100g de riz basmati", "..."],
-      "steps": ["Faire cuire le riz...", "Assaisonner le poulet...", "..."]
+      "steps": ["Faire cuire le riz...", "Assaisonner le poulet...", "..."]${dayFieldExample}
     }
   ]
 }

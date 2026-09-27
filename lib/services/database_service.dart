@@ -48,22 +48,7 @@ class DatabaseService {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 
-    final suggestionsJson = suggestions
-        .map(
-          (s) => {
-            'timeSlot': s.timeSlot,
-            'title': s.title,
-            'kcal': s.kcal,
-            'prot': s.prot,
-            'gluc': s.gluc,
-            'lip': s.lip,
-            'description': s.description,
-            'imageUrl': s.imageUrl,
-            'ingredients': s.ingredients,
-            'steps': s.steps,
-          },
-        )
-        .toList();
+    final suggestionsJson = suggestions.map(_suggestionToJson).toList();
 
     await _supabase.from('meal_suggestions').upsert({
       'user_id': user.id,
@@ -71,5 +56,66 @@ class DatabaseService {
       'suggestions': suggestionsJson,
       'preferences_signature': preferencesSignature,
     }, onConflict: 'user_id,day');
+  }
+
+  Map<String, dynamic> _suggestionToJson(MealSuggestion s) => {
+    'timeSlot': s.timeSlot,
+    'title': s.title,
+    'kcal': s.kcal,
+    'prot': s.prot,
+    'gluc': s.gluc,
+    'lip': s.lip,
+    'description': s.description,
+    'imageUrl': s.imageUrl,
+    'ingredients': s.ingredients,
+    'steps': s.steps,
+    'day': s.day,
+  };
+
+  /// Récupère le plan de repas déjà généré pour cette semaine (clé =
+  /// lundi de la semaine), si les préférences alimentaires n'ont pas changé
+  /// depuis — même logique que [getCachedMealSuggestions] (cache quotidien).
+  Future<List<MealSuggestion>?> getCachedWeeklyMealPlan(
+    String weekStartKey,
+    String preferencesSignature,
+  ) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return null;
+
+    final response = await _supabase
+        .from('weekly_meal_plans')
+        .select('suggestions, preferences_signature')
+        .eq('user_id', user.id)
+        .eq('week_start', weekStartKey)
+        .maybeSingle();
+
+    if (response == null) return null;
+    if ((response['preferences_signature'] as String?) != preferencesSignature) {
+      return null;
+    }
+
+    final suggestions = response['suggestions'] as List<dynamic>;
+    if (suggestions.isEmpty) return null;
+
+    return suggestions
+        .map((item) => MealSuggestion.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Sauvegarde (ou remplace) le plan de repas généré pour cette semaine.
+  Future<void> saveWeeklyMealPlan(
+    String weekStartKey,
+    List<MealSuggestion> suggestions,
+    String preferencesSignature,
+  ) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    await _supabase.from('weekly_meal_plans').upsert({
+      'user_id': user.id,
+      'week_start': weekStartKey,
+      'suggestions': suggestions.map(_suggestionToJson).toList(),
+      'preferences_signature': preferencesSignature,
+    }, onConflict: 'user_id,week_start');
   }
 }

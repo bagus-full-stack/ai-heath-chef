@@ -590,6 +590,21 @@
   "mealSuggestionsRegenerateTooltip": "Régénérer",
   "mealSuggestionsRetryButton": "Réessayer",
   "mealSuggestionsTitle": "Idées repas",
+  "mealSuggestionsWeeklyPlanTooltip": "Plan de la semaine",
+  "weeklyMealPlanTitle": "Plan de repas de la semaine",
+  "weeklyMealPlanEmptyMessage": "Aucun plan de repas disponible pour le moment.",
+  "weeklyMealPlanLoadError": "Impossible de générer le plan de repas pour le moment.",
+  "weeklyMealPlanRetryButton": "Réessayer",
+  "weeklyMealPlanRegenerateTooltip": "Régénérer",
+  "weeklyMealPlanAddAllButton": "Tout ajouter à la liste de courses",
+  "weeklyMealPlanAddAllMessage": "{count} repas ajoutés à la liste de courses",
+  "@weeklyMealPlanAddAllMessage": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "notificationSettingsAddButton": "Ajouter",
   "notificationSettingsAddSubmitButton": "Ajouter",
   "notificationSettingsCustomRemindersLoadError": "Impossible de charger tes rappels personnalisés.",

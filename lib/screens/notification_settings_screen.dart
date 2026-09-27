@@ -1,26 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-
 import '../models/meal_reminder.dart';
 import '../providers/custom_reminders_provider.dart';
 import '../providers/notification_settings_provider.dart';
+import '../utils/weekday_name.dart';
 import '../widgets/animated_async_value.dart';
 import '../l10n/l10n_extensions.dart';
 
 const Color _kPrimaryColor = Color(0xFF6B66FF);
-
-/// Nom du jour de la semaine dans la langue courante ([weekday] : 1 = lundi
-/// ... 7 = dimanche). 2024-01-01 était un lundi, donc `DateTime(2024, 1, weekday)`
-/// tombe toujours sur le bon jour — évite d'écrire 7 clés ARB par langue.
-String _weekdayName(BuildContext context, int weekday, {bool short = false}) {
-  final locale = Localizations.localeOf(context).toString();
-  final date = DateTime(2024, 1, weekday);
-  return short
-      ? DateFormat.E(locale).format(date)
-      : DateFormat.EEEE(locale).format(date);
-}
 
 /// Réglages des rappels : les créneaux fixes (petit-déjeuner/déjeuner/dîner)
 /// avec un interrupteur + une heure chacun, et des rappels personnalisés
@@ -286,7 +274,7 @@ class _ReminderTile extends StatelessWidget {
                         ? (weekday != null
                               ? context.l10n
                                     .notificationSettingsReminderWeeklyAtLabel(
-                                      _weekdayName(context, weekday!),
+                                      weekdayName(context, weekday!),
                                       timeLabel,
                                     )
                               : context.l10n
@@ -480,7 +468,7 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
                 children: [
                   for (var day = DateTime.monday; day <= DateTime.sunday; day++)
                     ChoiceChip(
-                      label: Text(_weekdayName(context, day, short: true)),
+                      label: Text(weekdayName(context, day, short: true)),
                       selected: _weekday == day,
                       selectedColor: _kPrimaryColor.withValues(alpha: 0.15),
                       onSelected: (_) => setState(() => _weekday = day),

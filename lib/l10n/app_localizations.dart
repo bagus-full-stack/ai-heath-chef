@@ -1874,6 +1874,54 @@ abstract class AppLocalizations {
   /// **'Idées repas'**
   String get mealSuggestionsTitle;
 
+  /// No description provided for @mealSuggestionsWeeklyPlanTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plan de la semaine'**
+  String get mealSuggestionsWeeklyPlanTooltip;
+
+  /// No description provided for @weeklyMealPlanTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plan de repas de la semaine'**
+  String get weeklyMealPlanTitle;
+
+  /// No description provided for @weeklyMealPlanEmptyMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun plan de repas disponible pour le moment.'**
+  String get weeklyMealPlanEmptyMessage;
+
+  /// No description provided for @weeklyMealPlanLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de générer le plan de repas pour le moment.'**
+  String get weeklyMealPlanLoadError;
+
+  /// No description provided for @weeklyMealPlanRetryButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get weeklyMealPlanRetryButton;
+
+  /// No description provided for @weeklyMealPlanRegenerateTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Régénérer'**
+  String get weeklyMealPlanRegenerateTooltip;
+
+  /// No description provided for @weeklyMealPlanAddAllButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout ajouter à la liste de courses'**
+  String get weeklyMealPlanAddAllButton;
+
+  /// No description provided for @weeklyMealPlanAddAllMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} repas ajoutés à la liste de courses'**
+  String weeklyMealPlanAddAllMessage(String count);
+
   /// No description provided for @notificationSettingsAddButton.
   ///
   /// In fr, this message translates to:

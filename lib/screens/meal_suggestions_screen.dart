@@ -34,6 +34,11 @@ class MealSuggestionsScreen extends ConsumerWidget {
         centerTitle: true,
         actions: [
           IconButton(
+            icon: const Icon(Icons.calendar_month_outlined, color: kCoachPrimaryColor),
+            tooltip: context.l10n.mealSuggestionsWeeklyPlanTooltip,
+            onPressed: () => context.push('/weekly_meal_plan'),
+          ),
+          IconButton(
             icon: const Icon(Icons.shopping_cart_outlined, color: kCoachPrimaryColor),
             tooltip: context.l10n.shoppingListTitle,
             onPressed: () => context.push('/shopping_list'),

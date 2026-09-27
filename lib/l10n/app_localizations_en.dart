@@ -1030,6 +1030,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mealSuggestionsTitle => 'Meal ideas';
 
   @override
+  String get mealSuggestionsWeeklyPlanTooltip => 'Weekly plan';
+
+  @override
+  String get weeklyMealPlanTitle => 'This week\'s meal plan';
+
+  @override
+  String get weeklyMealPlanEmptyMessage => 'No meal plan available right now.';
+
+  @override
+  String get weeklyMealPlanLoadError =>
+      'Couldn\'t generate the meal plan right now.';
+
+  @override
+  String get weeklyMealPlanRetryButton => 'Try again';
+
+  @override
+  String get weeklyMealPlanRegenerateTooltip => 'Regenerate';
+
+  @override
+  String get weeklyMealPlanAddAllButton =>
+      'Add everything to the shopping list';
+
+  @override
+  String weeklyMealPlanAddAllMessage(String count) {
+    return '$count meals added to the shopping list';
+  }
+
+  @override
   String get notificationSettingsAddButton => 'Add';
 
   @override

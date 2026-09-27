@@ -9,6 +9,10 @@ class MealSuggestion {
   final String? imageUrl;
   final List<String> ingredients;
   final List<String> steps;
+  /// Jour de la semaine (1 = lundi ... 7 = dimanche) pour un plan hebdomadaire
+  /// (voir weekly_meal_plan_provider.dart). `null` pour une suggestion du jour
+  /// classique (écran "Idées repas"/Coach).
+  final int? day;
 
   const MealSuggestion({
     required this.timeSlot,
@@ -21,6 +25,7 @@ class MealSuggestion {
     this.imageUrl,
     this.ingredients = const [],
     this.steps = const [],
+    this.day,
   });
 
   factory MealSuggestion.fromJson(Map<String, dynamic> json) {
@@ -43,6 +48,7 @@ class MealSuggestion {
               ?.map((e) => e.toString())
               .toList() ??
           const [],
+      day: (json['day'] as num?)?.toInt(),
     );
   }
 
@@ -60,6 +66,7 @@ class MealSuggestion {
       imageUrl: imageUrl,
       ingredients: ingredients,
       steps: steps,
+      day: day,
     );
   }
 }

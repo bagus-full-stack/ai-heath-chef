@@ -19,6 +19,7 @@ import '../screens/barcode_scanner_screen.dart';
 import '../screens/food_search_screen.dart';
 import '../screens/meal_analysis_screen.dart';
 import '../screens/meal_suggestions_screen.dart';
+import '../screens/weekly_meal_plan_screen.dart';
 import '../screens/notification_settings_screen.dart';
 import '../screens/local_ai_settings_screen.dart';
 import '../screens/camera_capture_screen.dart';
@@ -166,6 +167,10 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/meal_suggestions',
         builder: (context, state) => const MealSuggestionsScreen(),
+      ),
+      GoRoute(
+        path: '/weekly_meal_plan',
+        builder: (context, state) => const WeeklyMealPlanScreen(),
       ),
       GoRoute(
         path: '/notifications',
