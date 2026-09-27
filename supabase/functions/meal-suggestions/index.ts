@@ -198,6 +198,17 @@ const DIET_LABELS: Record<string, string> = {
     kosher: "kasher",
 };
 
+const CUISINE_LABELS: Record<string, string> = {
+    mediterranean: "méditerranéenne (Italie, Grèce, Espagne, Provence...)",
+    maghrebine: "maghrébine (Maroc, Algérie, Tunisie)",
+    asian: "asiatique (Chine, Japon, Vietnam, Thaïlande...)",
+    indian: "indienne",
+    middleEastern: "moyen-orientale (Liban, Turquie, Iran...)",
+    african: "africaine subsaharienne",
+    latinAmerican: "latino-américaine (Mexique, Pérou, Brésil...)",
+    european: "européenne (France, Allemagne, Europe de l'Est...)",
+};
+
 Deno.serve(async (req) => {
     // === GESTION DU PREFLIGHT (CORS) ===
     if (req.method === 'OPTIONS') {
@@ -234,6 +245,7 @@ Deno.serve(async (req) => {
             targetLip,
             dietType,
             allergies,
+            cuisinePreference,
             count,
             days,
             mealsPerDay,
@@ -251,6 +263,7 @@ Deno.serve(async (req) => {
             : (Number.isFinite(count) && count > 0 ? Math.min(count, 10) : 6);
         const goalLabel = GOAL_LABELS[goal as string] ?? GOAL_LABELS.maintain;
         const dietLabel = DIET_LABELS[dietType as string];
+        const cuisineLabel = CUISINE_LABELS[cuisinePreference as string];
         const allergyList: string[] = Array.isArray(allergies)
             ? allergies.filter((a) => typeof a === 'string' && a.trim().length > 0)
             : [];
@@ -271,6 +284,11 @@ Deno.serve(async (req) => {
         const constraintLines = [];
         if (dietLabel) {
             constraintLines.push(`Régime à respecter STRICTEMENT : ${dietLabel}.`);
+        }
+        if (cuisineLabel) {
+            constraintLines.push(
+                `Privilégie des plats typiques de la cuisine ${cuisineLabel} tant que cela reste compatible avec le régime et les allergies ci-dessus.`,
+            );
         }
         if (allergyList.length > 0) {
             constraintLines.push(

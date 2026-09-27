@@ -17,6 +17,18 @@ const List<(String value, String label, IconData icon)> _kDietOptions = [
   ('kosher', 'Kasher', Icons.synagogue_rounded),
 ];
 
+const List<(String value, String label, IconData icon)> _kCuisineOptions = [
+  ('none', 'Aucune préférence', Icons.public_rounded),
+  ('mediterranean', 'Méditerranéenne', Icons.local_florist_rounded),
+  ('maghrebine', 'Maghrébine', Icons.dinner_dining_rounded),
+  ('asian', 'Asiatique', Icons.ramen_dining_rounded),
+  ('indian', 'Indienne', Icons.rice_bowl_rounded),
+  ('middleEastern', 'Moyen-orientale', Icons.kebab_dining_rounded),
+  ('african', 'Africaine', Icons.soup_kitchen_rounded),
+  ('latinAmerican', 'Latino-américaine', Icons.tapas_rounded),
+  ('european', 'Européenne', Icons.restaurant_menu_rounded),
+];
+
 const List<String> _kCommonAllergies = [
   'Gluten',
   'Lactose',
@@ -40,6 +52,7 @@ class DietaryPreferencesScreen extends ConsumerStatefulWidget {
 class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScreen> {
   late String _dietType;
   late Set<String> _allergies;
+  late String _cuisinePreference;
   final _customAllergyController = TextEditingController();
   bool _saving = false;
 
@@ -49,6 +62,7 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
     final profile = ref.read(profileProvider).value;
     _dietType = profile?.dietType ?? 'none';
     _allergies = {...(profile?.allergies ?? const [])};
+    _cuisinePreference = profile?.cuisinePreference ?? 'none';
   }
 
   @override
@@ -74,6 +88,29 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
     }
   }
 
+  String _cuisineLabel(BuildContext context, String value) {
+    switch (value) {
+      case 'mediterranean':
+        return context.l10n.dietaryPreferencesCuisineMediterranean;
+      case 'maghrebine':
+        return context.l10n.dietaryPreferencesCuisineMaghrebine;
+      case 'asian':
+        return context.l10n.dietaryPreferencesCuisineAsian;
+      case 'indian':
+        return context.l10n.dietaryPreferencesCuisineIndian;
+      case 'middleEastern':
+        return context.l10n.dietaryPreferencesCuisineMiddleEastern;
+      case 'african':
+        return context.l10n.dietaryPreferencesCuisineAfrican;
+      case 'latinAmerican':
+        return context.l10n.dietaryPreferencesCuisineLatinAmerican;
+      case 'european':
+        return context.l10n.dietaryPreferencesCuisineEuropean;
+      default:
+        return context.l10n.dietaryPreferencesCuisineNone;
+    }
+  }
+
   void _addCustomAllergy() {
     final value = _customAllergyController.text.trim();
     if (value.isEmpty) {
@@ -91,6 +128,7 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
       await ref.read(authServiceProvider).updateDietaryPreferences(
             dietType: _dietType,
             allergies: _allergies.toList(),
+            cuisinePreference: _cuisinePreference,
             lang: Localizations.localeOf(context).languageCode,
           );
       ref.invalidate(profileProvider);
@@ -142,6 +180,18 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
                 label: _dietLabel(context, option.$1),
                 selected: _dietType == option.$1,
                 onTap: () => setState(() => _dietType = option.$1),
+              ),
+              const SizedBox(height: 10),
+            ],
+            const SizedBox(height: 12),
+            Text(context.l10n.dietaryPreferencesCuisineSectionTitle, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8, color: Colors.grey)),
+            const SizedBox(height: 12),
+            for (final option in _kCuisineOptions) ...[
+              _SelectableRow(
+                icon: option.$3,
+                label: _cuisineLabel(context, option.$1),
+                selected: _cuisinePreference == option.$1,
+                onTap: () => setState(() => _cuisinePreference = option.$1),
               ),
               const SizedBox(height: 10),
             ],

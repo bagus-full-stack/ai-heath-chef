@@ -104,6 +104,7 @@ class AuthService {
   Future<void> updateDietaryPreferences({
     required String dietType,
     required List<String> allergies,
+    String cuisinePreference = 'none',
     String lang = 'fr',
   }) async {
     final l10n = lookupAppLocalizations(Locale(lang));
@@ -114,7 +115,7 @@ class AuthService {
     try {
       await _supabase
           .from('profiles')
-          .update({'diet_type': dietType, 'allergies': allergies})
+          .update({'diet_type': dietType, 'allergies': allergies, 'cuisine_preference': cuisinePreference})
           .eq('user_id', user.id);
     } catch (e) {
       throw Exception(l10n.svcErrorSavePreferences(e.toString()));

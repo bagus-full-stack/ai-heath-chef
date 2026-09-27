@@ -49,7 +49,8 @@ class WeeklyMealPlanNotifier extends AsyncNotifier<List<MealSuggestion>> {
     final weekKey = weekStartKey(DateTime.now());
     final dietType = profile?.dietType ?? 'none';
     final allergies = profile?.allergies ?? const [];
-    final signature = _preferencesSignature(dietType, allergies);
+    final cuisinePreference = profile?.cuisinePreference ?? 'none';
+    final signature = _preferencesSignature(dietType, allergies, cuisinePreference);
 
     if (!forceRefresh) {
       final cached = await dbService.getCachedWeeklyMealPlan(weekKey, signature);
@@ -72,6 +73,7 @@ class WeeklyMealPlanNotifier extends AsyncNotifier<List<MealSuggestion>> {
       targetLip: targets.fat,
       dietType: dietType,
       allergies: allergies,
+      cuisinePreference: cuisinePreference,
       days: 7,
       mealsPerDay: _mealsPerDay,
       lang: lang,
@@ -81,8 +83,8 @@ class WeeklyMealPlanNotifier extends AsyncNotifier<List<MealSuggestion>> {
     return plan;
   }
 
-  String _preferencesSignature(String dietType, List<String> allergies) {
+  String _preferencesSignature(String dietType, List<String> allergies, String cuisinePreference) {
     final sortedAllergies = [...allergies]..sort();
-    return '$dietType|${sortedAllergies.join(',')}';
+    return '$dietType|${sortedAllergies.join(',')}|$cuisinePreference';
   }
 }

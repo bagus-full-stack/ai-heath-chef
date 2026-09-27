@@ -15,6 +15,7 @@ class UserProfile {
   final String? avatarUrl;
   final String dietType;
   final List<String> allergies;
+  final String cuisinePreference;
   final String coachTone;
   final bool isAdmin;
   final DateTime? updatedAt;
@@ -32,6 +33,7 @@ class UserProfile {
     this.avatarUrl,
     this.dietType = 'none',
     this.allergies = const [],
+    this.cuisinePreference = 'none',
     this.coachTone = 'motivant',
     this.isAdmin = false,
     this.updatedAt,
@@ -51,6 +53,7 @@ class UserProfile {
       avatarUrl: json['avatar_url'] as String?,
       dietType: (json['diet_type'] as String?) ?? 'none',
       allergies: (json['allergies'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [],
+      cuisinePreference: (json['cuisine_preference'] as String?) ?? 'none',
       coachTone: (json['coach_tone'] as String?) ?? 'motivant',
       isAdmin: json['is_admin'] as bool? ?? false,
       updatedAt: json['updated_at'] == null
@@ -95,6 +98,29 @@ class UserProfile {
         return context.l10n.dietaryPreferencesDietKosher;
       default:
         return context.l10n.dietaryPreferencesDietNone;
+    }
+  }
+
+  String cuisinePreferenceLabel(BuildContext context) {
+    switch (cuisinePreference) {
+      case 'mediterranean':
+        return context.l10n.dietaryPreferencesCuisineMediterranean;
+      case 'maghrebine':
+        return context.l10n.dietaryPreferencesCuisineMaghrebine;
+      case 'asian':
+        return context.l10n.dietaryPreferencesCuisineAsian;
+      case 'indian':
+        return context.l10n.dietaryPreferencesCuisineIndian;
+      case 'middleEastern':
+        return context.l10n.dietaryPreferencesCuisineMiddleEastern;
+      case 'african':
+        return context.l10n.dietaryPreferencesCuisineAfrican;
+      case 'latinAmerican':
+        return context.l10n.dietaryPreferencesCuisineLatinAmerican;
+      case 'european':
+        return context.l10n.dietaryPreferencesCuisineEuropean;
+      default:
+        return context.l10n.dietaryPreferencesCuisineNone;
     }
   }
 

@@ -1040,6 +1040,66 @@ abstract class AppLocalizations {
   /// **'ALLERGIES & INTOLÉRANCES'**
   String get dietaryPreferencesAllergiesSectionTitle;
 
+  /// No description provided for @dietaryPreferencesCuisineAfrican.
+  ///
+  /// In fr, this message translates to:
+  /// **'Africaine'**
+  String get dietaryPreferencesCuisineAfrican;
+
+  /// No description provided for @dietaryPreferencesCuisineAsian.
+  ///
+  /// In fr, this message translates to:
+  /// **'Asiatique'**
+  String get dietaryPreferencesCuisineAsian;
+
+  /// No description provided for @dietaryPreferencesCuisineEuropean.
+  ///
+  /// In fr, this message translates to:
+  /// **'Européenne'**
+  String get dietaryPreferencesCuisineEuropean;
+
+  /// No description provided for @dietaryPreferencesCuisineIndian.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indienne'**
+  String get dietaryPreferencesCuisineIndian;
+
+  /// No description provided for @dietaryPreferencesCuisineLatinAmerican.
+  ///
+  /// In fr, this message translates to:
+  /// **'Latino-américaine'**
+  String get dietaryPreferencesCuisineLatinAmerican;
+
+  /// No description provided for @dietaryPreferencesCuisineMaghrebine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maghrébine'**
+  String get dietaryPreferencesCuisineMaghrebine;
+
+  /// No description provided for @dietaryPreferencesCuisineMediterranean.
+  ///
+  /// In fr, this message translates to:
+  /// **'Méditerranéenne'**
+  String get dietaryPreferencesCuisineMediterranean;
+
+  /// No description provided for @dietaryPreferencesCuisineMiddleEastern.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moyen-orientale'**
+  String get dietaryPreferencesCuisineMiddleEastern;
+
+  /// No description provided for @dietaryPreferencesCuisineNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune préférence'**
+  String get dietaryPreferencesCuisineNone;
+
+  /// No description provided for @dietaryPreferencesCuisineSectionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'CUISINE PRÉFÉRÉE'**
+  String get dietaryPreferencesCuisineSectionTitle;
+
   /// No description provided for @dietaryPreferencesDietHalal.
   ///
   /// In fr, this message translates to:

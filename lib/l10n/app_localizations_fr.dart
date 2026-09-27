@@ -561,6 +561,36 @@ class AppLocalizationsFr extends AppLocalizations {
       'ALLERGIES & INTOLÉRANCES';
 
   @override
+  String get dietaryPreferencesCuisineAfrican => 'Africaine';
+
+  @override
+  String get dietaryPreferencesCuisineAsian => 'Asiatique';
+
+  @override
+  String get dietaryPreferencesCuisineEuropean => 'Européenne';
+
+  @override
+  String get dietaryPreferencesCuisineIndian => 'Indienne';
+
+  @override
+  String get dietaryPreferencesCuisineLatinAmerican => 'Latino-américaine';
+
+  @override
+  String get dietaryPreferencesCuisineMaghrebine => 'Maghrébine';
+
+  @override
+  String get dietaryPreferencesCuisineMediterranean => 'Méditerranéenne';
+
+  @override
+  String get dietaryPreferencesCuisineMiddleEastern => 'Moyen-orientale';
+
+  @override
+  String get dietaryPreferencesCuisineNone => 'Aucune préférence';
+
+  @override
+  String get dietaryPreferencesCuisineSectionTitle => 'CUISINE PRÉFÉRÉE';
+
+  @override
   String get dietaryPreferencesDietHalal => 'Halal';
 
   @override

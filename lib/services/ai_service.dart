@@ -146,6 +146,7 @@ class AIService {
     required double targetLip,
     String dietType = 'none',
     List<String> allergies = const [],
+    String cuisinePreference = 'none',
     int count = 6,
     // Plan hebdomadaire (voir weekly_meal_plan_provider.dart) : quand fourni,
     // `days`/`mealsPerDay` remplacent `count` et chaque suggestion revient
@@ -169,6 +170,7 @@ class AIService {
           'targetLip': targetLip,
           'dietType': dietType,
           'allergies': allergies,
+          'cuisinePreference': cuisinePreference,
           'count': count,
           if (days != null) 'days': days,
           if (mealsPerDay != null) 'mealsPerDay': mealsPerDay,

@@ -38,6 +38,7 @@ class PantryRecipesNotifier extends AsyncNotifier<List<MealSuggestion>> {
         targetLip: targets.fat,
         dietType: profile?.dietType ?? 'none',
         allergies: profile?.allergies ?? const [],
+        cuisinePreference: profile?.cuisinePreference ?? 'none',
         count: 3,
         availableIngredients: ingredientNames,
         lang: lang,
