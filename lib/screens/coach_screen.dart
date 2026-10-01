@@ -691,6 +691,19 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
         _textController.text = widget.presetMessage!;
       });
     }
+    // Pagination simple de l'historique (voir chat_provider.dart) : on
+    // charge le lot précédent quand l'utilisateur remonte près du haut de
+    // la liste plutôt que tout l'historique d'un coup.
+    _scrollController.addListener(_maybeLoadOlderMessages);
+  }
+
+  void _maybeLoadOlderMessages() {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+    if (_scrollController.position.pixels <= 200) {
+      ref.read(chatProvider.notifier).loadOlderMessages();
+    }
   }
 
   @override
@@ -1063,7 +1076,6 @@ class _ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.isUser;
-    final imageBytes = decodeImageDataUri(message.imageUrl);
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -1086,13 +1098,7 @@ class _ChatBubble extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (imageBytes != null) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.memory(imageBytes, height: 140, width: double.infinity, fit: BoxFit.cover),
-              ),
-              const SizedBox(height: 10),
-            ],
+            _DishImage(message: message),
             Text(
               message.text,
               style: TextStyle(
@@ -1104,6 +1110,112 @@ class _ChatBubble extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Illustration IA du plat recommandé par le coach (voir chat_provider.dart),
+/// si le message en a une — trois sources possibles, dans l'ordre : le
+/// chemin Storage (`chat_images`, nouveaux messages depuis la migration
+/// 0019 — URL signée générée à la demande), la data URI legacy déjà en
+/// mémoire, ou (anciens messages pas encore migrés par le script de
+/// backfill) la data URI legacy chargée à la demande sans avoir été
+/// sélectionnée en masse au chargement de l'historique. N'affiche rien si
+/// le message n'a pas d'illustration.
+class _DishImage extends ConsumerStatefulWidget {
+  final ChatMessage message;
+
+  const _DishImage({required this.message});
+
+  @override
+  ConsumerState<_DishImage> createState() => _DishImageState();
+}
+
+class _DishImageState extends ConsumerState<_DishImage> {
+  // Calculé une seule fois (initState) plutôt qu'à chaque build : la liste
+  // de messages se reconstruit à chaque envoi/réception, et sans ce cache
+  // on régénérerait une URL signée (ou re-chargerait la data URI legacy)
+  // pour chaque image déjà visible à chaque fois.
+  Future<String?>? _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _resolve();
+  }
+
+  Future<String?> _resolve() {
+    final message = widget.message;
+    if (message.imagePath != null) {
+      return ref.read(chatProvider.notifier).getSignedImageUrl(message.imagePath!);
+    }
+    if (message.hasLegacyImage) {
+      return ref.read(chatProvider.notifier).fetchLegacyImageDataUri(message.id);
+    }
+    return Future.value(null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final message = widget.message;
+
+    // Data URI legacy déjà en mémoire (pas d'aller-retour réseau requis).
+    final legacyBytes = decodeImageDataUri(message.imageUrl);
+    if (legacyBytes != null) {
+      return _frame(
+        Image.memory(legacyBytes, height: 140, width: double.infinity, fit: BoxFit.cover),
+      );
+    }
+
+    if (message.imagePath == null && !message.hasLegacyImage) {
+      return const SizedBox.shrink();
+    }
+
+    final isSignedUrl = message.imagePath != null;
+    return FutureBuilder<String?>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const SizedBox.shrink();
+        }
+        if (isSignedUrl) {
+          if (snapshot.data == null) {
+            return _frame(_placeholder());
+          }
+          return _frame(
+            Image.network(
+              snapshot.data!,
+              height: 140,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => _placeholder(),
+            ),
+          );
+        }
+
+        final bytes = decodeImageDataUri(snapshot.data);
+        if (bytes == null) {
+          return _frame(_placeholder());
+        }
+        return _frame(Image.memory(bytes, height: 140, width: double.infinity, fit: BoxFit.cover));
+      },
+    );
+  }
+
+  Widget _frame(Widget image) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: ClipRRect(borderRadius: BorderRadius.circular(12), child: image),
+    );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      height: 140,
+      width: double.infinity,
+      color: Colors.grey.shade200,
+      alignment: Alignment.center,
+      child: Icon(Icons.image_not_supported_outlined, color: Colors.grey.shade400),
     );
   }
 }
