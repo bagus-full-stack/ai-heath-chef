@@ -1543,6 +1543,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get profileDietaryPrefsTitle => 'Préférences alimentaires';
 
   @override
+  String get profileExportTitle => 'Exporter mes données';
+
+  @override
+  String get profileExportSubtitle => 'Journal, bilans nutritionnels';
+
+  @override
   String get profileExportJournalSubtitle => 'Partager mes repas (CSV)';
 
   @override
@@ -1557,12 +1563,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get profileGoalLabel => 'Objectif';
-
-  @override
-  String get profileGoalsSubtitle => 'Calories et macros';
-
-  @override
-  String get profileGoalsTitle => 'Mes objectifs';
 
   @override
   String get profileHelpCenterSubtitle => 'FAQ, guides et tutoriels';

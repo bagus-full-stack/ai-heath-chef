@@ -15,6 +15,51 @@ import '../widgets/animated_async_value.dart';
 
 const _kLanguageNames = {'fr': 'Français', 'en': 'English'};
 
+Future<void> _showExportPicker(BuildContext context, WidgetRef ref) async {
+  await showModalBottomSheet<void>(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (context) {
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.ios_share_rounded, color: Color(0xFF6B66FF)),
+              title: Text(context.l10n.profileExportJournalTitle),
+              subtitle: Text(context.l10n.profileExportJournalSubtitle),
+              onTap: () {
+                Navigator.pop(context);
+                exportMealJournalCsv(ref);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf_outlined, color: Color(0xFF6B66FF)),
+              title: Text(context.l10n.profileExportPdfTitle),
+              subtitle: Text(context.l10n.profileExportPdfSubtitle),
+              onTap: () {
+                Navigator.pop(context);
+                exportWeeklyNutritionSummaryPdf(ref);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFF6B66FF)),
+              title: Text(context.l10n.profileExportMonthlyPdfTitle),
+              subtitle: Text(context.l10n.profileExportMonthlyPdfSubtitle),
+              onTap: () {
+                Navigator.pop(context);
+                exportMonthlyNutritionSummaryPdf(ref);
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 Future<void> _showLanguagePicker(BuildContext context, WidgetRef ref, Locale current) async {
   await showModalBottomSheet<void>(
     context: context,
@@ -176,21 +221,9 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     _SettingsItem(
                       icon: Icons.ios_share_rounded,
-                      title: context.l10n.profileExportJournalTitle,
-                      subtitle: context.l10n.profileExportJournalSubtitle,
-                      onTap: () => exportMealJournalCsv(ref),
-                    ),
-                    _SettingsItem(
-                      icon: Icons.picture_as_pdf_outlined,
-                      title: context.l10n.profileExportPdfTitle,
-                      subtitle: context.l10n.profileExportPdfSubtitle,
-                      onTap: () => exportWeeklyNutritionSummaryPdf(ref),
-                    ),
-                    _SettingsItem(
-                      icon: Icons.picture_as_pdf_rounded,
-                      title: context.l10n.profileExportMonthlyPdfTitle,
-                      subtitle: context.l10n.profileExportMonthlyPdfSubtitle,
-                      onTap: () => exportMonthlyNutritionSummaryPdf(ref),
+                      title: context.l10n.profileExportTitle,
+                      subtitle: context.l10n.profileExportSubtitle,
+                      onTap: () => _showExportPicker(context, ref),
                     ),
                     _SettingsItem(
                       icon: Icons.language_rounded,
@@ -228,12 +261,6 @@ class ProfileScreen extends ConsumerWidget {
                 _SettingsGroup(
                   title: context.l10n.profileSectionPersonalization,
                   items: [
-                    _SettingsItem(
-                      icon: Icons.local_fire_department_outlined,
-                      title: context.l10n.profileGoalsTitle,
-                      subtitle: context.l10n.profileGoalsSubtitle,
-                      onTap: () => context.push('/account'),
-                    ),
                     _SettingsItem(
                       icon: Icons.restaurant_menu_rounded,
                       title: context.l10n.profileDietaryPrefsTitle,

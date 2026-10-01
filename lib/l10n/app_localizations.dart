@@ -2762,6 +2762,18 @@ abstract class AppLocalizations {
   /// **'Préférences alimentaires'**
   String get profileDietaryPrefsTitle;
 
+  /// No description provided for @profileExportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter mes données'**
+  String get profileExportTitle;
+
+  /// No description provided for @profileExportSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Journal, bilans nutritionnels'**
+  String get profileExportSubtitle;
+
   /// No description provided for @profileExportJournalSubtitle.
   ///
   /// In fr, this message translates to:
@@ -2791,18 +2803,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Objectif'**
   String get profileGoalLabel;
-
-  /// No description provided for @profileGoalsSubtitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Calories et macros'**
-  String get profileGoalsSubtitle;
-
-  /// No description provided for @profileGoalsTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Mes objectifs'**
-  String get profileGoalsTitle;
 
   /// No description provided for @profileHelpCenterSubtitle.
   ///
