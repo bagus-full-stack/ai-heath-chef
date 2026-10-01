@@ -12,6 +12,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'AI Health Chef';
 
   @override
+  String get commonBackButtonTooltip => 'Back';
+
+  @override
+  String get commonCloseButtonTooltip => 'Close';
+
+  @override
+  String get commonFlashButtonTooltip => 'Flash';
+
+  @override
+  String get commonHelpButtonTooltip => 'Help';
+
+  @override
+  String get commonDeleteActionLabel => 'Delete';
+
+  @override
+  String get navHomeLabel => 'Home';
+
+  @override
+  String get navCoachLabel => 'AI Coach';
+
+  @override
+  String get navProfileLabel => 'Profile';
+
+  @override
   String get bmiCategoryUnderweight => 'Underweight';
 
   @override
@@ -251,6 +275,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraCaptureRetryButton => 'Retry';
 
   @override
+  String get cameraCaptureShutterButtonLabel => 'Take a photo';
+
+  @override
   String get checkoutAppBarTitle => 'Complete your order';
 
   @override
@@ -462,6 +489,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coachTitle => 'AI Coach';
 
   @override
+  String get coachChatImageSemanticLabel => 'Sent photo';
+
+  @override
+  String get coachTypingIndicatorSemanticLabel => 'The coach is typing a reply';
+
+  @override
   String get comingSoonDefaultMessage => 'This feature is coming soon.';
 
   @override
@@ -481,6 +514,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String dashboardCalorieGoalLabel(int kcal) {
     return ' Goal: $kcal';
   }
+
+  @override
+  String dashboardCaloriesGaugeSemanticLabel(int remaining, int goal) {
+    return 'Calories: $remaining remaining out of a goal of $goal';
+  }
+
+  @override
+  String dashboardMacroProgressSemanticLabel(
+    String label,
+    int current,
+    int target,
+  ) {
+    return '$label: $current g out of a goal of $target g';
+  }
+
+  @override
+  String get dashboardAvatarTooltip => 'Profile';
 
   @override
   String get dashboardCarbsLabel => 'CARBS';
@@ -903,6 +953,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mealAnalysisDefaultMealName => 'AI Meal';
 
   @override
+  String get mealAnalysisDecreaseQuantityTooltip => 'Decrease quantity';
+
+  @override
+  String get mealAnalysisIncreaseQuantityTooltip => 'Increase quantity';
+
+  @override
+  String get mealAnalysisDeleteIngredientTooltip => 'Delete ingredient';
+
+  @override
   String get mealAnalysisErrorCaloriesInvalid =>
       'Enter the calories for this portion.';
 
@@ -1040,6 +1099,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mealSuggestionCardProtLabel => 'PROT';
 
   @override
+  String get mealSuggestionCardAddToShoppingListTooltip =>
+      'Add to shopping list';
+
+  @override
+  String get mealSuggestionCardAddToJournalTooltip => 'Add to journal';
+
+  @override
+  String get mealSuggestionCardSubstituteTooltip => 'See substitute';
+
+  @override
   String mealSuggestionsAddedToShoppingListMessage(String title) {
     return '\"$title\" added to your shopping list';
   }
@@ -1129,6 +1198,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationSettingsCustomRemindersTitle => 'CUSTOM REMINDERS';
+
+  @override
+  String get notificationSettingsDeleteReminderTooltip => 'Delete reminder';
 
   @override
   String get notificationSettingsDisabledLabel => 'Off';

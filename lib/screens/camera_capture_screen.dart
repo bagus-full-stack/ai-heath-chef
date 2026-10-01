@@ -385,17 +385,20 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                         _CircleIconButton(
                           icon: _flashIcon(),
                           onTap: _toggleFlash,
+                          label: context.l10n.commonFlashButtonTooltip,
                         ),
                         Row(
                           children: [
                             _CircleIconButton(
                               icon: Icons.question_mark_rounded,
                               onTap: _showHelp,
+                              label: context.l10n.commonHelpButtonTooltip,
                             ),
                             const SizedBox(width: 10),
                             _CircleIconButton(
                               icon: Icons.close_rounded,
                               onTap: _close,
+                              label: context.l10n.commonCloseButtonTooltip,
                             ),
                           ],
                         ),
@@ -420,7 +423,11 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                               onTap: _pickFromGallery,
                               isLoading: _isPickingFromGallery,
                             ),
-                            GestureDetector(
+                            Semantics(
+                              button: true,
+                              excludeSemantics: true,
+                              label: context.l10n.cameraCaptureShutterButtonLabel,
+                              child: GestureDetector(
                               onTap: _isCapturing ? null : _capturePhoto,
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 180),
@@ -457,6 +464,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                                         ),
                                 ),
                               ),
+                              ),
                             ),
                             _BottomActionButton(
                               icon: Icons.crop_free_rounded,
@@ -470,7 +478,12 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: _CaptureMode.values.map((mode) {
                             final selected = mode == _mode;
-                            return GestureDetector(
+                            return Semantics(
+                              button: true,
+                              selected: selected,
+                              excludeSemantics: true,
+                              label: _modeLabel(mode),
+                              child: GestureDetector(
                               onTap: () => _selectMode(mode),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
@@ -497,6 +510,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                                     ),
                                   ],
                                 ),
+                              ),
                               ),
                             );
                           }).toList(),
@@ -623,24 +637,34 @@ class _FocusCaption extends StatelessWidget {
 class _CircleIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
+  final String label;
 
-  const _CircleIconButton({required this.icon, required this.onTap});
+  const _CircleIconButton({
+    required this.icon,
+    required this.onTap,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.45),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-        ),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: Icon(icon, key: ValueKey(icon), color: Colors.white, size: 20),
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 48,
+          height: 48,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.45),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+          ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: Icon(icon, key: ValueKey(icon), color: Colors.white, size: 20),
+          ),
         ),
       ),
     );

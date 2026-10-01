@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -140,25 +141,35 @@ class DashboardScreen extends ConsumerWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: GestureDetector(
-              onTap: () => context.push('/account'),
-              child: profileAsync.maybeWhen(
-                data: (profile) => AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: CircleAvatar(
-                    key: ValueKey(profile?.avatarUrl ?? 'no-avatar'),
-                    backgroundColor: const Color(0xFFEEEEEE),
-                    backgroundImage: profile?.avatarUrl != null
-                        ? NetworkImage(profile!.avatarUrl!)
-                        : null,
-                    child: profile?.avatarUrl == null
-                        ? const Icon(Icons.person, color: Colors.grey)
-                        : null,
+            child: Semantics(
+              button: true,
+              label: context.l10n.dashboardAvatarTooltip,
+              child: GestureDetector(
+                onTap: () => context.push('/account'),
+                child: SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Center(
+                    child: profileAsync.maybeWhen(
+                      data: (profile) => AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: CircleAvatar(
+                          key: ValueKey(profile?.avatarUrl ?? 'no-avatar'),
+                          backgroundColor: const Color(0xFFEEEEEE),
+                          backgroundImage: profile?.avatarUrl != null
+                              ? NetworkImage(profile!.avatarUrl!)
+                              : null,
+                          child: profile?.avatarUrl == null
+                              ? const Icon(Icons.person, color: Colors.grey)
+                              : null,
+                        ),
+                      ),
+                      orElse: () => const CircleAvatar(
+                        backgroundColor: Color(0xFFEEEEEE),
+                        child: Icon(Icons.person, color: Colors.grey),
+                      ),
+                    ),
                   ),
-                ),
-                orElse: () => const CircleAvatar(
-                  backgroundColor: Color(0xFFEEEEEE),
-                  child: Icon(Icons.person, color: Colors.grey),
                 ),
               ),
             ),
@@ -287,7 +298,13 @@ class DashboardScreen extends ConsumerWidget {
 
                   // Jauge Circulaire
                   Center(
-                    child: CircularPercentIndicator(
+                    child: Semantics(
+                      excludeSemantics: true,
+                      label: context.l10n.dashboardCaloriesGaugeSemanticLabel(
+                        remainingKcal,
+                        targetKcal,
+                      ),
+                      child: CircularPercentIndicator(
                       radius: 130.0,
                       lineWidth: 20.0,
                       animation: true,
@@ -337,6 +354,7 @@ class DashboardScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
+                    ),
                   ),
                   const SizedBox(height: 20),
 
@@ -344,26 +362,50 @@ class DashboardScreen extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildMacroCard(
-                        context.l10n.dashboardProteinLabel,
-                        '${totalProt.toInt()}g',
-                        '/${targetProt.toInt()}g',
-                        percentProt,
-                        Colors.blue,
+                      Semantics(
+                        excludeSemantics: true,
+                        label: context.l10n.dashboardMacroProgressSemanticLabel(
+                          context.l10n.dashboardProteinLabel,
+                          totalProt.toInt(),
+                          targetProt.toInt(),
+                        ),
+                        child: _buildMacroCard(
+                          context.l10n.dashboardProteinLabel,
+                          '${totalProt.toInt()}g',
+                          '/${targetProt.toInt()}g',
+                          percentProt,
+                          Colors.blue,
+                        ),
                       ),
-                      _buildMacroCard(
-                        context.l10n.dashboardCarbsLabel,
-                        '${totalGluc.toInt()}g',
-                        '/${targetGluc.toInt()}g',
-                        percentGluc,
-                        Colors.orange,
+                      Semantics(
+                        excludeSemantics: true,
+                        label: context.l10n.dashboardMacroProgressSemanticLabel(
+                          context.l10n.dashboardCarbsLabel,
+                          totalGluc.toInt(),
+                          targetGluc.toInt(),
+                        ),
+                        child: _buildMacroCard(
+                          context.l10n.dashboardCarbsLabel,
+                          '${totalGluc.toInt()}g',
+                          '/${targetGluc.toInt()}g',
+                          percentGluc,
+                          Colors.orange,
+                        ),
                       ),
-                      _buildMacroCard(
-                        context.l10n.dashboardFatLabel,
-                        '${totalLip.toInt()}g',
-                        '/${targetLip.toInt()}g',
-                        percentLip,
-                        Colors.pink,
+                      Semantics(
+                        excludeSemantics: true,
+                        label: context.l10n.dashboardMacroProgressSemanticLabel(
+                          context.l10n.dashboardFatLabel,
+                          totalLip.toInt(),
+                          targetLip.toInt(),
+                        ),
+                        child: _buildMacroCard(
+                          context.l10n.dashboardFatLabel,
+                          '${totalLip.toInt()}g',
+                          '/${targetLip.toInt()}g',
+                          percentLip,
+                          Colors.pink,
+                        ),
                       ),
                     ],
                   ),
@@ -431,15 +473,23 @@ class DashboardScreen extends ConsumerWidget {
                               final timeString =
                                   '${meal.createdAt.hour.toString().padLeft(2, '0')}:${meal.createdAt.minute.toString().padLeft(2, '0')}';
 
-                              return Dismissible(
+                              void deleteMeal() {
+                                ref
+                                    .read(mealRepositoryProvider)
+                                    .deleteMeal(meal.id);
+                                ref.invalidate(todayMealsProvider);
+                              }
+
+                              return Semantics(
+                                customSemanticsActions: {
+                                  CustomSemanticsAction(
+                                    label: context.l10n.commonDeleteActionLabel,
+                                  ): deleteMeal,
+                                },
+                                child: Dismissible(
                                 key: ValueKey(meal.id),
                                 direction: DismissDirection.endToStart,
-                                onDismissed: (_) {
-                                  ref
-                                      .read(mealRepositoryProvider)
-                                      .deleteMeal(meal.id);
-                                  ref.invalidate(todayMealsProvider);
-                                },
+                                onDismissed: (_) => deleteMeal(),
                                 background: Container(
                                   margin: const EdgeInsets.only(bottom: 12),
                                   padding: const EdgeInsets.symmetric(
@@ -484,6 +534,7 @@ class DashboardScreen extends ConsumerWidget {
                                     }
                                   },
                                 ),
+                              ),
                               );
                             }).toList(),
                           ),
@@ -502,6 +553,7 @@ class DashboardScreen extends ConsumerWidget {
           ? null
           : FloatingActionButton(
               onPressed: () => _openCameraCapture(context),
+              tooltip: context.l10n.cameraCaptureShutterButtonLabel,
               backgroundColor: Colors.pink.shade400,
               shape: const CircleBorder(),
               elevation: 4,
@@ -660,8 +712,10 @@ class DashboardScreen extends ConsumerWidget {
             child: Center(
               child: Text(
                 bmi.value.toStringAsFixed(1),
+                // ponytail: texte noir plutôt que blanc sur ces pastels
+                // (ratio WCAG AA insuffisant en blanc, confortable en noir).
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),

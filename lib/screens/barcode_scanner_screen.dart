@@ -95,6 +95,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                   _CircleIconButton(
                     icon: Icons.close_rounded,
                     onTap: () => context.pop(),
+                    label: context.l10n.commonCloseButtonTooltip,
                   ),
                   ValueListenableBuilder(
                     valueListenable: _controller,
@@ -104,6 +105,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                             ? Icons.flash_on_rounded
                             : Icons.flash_off_rounded,
                         onTap: () => _controller.toggleTorch(),
+                        label: context.l10n.commonFlashButtonTooltip,
                       );
                     },
                   ),
@@ -146,22 +148,32 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
 class _CircleIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
+  final String label;
 
-  const _CircleIconButton({required this.icon, required this.onTap});
+  const _CircleIconButton({
+    required this.icon,
+    required this.onTap,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.45),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 48,
+          height: 48,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.45),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
         ),
-        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }

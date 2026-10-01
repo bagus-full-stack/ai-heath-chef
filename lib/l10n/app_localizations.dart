@@ -104,6 +104,54 @@ abstract class AppLocalizations {
   /// **'AI Health Chef'**
   String get appTitle;
 
+  /// No description provided for @commonBackButtonTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour'**
+  String get commonBackButtonTooltip;
+
+  /// No description provided for @commonCloseButtonTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get commonCloseButtonTooltip;
+
+  /// No description provided for @commonFlashButtonTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Flash'**
+  String get commonFlashButtonTooltip;
+
+  /// No description provided for @commonHelpButtonTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide'**
+  String get commonHelpButtonTooltip;
+
+  /// No description provided for @commonDeleteActionLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get commonDeleteActionLabel;
+
+  /// No description provided for @navHomeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accueil'**
+  String get navHomeLabel;
+
+  /// No description provided for @navCoachLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coach IA'**
+  String get navCoachLabel;
+
+  /// No description provided for @navProfileLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get navProfileLabel;
+
   /// No description provided for @bmiCategoryUnderweight.
   ///
   /// In fr, this message translates to:
@@ -530,6 +578,12 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get cameraCaptureRetryButton;
 
+  /// No description provided for @cameraCaptureShutterButtonLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre une photo'**
+  String get cameraCaptureShutterButtonLabel;
+
   /// No description provided for @checkoutAppBarTitle.
   ///
   /// In fr, this message translates to:
@@ -896,6 +950,18 @@ abstract class AppLocalizations {
   /// **'Coach IA'**
   String get coachTitle;
 
+  /// No description provided for @coachChatImageSemanticLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo envoyée'**
+  String get coachChatImageSemanticLabel;
+
+  /// No description provided for @coachTypingIndicatorSemanticLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le coach écrit une réponse'**
+  String get coachTypingIndicatorSemanticLabel;
+
   /// No description provided for @comingSoonDefaultMessage.
   ///
   /// In fr, this message translates to:
@@ -925,6 +991,28 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **' Objectif: {kcal}'**
   String dashboardCalorieGoalLabel(int kcal);
+
+  /// No description provided for @dashboardCaloriesGaugeSemanticLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calories : {remaining} restantes sur un objectif de {goal}'**
+  String dashboardCaloriesGaugeSemanticLabel(int remaining, int goal);
+
+  /// No description provided for @dashboardMacroProgressSemanticLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} : {current} g sur un objectif de {target} g'**
+  String dashboardMacroProgressSemanticLabel(
+    String label,
+    int current,
+    int target,
+  );
+
+  /// No description provided for @dashboardAvatarTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get dashboardAvatarTooltip;
 
   /// No description provided for @dashboardCarbsLabel.
   ///
@@ -1658,6 +1746,24 @@ abstract class AppLocalizations {
   /// **'Repas IA'**
   String get mealAnalysisDefaultMealName;
 
+  /// No description provided for @mealAnalysisDecreaseQuantityTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Diminuer la quantité'**
+  String get mealAnalysisDecreaseQuantityTooltip;
+
+  /// No description provided for @mealAnalysisIncreaseQuantityTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Augmenter la quantité'**
+  String get mealAnalysisIncreaseQuantityTooltip;
+
+  /// No description provided for @mealAnalysisDeleteIngredientTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer l\'ingrédient'**
+  String get mealAnalysisDeleteIngredientTooltip;
+
   /// No description provided for @mealAnalysisErrorCaloriesInvalid.
   ///
   /// In fr, this message translates to:
@@ -1904,6 +2010,24 @@ abstract class AppLocalizations {
   /// **'PROT'**
   String get mealSuggestionCardProtLabel;
 
+  /// No description provided for @mealSuggestionCardAddToShoppingListTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter à la liste de courses'**
+  String get mealSuggestionCardAddToShoppingListTooltip;
+
+  /// No description provided for @mealSuggestionCardAddToJournalTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter au journal'**
+  String get mealSuggestionCardAddToJournalTooltip;
+
+  /// No description provided for @mealSuggestionCardSubstituteTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir le remplacement'**
+  String get mealSuggestionCardSubstituteTooltip;
+
   /// No description provided for @mealSuggestionsAddedToShoppingListMessage.
   ///
   /// In fr, this message translates to:
@@ -2053,6 +2177,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'RAPPELS PERSONNALISÉS'**
   String get notificationSettingsCustomRemindersTitle;
+
+  /// No description provided for @notificationSettingsDeleteReminderTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le rappel'**
+  String get notificationSettingsDeleteReminderTooltip;
 
   /// No description provided for @notificationSettingsDisabledLabel.
   ///

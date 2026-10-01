@@ -1,6 +1,14 @@
 {
   "@@locale": "fr",
   "appTitle": "AI Health Chef",
+  "commonBackButtonTooltip": "Retour",
+  "commonCloseButtonTooltip": "Fermer",
+  "commonFlashButtonTooltip": "Flash",
+  "commonHelpButtonTooltip": "Aide",
+  "commonDeleteActionLabel": "Supprimer",
+  "navHomeLabel": "Accueil",
+  "navCoachLabel": "Coach IA",
+  "navProfileLabel": "Profil",
   "bmiCategoryUnderweight": "Insuffisance pondérale",
   "bmiCategoryNormal": "Corpulence normale",
   "bmiCategoryOverweight": "Surpoids",
@@ -148,6 +156,7 @@
     }
   },
   "cameraCaptureRetryButton": "Réessayer",
+  "cameraCaptureShutterButtonLabel": "Prendre une photo",
   "checkoutAppBarTitle": "Finaliser la commande",
   "checkoutConfirmButton": "Confirmer • {price} {period}",
   "@checkoutConfirmButton": {
@@ -253,6 +262,8 @@
   "coachTipFatLossText": "Pour optimiser votre perte de gras, privilégiez des sources de protéines maigres comme le blanc de poulet ou le tofu pour votre prochain repas.",
   "coachTipTitle": "Conseil du Chef IA",
   "coachTitle": "Coach IA",
+  "coachChatImageSemanticLabel": "Photo envoyée",
+  "coachTypingIndicatorSemanticLabel": "Le coach écrit une réponse",
   "comingSoonDefaultMessage": "Cette fonctionnalité arrive prochainement.",
   "comingSoonDefaultTitle": "Bientôt disponible",
   "dashboardBmiLabel": "IMC : {label}",
@@ -282,6 +293,32 @@
       }
     }
   },
+  "dashboardCaloriesGaugeSemanticLabel": "Calories : {remaining} restantes sur un objectif de {goal}",
+  "@dashboardCaloriesGaugeSemanticLabel": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardMacroProgressSemanticLabel": "{label} : {current} g sur un objectif de {target} g",
+  "@dashboardMacroProgressSemanticLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "current": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardAvatarTooltip": "Profil",
   "dashboardCarbsLabel": "GLUCIDES",
   "dashboardEmptyMealsMessage": "Aucun repas enregistré aujourd'hui. Scannez votre première assiette !",
   "dashboardFatLabel": "LIPIDES",
@@ -505,6 +542,9 @@
   "mealAnalysisBadgeManual": "Saisie manuelle",
   "mealAnalysisBadgeProt": "PROT",
   "mealAnalysisDefaultMealName": "Repas IA",
+  "mealAnalysisDecreaseQuantityTooltip": "Diminuer la quantité",
+  "mealAnalysisIncreaseQuantityTooltip": "Augmenter la quantité",
+  "mealAnalysisDeleteIngredientTooltip": "Supprimer l'ingrédient",
   "mealAnalysisErrorCaloriesInvalid": "Entre les calories de cette portion.",
   "mealAnalysisErrorNameRequired": "Entre le nom de l'ingrédient.",
   "mealAnalysisErrorTitle": "Oups !",
@@ -581,6 +621,9 @@
   },
   "mealSuggestionCardLipLabel": "LIP",
   "mealSuggestionCardProtLabel": "PROT",
+  "mealSuggestionCardAddToShoppingListTooltip": "Ajouter à la liste de courses",
+  "mealSuggestionCardAddToJournalTooltip": "Ajouter au journal",
+  "mealSuggestionCardSubstituteTooltip": "Voir le remplacement",
   "mealSuggestionsAddedToShoppingListMessage": "\"{title}\" ajouté à la liste de courses",
   "@mealSuggestionsAddedToShoppingListMessage": {
     "placeholders": {
@@ -641,6 +684,7 @@
   "notificationSettingsAddSubmitButton": "Ajouter",
   "notificationSettingsCustomRemindersLoadError": "Impossible de charger tes rappels personnalisés.",
   "notificationSettingsCustomRemindersTitle": "RAPPELS PERSONNALISÉS",
+  "notificationSettingsDeleteReminderTooltip": "Supprimer le rappel",
   "notificationSettingsDisabledLabel": "Désactivé",
   "notificationSettingsFrequencyDaily": "Chaque jour",
   "notificationSettingsFrequencyWeekly": "Chaque semaine",
