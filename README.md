@@ -136,7 +136,7 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0013) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0019) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
    - `0001` : tables `profiles`, `meals`, `chat_messages` + policies RLS + bucket `avatars`
    - `0002` : taille (`height_cm`) sur `profiles`
    - `0003` : table `meal_suggestions` (cache des idées de repas IA)
@@ -150,6 +150,7 @@ flutter pub get
    - `0011` : tables `weight_entries`, `hydration_entries` et `custom_reminders_backup` — synchronisation cross-device du poids, de l'hydratation et des rappels personnalisés (voir [Notes](#notes))
    - `0012` : photo de progression (`image_url`/`local_image_path` sur `weight_entries`) + bucket `weight_photos`
    - `0013` : table `weekly_meal_plans` (cache du plan de repas hebdomadaire généré par l'IA)
+   - `0019` : illustrations du coach dans Storage plutôt qu'en base64 (`image_path` sur `chat_messages`) + bucket **privé** `chat_images` (policies scopées à `{user_id}/...`, URL signée générée à la demande côté app) — voir `supabase/scripts/backfill_chat_images.dart` pour migrer les anciens messages (`image_url`, conservée en lecture pour rétrocompatibilité) vers ce bucket
 3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
    - Chaque fonction est **autonome** (aucun import relatif vers `_shared/`) : un simple copier-coller de son `index.ts` dans l'éditeur du Dashboard Supabase suffit à la déployer/redéployer, sans erreur de bundling.
 4. **Illustrations des idées de repas (optionnel, 100% gratuit)** — `meal-images` génère une image IA par suggestion, en cascade entre deux fournisseurs gratuits :
