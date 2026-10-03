@@ -466,40 +466,54 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                           ],
                         ),
                         const SizedBox(height: 18),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: _CaptureMode.values.map((mode) {
-                            final selected = mode == _mode;
-                            return GestureDetector(
-                              onTap: () => _selectMode(mode),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    AnimatedDefaultTextStyle(
-                                      duration: const Duration(milliseconds: 200),
-                                      style: TextStyle(
-                                        color: selected ? primaryColor : Colors.white70,
-                                        fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-                                        fontSize: 12,
-                                        letterSpacing: 0.6,
-                                      ),
-                                      child: Text(_modeLabel(mode).toUpperCase()),
+                        PopupMenuButton<_CaptureMode>(
+                          color: const Color(0xFF1B1B26),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          onSelected: _selectMode,
+                          itemBuilder: (context) => _CaptureMode.values
+                              .map(
+                                (mode) => PopupMenuItem(
+                                  value: mode,
+                                  child: Text(
+                                    _modeLabel(mode),
+                                    style: TextStyle(
+                                      color: mode == _mode ? primaryColor : Colors.white,
+                                      fontWeight: mode == _mode ? FontWeight.bold : FontWeight.w500,
                                     ),
-                                    const SizedBox(height: 4),
-                                    AnimatedContainer(
-                                      duration: const Duration(milliseconds: 200),
-                                      curve: Curves.easeOut,
-                                      width: selected ? 18 : 0,
-                                      height: 2,
-                                      color: primaryColor,
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
+                              )
+                              .toList(),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.45),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _modeLabel(_mode).toUpperCase(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                    letterSpacing: 0.6,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                const Icon(
+                                  Icons.keyboard_arrow_up_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
