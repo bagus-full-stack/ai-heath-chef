@@ -487,6 +487,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get dashboardCalorieFlooredNotice =>
+      'Objectif ajusté au minimum recommandé. Consulte un professionnel de santé pour un régime plus restrictif.';
+
+  @override
   String get dashboardCarbsLabel => 'GLUCIDES';
 
   @override
@@ -692,7 +696,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String helpCenterAccountQ3Answer(String supportEmail) {
-    return 'Écris-nous à $supportEmail depuis l’adresse email associée à ton compte, on s’occupe de la suppression de tes données.';
+    return 'Depuis Profil > Sécurité et Confidentialité > \"Supprimer mon compte\", tu peux supprimer définitivement ton compte et toutes tes données directement dans l\'app, sans avoir à nous écrire. Si tu rencontres un problème avec ce parcours, tu peux toujours nous contacter à $supportEmail.';
   }
 
   @override
@@ -1323,6 +1327,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingErrorInvalidAge => 'Entre un âge valide.';
 
   @override
+  String get onboardingErrorUnderMinimumAge =>
+      'AI Health Chef est réservé aux personnes de 16 ans ou plus. Ton âge n\'a pas été enregistré.';
+
+  @override
   String get onboardingErrorInvalidHeight => 'Entre ta taille en cm.';
 
   @override
@@ -1390,6 +1398,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onboardingWeightSectionLabel => 'Votre Poids';
+
+  @override
+  String get onboardingMedicalDisclaimer =>
+      'Ces estimations sont indicatives et ne remplacent pas un avis médical. Consulte un professionnel de santé avant tout changement alimentaire important.';
 
   @override
   String get paywallBadgePopular => 'POPULAIRE';
@@ -1661,6 +1673,58 @@ class AppLocalizationsFr extends AppLocalizations {
       'Pas encore disponible — prévue dans une prochaine mise à jour.';
 
   @override
+  String get securityDeleteAccountTitle => 'Supprimer mon compte';
+
+  @override
+  String get securityDeleteAccountSubtitle =>
+      'Supprimer définitivement mon compte';
+
+  @override
+  String get deleteAccountAppBarTitle => 'Supprimer mon compte';
+
+  @override
+  String get deleteAccountWarningTitle => 'Action irréversible';
+
+  @override
+  String get deleteAccountWarningBody =>
+      'Une fois confirmée, cette suppression est définitive : ton compte et tes données ne pourront plus être récupérés.';
+
+  @override
+  String get deleteAccountDataListTitle => 'Ce qui sera supprimé :';
+
+  @override
+  String get deleteAccountDataListBody =>
+      '• Ton profil, tes objectifs et préférences\n• Ton journal de repas et leurs photos\n• Ton historique de poids et ses photos\n• Ton historique d\'hydratation\n• Tes conversations avec le Coach IA\n• Tes idées de repas et plannings hebdomadaires générés\n• Ta photo de profil\n\nLe modèle d\'IA locale éventuellement téléchargé sur cet appareil n\'est pas supprimé : il n\'est pas lié à ton compte, c\'est un fichier générique partagé par l\'app.';
+
+  @override
+  String get deleteAccountSubscriptionWarningTitle => 'Abonnement actif';
+
+  @override
+  String get deleteAccountSubscriptionWarningBody =>
+      'Supprimer ton compte n\'annule PAS ton abonnement en cours : il continuera à être facturé tant que tu ne l\'auras pas annulé depuis les paramètres de ton compte Apple ou Google.';
+
+  @override
+  String get deleteAccountManageSubscriptionButton => 'Gérer mon abonnement';
+
+  @override
+  String get deleteAccountConfirmWord => 'SUPPRIMER';
+
+  @override
+  String deleteAccountConfirmInstructions(String word) {
+    return 'Pour confirmer, tape $word ci-dessous :';
+  }
+
+  @override
+  String get deleteAccountConfirmFieldLabel => 'Mot de confirmation';
+
+  @override
+  String get deleteAccountConfirmMismatch =>
+      'Le mot de confirmation ne correspond pas.';
+
+  @override
+  String get deleteAccountButton => 'Supprimer définitivement mon compte';
+
+  @override
   String get profileSubscriptionSubtitle => 'Plan PRO et facturation';
 
   @override
@@ -1719,7 +1783,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get signupErrorAcceptTerms =>
-      'Vous devez accepter les conditions d\'utilisation.';
+      'Tu dois confirmer avoir au moins 16 ans et accepter les CGU et la politique de confidentialité.';
 
   @override
   String get signupErrorFillAllFields => 'Veuillez remplir tous les champs.';
@@ -1755,7 +1819,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get signupTermsAcceptance =>
-      'J\'accepte les Conditions d\'utilisation et la Politique de confidentialité';
+      'J\'ai au moins 16 ans et j\'accepte les CGU et la politique de confidentialité.';
+
+  @override
+  String get signupTermsLinkLabel => 'Lire les CGU';
 
   @override
   String get termsAppBarTitle => 'Conditions d’utilisation';
@@ -1845,7 +1912,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get termsSection6Body =>
-      'L’utilisation de l’Application nécessite la création d’un compte. Tu es responsable de l’exactitude des informations fournies et de la confidentialité de tes identifiants de connexion. Toute activité réalisée depuis ton compte est présumée effectuée par toi.';
+      'L’Application est réservée aux personnes âgées de 16 ans ou plus. L’utilisation de l’Application nécessite la création d’un compte. Tu es responsable de l’exactitude des informations fournies et de la confidentialité de tes identifiants de connexion. Toute activité réalisée depuis ton compte est présumée effectuée par toi.';
 
   @override
   String get termsSection6Title => '6. Compte utilisateur';
@@ -1943,6 +2010,11 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String svcErrorFetchProfile(String error) {
     return 'Erreur lors de la récupération du profil : $error';
+  }
+
+  @override
+  String svcErrorDeleteAccount(String error) {
+    return 'Erreur lors de la suppression du compte : $error';
   }
 
   @override
@@ -2140,4 +2212,168 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get pantryRecipesEmptyMessage => 'Aucune recette générée.';
+
+  @override
+  String get profilePrivacyTitle => 'Politique de confidentialité';
+
+  @override
+  String get profilePrivacySubtitle =>
+      'Quelles données sont collectées et pourquoi';
+
+  @override
+  String get profileLicensesTitle => 'Licences';
+
+  @override
+  String get profileLicensesSubtitle => 'Crédits open source et tiers';
+
+  @override
+  String get aboutPrivacyLinkTitle => 'Politique de confidentialité';
+
+  @override
+  String get aboutLicensesLinkTitle => 'Licences';
+
+  @override
+  String get signupPrivacyLinkLabel => 'Lire la politique de confidentialité';
+
+  @override
+  String get helpCenterPrivacyLinkLabel => 'Politique de confidentialité';
+
+  @override
+  String get privacyAppBarTitle => 'Politique de confidentialité';
+
+  @override
+  String get privacyDraftBanner =>
+      'Brouillon : ce document n\'a pas encore été relu par un juriste et n\'est pas juridiquement opposable en l\'état.';
+
+  @override
+  String privacyLastUpdated(String date) {
+    return 'Dernière mise à jour : $date';
+  }
+
+  @override
+  String get privacySection1Title => '1. Responsable du traitement';
+
+  @override
+  String privacySection1Body(String supportEmail) {
+    return 'AI Health Chef est éditée par Baga Assami, développeur individuel (pas de société immatriculée à ce jour). Contact : $supportEmail';
+  }
+
+  @override
+  String get privacySection2Title => '2. Données collectées';
+
+  @override
+  String get privacySection2Body =>
+      'Email/mot de passe du compte, profil de santé (poids, taille, âge, objectif, régime, allergies — donnée de santé au sens du RGPD), photos d\'avatar/repas/progression/menu/frigo, historique de chat avec le coach, entrées de poids et d\'hydratation, identifiants techniques, statut d\'abonnement, suggestions et plans mis en cache, compteurs d\'usage anti-abus, horodatages de tentative de suppression, preuve d\'acceptation des CGU. Aucune géolocalisation, identifiant publicitaire, carnet de contacts, ni donnée de paiement en clair (gérée nativement par le store).';
+
+  @override
+  String get privacySection3Title => '3. Destinataires des données';
+
+  @override
+  String get privacySection3Body =>
+      'Supabase (hébergement backend, toutes les données). Google Gemini (photos de repas/produit/menu/frigo, texte du chat, régime/allergies pour le coach). Cloudflare Workers AI et Pollinations.ai (titre/description textuelle d\'un repas uniquement, pour l\'illustration). RevenueCat (gestion de l\'abonnement, identifiant utilisateur Supabase). Open Food Facts (recherche anonyme par code-barres). Hugging Face (téléchargement du modèle d\'IA locale). Apple/Google (paiement natif in-app). Plusieurs de ces transferts sortent de l\'UE ; réduire le détail des allergies/régime envoyé au coach, et rendre privés les buckets de photos, sont des propositions non encore appliquées.';
+
+  @override
+  String get privacySection4Title => '4. Durées de conservation';
+
+  @override
+  String get privacySection4Body =>
+      'Les données sont conservées tant que le compte existe. Les compteurs d\'usage sont remis à zéro quotidiennement. La suppression de compte supprime en cascade les données Supabase Auth et les données locales, mais oublie actuellement le bucket Storage chat_images (voir section 9 — un bug connu, pas encore corrigé).';
+
+  @override
+  String get privacySection5Title => '5. Tes droits';
+
+  @override
+  String get privacySection5Body =>
+      'Tu disposes d\'un droit d\'accès, de rectification, d\'effacement, de limitation, d\'opposition et de portabilité de tes données, ainsi que du droit d\'introduire une réclamation auprès de la CNIL. Accès/rectification : écran Profil. Effacement : Profil > Sécurité > Supprimer mon compte. Portabilité : exports CSV/PDF existants mais partiels (voir section 7).';
+
+  @override
+  String get privacySection6Title => '6. Âge minimum';
+
+  @override
+  String get privacySection6Body =>
+      'L\'application est réservée aux personnes de 16 ans ou plus, l\'âge de consentement numérique par défaut en RGPD, pour éviter de collecter des données de santé de mineurs sans consentement parental vérifiable. L\'âge est déclaré par l\'utilisateur, sans vérification indépendante.';
+
+  @override
+  String get privacySection7Title => '7. Export de données';
+
+  @override
+  String privacySection7Body(String supportEmail) {
+    return 'Les exports existants (CSV du journal de repas, PDF bilan hebdo/mensuel, export .ics du plan de repas) sont partiels : ils ne couvrent pas l\'hydratation, le chat, le profil complet, ni les photos. Un export JSON complet est proposé mais pas encore implémenté. Pour toute demande liée à l\'export de tes données, contacte $supportEmail';
+  }
+
+  @override
+  String get privacySection8Title => '8. Sécurité';
+
+  @override
+  String get privacySection8Body =>
+      'Les mots de passe sont hashés par Supabase Auth et jamais stockés en clair. La Row Level Security limite chaque utilisateur à ses propres données. Les Edge Functions exigent une session Supabase valide et appliquent des quotas anti-abus. Le bucket chat_images est privé avec accès signé ; les buckets avatar, repas et progression sont actuellement publics (une proposition pour les rendre privés est en attente de validation).';
+
+  @override
+  String get privacySection9Title => '9. Point signalé — suppression de compte';
+
+  @override
+  String get privacySection9Body =>
+      'La suppression de compte efface tes photos d\'avatar, de repas et de progression, mais un bug connu laisse actuellement tes images de chat orphelines dans le Storage au lieu de les supprimer aussi. Un correctif a été identifié et attend ta validation avant d\'être appliqué.';
+
+  @override
+  String get privacySection10Title => '10. Contact';
+
+  @override
+  String privacySection10Body(String supportEmail) {
+    return 'Pour toute question sur cette politique ou sur tes données, contacte $supportEmail';
+  }
+
+  @override
+  String get licensesAppBarTitle => 'Licences';
+
+  @override
+  String get licensesIntro =>
+      'AI Health Chef s\'appuie sur des packages open source ainsi que sur des données et modèles d\'IA tiers. Les licences des packages open source sont listées ci-dessous ; les autres crédits sont listés ici.';
+
+  @override
+  String get licensesOpenFoodFactsBody =>
+      'Les données produits (lookup par code-barres) viennent d\'Open Food Facts, une base collaborative et libre sous licence Open Database License (ODbL).';
+
+  @override
+  String get licensesGemmaBody =>
+      'L\'analyse de repas sur l\'appareil utilise le modèle Gemma 3n de Google, téléchargé directement sur ton appareil, sous les conditions d\'utilisation Gemma de Google.';
+
+  @override
+  String get licensesFluxBody =>
+      'Les illustrations de repas sont générées avec le modèle FLUX.1 [schnell] (Apache 2.0), servi via Cloudflare Workers AI.';
+
+  @override
+  String get licensesPollinationsBody =>
+      'Les illustrations de repas peuvent aussi être générées via Pollinations.ai, utilisé comme service de génération d\'image de secours.';
+
+  @override
+  String get licensesOpenSourceButton =>
+      'Voir les licences des packages open source';
+
+  @override
+  String get cloudAiConsentTitle => 'Envoyer à l\'IA pour analyse ?';
+
+  @override
+  String get cloudAiConsentBody =>
+      'Cette fonctionnalité peut envoyer ta photo ou ton message à un service d\'IA cloud (comme Google Gemini) pour analyse. Tu peux changer ce choix à tout moment dans Sécurité et confidentialité.';
+
+  @override
+  String get cloudAiConsentAccept => 'Accepter et continuer';
+
+  @override
+  String get cloudAiConsentDecline => 'Pas maintenant';
+
+  @override
+  String get securityPrivacySectionTitle => 'Confidentialité';
+
+  @override
+  String get securityCloudAiConsentTitle => 'Analyse par IA cloud';
+
+  @override
+  String get securityCloudAiConsentSubtitle =>
+      'Autoriser l\'envoi de photos et de messages à des services d\'IA cloud pour analyse et coaching';
+
+  @override
+  String get securityPrivacyPolicyLinkLabel =>
+      'Lire la politique de confidentialité';
 }

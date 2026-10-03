@@ -12,6 +12,7 @@ import '../providers/shopping_list_provider.dart';
 import '../utils/image_data_uri.dart';
 import '../utils/nutrition_targets.dart';
 import '../widgets/animated_async_value.dart';
+import '../widgets/cloud_ai_consent_gate.dart';
 import '../widgets/meal_suggestion_card.dart';
 import '../widgets/staggered_entrance.dart';
 
@@ -38,27 +39,19 @@ class CoachScreen extends ConsumerWidget {
           slivers: [
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              sliver: SliverToBoxAdapter(
-                child: _Header(),
-              ),
+              sliver: SliverToBoxAdapter(child: _Header()),
             ),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverToBoxAdapter(
-                child: _RealtimeBanner(),
-              ),
+              sliver: SliverToBoxAdapter(child: _RealtimeBanner()),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-              sliver: SliverToBoxAdapter(
-                child: _DailyObjectiveCard(),
-              ),
+              sliver: SliverToBoxAdapter(child: _DailyObjectiveCard()),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-              sliver: SliverToBoxAdapter(
-                child: _NeedsCard(),
-              ),
+              sliver: SliverToBoxAdapter(child: _NeedsCard()),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
@@ -89,9 +82,7 @@ class CoachScreen extends ConsumerWidget {
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              sliver: SliverToBoxAdapter(
-                child: _MealSuggestionsRow(),
-              ),
+              sliver: SliverToBoxAdapter(child: _MealSuggestionsRow()),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
@@ -187,12 +178,23 @@ class _MealSuggestionsRow extends ConsumerWidget {
                     allergies: allergies,
                     onAdd: () => openCoachChatSheet(
                       context,
-                      presetMessage: context.l10n.coachAdjustMealPresetMessage(suggestion.title),
+                      presetMessage: context.l10n.coachAdjustMealPresetMessage(
+                        suggestion.title,
+                      ),
                     ),
                     onAddToShoppingList: () {
-                      ref.read(shoppingListProvider.notifier).addItems([suggestion.title]);
+                      ref.read(shoppingListProvider.notifier).addItems([
+                        suggestion.title,
+                      ]);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(context.l10n.mealSuggestionsAddedToShoppingListMessage(suggestion.title))),
+                        SnackBar(
+                          content: Text(
+                            context.l10n
+                                .mealSuggestionsAddedToShoppingListMessage(
+                                  suggestion.title,
+                                ),
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -245,7 +247,9 @@ class _Header extends ConsumerWidget {
             CircleAvatar(
               radius: 18,
               backgroundColor: Colors.grey.shade200,
-              backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+              backgroundImage: avatarUrl != null
+                  ? NetworkImage(avatarUrl)
+                  : null,
               child: avatarUrl == null
                   ? Icon(Icons.person, color: Colors.grey.shade500, size: 20)
                   : null,
@@ -316,7 +320,8 @@ class _PulsingDot extends StatefulWidget {
   State<_PulsingDot> createState() => _PulsingDotState();
 }
 
-class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderStateMixin {
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 900),
@@ -331,9 +336,10 @@ class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderState
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
-      opacity: Tween(begin: 0.35, end: 1.0).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-      ),
+      opacity: Tween(
+        begin: 0.35,
+        end: 1.0,
+      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut)),
       child: Container(
         width: widget.size,
         height: widget.size,
@@ -356,7 +362,8 @@ class _DailyObjectiveCard extends ConsumerWidget {
       orElse: () => NutritionTargets.fallback,
     );
     final goalLabel = profileAsync.maybeWhen(
-      data: (profile) => profile?.goalLabel(context) ?? context.l10n.coachGoalMaintainLabel,
+      data: (profile) =>
+          profile?.goalLabel(context) ?? context.l10n.coachGoalMaintainLabel,
       orElse: () => context.l10n.coachGoalMaintainLabel,
     );
     final totalKcal = mealsAsync.maybeWhen(
@@ -500,7 +507,10 @@ class _NeedsCard extends ConsumerWidget {
             icon: Icons.fitness_center,
             iconColor: const Color(0xFF6B66FF),
             label: context.l10n.coachProteinLabel,
-            value: context.l10n.coachNeedValueGrams(totalProt.toInt(), targets.protein.toInt()),
+            value: context.l10n.coachNeedValueGrams(
+              totalProt.toInt(),
+              targets.protein.toInt(),
+            ),
             progress: progressOf(totalProt, targets.protein),
           ),
           const SizedBox(height: 14),
@@ -508,7 +518,10 @@ class _NeedsCard extends ConsumerWidget {
             icon: Icons.grain_rounded,
             iconColor: const Color(0xFFF06B9E),
             label: context.l10n.coachCarbsLabel,
-            value: context.l10n.coachNeedValueGrams(totalGluc.toInt(), targets.carbs.toInt()),
+            value: context.l10n.coachNeedValueGrams(
+              totalGluc.toInt(),
+              targets.carbs.toInt(),
+            ),
             progress: progressOf(totalGluc, targets.carbs),
           ),
           const SizedBox(height: 14),
@@ -516,7 +529,10 @@ class _NeedsCard extends ConsumerWidget {
             icon: Icons.local_fire_department_rounded,
             iconColor: const Color(0xFFFFB54A),
             label: context.l10n.coachFatLabel,
-            value: context.l10n.coachNeedValueGrams(totalLip.toInt(), targets.fat.toInt()),
+            value: context.l10n.coachNeedValueGrams(
+              totalLip.toInt(),
+              targets.fat.toInt(),
+            ),
             progress: progressOf(totalLip, targets.fat),
           ),
         ],
@@ -586,12 +602,13 @@ class _NeedRow extends StatelessWidget {
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeOut,
                   tween: Tween<double>(begin: 0, end: progress),
-                  builder: (context, animatedProgress, child) => LinearProgressIndicator(
-                    value: animatedProgress,
-                    minHeight: 6,
-                    backgroundColor: iconColor.withValues(alpha: 0.16),
-                    color: iconColor,
-                  ),
+                  builder: (context, animatedProgress, child) =>
+                      LinearProgressIndicator(
+                        value: animatedProgress,
+                        minHeight: 6,
+                        backgroundColor: iconColor.withValues(alpha: 0.16),
+                        color: iconColor,
+                      ),
                 ),
               ),
             ],
@@ -606,10 +623,7 @@ class _CoachTipCard extends StatelessWidget {
   final String title;
   final String text;
 
-  const _CoachTipCard({
-    required this.title,
-    required this.text,
-  });
+  const _CoachTipCard({required this.title, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -652,10 +666,7 @@ class _CoachTipCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   text,
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
-                    height: 1.45,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade700, height: 1.45),
                 ),
               ],
             ),
@@ -718,6 +729,11 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
     if (text.isEmpty || _isSending) {
       return;
     }
+    // ponytail: le chat utilise l'IA locale si prête (voir chat_provider.dart),
+    // mais ce choix se fait à l'intérieur de sendMessage — on ne peut pas le
+    // savoir à l'avance ici. On demande le consentement cloud par prudence
+    // dans tous les cas plutôt que dupliquer la logique de chat_provider.
+    if (!await ensureCloudAiConsent(context, ref)) return;
     _textController.clear();
     setState(() => _isSending = true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -859,19 +875,22 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                       _PromptChip(
                         label: context.l10n.coachPromptIdeasLabel,
                         onTap: () {
-                          _textController.text = context.l10n.coachPromptIdeasMessage;
+                          _textController.text =
+                              context.l10n.coachPromptIdeasMessage;
                         },
                       ),
                       _PromptChip(
                         label: context.l10n.coachPromptPostWorkoutLabel,
                         onTap: () {
-                          _textController.text = context.l10n.coachPromptPostWorkoutMessage;
+                          _textController.text =
+                              context.l10n.coachPromptPostWorkoutMessage;
                         },
                       ),
                       _PromptChip(
                         label: context.l10n.coachPromptFatLossLabel,
                         onTap: () {
-                          _textController.text = context.l10n.coachPromptFatLossMessage;
+                          _textController.text =
+                              context.l10n.coachPromptFatLossMessage;
                         },
                       ),
                     ],
@@ -881,9 +900,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                 Expanded(
                   child: messagesAsync.isLoading && messages.isEmpty
                       ? Center(
-                          child: CircularProgressIndicator(
-                            color: primaryColor,
-                          ),
+                          child: CircularProgressIndicator(color: primaryColor),
                         )
                       : ListView.builder(
                           controller: _scrollController,
@@ -952,7 +969,9 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                                       height: 18,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation(Colors.white),
+                                        valueColor: AlwaysStoppedAnimation(
+                                          Colors.white,
+                                        ),
                                       ),
                                     )
                                   : const Icon(
@@ -1010,7 +1029,8 @@ class _TypingBubble extends StatefulWidget {
   State<_TypingBubble> createState() => _TypingBubbleState();
 }
 
-class _TypingBubbleState extends State<_TypingBubble> with SingleTickerProviderStateMixin {
+class _TypingBubbleState extends State<_TypingBubble>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1200),
@@ -1053,7 +1073,9 @@ class _TypingBubbleState extends State<_TypingBubble> with SingleTickerProviderS
                       width: 7,
                       height: 7,
                       decoration: BoxDecoration(
-                        color: kCoachPrimaryColor.withValues(alpha: 0.5 + bounce * 0.5),
+                        color: kCoachPrimaryColor.withValues(
+                          alpha: 0.5 + bounce * 0.5,
+                        ),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -1147,10 +1169,14 @@ class _DishImageState extends ConsumerState<_DishImage> {
   Future<String?> _resolve() {
     final message = widget.message;
     if (message.imagePath != null) {
-      return ref.read(chatProvider.notifier).getSignedImageUrl(message.imagePath!);
+      return ref
+          .read(chatProvider.notifier)
+          .getSignedImageUrl(message.imagePath!);
     }
     if (message.hasLegacyImage) {
-      return ref.read(chatProvider.notifier).fetchLegacyImageDataUri(message.id);
+      return ref
+          .read(chatProvider.notifier)
+          .fetchLegacyImageDataUri(message.id);
     }
     return Future.value(null);
   }
@@ -1163,7 +1189,12 @@ class _DishImageState extends ConsumerState<_DishImage> {
     final legacyBytes = decodeImageDataUri(message.imageUrl);
     if (legacyBytes != null) {
       return _frame(
-        Image.memory(legacyBytes, height: 140, width: double.infinity, fit: BoxFit.cover),
+        Image.memory(
+          legacyBytes,
+          height: 140,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
       );
     }
 
@@ -1197,7 +1228,14 @@ class _DishImageState extends ConsumerState<_DishImage> {
         if (bytes == null) {
           return _frame(_placeholder());
         }
-        return _frame(Image.memory(bytes, height: 140, width: double.infinity, fit: BoxFit.cover));
+        return _frame(
+          Image.memory(
+            bytes,
+            height: 140,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        );
       },
     );
   }
@@ -1215,7 +1253,10 @@ class _DishImageState extends ConsumerState<_DishImage> {
       width: double.infinity,
       color: Colors.grey.shade200,
       alignment: Alignment.center,
-      child: Icon(Icons.image_not_supported_outlined, color: Colors.grey.shade400),
+      child: Icon(
+        Icons.image_not_supported_outlined,
+        color: Colors.grey.shade400,
+      ),
     );
   }
 }

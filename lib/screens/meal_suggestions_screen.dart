@@ -6,14 +6,27 @@ import '../providers/meal_suggestions_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/shopping_list_provider.dart';
 import '../widgets/animated_async_value.dart';
+import '../widgets/cloud_ai_consent_gate.dart';
 import '../widgets/meal_suggestion_card.dart';
 import 'coach_screen.dart' show openCoachChatSheet, kCoachPrimaryColor;
 import '../l10n/l10n_extensions.dart';
 
 /// Liste complète des idées de repas générées par l'IA, ouverte depuis
-/// "Tout voir" sur l'écran du Coach.
-class MealSuggestionsScreen extends ConsumerWidget {
+/// "Tout voir" sur l'écran du Coach. [mealSuggestionsProvider] se construit
+/// (et appelle l'IA cloud) dès qu'il est lu une première fois : le contenu
+/// réel vit dans [_MealSuggestionsContent], gardé derrière
+/// CloudAiConsentGate, pour que ce `watch` n'ait jamais lieu avant consentement.
+class MealSuggestionsScreen extends StatelessWidget {
   const MealSuggestionsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const CloudAiConsentGate(child: _MealSuggestionsContent());
+  }
+}
+
+class _MealSuggestionsContent extends ConsumerWidget {
+  const _MealSuggestionsContent();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,24 +44,35 @@ class MealSuggestionsScreen extends ConsumerWidget {
         ),
         title: Text(
           context.l10n.mealSuggestionsTitle,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.calendar_month_outlined, color: kCoachPrimaryColor),
+            icon: const Icon(
+              Icons.calendar_month_outlined,
+              color: kCoachPrimaryColor,
+            ),
             tooltip: context.l10n.mealSuggestionsWeeklyPlanTooltip,
             onPressed: () => context.push('/weekly_meal_plan'),
           ),
           IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined, color: kCoachPrimaryColor),
+            icon: const Icon(
+              Icons.shopping_cart_outlined,
+              color: kCoachPrimaryColor,
+            ),
             tooltip: context.l10n.shoppingListTitle,
             onPressed: () => context.push('/shopping_list'),
           ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: kCoachPrimaryColor),
             tooltip: context.l10n.mealSuggestionsRegenerateTooltip,
-            onPressed: () => ref.read(mealSuggestionsProvider.notifier).regenerate(),
+            onPressed: () =>
+                ref.read(mealSuggestionsProvider.notifier).regenerate(),
           ),
         ],
       ),
@@ -63,7 +87,11 @@ class MealSuggestionsScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.redAccent,
+                    size: 48,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     context.l10n.mealSuggestionsLoadError,
@@ -73,8 +101,13 @@ class MealSuggestionsScreen extends ConsumerWidget {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () => ref.invalidate(mealSuggestionsProvider),
-                    style: ElevatedButton.styleFrom(backgroundColor: kCoachPrimaryColor),
-                    child: Text(context.l10n.mealSuggestionsRetryButton, style: const TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kCoachPrimaryColor,
+                    ),
+                    child: Text(
+                      context.l10n.mealSuggestionsRetryButton,
+                      style: const TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),
@@ -92,12 +125,14 @@ class MealSuggestionsScreen extends ConsumerWidget {
 
             return RefreshIndicator(
               color: kCoachPrimaryColor,
-              onRefresh: () => ref.read(mealSuggestionsProvider.notifier).regenerate(),
+              onRefresh: () =>
+                  ref.read(mealSuggestionsProvider.notifier).regenerate(),
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: suggestions.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 16),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 16),
                 itemBuilder: (context, index) {
                   final suggestion = suggestions[index];
                   return MealSuggestionCard(
@@ -105,12 +140,22 @@ class MealSuggestionsScreen extends ConsumerWidget {
                     allergies: allergies,
                     onAdd: () => openCoachChatSheet(
                       context,
-                      presetMessage: context.l10n.mealSuggestionsAdjustPresetMessage(suggestion.title),
+                      presetMessage: context.l10n
+                          .mealSuggestionsAdjustPresetMessage(suggestion.title),
                     ),
                     onAddToShoppingList: () {
-                      ref.read(shoppingListProvider.notifier).addItems([suggestion.title]);
+                      ref.read(shoppingListProvider.notifier).addItems([
+                        suggestion.title,
+                      ]);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(context.l10n.mealSuggestionsAddedToShoppingListMessage(suggestion.title))),
+                        SnackBar(
+                          content: Text(
+                            context.l10n
+                                .mealSuggestionsAddedToShoppingListMessage(
+                                  suggestion.title,
+                                ),
+                          ),
+                        ),
                       );
                     },
                   );

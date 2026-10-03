@@ -112,20 +112,27 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(localMeals, localMeals.totalSugar);
             await m.addColumn(localMeals, localMeals.totalSatFat);
           }
+          // `createTable` always uses the table's *current* Dart definition,
+          // not the one from the version it historically corresponds to. So a
+          // table created here in the same pass (e.g. a user jumping straight
+          // from v1 to v6) already has every column added by later branches
+          // below — adding them again would fail with "duplicate column".
           if (from < 3) {
             await m.createTable(weightEntries);
+          } else {
+            if (from < 5) {
+              await m.addColumn(weightEntries, weightEntries.isSynced);
+            }
+            if (from < 6) {
+              await m.addColumn(weightEntries, weightEntries.imageUrl);
+              await m.addColumn(weightEntries, weightEntries.localImagePath);
+            }
           }
           if (from < 4) {
             await m.createTable(hydrationEntries);
-          }
-          if (from < 5) {
-            await m.addColumn(weightEntries, weightEntries.isSynced);
+          } else if (from < 5) {
             await m.addColumn(hydrationEntries, hydrationEntries.isSynced);
             await m.addColumn(hydrationEntries, hydrationEntries.isDeleted);
-          }
-          if (from < 6) {
-            await m.addColumn(weightEntries, weightEntries.imageUrl);
-            await m.addColumn(weightEntries, weightEntries.localImagePath);
           }
         },
       );

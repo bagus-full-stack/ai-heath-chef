@@ -34,13 +34,28 @@ List<_FaqSection> _faqSections(BuildContext context) {
       _FaqItem(l10n.helpCenterCoachQ2Question, l10n.helpCenterCoachQ2Answer),
     ]),
     _FaqSection(l10n.helpCenterSectionRemindersTitle, [
-      _FaqItem(l10n.helpCenterRemindersQ1Question, l10n.helpCenterRemindersQ1Answer),
-      _FaqItem(l10n.helpCenterRemindersQ2Question, l10n.helpCenterRemindersQ2Answer),
+      _FaqItem(
+        l10n.helpCenterRemindersQ1Question,
+        l10n.helpCenterRemindersQ1Answer,
+      ),
+      _FaqItem(
+        l10n.helpCenterRemindersQ2Question,
+        l10n.helpCenterRemindersQ2Answer,
+      ),
     ]),
     _FaqSection(l10n.helpCenterSectionAccountTitle, [
-      _FaqItem(l10n.helpCenterAccountQ1Question, l10n.helpCenterAccountQ1Answer),
-      _FaqItem(l10n.helpCenterAccountQ2Question, l10n.helpCenterAccountQ2Answer),
-      _FaqItem(l10n.helpCenterAccountQ3Question, l10n.helpCenterAccountQ3Answer(kSupportEmail)),
+      _FaqItem(
+        l10n.helpCenterAccountQ1Question,
+        l10n.helpCenterAccountQ1Answer,
+      ),
+      _FaqItem(
+        l10n.helpCenterAccountQ2Question,
+        l10n.helpCenterAccountQ2Answer,
+      ),
+      _FaqItem(
+        l10n.helpCenterAccountQ3Question,
+        l10n.helpCenterAccountQ3Answer(kSupportEmail),
+      ),
     ]),
   ];
 }
@@ -52,7 +67,11 @@ class HelpCenterScreen extends StatelessWidget {
   const HelpCenterScreen({super.key});
 
   Future<void> _contactSupport(BuildContext context) async {
-    final uri = Uri(scheme: 'mailto', path: kSupportEmail, query: 'subject=${context.l10n.helpCenterMailtoSubject}');
+    final uri = Uri(
+      scheme: 'mailto',
+      path: kSupportEmail,
+      query: 'subject=${context.l10n.helpCenterMailtoSubject}',
+    );
     bool launched = false;
     try {
       launched = await launchUrl(uri);
@@ -61,7 +80,11 @@ class HelpCenterScreen extends StatelessWidget {
     }
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.helpCenterNoMailAppSnackbar(kSupportEmail))),
+        SnackBar(
+          content: Text(
+            context.l10n.helpCenterNoMailAppSnackbar(kSupportEmail),
+          ),
+        ),
       );
     }
   }
@@ -79,7 +102,11 @@ class HelpCenterScreen extends StatelessWidget {
         ),
         title: Text(
           context.l10n.helpCenterAppBarTitle,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
         centerTitle: true,
       ),
@@ -111,20 +138,34 @@ class HelpCenterScreen extends StatelessWidget {
                     for (var i = 0; i < section.items.length; i++) ...[
                       if (i > 0) const Divider(height: 1),
                       Theme(
-                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                        data: Theme.of(
+                          context,
+                        ).copyWith(dividerColor: Colors.transparent),
                         child: ExpansionTile(
                           title: Text(
                             section.items[i].question,
-                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
                           ),
                           iconColor: _kPrimaryColor,
                           collapsedIconColor: Colors.grey.shade400,
-                          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          childrenPadding: const EdgeInsets.fromLTRB(
+                            16,
+                            0,
+                            16,
+                            16,
+                          ),
                           expandedCrossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               section.items[i].answer,
-                              style: TextStyle(color: Colors.grey.shade600, height: 1.45, fontSize: 13),
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                height: 1.45,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
@@ -140,14 +181,19 @@ class HelpCenterScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: _kPrimaryColor.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: _kPrimaryColor.withValues(alpha: 0.15)),
+                border: Border.all(
+                  color: _kPrimaryColor.withValues(alpha: 0.15),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     context.l10n.helpCenterNotFoundTitle,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -163,11 +209,20 @@ class HelpCenterScreen extends StatelessWidget {
                       backgroundColor: _kPrimaryColor,
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 48),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                       elevation: 0,
                     ),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: TextButton(
+                onPressed: () => context.push('/privacy'),
+                child: Text(context.l10n.helpCenterPrivacyLinkLabel),
               ),
             ),
           ],

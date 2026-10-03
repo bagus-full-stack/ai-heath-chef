@@ -10,6 +10,7 @@ import '../models/user_profile.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 import '../providers/profile_provider.dart';
+import '../utils/age_policy.dart';
 import '../utils/bmi.dart';
 import '../widgets/animated_async_value.dart';
 
@@ -184,7 +185,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       _showError(context.l10n.accountErrorNameEmpty);
       return;
     }
-    if (age == null || age < 10 || age > 120) {
+    if (age == null || !isValidAge(age)) {
       _showError(context.l10n.accountErrorInvalidAge);
       return;
     }
@@ -418,6 +419,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       onSelected: (_) => setState(() => _goal = goal),
                     );
                   }).toList(),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  context.l10n.onboardingMedicalDisclaimer,
+                  style: TextStyle(fontSize: 11.5, color: Colors.grey.shade500, height: 1.3),
                 ),
                 const SizedBox(height: 28),
                 ElevatedButton(

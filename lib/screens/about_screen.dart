@@ -15,7 +15,11 @@ class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
   Future<void> _contactSupport(BuildContext context) async {
-    final uri = Uri(scheme: 'mailto', path: kSupportEmail, query: 'subject=${context.l10n.aboutMailtoSubject}');
+    final uri = Uri(
+      scheme: 'mailto',
+      path: kSupportEmail,
+      query: 'subject=${context.l10n.aboutMailtoSubject}',
+    );
     bool launched = false;
     try {
       launched = await launchUrl(uri);
@@ -24,7 +28,9 @@ class AboutScreen extends StatelessWidget {
     }
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.aboutNoMailAppSnackbar(kSupportEmail))),
+        SnackBar(
+          content: Text(context.l10n.aboutNoMailAppSnackbar(kSupportEmail)),
+        ),
       );
     }
   }
@@ -42,7 +48,11 @@ class AboutScreen extends StatelessWidget {
         ),
         title: Text(
           context.l10n.aboutAppBarTitle,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
         centerTitle: true,
       ),
@@ -60,12 +70,19 @@ class AboutScreen extends StatelessWidget {
                       color: Colors.black,
                       borderRadius: BorderRadius.circular(18),
                     ),
-                    child: const Icon(Icons.bolt, color: Colors.white, size: 36),
+                    child: const Icon(
+                      Icons.bolt,
+                      color: Colors.white,
+                      size: 36,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     context.l10n.aboutAppName,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   FutureBuilder<PackageInfo>(
@@ -74,10 +91,16 @@ class AboutScreen extends StatelessWidget {
                       final info = snapshot.data;
                       final versionLabel = info == null
                           ? context.l10n.aboutVersionLoading
-                          : context.l10n.aboutVersionLabel(info.version, info.buildNumber);
+                          : context.l10n.aboutVersionLabel(
+                              info.version,
+                              info.buildNumber,
+                            );
                       return Text(
                         versionLabel,
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
                       );
                     },
                   ),
@@ -100,6 +123,16 @@ class AboutScreen extends StatelessWidget {
               icon: Icons.description_outlined,
               title: context.l10n.aboutTermsLinkTitle,
               onTap: () => context.push('/terms'),
+            ),
+            _AboutLinkTile(
+              icon: Icons.privacy_tip_outlined,
+              title: context.l10n.aboutPrivacyLinkTitle,
+              onTap: () => context.push('/privacy'),
+            ),
+            _AboutLinkTile(
+              icon: Icons.badge_outlined,
+              title: context.l10n.aboutLicensesLinkTitle,
+              onTap: () => context.push('/licenses'),
             ),
             _AboutLinkTile(
               icon: Icons.mail_outline_rounded,
@@ -163,10 +196,22 @@ class _AboutLinkTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
-                    Text(subtitle!, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                    Text(
+                      subtitle!,
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ],
               ),

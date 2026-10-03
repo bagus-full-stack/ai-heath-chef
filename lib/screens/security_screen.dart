@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../l10n/l10n_extensions.dart';
+import '../providers/ai_consent_provider.dart';
 import '../providers/auth_provider.dart';
 
 /// Écran Sécurité et Confidentialité : changement de mot de passe (le seul
@@ -52,7 +54,9 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
 
     setState(() => _isSaving = true);
     try {
-      await ref.read(authServiceProvider).updatePassword(
+      await ref
+          .read(authServiceProvider)
+          .updatePassword(
             newPassword,
             lang: Localizations.localeOf(context).languageCode,
           );
@@ -69,15 +73,24 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
 
   void _showMessage(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: isError ? Colors.redAccent : Colors.green),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.redAccent : Colors.green,
+      ),
     );
   }
 
-  InputDecoration _decoration({required IconData icon, required bool obscure, required VoidCallback onToggle}) {
+  InputDecoration _decoration({
+    required IconData icon,
+    required bool obscure,
+    required VoidCallback onToggle,
+  }) {
     return InputDecoration(
       prefixIcon: Icon(icon),
       suffixIcon: IconButton(
-        icon: Icon(obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+        icon: Icon(
+          obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+        ),
         onPressed: onToggle,
       ),
       filled: true,
@@ -107,7 +120,11 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
         elevation: 0,
         title: Text(
           context.l10n.profileSecurityTitle,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
         ),
         centerTitle: true,
       ),
@@ -121,7 +138,10 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 16),
-            Text(context.l10n.securityNewPasswordLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              context.l10n.securityNewPasswordLabel,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _newPasswordController,
@@ -133,7 +153,10 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            Text(context.l10n.securityConfirmPasswordLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              context.l10n.securityConfirmPasswordLabel,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _confirmPasswordController,
@@ -142,7 +165,8 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
               decoration: _decoration(
                 icon: Icons.lock_outline,
                 obscure: _obscureConfirm,
-                onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                onToggle: () =>
+                    setState(() => _obscureConfirm = !_obscureConfirm),
               ),
             ),
             const SizedBox(height: 24),
@@ -151,18 +175,27 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: _primaryColor,
                 minimumSize: const Size(double.infinity, 54),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
                 elevation: 0,
               ),
               child: _isSaving
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : Text(
                       context.l10n.securityUpdatePasswordButton,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
             ),
             const SizedBox(height: 28),
@@ -175,22 +208,123 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.verified_user_outlined, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.verified_user_outlined,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(context.l10n.security2faTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        Text(
+                          context.l10n.security2faTitle,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           context.l10n.security2faMessage,
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 28),
+            Text(
+              context.l10n.securityPrivacySectionTitle,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 10),
+            Consumer(
+              builder: (context, ref, _) {
+                final consent =
+                    ref.watch(cloudAiConsentProvider).value ?? false;
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.l10n.securityCloudAiConsentTitle,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              context.l10n.securityCloudAiConsentSubtitle,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value: consent,
+                        activeTrackColor: _primaryColor,
+                        onChanged: (value) {
+                          final notifier = ref.read(
+                            cloudAiConsentProvider.notifier,
+                          );
+                          value ? notifier.accept() : notifier.revoke();
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: () => context.push('/privacy'),
+              child: Text(context.l10n.securityPrivacyPolicyLinkLabel),
+            ),
+            const SizedBox(height: 28),
+            Text(
+              context.l10n.securityDeleteAccountTitle,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.redAccent,
+              ),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () => context.push('/delete_account'),
+              icon: const Icon(
+                Icons.delete_forever_outlined,
+                color: Colors.redAccent,
+              ),
+              label: Text(
+                context.l10n.securityDeleteAccountSubtitle,
+                style: const TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                minimumSize: const Size(double.infinity, 54),
+                side: const BorderSide(color: Colors.redAccent, width: 1.4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
               ),
             ),
           ],

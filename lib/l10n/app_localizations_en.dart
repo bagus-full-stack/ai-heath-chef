@@ -483,6 +483,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get dashboardCalorieFlooredNotice =>
+      'Goal adjusted to the recommended minimum. See a healthcare professional for a more restrictive diet.';
+
+  @override
   String get dashboardCarbsLabel => 'CARBS';
 
   @override
@@ -687,7 +691,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String helpCenterAccountQ3Answer(String supportEmail) {
-    return 'Write to us at $supportEmail from the email address associated with your account, and we\'ll take care of deleting your data.';
+    return 'From Profile > Security and Privacy > \"Delete my account\", you can permanently delete your account and all your data directly in the app, no need to write to us. If you run into an issue with this flow, you can still contact us at $supportEmail.';
   }
 
   @override
@@ -1310,6 +1314,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingErrorInvalidAge => 'Enter a valid age.';
 
   @override
+  String get onboardingErrorUnderMinimumAge =>
+      'AI Health Chef is for people aged 16 and over. Your age was not saved.';
+
+  @override
   String get onboardingErrorInvalidHeight => 'Enter your height in cm.';
 
   @override
@@ -1377,6 +1385,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingWeightSectionLabel => 'Your Weight';
+
+  @override
+  String get onboardingMedicalDisclaimer =>
+      'These estimates are indicative and do not replace medical advice. See a healthcare professional before any significant dietary change.';
 
   @override
   String get paywallBadgePopular => 'POPULAR';
@@ -1647,6 +1659,57 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not available yet — coming in a future update.';
 
   @override
+  String get securityDeleteAccountTitle => 'Delete my account';
+
+  @override
+  String get securityDeleteAccountSubtitle => 'Permanently delete my account';
+
+  @override
+  String get deleteAccountAppBarTitle => 'Delete my account';
+
+  @override
+  String get deleteAccountWarningTitle => 'Irreversible action';
+
+  @override
+  String get deleteAccountWarningBody =>
+      'Once confirmed, this deletion is permanent: your account and data cannot be recovered afterwards.';
+
+  @override
+  String get deleteAccountDataListTitle => 'What will be deleted:';
+
+  @override
+  String get deleteAccountDataListBody =>
+      '• Your profile, goals and preferences\n• Your meal journal and its photos\n• Your weight history and its photos\n• Your hydration history\n• Your conversations with the AI Coach\n• Your generated meal ideas and weekly meal plans\n• Your profile picture\n\nThe on-device AI model you may have downloaded on this device is not deleted: it isn\'t tied to your account, it\'s a generic file shared by the app.';
+
+  @override
+  String get deleteAccountSubscriptionWarningTitle => 'Active subscription';
+
+  @override
+  String get deleteAccountSubscriptionWarningBody =>
+      'Deleting your account does NOT cancel your ongoing subscription: it will keep being billed until you cancel it from your Apple or Google account settings.';
+
+  @override
+  String get deleteAccountManageSubscriptionButton => 'Manage my subscription';
+
+  @override
+  String get deleteAccountConfirmWord => 'DELETE';
+
+  @override
+  String deleteAccountConfirmInstructions(String word) {
+    return 'To confirm, type $word below:';
+  }
+
+  @override
+  String get deleteAccountConfirmFieldLabel => 'Confirmation word';
+
+  @override
+  String get deleteAccountConfirmMismatch =>
+      'The confirmation word doesn\'t match.';
+
+  @override
+  String get deleteAccountButton => 'Permanently delete my account';
+
+  @override
   String get profileSubscriptionSubtitle => 'PRO plan and billing';
 
   @override
@@ -1704,7 +1767,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signupEmailLabel => 'EMAIL ADDRESS';
 
   @override
-  String get signupErrorAcceptTerms => 'You must accept the Terms of Use.';
+  String get signupErrorAcceptTerms =>
+      'You must confirm you are at least 16 and accept the Terms of Use and Privacy Policy.';
 
   @override
   String get signupErrorFillAllFields => 'Please fill in all fields.';
@@ -1740,7 +1804,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signupTermsAcceptance =>
-      'I accept the Terms of Use and Privacy Policy';
+      'I am at least 16 years old and I accept the Terms of Use and Privacy Policy.';
+
+  @override
+  String get signupTermsLinkLabel => 'Read the Terms of Use';
 
   @override
   String get termsAppBarTitle => 'Terms of Use';
@@ -1829,7 +1896,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsSection6Body =>
-      'Using the App requires creating an account. You are responsible for the accuracy of the information provided and for keeping your login credentials confidential. Any activity carried out from your account is presumed to have been performed by you.';
+      'The App is restricted to people aged 16 or over. Using the App requires creating an account. You are responsible for the accuracy of the information provided and for keeping your login credentials confidential. Any activity carried out from your account is presumed to have been performed by you.';
 
   @override
   String get termsSection6Title => '6. User account';
@@ -1926,6 +1993,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String svcErrorFetchProfile(String error) {
     return 'Error fetching profile: $error';
+  }
+
+  @override
+  String svcErrorDeleteAccount(String error) {
+    return 'Error deleting account: $error';
   }
 
   @override
@@ -2123,4 +2195,165 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pantryRecipesEmptyMessage => 'No recipe generated.';
+
+  @override
+  String get profilePrivacyTitle => 'Privacy policy';
+
+  @override
+  String get profilePrivacySubtitle => 'What data we collect and why';
+
+  @override
+  String get profileLicensesTitle => 'Licenses';
+
+  @override
+  String get profileLicensesSubtitle => 'Open-source and third-party credits';
+
+  @override
+  String get aboutPrivacyLinkTitle => 'Privacy Policy';
+
+  @override
+  String get aboutLicensesLinkTitle => 'Licenses';
+
+  @override
+  String get signupPrivacyLinkLabel => 'Read the Privacy Policy';
+
+  @override
+  String get helpCenterPrivacyLinkLabel => 'Privacy policy';
+
+  @override
+  String get privacyAppBarTitle => 'Privacy policy';
+
+  @override
+  String get privacyDraftBanner =>
+      'Draft: this document has not been reviewed by a lawyer yet and is not legally binding as-is.';
+
+  @override
+  String privacyLastUpdated(String date) {
+    return 'Last updated: $date';
+  }
+
+  @override
+  String get privacySection1Title => '1. Data controller';
+
+  @override
+  String privacySection1Body(String supportEmail) {
+    return 'AI Health Chef is published by Baga Assami, an individual developer (no registered company as of this draft). Contact: $supportEmail';
+  }
+
+  @override
+  String get privacySection2Title => '2. Data collected';
+
+  @override
+  String get privacySection2Body =>
+      'Account email/password, health profile (weight, height, age, goal, diet, allergies — special category health data), avatar/meal/progress/menu/pantry photos, coach chat history, weight/hydration entries, technical identifiers, subscription status, cached suggestions and plans, anti-abuse usage counters, deletion-attempt timestamps, terms-acceptance record. No location, no advertising ID, no contacts, no raw payment data (handled natively by the store).';
+
+  @override
+  String get privacySection3Title => '3. Recipients / processors';
+
+  @override
+  String get privacySection3Body =>
+      'Supabase (backend hosting, all data). Google Gemini (meal/product/menu/pantry photos, chat text, diet/allergies for the coach). Cloudflare Workers AI and Pollinations.ai (meal title/description text only, for illustration generation). RevenueCat (subscription management, Supabase user ID). Open Food Facts (anonymous barcode/search lookup). Hugging Face (on-device model download). Apple/Google (native in-app payment). Several of these transfer data outside the EU; minimization of the allergy/diet detail sent to the coach, and moving photo buckets to private+signed URLs, are proposed but not yet applied.';
+
+  @override
+  String get privacySection4Title => '4. Retention';
+
+  @override
+  String get privacySection4Body =>
+      'Data is kept for the lifetime of the account. Usage counters reset daily. Account deletion cascades through Supabase Auth and wipes local data, but currently misses the chat_images Storage bucket (see section 9 — a known bug, not fixed yet).';
+
+  @override
+  String get privacySection5Title => '5. Your rights';
+
+  @override
+  String get privacySection5Body =>
+      'You have the right to access, rectify, erase, restrict, object to, and port your data, plus the right to lodge a complaint with your national data protection authority. Access/rectification: in-app Profile screen. Erasure: Profile > Security > Delete account. Portability: existing partial CSV/PDF exports (see section 7).';
+
+  @override
+  String get privacySection6Title => '6. Minimum age';
+
+  @override
+  String get privacySection6Body =>
+      'This app is restricted to users 16 and older, matching the GDPR default digital-consent age, to avoid collecting minors\' health data without verifiable parental consent. Age is self-declared only — no independent verification.';
+
+  @override
+  String get privacySection7Title => '7. Data export';
+
+  @override
+  String privacySection7Body(String supportEmail) {
+    return 'Existing exports (meal journal CSV, weekly/monthly nutrition PDF, weekly meal plan .ics) are partial — they don\'t cover hydration, chat history, full profile, or photos. A single full JSON export is proposed but not yet implemented. For any export or data request, contact $supportEmail';
+  }
+
+  @override
+  String get privacySection8Title => '8. Security';
+
+  @override
+  String get privacySection8Body =>
+      'Passwords are hashed by Supabase Auth and never stored in clear text. Row Level Security restricts every user to their own data. Edge Functions require a valid Supabase session and apply anti-abuse quotas. The chat_images Storage bucket is private with signed access; avatar, meal, and progress-photo buckets are currently public (a minimization proposal to make them private is pending approval).';
+
+  @override
+  String get privacySection9Title => '9. Flagged issue — account deletion';
+
+  @override
+  String get privacySection9Body =>
+      'Deleting your account removes your avatar, meal, and progress photos, but a known bug currently leaves chat images orphaned in Storage instead of deleting them too. A fix has been identified and is pending approval before being applied.';
+
+  @override
+  String get privacySection10Title => '10. Contact';
+
+  @override
+  String privacySection10Body(String supportEmail) {
+    return 'For any question about this policy or your data, contact $supportEmail';
+  }
+
+  @override
+  String get licensesAppBarTitle => 'Licenses';
+
+  @override
+  String get licensesIntro =>
+      'AI Health Chef is built on open-source packages and relies on third-party data and AI models. Open-source package licenses are listed below; other credits are listed here.';
+
+  @override
+  String get licensesOpenFoodFactsBody =>
+      'Food product data (barcode lookup) comes from Open Food Facts, a collaborative, free database under the Open Database License (ODbL).';
+
+  @override
+  String get licensesGemmaBody =>
+      'On-device meal analysis uses Google\'s Gemma 3n model, downloaded directly to your device, under Google\'s Gemma Terms of Use.';
+
+  @override
+  String get licensesFluxBody =>
+      'Meal illustrations are generated using the FLUX.1 [schnell] model (Apache 2.0), served via Cloudflare Workers AI.';
+
+  @override
+  String get licensesPollinationsBody =>
+      'Meal illustrations may also be generated via Pollinations.ai, used as a fallback image generation service.';
+
+  @override
+  String get licensesOpenSourceButton => 'View open-source package licenses';
+
+  @override
+  String get cloudAiConsentTitle => 'Send to AI for analysis?';
+
+  @override
+  String get cloudAiConsentBody =>
+      'This feature can send your photo or message to a cloud AI service (such as Google Gemini) for analysis. You can change this choice anytime in Security and Privacy settings.';
+
+  @override
+  String get cloudAiConsentAccept => 'Accept and continue';
+
+  @override
+  String get cloudAiConsentDecline => 'Not now';
+
+  @override
+  String get securityPrivacySectionTitle => 'Privacy';
+
+  @override
+  String get securityCloudAiConsentTitle => 'Cloud AI analysis';
+
+  @override
+  String get securityCloudAiConsentSubtitle =>
+      'Allow sending photos and messages to cloud AI services for analysis and coaching';
+
+  @override
+  String get securityPrivacyPolicyLinkLabel => 'Read the privacy policy';
 }

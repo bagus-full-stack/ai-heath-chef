@@ -31,10 +31,15 @@ const localImagePrefix = 'local://';
 /// (`saveMeal`/`getTodayMeals`/`uploadMealPhoto`), qui écrivaient
 /// directement dans Supabase sans aucune persistance locale.
 class MealRepository {
-  MealRepository(this._db);
+  /// [supabaseClient] n'est à fournir que pour les tests (voir
+  /// test/local_db/meal_repository_test.dart) : un `SupabaseClient` de test
+  /// construit avec un `httpClient` mocké, pour éviter tout appel réseau réel
+  /// tout en gardant le code de synchronisation inchangé.
+  MealRepository(this._db, [SupabaseClient? supabaseClient])
+      : _supabase = supabaseClient ?? Supabase.instance.client;
 
   final AppDatabase _db;
-  SupabaseClient get _supabase => Supabase.instance.client;
+  final SupabaseClient _supabase;
 
   /// Sauvegarde un repas en local (utilisable immédiatement, même hors
   /// ligne), puis tente une synchronisation immédiate — sans faire échouer

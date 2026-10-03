@@ -10,6 +10,7 @@ import '../models/ingredient.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/meal_provider.dart';
 import '../widgets/animated_async_value.dart';
+import '../widgets/cloud_ai_consent_gate.dart';
 
 const _primaryColor = Color(0xFF6B66FF);
 
@@ -30,14 +31,19 @@ class _MenuScanScreenState extends ConsumerState<MenuScanScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => ref.read(mealProvider.notifier).analyzeImage(widget.imagePath, isMenu: true),
-    );
+  }
+
+  void _startAnalysis() {
+    ref
+        .read(mealProvider.notifier)
+        .analyzeImage(widget.imagePath, isMenu: true);
   }
 
   Future<void> _addToJournal(Ingredient dish) async {
     try {
-      await ref.read(mealRepositoryProvider).saveMeal(
+      await ref
+          .read(mealRepositoryProvider)
+          .saveMeal(
             [dish],
             dish.name,
             lang: Localizations.localeOf(context).languageCode,
@@ -45,12 +51,18 @@ class _MenuScanScreenState extends ConsumerState<MenuScanScreen> {
       ref.invalidate(todayMealsProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.menuScanAddedMessage(dish.name)), backgroundColor: Colors.green),
+        SnackBar(
+          content: Text(context.l10n.menuScanAddedMessage(dish.name)),
+          backgroundColor: Colors.green,
+        ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.redAccent,
+        ),
       );
     }
   }
@@ -59,78 +71,107 @@ class _MenuScanScreenState extends ConsumerState<MenuScanScreen> {
   Widget build(BuildContext context) {
     final dishesAsync = ref.watch(mealProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+    return CloudAiConsentGate(
+      onGranted: _startAnalysis,
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          context.l10n.menuScanTitle,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.file(File(widget.imagePath), height: 160, width: double.infinity, fit: BoxFit.cover),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              color: Colors.black,
+              size: 20,
             ),
-            const SizedBox(height: 20),
-            dishesAsync.animatedWhen(
-              loading: () => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 60),
-                child: Column(
-                  children: [
-                    const CircularProgressIndicator(color: _primaryColor),
-                    const SizedBox(height: 16),
-                    Text(context.l10n.menuScanLoadingMessage, style: TextStyle(color: Colors.grey.shade600)),
-                  ],
+            onPressed: () => context.pop(),
+          ),
+          title: Text(
+            context.l10n.menuScanTitle,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.file(
+                  File(widget.imagePath),
+                  height: 160,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
                 ),
               ),
-              error: (error, stack) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40),
-                child: Column(
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
-                    const SizedBox(height: 12),
-                    Text(error.toString(), textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600)),
-                  ],
+              const SizedBox(height: 20),
+              dishesAsync.animatedWhen(
+                loading: () => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 60),
+                  child: Column(
+                    children: [
+                      const CircularProgressIndicator(color: _primaryColor),
+                      const SizedBox(height: 16),
+                      Text(
+                        context.l10n.menuScanLoadingMessage,
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              data: (dishes) {
-                if (dishes.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: Text(
-                      context.l10n.menuScanEmptyMessage,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey.shade600),
-                    ),
-                  );
-                }
-
-                return Column(
-                  children: [
-                    for (final dish in dishes) ...[
-                      _DishCard(
-                        dish: dish,
-                        onDismiss: () => ref.read(mealProvider.notifier).removeIngredient(dish.id),
-                        onAdd: () => _addToJournal(dish),
+                error: (error, stack) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.redAccent,
+                        size: 48,
                       ),
                       const SizedBox(height: 12),
+                      Text(
+                        error.toString(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
                     ],
-                  ],
-                );
-              },
-            ),
-          ],
+                  ),
+                ),
+                data: (dishes) {
+                  if (dishes.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Text(
+                        context.l10n.menuScanEmptyMessage,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      for (final dish in dishes) ...[
+                        _DishCard(
+                          dish: dish,
+                          onDismiss: () => ref
+                              .read(mealProvider.notifier)
+                              .removeIngredient(dish.id),
+                          onAdd: () => _addToJournal(dish),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -141,7 +182,11 @@ class _DishCard extends StatelessWidget {
   final Ingredient dish;
   final VoidCallback onDismiss;
   final VoidCallback onAdd;
-  const _DishCard({required this.dish, required this.onDismiss, required this.onAdd});
+  const _DishCard({
+    required this.dish,
+    required this.onDismiss,
+    required this.onAdd,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +197,10 @@ class _DishCard extends StatelessWidget {
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: const Icon(Icons.delete_outline, color: Colors.white),
       ),
       child: Container(
@@ -169,11 +217,22 @@ class _DishCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(dish.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  child: Text(
+                    dish.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
                 ),
                 Text(
-                  context.l10n.mealAnalysisKcalValue(dish.currentKcal.toString()),
-                  style: const TextStyle(color: _primaryColor, fontWeight: FontWeight.bold),
+                  context.l10n.mealAnalysisKcalValue(
+                    dish.currentKcal.toString(),
+                  ),
+                  style: const TextStyle(
+                    color: _primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -185,11 +244,20 @@ class _DishCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                _MacroChip(label: context.l10n.mealAnalysisBadgeProt, value: dish.currentProt),
+                _MacroChip(
+                  label: context.l10n.mealAnalysisBadgeProt,
+                  value: dish.currentProt,
+                ),
                 const SizedBox(width: 8),
-                _MacroChip(label: context.l10n.mealAnalysisBadgeGluc, value: dish.currentGluc),
+                _MacroChip(
+                  label: context.l10n.mealAnalysisBadgeGluc,
+                  value: dish.currentGluc,
+                ),
                 const SizedBox(width: 8),
-                _MacroChip(label: context.l10n.mealAnalysisBadgeLip, value: dish.currentLip),
+                _MacroChip(
+                  label: context.l10n.mealAnalysisBadgeLip,
+                  value: dish.currentLip,
+                ),
                 const Spacer(),
                 OutlinedButton(
                   onPressed: onAdd,

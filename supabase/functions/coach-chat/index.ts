@@ -1,165 +1,12 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "jsr:@supabase/supabase-js@2"
 
-/**
- * Copie volontaire de la logique de `_shared/quota.ts` plutôt qu'un import
- * relatif : cette fonction est déployée depuis l'éditeur du Dashboard
- * Supabase, qui ne bundle que les fichiers ajoutés explicitement à CETTE
- * fonction et ne voit pas le dossier `_shared` partagé par les autres. La
- * dupliquer ici évite l'erreur "Module not found .../_shared/quota.ts" au
- * déploiement (voir aussi meal-images/index.ts, même pattern).
- */
-interface QuotaCheckResult {
-    ok: boolean;
-    userId?: string;
-    response?: Response;
-}
+import { checkAndIncrementQuota } from "../_shared/quota.ts"
+import { corsHeaders } from "../_shared/cors.ts"
+import { HttpError } from "../_shared/errors.ts"
+import { callGeminiWithFallback } from "../_shared/gemini.ts"
 
-/**
- * True si l'appelant doit passer la limite quotidienne PAR UTILISATEUR
- * (admin de confiance, voir migration 0007, ou abonné PRO actif côté
- * RevenueCat). Le disjoncteur GLOBAL protège lui quand même le budget API
- * partagé, même pour ces comptes.
- *
- * Repli sur `false` (donc quota normal appliqué) si `REVENUECAT_SECRET_KEY`
- * n'est pas configuré ou si l'appel à RevenueCat échoue.
- */
-async function hasUnlimitedQuota(
-    // deno-lint-ignore no-explicit-any
-    serviceClient: any,
-    userId: string,
-): Promise<boolean> {
-    const { data: profile } = await serviceClient
-        .from("profiles")
-        .select("is_admin")
-        .eq("user_id", userId)
-        .maybeSingle();
-    if (profile?.is_admin) {
-        return true;
-    }
-
-    const revenueCatSecretKey = Deno.env.get("REVENUECAT_SECRET_KEY");
-    if (!revenueCatSecretKey) {
-        return false;
-    }
-
-    try {
-        const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${userId}`, {
-            headers: { Authorization: `Bearer ${revenueCatSecretKey}` },
-        });
-        if (!res.ok) {
-            return false;
-        }
-        const body = await res.json();
-        const expiresDate = body?.subscriber?.entitlements?.pro?.expires_date;
-        return expiresDate === null ||
-            (typeof expiresDate === "string" && new Date(expiresDate) > new Date());
-    } catch (_) {
-        return false;
-    }
-}
-
-async function checkAndIncrementQuota(
-    req: Request,
-    functionName: string,
-    dailyLimit: number,
-    corsHeaders: Record<string, string>,
-    globalDailyLimit?: number,
-    lang?: string,
-): Promise<QuotaCheckResult> {
-    const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
-    const isEn = lang === "en";
-
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-        return {
-            ok: false,
-            response: new Response(
-                JSON.stringify({ error: isEn ? "Authentication required." : "Authentification requise." }),
-                { status: 401, headers: jsonHeaders },
-            ),
-        };
-    }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const userClient = createClient(supabaseUrl, anonKey, {
-        global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userError } = await userClient.auth.getUser();
-    if (userError || !userData?.user) {
-        return {
-            ok: false,
-            response: new Response(
-                JSON.stringify({ error: isEn ? "Invalid authentication." : "Authentification invalide." }),
-                { status: 401, headers: jsonHeaders },
-            ),
-        };
-    }
-    const userId = userData.user.id;
-    const serviceClient = createClient(supabaseUrl, serviceRoleKey);
-
-    if (!(await hasUnlimitedQuota(serviceClient, userId))) {
-        const { data: allowed, error: quotaError } = await serviceClient.rpc(
-            "increment_api_usage",
-            { p_user_id: userId, p_function_name: functionName, p_daily_limit: dailyLimit },
-        );
-
-        if (quotaError) {
-            console.error(`Erreur quota (${functionName}) :`, quotaError.message);
-            return { ok: true, userId };
-        }
-
-        if (!allowed) {
-            return {
-                ok: false,
-                response: new Response(
-                    JSON.stringify({
-                        error: isEn
-                            ? `Daily limit reached (${dailyLimit}/day) for this feature. Try again tomorrow.`
-                            : `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
-                    }),
-                    { status: 429, headers: jsonHeaders },
-                ),
-            };
-        }
-    }
-
-    if (globalDailyLimit !== undefined) {
-        const { data: globalAllowed, error: globalQuotaError } = await serviceClient.rpc(
-            "increment_global_api_usage",
-            { p_function_name: functionName, p_daily_limit: globalDailyLimit },
-        );
-
-        if (globalQuotaError) {
-            console.error(`Erreur quota global (${functionName}) :`, globalQuotaError.message);
-        } else if (!globalAllowed) {
-            return {
-                ok: false,
-                response: new Response(
-                    JSON.stringify({
-                        error: isEn
-                            ? "This AI feature is in high demand today and has reached its shared limit. Try again tomorrow."
-                            : "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
-                    }),
-                    { status: 429, headers: jsonHeaders },
-                ),
-            };
-        }
-    }
-
-    return { ok: true, userId };
-}
-
-// 1. Headers CORS complets
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// 2. Liste de priorité des modèles (Les plus récents/performants en premier)
+// Liste de priorité des modèles (voir README : diverge volontairement/par
+// drift historique des autres fonctions IA du projet, non harmonisée).
 const MODELS = [
     "gemini-2.5-flash",
     "gemini-2.5-pro",
@@ -188,6 +35,9 @@ const MODELS = [
     "nano-banana-pro-preview",
     "gemini-1.5-flash" // Sécurité ultime (le plus stable)
 ];
+
+const MAX_MESSAGE_LENGTH = 4000;
+const MAX_HISTORY_ENTRIES = 50;
 
 Deno.serve(async (req) => {
     // === GESTION DU PREFLIGHT (CORS) ===
@@ -218,8 +68,11 @@ Deno.serve(async (req) => {
         }
 
         const { message, history, coachTone, dietType, allergies } = body;
-        if (!message) {
-            throw new Error(isEn ? "No message was provided in the request." : "Aucun message n'a été fourni dans la requête.");
+        if (!message || typeof message !== 'string') {
+            throw new HttpError(400, isEn ? "No message was provided in the request." : "Aucun message n'a été fourni dans la requête.");
+        }
+        if (message.length > MAX_MESSAGE_LENGTH) {
+            throw new HttpError(400, isEn ? `The message is too long (max ${MAX_MESSAGE_LENGTH} characters).` : `Le message est trop long (max ${MAX_MESSAGE_LENGTH} caractères).`);
         }
 
         // === 2. VÉRIFICATION CLÉ API GEMINI ===
@@ -262,74 +115,52 @@ Deno.serve(async (req) => {
         const dishTagInstruction = isEn
             ? " If, and only if, you recommend one specific dish or recipe the user could cook or order, end your reply with a separate line in the exact format \"[DISH: Dish name]\" (short name, no description). Never add this tag for general advice, questions, or encouragement."
             : " Si, et seulement si, tu recommandes un plat ou une recette précise que l'utilisateur pourrait cuisiner ou commander, termine ta réponse par une ligne séparée au format exact \"[DISH: Nom du plat]\" (nom court, sans description). N'ajoute JAMAIS cette balise pour un conseil général, une question ou un encouragement.";
-        const systemInstruction = `Tu es AI Health Chef, un coach en nutrition expert. ${toneInstruction} Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.${dietaryNote} Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.${langInstruction}${dishTagInstruction}`;
+        // Garde-fou santé : voir lib/utils/nutrition_targets.dart pour le
+        // plancher calorique appliqué côté app (1200/1500 kcal). Le coach ne
+        // doit jamais recommander moins, ni un jeûne extrême ou un régime
+        // dangereux, et doit orienter vers un professionnel en cas de signal
+        // de trouble du comportement alimentaire.
+        const safetyInstruction = isEn
+            ? " Never recommend a daily calorie target below 1200 kcal for a woman or 1500 kcal for a man, an extreme/prolonged fast, or any other dangerous or extremely restrictive diet. If the user mentions signs of disordered eating (extreme restriction, purging, obsession with weight), respond with warmth and without judgment, and gently encourage them to talk to a doctor, dietitian, or mental health professional."
+            : " Ne recommande jamais une cible calorique quotidienne inférieure à 1200 kcal pour une femme ou 1500 kcal pour un homme, un jeûne extrême/prolongé, ni aucun autre régime dangereux ou extrêmement restrictif. Si l'utilisateur évoque des signes de trouble du comportement alimentaire (restriction extrême, purge, obsession du poids), réponds avec bienveillance et sans jugement, et encourage-le doucement à en parler à un médecin, un·e diététicien·ne ou un·e psychologue.";
+        const systemInstruction = `Tu es AI Health Chef, un coach en nutrition expert. ${toneInstruction} Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.${dietaryNote} Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.${langInstruction}${dishTagInstruction}${safetyInstruction}`;
 
         // On prépare le payload exact attendu par l'API REST de Google
         // On combine l'historique (s'il y en a) avec le nouveau message
         const contents = [];
         if (history && Array.isArray(history)) {
-            contents.push(...history);
+            const truncatedHistory = history.slice(-MAX_HISTORY_ENTRIES).map((entry: Record<string, unknown>) => {
+                if (!entry || !Array.isArray(entry.parts)) return entry;
+                return {
+                    ...entry,
+                    parts: entry.parts.map((part: Record<string, unknown>) =>
+                        part && typeof part.text === 'string' && part.text.length > MAX_MESSAGE_LENGTH
+                            ? { ...part, text: part.text.slice(0, MAX_MESSAGE_LENGTH) }
+                            : part
+                    ),
+                };
+            });
+            contents.push(...truncatedHistory);
         }
         contents.push({ role: "user", parts: [{ text: message }] });
 
 
         // === 4. BOUCLE DE TENTATIVES (FALLBACK) ===
-        let lastError = null;
-        let successData = null;
-        let usedModel = "";
-
-        for (const modelName of MODELS) {
-            try {
-                console.log(`Tentative avec le modèle : ${modelName}...`);
-
-                const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            systemInstruction: { parts: [{ text: systemInstruction }] },
-                            contents: contents,
-                            generationConfig: {
-                                temperature: 0.7 // Une température moyenne pour avoir des réponses naturelles et variées
-                            }
-                        })
-                    }
-                );
-
-                const data = await response.json();
-
-                if (data.error) {
-                    console.warn(`Échec ${modelName} : ${data.error.message}`);
-                    lastError = data.error.message;
-                    continue;
+        let successData: string;
+        let usedModel: string;
+        try {
+            const result = await callGeminiWithFallback(apiKey, MODELS, {
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                contents: contents,
+                generationConfig: {
+                    temperature: 0.7 // Une température moyenne pour avoir des réponses naturelles et variées
                 }
-
-                const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!textResponse) {
-                    console.warn(`Échec ${modelName} : Réponse vide.`);
-                    continue;
-                }
-
-                // Si ça marche, on sauvegarde le texte et on casse la boucle !
-                successData = textResponse;
-                usedModel = modelName;
-                break;
-
-            } catch (err) {
-                console.warn(`Erreur réseau avec ${modelName} : ${err.message}`);
-                lastError = err.message;
-                continue;
-            }
-        }
-
-        // === 5. PARSING DU RÉSULTAT FINAL ===
-        if (!successData) {
-            throw new Error(
-                isEn
-                    ? `All chat models failed. Last error: ${lastError}`
-                    : `Tous les modèles de chat ont échoué. Dernière erreur : ${lastError}`,
-            );
+            });
+            successData = result.text;
+            usedModel = result.usedModel;
+        } catch (err) {
+            console.error(`Tous les modèles de chat ont échoué (coach-chat). Dernière erreur : ${(err as Error).message}`);
+            throw new Error(isEn ? "The coach temporarily failed. Please try again later." : "Le coach a temporairement échoué. Réessaie plus tard.");
         }
 
         console.log(`SUCCÈS : Réponse générée avec ${usedModel}`);
@@ -358,7 +189,7 @@ Deno.serve(async (req) => {
         // On renvoie l'erreur au format JSON
         return new Response(JSON.stringify({ error: error.message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 400,
+            status: error instanceof HttpError ? error.status : 400,
         })
     }
 })

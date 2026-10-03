@@ -19,10 +19,13 @@ const _uuid = Uuid();
 /// courbe de progression et à sa restauration après désinstallation/sur un
 /// nouvel appareil.
 class WeightRepository {
-  WeightRepository(this._db);
+  /// [supabaseClient] n'est à fournir que pour les tests (voir
+  /// test/local_db/weight_repository_test.dart).
+  WeightRepository(this._db, [SupabaseClient? supabaseClient])
+      : _supabase = supabaseClient ?? Supabase.instance.client;
 
   final AppDatabase _db;
-  SupabaseClient get _supabase => Supabase.instance.client;
+  final SupabaseClient _supabase;
 
   /// [photoPath] est le chemin d'une photo de progression tout juste prise
   /// (caméra/galerie), optionnelle — compressée et copiée dans le stockage

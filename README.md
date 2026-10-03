@@ -26,6 +26,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Rappels** — notifications locales quotidiennes pour les repas (petit-déjeuner/déjeuner/dîner, activables et personnalisables individuellement) et rappels personnalisés illimités (nom + heure au choix, quotidien ou un jour de la semaine donné — ex. le rappel de pesée hebdomadaire), réglables depuis Profil > Notifications. Tant qu'un créneau repas n'a jamais été réglé manuellement, son heure par défaut est déduite de l'historique de repas de l'utilisateur (heure habituelle sur les 30 derniers jours) plutôt qu'un horaire fixe générique. Les rappels personnalisés sont aussi sauvegardés sur Supabase et restaurés automatiquement sur un appareil "vide" (nouvelle install/nouveau téléphone) ; les créneaux fixes petit-déjeuner/déjeuner/dîner restent purement locaux (rapides à réactiver manuellement)
 - **Profil & compte** — gestion du profil utilisateur, paramètres de compte, photo de profil
 - **Sécurité et confidentialité** — changement du mot de passe depuis Profil > Sécurité (session active requise, pas de ré-saisie de l'ancien mot de passe). Le 2FA n'est pas encore implémenté (chantier séparé : nécessite aussi une vérification à la connexion, pas seulement un écran d'inscription)
+- **Suppression de compte** — parcours complet depuis Profil > Sécurité > Supprimer mon compte : confirmation explicite (mot de confirmation à ressaisir), suppression côté serveur (Storage + lignes Postgres via cascade + compte Auth, Edge Function `delete-account`), purge locale (base SQLite, préférences, rappels programmés, widget écran d'accueil) puis déconnexion. Avertit qu'un abonnement Apple/Google actif n'est pas annulé automatiquement (lien vers la gestion des abonnements du store)
 - **Centre d'aide** — FAQ groupée par thème + contact support par email
 - **Conditions d'utilisation** — CGU et mentions légales (⚠️ contenu de brouillon, voir [Notes](#notes) ci-dessous)
 - **À propos** — version de l'app (lue dynamiquement), liens vers l'aide et les CGU
@@ -107,24 +108,31 @@ android/app/src/main/kotlin/.../HealthChefWidgetProvider.kt
                 Rendu natif du widget écran d'accueil (RemoteViews), alimenté par les
                 données poussées depuis home_widget_service.dart
 supabase/
-  migrations/   Schéma SQL versionné (0001 à 0013, voir ci-dessous)
+  migrations/   Schéma SQL versionné (0001 à 0017, voir ci-dessous)
   functions/    Edge Functions : analyze-meal, analyze-product, analyze-menu,
                 analyze-pantry, coach-chat, meal-suggestions, meal-images,
-                huggingface-token — chacune déployée depuis l'éditeur du Dashboard
-                Supabase, donc chacune embarque sa propre copie de la vérification
-                d'identité et du quota (quotidien par utilisateur + global partagé) dans son
-                index.ts, sans dépendre d'un dossier partagé. _shared/quota.ts reste dans le
-                repo comme référence/copie canonique de cette logique, mais n'est importé par
-                aucune fonction. analyze-menu et analyze-pantry sont des quasi-copies
+                huggingface-token, delete-account — déployées en CI via la CLI
+                Supabase (voir ci-dessous), qui bundle les imports relatifs. La
+                vérification d'identité et le quota (quotidien par utilisateur +
+                global partagé) vivent dans `_shared/quota.ts`, importé par
+                chaque fonction IA ; `_shared/cors.ts` et `_shared/errors.ts`
+                mutualisent de même les headers CORS et la classe d'erreur HTTP
+                (`HttpError`), et `_shared/gemini.ts` mutualise le mécanisme de
+                cascade entre modèles Gemini (fetch, timeout, retry) — chaque
+                fonction garde néanmoins SA PROPRE liste de modèles `MODELS`
+                (elles divergent entre fonctions par drift historique, non
+                harmonisées). analyze-menu et analyze-pantry sont des quasi-copies
                 d'analyze-meal (même contrat JSON `{ ingredients: [...] }`), seul le prompt
                 change (carte de restaurant / inventaire de frigo plutôt qu'assiette).
+                delete-account n'a pas de quota IA (aucun appel GEMINI_API_KEY) mais applique
+                son propre rate limit (3 tentatives/heure, voir migration 0017).
 test/           Tests unitaires (providers, utils)
 ```
 
 ## Prérequis
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (compatible Dart ^3.12.0 — bump récent, requis par `flutter_gemma`)
-- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` déployées (voir ci-dessous)
+- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images`, `huggingface-token` et `delete-account` déployées (voir ci-dessous)
 - (Optionnel) Un projet [RevenueCat](https://www.revenuecat.com) pour activer les achats réels
 
 ## Installation
@@ -136,7 +144,7 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0019) depuis le **SQL Editor** du dashboard Supabase (ou via `supabase db push` si tu utilises la CLI Supabase) :
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0019) depuis le **SQL Editor** du dashboard Supabase, ou laisse la CI le faire : `.github/workflows/deploy_functions.yml` lance automatiquement `supabase db push` sur push vers `master` dès qu'un fichier change dans `supabase/migrations/` (nécessite les secrets GitHub `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID` et `SUPABASE_DB_PASSWORD` — mot de passe de la base, Project Settings > Database). ⚠️ Ne mélange pas les deux : si tu as déjà appliqué une migration manuellement via le SQL Editor, le `supabase db push` CI échouera ou la rejouera en double tant que l'historique local (`supabase migration list`) n'est pas resynchronisé avec la prod.
    - `0001` : tables `profiles`, `meals`, `chat_messages` + policies RLS + bucket `avatars`
    - `0002` : taille (`height_cm`) sur `profiles`
    - `0003` : table `meal_suggestions` (cache des idées de repas IA)
@@ -150,9 +158,14 @@ flutter pub get
    - `0011` : tables `weight_entries`, `hydration_entries` et `custom_reminders_backup` — synchronisation cross-device du poids, de l'hydratation et des rappels personnalisés (voir [Notes](#notes))
    - `0012` : photo de progression (`image_url`/`local_image_path` sur `weight_entries`) + bucket `weight_photos`
    - `0013` : table `weekly_meal_plans` (cache du plan de repas hebdomadaire généré par l'IA)
+   - `0014` : préférence de cuisine (`cuisine_preference` sur `profiles`), pour orienter les idées de repas générées
+   - `0015` : illustration IA d'un plat recommandé par le coach (`image_url` sur `chat_messages`)
+   - `0016` : variante de `increment_global_api_usage` acceptant un incrément explicite (`p_increment`), utilisée par `meal-images` quand plusieurs images sont générées en un seul appel
+   - `0017` : table `delete_account_attempts` + fonction `check_delete_account_rate_limit`, pour le rate limit (3 tentatives/heure) sur la suppression de compte
+   - `0018` : traçabilité de l'acceptation des CGU (`accepted_terms_at`/`accepted_terms_version` sur `profiles`)
    - `0019` : illustrations du coach dans Storage plutôt qu'en base64 (`image_path` sur `chat_messages`) + bucket **privé** `chat_images` (policies scopées à `{user_id}/...`, URL signée générée à la demande côté app) — voir `supabase/scripts/backfill_chat_images.dart` pour migrer les anciens messages (`image_url`, conservée en lecture pour rétrocompatibilité) vers ce bucket
-3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images` et `huggingface-token` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas sont injectés automatiquement par Supabase, rien à configurer pour eux.
-   - Chaque fonction est **autonome** (aucun import relatif vers `_shared/`) : un simple copier-coller de son `index.ts` dans l'éditeur du Dashboard Supabase suffit à la déployer/redéployer, sans erreur de bundling.
+3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images`, `huggingface-token` et `delete-account` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas (et par `delete-account`) sont injectés automatiquement par Supabase, rien à configurer pour eux. En CI, `.github/workflows/deploy_functions.yml` déploie automatiquement tous les sous-dossiers de `supabase/functions/`, `delete-account` inclus — aucune modification du workflow n'est nécessaire.
+   - Les fonctions IA (`analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images`) importent la logique commune depuis `supabase/functions/_shared/` (`quota.ts`, `cors.ts`, `errors.ts`, `gemini.ts`) via des imports relatifs (`../_shared/...`) : la CLI Supabase les bundle automatiquement au déploiement, il n'y a rien à copier manuellement. Chaque fonction garde en revanche sa propre liste de modèles Gemini (`MODELS`), volontairement non harmonisée (voir ci-dessus).
 4. **Illustrations des idées de repas (optionnel, 100% gratuit)** — `meal-images` génère une image IA par suggestion, en cascade entre deux fournisseurs gratuits :
    - **Cloudflare Workers AI (FLUX.1 [schnell])**, essayé en premier — meilleure qualité, gratuit jusqu'à ~10 000 Neurons/jour (~100 images, partagées entre tous les utilisateurs de l'app), sans carte bancaire requise. Crée un compte gratuit sur [dash.cloudflare.com](https://dash.cloudflare.com), récupère ton **Account ID** (visible sur le Dashboard) et crée un **API Token** avec la permission "Workers AI" (My Profile > API Tokens), puis configure les secrets `CLOUDFLARE_ACCOUNT_ID` et `CLOUDFLARE_API_TOKEN`.
    - **[Pollinations.ai](https://pollinations.ai)**, utilisé en repli si Cloudflare échoue ou n'est pas configuré — fonctionne **sans compte** (accès anonyme, gratuit, limité en débit). Pour un accès plus rapide et sans watermark, crée un compte sur [auth.pollinations.ai](https://auth.pollinations.ai) et configure le secret `POLLINATIONS_TOKEN`.
@@ -222,8 +235,9 @@ flutter test
 - **Notifications locales, rappels personnalisés sauvegardés** — les rappels (créneaux fixes et personnalisés) sont programmés en local sur l'appareil (`flutter_local_notifications`) et persistés dans `shared_preferences`. Les rappels personnalisés sont en plus sauvegardés dans la table Supabase `custom_reminders_backup` à chaque modification, et restaurés automatiquement (nouvelle installation ou nouvel appareil sans rappel local) — voir `lib/providers/custom_reminders_provider.dart`. ⚠️ Restauration one-shot, pas de fusion en cas d'usage simultané sur deux appareils avant leur première synchronisation ; les créneaux fixes petit-déjeuner/déjeuner/dîner, eux, ne sont pas sauvegardés (à réactiver manuellement après réinstallation).
 - **Photos de repas** — uploadées dans le bucket `meal_photos` uniquement pour les analyses par photo ("Repas"/"Produit") ; un repas issu d'un scan de code-barres n'a pas de photo.
 - **Identité visuelle** — le logo source (`assets/icon/icon.png` / `icon_foreground.png`) alimente à la fois l'icône d'app (générée par `flutter_launcher_icons`, voir `pubspec.yaml`) et, depuis peu, le splash screen (Android/iOS) et l'écran de connexion. L'identifiant d'app est unifié en `com.aihealthchef.app` sur Android/iOS/macOS/Linux (Windows n'a pas d'identifiant de ce type).
-- **CGU/mentions légales à finaliser** — le contenu de `lib/screens/terms_screen.dart` décrit honnêtement le fonctionnement actuel de l'app (données collectées, absence de conseil médical, contenu généré par IA, abonnement) et identifie l'éditeur (Baga Assami, projet personnel sans société immatriculée) et son contact (`kSupportEmail`), mais reste un brouillon : le texte doit être relu par un professionnel du droit avant toute publication publique — un bandeau d'avertissement s'affiche sur l'écran tant que ce n'est pas fait.
-- **Quotas IA** — les limites quotidiennes sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque `supabase/functions/<nom>/index.ts` si besoin (4ᵉ argument = quota par utilisateur, 5ᵉ argument optionnel = quota global partagé par toute l'app, voir migration 0009). Cette fonction est dupliquée dans chaque Edge Function (voir Architecture ci-dessus) — un changement dans `_shared/quota.ts` doit être reporté manuellement dans chaque `index.ts` si tu veux le garder comme référence à jour. Un compte admin (`profiles.is_admin`) n'en est **pas** exempté — le quota s'applique à tout le monde, y compris toi.
+- **CGU/mentions légales à finaliser** — le contenu de `lib/screens/terms_screen.dart` décrit honnêtement le fonctionnement actuel de l'app (données collectées, absence de conseil médical, contenu généré par IA, abonnement, âge minimum) et identifie l'éditeur (Baga Assami, projet personnel sans société immatriculée) et son contact (`kSupportEmail`), mais reste un brouillon : le texte doit être relu par un professionnel du droit avant toute publication publique — un bandeau d'avertissement s'affiche sur l'écran tant que ce n'est pas fait.
+- **Âge minimum (RGPD art. 8/9)** — l'app est réservée aux personnes de 16 ans ou plus (`kMinimumAge` dans `lib/utils/age_policy.dart`), sans flux de consentement parental : en-dessous, la création de profil est bloquée (onboarding et écran "Mes objectifs"). L'inscription (`signup_screen.dart`) exige en plus une case explicite "J'ai au moins 16 ans et j'accepte les CGU…", dont l'horodatage et la version acceptée sont tracés dans `profiles.accepted_terms_at`/`accepted_terms_version` (migration 0018). Ceci n'empêche pas, par construction, qu'un compte créé avant ce changement ait un âge < 16 ans déjà enregistré ; voir la requête de détection et le traitement proposé dans le rapport de la tâche correspondante (non ré-exécutée automatiquement par l'app).
+- **Quotas IA** — les limites quotidiennes sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque `supabase/functions/<nom>/index.ts` si besoin (4ᵉ argument = quota par utilisateur, 5ᵉ argument optionnel = quota global partagé par toute l'app, voir migration 0009). Cette fonction vit dans `supabase/functions/_shared/quota.ts` et est importée par chaque Edge Function IA (voir Architecture ci-dessus) : un changement dans `_shared/quota.ts` s'applique à toutes d'un coup, pas besoin de le reporter manuellement. Un compte admin (`profiles.is_admin`) n'en est **pas** exempté — le quota s'applique à tout le monde, y compris toi.
 
 ## Ressources Flutter
 

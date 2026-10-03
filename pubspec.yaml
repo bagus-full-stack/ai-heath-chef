@@ -80,6 +80,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4           # Génère les icônes d'app (AI Health Chef) à partir de assets/icon/
   drift_dev: ^2.35.0                        # Génère le code de la base locale (database.g.dart) à partir des tables drift
   build_runner: ^2.16.1                     # Lance la génération de code (drift_dev)
+  sqlite3: ^3.6.0                           # Construit une base brute à un ancien schéma dans test/local_db/app_database_migration_test.dart
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

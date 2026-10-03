@@ -99,6 +99,10 @@ class NotificationService {
 
   Future<void> cancelReminder(int id) => _plugin.cancel(id: id);
 
+  /// Annule tous les rappels programmés — utilisé lors de la purge locale
+  /// après suppression de compte (voir local_data_purge.dart).
+  Future<void> cancelAll() => _plugin.cancelAll();
+
   /// Affiche une notification immédiatement (pas de programmation) — utilisé
   /// pour les résumés (poids/kcal) calculés au moment où l'app est ouverte,
   /// plutôt que programmés à l'avance avec des chiffres qui seraient obsolètes.

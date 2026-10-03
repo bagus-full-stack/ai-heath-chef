@@ -14,6 +14,8 @@ import '../screens/coach_screen.dart';
 import '../screens/dietary_preferences_screen.dart';
 import '../screens/help_center_screen.dart';
 import '../screens/terms_screen.dart';
+import '../screens/privacy_screen.dart';
+import '../screens/licenses_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/barcode_scanner_screen.dart';
 import '../screens/food_search_screen.dart';
@@ -35,6 +37,7 @@ import '../screens/shopping_list_screen.dart';
 import '../screens/checkout_screen.dart';
 import '../screens/account_screen.dart';
 import '../screens/security_screen.dart';
+import '../screens/delete_account_screen.dart';
 import '../screens/coming_soon_screen.dart';
 import '../widgets/main_layout.dart';
 import '../models/meal_analysis_args.dart';
@@ -46,7 +49,7 @@ class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
     notifyListeners();
     _subscription = stream.asBroadcastStream().listen(
-          (dynamic _) => notifyListeners(),
+      (dynamic _) => notifyListeners(),
     );
   }
   late final StreamSubscription<dynamic> _subscription;
@@ -75,7 +78,9 @@ void setupRouter(bool showOnboarding) {
     initialLocation: showOnboarding ? '/onboarding' : '/',
 
     // On écoute l'état de Supabase
-    refreshListenable: GoRouterRefreshStream(Supabase.instance.client.auth.onAuthStateChange),
+    refreshListenable: GoRouterRefreshStream(
+      Supabase.instance.client.auth.onAuthStateChange,
+    ),
 
     // --- 4. LA LOGIQUE DE REDIRECTION (Le "Videur") ---
     redirect: (context, state) {
@@ -85,9 +90,14 @@ void setupRouter(bool showOnboarding) {
       final isGoingToLogin = state.matchedLocation == '/';
       final isGoingToSignup = state.matchedLocation == '/signup';
       final isGoingToOnboarding = state.matchedLocation == '/onboarding';
-      final isGoingToForgotPassword = state.matchedLocation == '/forgot_password';
+      final isGoingToForgotPassword =
+          state.matchedLocation == '/forgot_password';
 
-      final isAuthScreen = isGoingToLogin || isGoingToSignup || isGoingToOnboarding || isGoingToForgotPassword;
+      final isAuthScreen =
+          isGoingToLogin ||
+          isGoingToSignup ||
+          isGoingToOnboarding ||
+          isGoingToForgotPassword;
 
       // RÈGLE 1 : Si NON connecté et essaie d'aller sur une page privée
       if (!isLoggedIn && !isAuthScreen) {
@@ -105,10 +115,7 @@ void setupRouter(bool showOnboarding) {
 
     // --- 5. DÉCLARATION DES ROUTES ---
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/signup',
         builder: (context, state) => const SignUpScreen(),
@@ -162,15 +169,18 @@ void setupRouter(bool showOnboarding) {
       ),
       GoRoute(
         path: '/menu_scan',
-        builder: (context, state) => MenuScanScreen(imagePath: state.extra as String),
+        builder: (context, state) =>
+            MenuScanScreen(imagePath: state.extra as String),
       ),
       GoRoute(
         path: '/pantry_scan',
-        builder: (context, state) => PantryScanScreen(imagePath: state.extra as String),
+        builder: (context, state) =>
+            PantryScanScreen(imagePath: state.extra as String),
       ),
       GoRoute(
         path: '/pantry_recipes',
-        builder: (context, state) => PantryRecipesScreen(ingredientNames: state.extra as List<String>),
+        builder: (context, state) =>
+            PantryRecipesScreen(ingredientNames: state.extra as List<String>),
       ),
       GoRoute(
         path: '/fasting',
@@ -204,14 +214,16 @@ void setupRouter(bool showOnboarding) {
         path: '/help',
         builder: (context, state) => const HelpCenterScreen(),
       ),
+      GoRoute(path: '/terms', builder: (context, state) => const TermsScreen()),
       GoRoute(
-        path: '/terms',
-        builder: (context, state) => const TermsScreen(),
+        path: '/privacy',
+        builder: (context, state) => const PrivacyScreen(),
       ),
       GoRoute(
-        path: '/about',
-        builder: (context, state) => const AboutScreen(),
+        path: '/licenses',
+        builder: (context, state) => const LicensesScreen(),
       ),
+      GoRoute(path: '/about', builder: (context, state) => const AboutScreen()),
       GoRoute(
         path: '/dietary_preferences',
         builder: (context, state) => const DietaryPreferencesScreen(),
@@ -227,6 +239,10 @@ void setupRouter(bool showOnboarding) {
       GoRoute(
         path: '/security',
         builder: (context, state) => const SecurityScreen(),
+      ),
+      GoRoute(
+        path: '/delete_account',
+        builder: (context, state) => const DeleteAccountScreen(),
       ),
       GoRoute(
         path: '/coming-soon',

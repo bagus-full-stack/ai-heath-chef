@@ -1,175 +1,22 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "jsr:@supabase/supabase-js@2"
 
-/**
- * Copie volontaire de la logique de `_shared/quota.ts` plutôt qu'un import
- * relatif : cette fonction est déployée depuis l'éditeur du Dashboard
- * Supabase, qui ne bundle que les fichiers ajoutés explicitement à CETTE
- * fonction et ne voit pas le dossier `_shared` partagé par les autres. La
- * dupliquer ici évite l'erreur "Module not found .../_shared/quota.ts" au
- * déploiement (voir aussi meal-images/index.ts, même pattern).
- *
- * Cette fonction est par ailleurs une quasi-copie de analyze-meal/index.ts :
- * même contrat JSON de sortie ({ ingredients: [...] }) pour rester
- * compatible avec le parsing existant de AIService._analyzeImage côté
- * Flutter, seul le prompt change (photo de frigo/placard : on identifie un
- * inventaire d'ingrédients disponibles, pas un plat à consommer). Les
- * champs macros/poids sont demandés pour respecter le contrat JSON commun
- * mais ne sont pas utilisés côté client — seul `name` sert (voir
- * pantry_scan_screen.dart), qui alimente ensuite meal-suggestions via
- * `availableIngredients`.
- */
-interface QuotaCheckResult {
-    ok: boolean;
-    userId?: string;
-    response?: Response;
-}
+import { checkAndIncrementQuota } from "../_shared/quota.ts"
+import { corsHeaders } from "../_shared/cors.ts"
+import { HttpError } from "../_shared/errors.ts"
+import { callGeminiWithFallback } from "../_shared/gemini.ts"
 
-/**
- * True si l'appelant doit passer la limite quotidienne PAR UTILISATEUR
- * (admin de confiance, voir migration 0007, ou abonné PRO actif côté
- * RevenueCat). Le disjoncteur GLOBAL protège lui quand même le budget API
- * partagé, même pour ces comptes.
- *
- * Repli sur `false` (donc quota normal appliqué) si `REVENUECAT_SECRET_KEY`
- * n'est pas configuré ou si l'appel à RevenueCat échoue.
- */
-async function hasUnlimitedQuota(
-    // deno-lint-ignore no-explicit-any
-    serviceClient: any,
-    userId: string,
-): Promise<boolean> {
-    const { data: profile } = await serviceClient
-        .from("profiles")
-        .select("is_admin")
-        .eq("user_id", userId)
-        .maybeSingle();
-    if (profile?.is_admin) {
-        return true;
-    }
+// Cette fonction est par ailleurs une quasi-copie de analyze-meal/index.ts :
+// même contrat JSON de sortie ({ ingredients: [...] }) pour rester
+// compatible avec le parsing existant de AIService._analyzeImage côté
+// Flutter, seul le prompt change (photo de frigo/placard : on identifie un
+// inventaire d'ingrédients disponibles, pas un plat à consommer). Les
+// champs macros/poids sont demandés pour respecter le contrat JSON commun
+// mais ne sont pas utilisés côté client — seul `name` sert (voir
+// pantry_scan_screen.dart), qui alimente ensuite meal-suggestions via
+// `availableIngredients`.
 
-    const revenueCatSecretKey = Deno.env.get("REVENUECAT_SECRET_KEY");
-    if (!revenueCatSecretKey) {
-        return false;
-    }
-
-    try {
-        const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${userId}`, {
-            headers: { Authorization: `Bearer ${revenueCatSecretKey}` },
-        });
-        if (!res.ok) {
-            return false;
-        }
-        const body = await res.json();
-        const expiresDate = body?.subscriber?.entitlements?.pro?.expires_date;
-        return expiresDate === null ||
-            (typeof expiresDate === "string" && new Date(expiresDate) > new Date());
-    } catch (_) {
-        return false;
-    }
-}
-
-async function checkAndIncrementQuota(
-    req: Request,
-    functionName: string,
-    dailyLimit: number,
-    corsHeaders: Record<string, string>,
-    globalDailyLimit?: number,
-    lang?: string,
-): Promise<QuotaCheckResult> {
-    const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
-    const isEn = lang === "en";
-
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-        return {
-            ok: false,
-            response: new Response(
-                JSON.stringify({ error: isEn ? "Authentication required." : "Authentification requise." }),
-                { status: 401, headers: jsonHeaders },
-            ),
-        };
-    }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const userClient = createClient(supabaseUrl, anonKey, {
-        global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userError } = await userClient.auth.getUser();
-    if (userError || !userData?.user) {
-        return {
-            ok: false,
-            response: new Response(
-                JSON.stringify({ error: isEn ? "Invalid authentication." : "Authentification invalide." }),
-                { status: 401, headers: jsonHeaders },
-            ),
-        };
-    }
-    const userId = userData.user.id;
-    const serviceClient = createClient(supabaseUrl, serviceRoleKey);
-
-    if (!(await hasUnlimitedQuota(serviceClient, userId))) {
-        const { data: allowed, error: quotaError } = await serviceClient.rpc(
-            "increment_api_usage",
-            { p_user_id: userId, p_function_name: functionName, p_daily_limit: dailyLimit },
-        );
-
-        if (quotaError) {
-            console.error(`Erreur quota (${functionName}) :`, quotaError.message);
-            return { ok: true, userId };
-        }
-
-        if (!allowed) {
-            return {
-                ok: false,
-                response: new Response(
-                    JSON.stringify({
-                        error: isEn
-                            ? `Daily limit reached (${dailyLimit}/day) for this feature. Try again tomorrow.`
-                            : `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
-                    }),
-                    { status: 429, headers: jsonHeaders },
-                ),
-            };
-        }
-    }
-
-    if (globalDailyLimit !== undefined) {
-        const { data: globalAllowed, error: globalQuotaError } = await serviceClient.rpc(
-            "increment_global_api_usage",
-            { p_function_name: functionName, p_daily_limit: globalDailyLimit },
-        );
-
-        if (globalQuotaError) {
-            console.error(`Erreur quota global (${functionName}) :`, globalQuotaError.message);
-        } else if (!globalAllowed) {
-            return {
-                ok: false,
-                response: new Response(
-                    JSON.stringify({
-                        error: isEn
-                            ? "This AI feature is in high demand today and has reached its shared limit. Try again tomorrow."
-                            : "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
-                    }),
-                    { status: 429, headers: jsonHeaders },
-                ),
-            };
-        }
-    }
-
-    return { ok: true, userId };
-}
-
-// 1. Headers CORS complets
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// 2. Liste de priorité des modèles
+// Liste de priorité des modèles (voir README : diverge volontairement/par
+// drift historique des autres fonctions IA du projet, non harmonisée).
 const MODELS = [
     "gemini-2.5-flash",
     "gemini-2.5-pro",
@@ -204,6 +51,9 @@ const MODELS = [
     "gemini-1.5-flash" // Sécurité ultime
 ];
 
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 Mo, cohérent avec le budget Cloudflare/Gemini existant
+const BASE64_IMAGE_RE = /^[A-Za-z0-9+/]+={0,2}$/;
+
 Deno.serve(async (req) => {
     // === GESTION DU PREFLIGHT (CORS) ===
     if (req.method === 'OPTIONS') {
@@ -233,8 +83,14 @@ Deno.serve(async (req) => {
         }
 
         const { image } = body;
-        if (!image) {
-            throw new Error(isEn ? "No image was provided in the request." : "Aucune image n'a été fournie dans la requête.");
+        if (!image || typeof image !== 'string') {
+            throw new HttpError(400, isEn ? "No image was provided in the request." : "Aucune image n'a été fournie dans la requête.");
+        }
+        if (!BASE64_IMAGE_RE.test(image)) {
+            throw new HttpError(400, isEn ? "The image is not valid base64 data." : "L'image n'est pas une donnée base64 valide.");
+        }
+        if ((image.length * 3) / 4 > MAX_IMAGE_BYTES) {
+            throw new HttpError(413, isEn ? "The image is too large (8 MB max)." : "L'image est trop volumineuse (8 Mo max).");
         }
         const langInstruction = isEn
             ? "Respond with English text values (ingredient names) in the JSON."
@@ -274,66 +130,26 @@ Le JSON doit avoir cette structure exacte :
 ${langInstruction}`;
 
         // === 4. BOUCLE DE TENTATIVES (FALLBACK) ===
-        let lastError = null;
-        let successData = null;
-        let usedModel = "";
-
-        for (const modelName of MODELS) {
-            try {
-                console.log(`Tentative avec le modèle : ${modelName}...`);
-
-                const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [
-                                    { text: promptText },
-                                    // Gemini attend l'image dans ce format spécifique "inlineData"
-                                    { inlineData: { mimeType: "image/jpeg", data: image } }
-                                ]
-                            }],
-                            generationConfig: {
-                                temperature: 0.2 // Température basse pour avoir un JSON consistant
-                            }
-                        })
-                    }
-                );
-
-                const data = await response.json();
-
-                if (data.error) {
-                    console.warn(`Échec ${modelName} : ${data.error.message}`);
-                    lastError = data.error.message;
-                    continue;
+        let successData: string;
+        let usedModel: string;
+        try {
+            const result = await callGeminiWithFallback(apiKey, MODELS, {
+                contents: [{
+                    parts: [
+                        { text: promptText },
+                        // Gemini attend l'image dans ce format spécifique "inlineData"
+                        { inlineData: { mimeType: "image/jpeg", data: image } }
+                    ]
+                }],
+                generationConfig: {
+                    temperature: 0.2 // Température basse pour avoir un JSON consistant
                 }
-
-                const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!textResponse) {
-                    throw new Error(isEn ? "Empty response or no text generated." : "Réponse vide ou sans texte généré.");
-                }
-
-                // Si ça marche, on sauvegarde le texte et on casse la boucle !
-                successData = textResponse;
-                usedModel = modelName;
-                break;
-
-            } catch (err) {
-                console.warn(`Erreur réseau avec ${modelName} : ${err.message}`);
-                lastError = err.message;
-                continue;
-            }
-        }
-
-        // === 5. PARSING DU RÉSULTAT FINAL ===
-        if (!successData) {
-            throw new Error(
-                isEn
-                    ? `All models failed. Last error: ${lastError}`
-                    : `Tous les modèles ont échoué. Dernière erreur : ${lastError}`,
-            );
+            });
+            successData = result.text;
+            usedModel = result.usedModel;
+        } catch (err) {
+            console.error(`Tous les modèles ont échoué (analyze-pantry). Dernière erreur : ${(err as Error).message}`);
+            throw new Error(isEn ? "Analysis temporarily failed. Please try again later." : "L'analyse a temporairement échoué. Réessaie plus tard.");
         }
 
         console.log(`SUCCÈS : Analyse générée avec ${usedModel}`);
@@ -364,7 +180,7 @@ ${langInstruction}`;
         // On renvoie l'erreur au format JSON pour que Flutter puisse l'afficher dans le SnackBar
         return new Response(JSON.stringify({ error: error.message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 400,
+            status: error instanceof HttpError ? error.status : 400,
         })
     }
 })

@@ -72,6 +72,12 @@ async function hasUnlimitedQuota(
  * Nécessite les secrets SUPABASE_URL / SUPABASE_ANON_KEY /
  * SUPABASE_SERVICE_ROLE_KEY, injectés automatiquement par Supabase dans
  * toutes les Edge Functions — rien à configurer manuellement.
+ *
+ * `globalIncrement` (par défaut 1) permet d'incrémenter le compteur global
+ * de plus d'1 par appel — utilisé par `meal-images` pour décompter le
+ * nombre d'images réellement demandées (après plafonnement) plutôt qu'1
+ * crédit par requête HTTP, qui pouvait masquer un tableau `meals` de
+ * n'importe quelle taille derrière un seul appel et un seul crédit de quota.
  */
 export async function checkAndIncrementQuota(
     req: Request,
@@ -80,6 +86,7 @@ export async function checkAndIncrementQuota(
     corsHeaders: Record<string, string>,
     globalDailyLimit?: number,
     lang?: string,
+    globalIncrement = 1,
 ): Promise<QuotaCheckResult> {
     const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
     const isEn = lang === "en";
@@ -146,7 +153,7 @@ export async function checkAndIncrementQuota(
     if (globalDailyLimit !== undefined) {
         const { data: globalAllowed, error: globalQuotaError } = await serviceClient.rpc(
             "increment_global_api_usage",
-            { p_function_name: functionName, p_daily_limit: globalDailyLimit },
+            { p_function_name: functionName, p_daily_limit: globalDailyLimit, p_increment: globalIncrement },
         );
 
         if (globalQuotaError) {

@@ -1,165 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "jsr:@supabase/supabase-js@2"
 
-/**
- * Copie volontaire de la logique de `_shared/quota.ts` plutôt qu'un import
- * relatif : cette fonction est déployée depuis l'éditeur du Dashboard
- * Supabase, qui ne bundle que les fichiers ajoutés explicitement à CETTE
- * fonction et ne voit pas le dossier `_shared` partagé par les autres. La
- * dupliquer ici évite l'erreur "Module not found .../_shared/quota.ts" au
- * déploiement (voir aussi meal-images/index.ts, même pattern).
- */
-interface QuotaCheckResult {
-    ok: boolean;
-    userId?: string;
-    response?: Response;
-}
+import { checkAndIncrementQuota } from "../_shared/quota.ts"
+import { corsHeaders } from "../_shared/cors.ts"
+import { callGeminiWithFallback } from "../_shared/gemini.ts"
 
-/**
- * True si l'appelant doit passer la limite quotidienne PAR UTILISATEUR
- * (admin de confiance, voir migration 0007, ou abonné PRO actif côté
- * RevenueCat). Le disjoncteur GLOBAL protège lui quand même le budget API
- * partagé, même pour ces comptes.
- *
- * Repli sur `false` (donc quota normal appliqué) si `REVENUECAT_SECRET_KEY`
- * n'est pas configuré ou si l'appel à RevenueCat échoue.
- */
-async function hasUnlimitedQuota(
-    // deno-lint-ignore no-explicit-any
-    serviceClient: any,
-    userId: string,
-): Promise<boolean> {
-    const { data: profile } = await serviceClient
-        .from("profiles")
-        .select("is_admin")
-        .eq("user_id", userId)
-        .maybeSingle();
-    if (profile?.is_admin) {
-        return true;
-    }
-
-    const revenueCatSecretKey = Deno.env.get("REVENUECAT_SECRET_KEY");
-    if (!revenueCatSecretKey) {
-        return false;
-    }
-
-    try {
-        const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${userId}`, {
-            headers: { Authorization: `Bearer ${revenueCatSecretKey}` },
-        });
-        if (!res.ok) {
-            return false;
-        }
-        const body = await res.json();
-        const expiresDate = body?.subscriber?.entitlements?.pro?.expires_date;
-        return expiresDate === null ||
-            (typeof expiresDate === "string" && new Date(expiresDate) > new Date());
-    } catch (_) {
-        return false;
-    }
-}
-
-async function checkAndIncrementQuota(
-    req: Request,
-    functionName: string,
-    dailyLimit: number,
-    corsHeaders: Record<string, string>,
-    globalDailyLimit?: number,
-    lang?: string,
-): Promise<QuotaCheckResult> {
-    const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
-    const isEn = lang === "en";
-
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-        return {
-            ok: false,
-            response: new Response(
-                JSON.stringify({ error: isEn ? "Authentication required." : "Authentification requise." }),
-                { status: 401, headers: jsonHeaders },
-            ),
-        };
-    }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const userClient = createClient(supabaseUrl, anonKey, {
-        global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userError } = await userClient.auth.getUser();
-    if (userError || !userData?.user) {
-        return {
-            ok: false,
-            response: new Response(
-                JSON.stringify({ error: isEn ? "Invalid authentication." : "Authentification invalide." }),
-                { status: 401, headers: jsonHeaders },
-            ),
-        };
-    }
-    const userId = userData.user.id;
-    const serviceClient = createClient(supabaseUrl, serviceRoleKey);
-
-    if (!(await hasUnlimitedQuota(serviceClient, userId))) {
-        const { data: allowed, error: quotaError } = await serviceClient.rpc(
-            "increment_api_usage",
-            { p_user_id: userId, p_function_name: functionName, p_daily_limit: dailyLimit },
-        );
-
-        if (quotaError) {
-            console.error(`Erreur quota (${functionName}) :`, quotaError.message);
-            return { ok: true, userId };
-        }
-
-        if (!allowed) {
-            return {
-                ok: false,
-                response: new Response(
-                    JSON.stringify({
-                        error: isEn
-                            ? `Daily limit reached (${dailyLimit}/day) for this feature. Try again tomorrow.`
-                            : `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
-                    }),
-                    { status: 429, headers: jsonHeaders },
-                ),
-            };
-        }
-    }
-
-    if (globalDailyLimit !== undefined) {
-        const { data: globalAllowed, error: globalQuotaError } = await serviceClient.rpc(
-            "increment_global_api_usage",
-            { p_function_name: functionName, p_daily_limit: globalDailyLimit },
-        );
-
-        if (globalQuotaError) {
-            console.error(`Erreur quota global (${functionName}) :`, globalQuotaError.message);
-        } else if (!globalAllowed) {
-            return {
-                ok: false,
-                response: new Response(
-                    JSON.stringify({
-                        error: isEn
-                            ? "This AI feature is in high demand today and has reached its shared limit. Try again tomorrow."
-                            : "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
-                    }),
-                    { status: 429, headers: jsonHeaders },
-                ),
-            };
-        }
-    }
-
-    return { ok: true, userId };
-}
-
-// 1. Headers CORS complets
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// 2. Liste de priorité des modèles (Les plus récents/performants en premier)
+// Liste de priorité des modèles (voir README : diverge volontairement/par
+// drift historique des autres fonctions IA du projet, non harmonisée).
 const MODELS = [
     "gemini-2.5-flash",
     "gemini-2.5-pro",
@@ -304,6 +150,12 @@ Deno.serve(async (req) => {
         const langInstruction = lang === 'en'
             ? "Respond with English text values (title, description, timeSlot, ingredients, steps) in the JSON."
             : "Réponds avec des valeurs textuelles en français (title, description, timeSlot, ingredients, steps) dans le JSON.";
+        // Garde-fou santé, même si targetKcal est déjà plancherné côté app
+        // (voir lib/utils/nutrition_targets.dart) : défense en profondeur si
+        // ce total venait à être anormalement bas.
+        const safetyInstruction = lang === 'en'
+            ? "Never suggest a plan whose total daily calories fall below 1200 kcal, nor any meal built around an extreme/prolonged fast or a dangerously restrictive diet."
+            : "Ne propose jamais un plan dont le total calorique quotidien descend sous 1200 kcal, ni aucun repas construit autour d'un jeûne extrême/prolongé ou d'un régime dangereusement restrictif.";
 
         const weeklyPlanInstruction = isWeeklyPlan
             ? `\nRépartis ces ${suggestionCount} repas sur ${days} jours (${weeklyMealsPerDay} repas/jour), en indiquant pour chacun le numéro du jour dans le champ "day" (1 = premier jour, ${days} = dernier). Varie les plats d'un jour à l'autre, ne répète jamais le même plat sur deux jours différents.`
@@ -314,6 +166,7 @@ Deno.serve(async (req) => {
 Tu es AI Health Chef, un coach en nutrition expert et créatif.
 Propose ${suggestionCount} idées de repas variées et réalistes, adaptées à un objectif de ${goalLabel}.
 L'utilisateur vise environ ${targetKcal ?? 2200} kcal, ${targetProt ?? 160}g de protéines, ${targetGluc ?? 250}g de glucides et ${targetLip ?? 75}g de lipides par jour au total.${constraintsText}${weeklyPlanInstruction}
+${safetyInstruction}
 Varie les moments de la journée (Petit-déjeuner, Déjeuner, Dîner, Collation) et les types de plats — ne propose jamais deux fois le même plat.
 Pour chaque plat, donne aussi la liste des ingrédients (avec quantités approximatives) et les étapes de préparation, courtes et actionnables.
 Tu DOIS répondre UNIQUEMENT avec un JSON strict, sans balises markdown ni texte autour, au format exact suivant :
@@ -335,60 +188,20 @@ Tu DOIS répondre UNIQUEMENT avec un JSON strict, sans balises markdown ni texte
 ${langInstruction}`;
 
         // === 4. BOUCLE DE TENTATIVES (FALLBACK) ===
-        let lastError = null;
-        let successData = null;
-        let usedModel = "";
-
-        for (const modelName of MODELS) {
-            try {
-                console.log(`Tentative avec le modèle : ${modelName}...`);
-
-                const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: promptText }] }],
-                            generationConfig: {
-                                temperature: 0.8 // Un peu de créativité pour varier les suggestions
-                            }
-                        })
-                    }
-                );
-
-                const data = await response.json();
-
-                if (data.error) {
-                    console.warn(`Échec ${modelName} : ${data.error.message}`);
-                    lastError = data.error.message;
-                    continue;
+        let successData: string;
+        let usedModel: string;
+        try {
+            const result = await callGeminiWithFallback(apiKey, MODELS, {
+                contents: [{ parts: [{ text: promptText }] }],
+                generationConfig: {
+                    temperature: 0.8 // Un peu de créativité pour varier les suggestions
                 }
-
-                const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!textResponse) {
-                    console.warn(`Échec ${modelName} : Réponse vide.`);
-                    continue;
-                }
-
-                successData = textResponse;
-                usedModel = modelName;
-                break;
-
-            } catch (err) {
-                console.warn(`Erreur réseau avec ${modelName} : ${err.message}`);
-                lastError = err.message;
-                continue;
-            }
-        }
-
-        // === 5. PARSING DU RÉSULTAT FINAL ===
-        if (!successData) {
-            throw new Error(
-                isEn
-                    ? `All models failed. Last error: ${lastError}`
-                    : `Tous les modèles ont échoué. Dernière erreur : ${lastError}`,
-            );
+            });
+            successData = result.text;
+            usedModel = result.usedModel;
+        } catch (err) {
+            console.error(`Tous les modèles ont échoué (meal-suggestions). Dernière erreur : ${(err as Error).message}`);
+            throw new Error(isEn ? "Suggestions temporarily failed. Please try again later." : "La génération de suggestions a temporairement échoué. Réessaie plus tard.");
         }
 
         console.log(`SUCCÈS : Suggestions générées avec ${usedModel}`);

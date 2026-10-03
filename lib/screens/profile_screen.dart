@@ -27,7 +27,10 @@ Future<void> _showExportPicker(BuildContext context, WidgetRef ref) async {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.ios_share_rounded, color: Color(0xFF6B66FF)),
+              leading: const Icon(
+                Icons.ios_share_rounded,
+                color: Color(0xFF6B66FF),
+              ),
               title: Text(context.l10n.profileExportJournalTitle),
               subtitle: Text(context.l10n.profileExportJournalSubtitle),
               onTap: () {
@@ -36,7 +39,10 @@ Future<void> _showExportPicker(BuildContext context, WidgetRef ref) async {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.picture_as_pdf_outlined, color: Color(0xFF6B66FF)),
+              leading: const Icon(
+                Icons.picture_as_pdf_outlined,
+                color: Color(0xFF6B66FF),
+              ),
               title: Text(context.l10n.profileExportPdfTitle),
               subtitle: Text(context.l10n.profileExportPdfSubtitle),
               onTap: () {
@@ -45,7 +51,10 @@ Future<void> _showExportPicker(BuildContext context, WidgetRef ref) async {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFF6B66FF)),
+              leading: const Icon(
+                Icons.picture_as_pdf_rounded,
+                color: Color(0xFF6B66FF),
+              ),
               title: Text(context.l10n.profileExportMonthlyPdfTitle),
               subtitle: Text(context.l10n.profileExportMonthlyPdfSubtitle),
               onTap: () {
@@ -60,7 +69,11 @@ Future<void> _showExportPicker(BuildContext context, WidgetRef ref) async {
   );
 }
 
-Future<void> _showLanguagePicker(BuildContext context, WidgetRef ref, Locale current) async {
+Future<void> _showLanguagePicker(
+  BuildContext context,
+  WidgetRef ref,
+  Locale current,
+) async {
   await showModalBottomSheet<void>(
     context: context,
     shape: const RoundedRectangleBorder(
@@ -155,10 +168,12 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
         data: (profile) {
-          final currentProfile = profile ??
+          final currentProfile =
+              profile ??
               UserProfile(
                 userId: user?.id ?? '',
-                fullName: user?.userMetadata?['full_name'] as String? ??
+                fullName:
+                    user?.userMetadata?['full_name'] as String? ??
                     user?.email?.split('@').first.replaceAll('.', ' ') ??
                     context.l10n.profileDefaultUserName,
                 email: user?.email ?? context.l10n.profileUnknownUser,
@@ -229,7 +244,8 @@ class ProfileScreen extends ConsumerWidget {
                       icon: Icons.language_rounded,
                       title: context.l10n.profileLanguageTitle,
                       subtitle: _kLanguageNames[currentLocale.languageCode]!,
-                      onTap: () => _showLanguagePicker(context, ref, currentLocale),
+                      onTap: () =>
+                          _showLanguagePicker(context, ref, currentLocale),
                     ),
                     _SettingsItem(
                       icon: Icons.shield_outlined,
@@ -255,6 +271,12 @@ class ProfileScreen extends ConsumerWidget {
                       subtitle: context.l10n.profileTermsSubtitle,
                       onTap: () => context.push('/terms'),
                     ),
+                    _SettingsItem(
+                      icon: Icons.privacy_tip_outlined,
+                      title: context.l10n.profilePrivacyTitle,
+                      subtitle: context.l10n.profilePrivacySubtitle,
+                      onTap: () => context.push('/privacy'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -266,16 +288,19 @@ class ProfileScreen extends ConsumerWidget {
                       title: context.l10n.profileDietaryPrefsTitle,
                       subtitle: currentProfile.allergies.isEmpty
                           ? currentProfile.dietTypeLabel(context)
-                          : context.l10n.profileDietaryPrefsSubtitleWithAllergies(
-                              currentProfile.dietTypeLabel(context),
-                              currentProfile.allergies.length,
-                            ),
+                          : context.l10n
+                                .profileDietaryPrefsSubtitleWithAllergies(
+                                  currentProfile.dietTypeLabel(context),
+                                  currentProfile.allergies.length,
+                                ),
                       onTap: () => context.push('/dietary_preferences'),
                     ),
                     _SettingsItem(
                       icon: Icons.auto_awesome_rounded,
                       title: context.l10n.profileCoachTitle,
-                      subtitle: context.l10n.profileCoachSubtitle(currentProfile.coachToneLabel(context)),
+                      subtitle: context.l10n.profileCoachSubtitle(
+                        currentProfile.coachToneLabel(context),
+                      ),
                       onTap: () => context.push('/coach_personalization'),
                     ),
                     _SettingsItem(
@@ -284,10 +309,12 @@ class ProfileScreen extends ConsumerWidget {
                       subtitle: localAiSettings == null
                           ? context.l10n.profileLocalAiSubtitleDefault
                           : !localAiSettings.enabled
-                              ? context.l10n.profileLocalAiSubtitleDisabled
-                              : localAiSettings.isDownloaded
-                                  ? context.l10n.profileLocalAiSubtitleEnabled
-                                  : context.l10n.profileLocalAiSubtitleEnabledNotDownloaded,
+                          ? context.l10n.profileLocalAiSubtitleDisabled
+                          : localAiSettings.isDownloaded
+                          ? context.l10n.profileLocalAiSubtitleEnabled
+                          : context
+                                .l10n
+                                .profileLocalAiSubtitleEnabledNotDownloaded,
                       onTap: () => context.push('/local_ai_settings'),
                     ),
                     _SettingsItem(
@@ -296,12 +323,21 @@ class ProfileScreen extends ConsumerWidget {
                       subtitle: context.l10n.profileAboutSubtitle,
                       onTap: () => context.push('/about'),
                     ),
+                    _SettingsItem(
+                      icon: Icons.badge_outlined,
+                      title: context.l10n.profileLicensesTitle,
+                      subtitle: context.l10n.profileLicensesSubtitle,
+                      onTap: () => context.push('/licenses'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: () => _logout(context, ref),
-                  icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                  icon: const Icon(
+                    Icons.logout_rounded,
+                    color: Colors.redAccent,
+                  ),
                   label: Text(
                     context.l10n.profileLogoutButton,
                     style: const TextStyle(
@@ -354,14 +390,11 @@ class _ProfileHeader extends StatelessWidget {
             CircleAvatar(
               radius: 48,
               backgroundColor: Colors.grey.shade200,
-              backgroundImage:
-                  profile.avatarUrl != null ? NetworkImage(profile.avatarUrl!) : null,
+              backgroundImage: profile.avatarUrl != null
+                  ? NetworkImage(profile.avatarUrl!)
+                  : null,
               child: profile.avatarUrl == null
-                  ? Icon(
-                      Icons.person,
-                      size: 48,
-                      color: Colors.grey.shade500,
-                    )
+                  ? Icon(Icons.person, size: 48, color: Colors.grey.shade500)
                   : null,
             ),
             Positioned(
@@ -375,7 +408,11 @@ class _ProfileHeader extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2.5),
                 ),
-                child: const Icon(Icons.star_rounded, color: Colors.white, size: 16),
+                child: const Icon(
+                  Icons.star_rounded,
+                  color: Colors.white,
+                  size: 16,
+                ),
               ),
             ),
           ],
@@ -395,7 +432,10 @@ class _ProfileHeader extends StatelessWidget {
             if (isPro) ...[
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: primaryColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
@@ -437,7 +477,9 @@ class _QuickStatsSection extends StatelessWidget {
             Expanded(
               child: _StatCard(
                 title: context.l10n.profileAgeLabel,
-                value: profile.age == 0 ? '—' : context.l10n.profileAgeValue(profile.age),
+                value: profile.age == 0
+                    ? '—'
+                    : context.l10n.profileAgeValue(profile.age),
                 icon: Icons.cake_outlined,
                 accentColor: const Color(0xFF6B66FF),
               ),
@@ -448,7 +490,9 @@ class _QuickStatsSection extends StatelessWidget {
                 title: context.l10n.profileCurrentWeightLabel,
                 value: profile.currentWeight == 0
                     ? '—'
-                    : context.l10n.profileWeightValue(profile.currentWeight.toStringAsFixed(1)),
+                    : context.l10n.profileWeightValue(
+                        profile.currentWeight.toStringAsFixed(1),
+                      ),
                 icon: Icons.monitor_weight_outlined,
                 accentColor: const Color(0xFFF06B9E),
               ),
@@ -463,7 +507,9 @@ class _QuickStatsSection extends StatelessWidget {
                 title: context.l10n.profileTargetWeightLabel,
                 value: profile.targetWeight == 0
                     ? '—'
-                    : context.l10n.profileWeightValue(profile.targetWeight.toStringAsFixed(1)),
+                    : context.l10n.profileWeightValue(
+                        profile.targetWeight.toStringAsFixed(1),
+                      ),
                 icon: Icons.flag_outlined,
                 accentColor: const Color(0xFFFFB54A),
               ),
@@ -545,10 +591,7 @@ class _SettingsGroup extends StatelessWidget {
   final String title;
   final List<_SettingsItem> items;
 
-  const _SettingsGroup({
-    required this.title,
-    required this.items,
-  });
+  const _SettingsGroup({required this.title, required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -650,7 +693,11 @@ class _SettingsTile extends StatelessWidget {
             ),
             const SizedBox(width: 8),
           ],
-          const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 16,
+            color: Colors.grey,
+          ),
         ],
       ),
       onTap: item.onTap,

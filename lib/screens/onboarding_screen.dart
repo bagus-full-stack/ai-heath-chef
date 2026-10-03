@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
+import '../utils/age_policy.dart';
 
 /// Ordre d'affichage des objectifs, aligné sur la maquette (Onboarding.png) :
 /// Perdre du poids, Maintenir mon poids, Prendre de la masse.
@@ -58,8 +59,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
 
     final age = int.tryParse(_ageController.text.trim());
-    if (age == null || age < 10 || age > 120) {
+    if (age == null || age > kMaximumAge) {
       _showError(context.l10n.onboardingErrorInvalidAge);
+      return;
+    }
+
+    // RGPD art. 8/9 : âge minimum pour créer un compte, sans flux de
+    // consentement parental. On bloque avant toute sauvegarde (locale ou
+    // distante) et on efface la valeur saisie : aucune donnée d'un profil
+    // refusé n'est conservée.
+    if (age < kMinimumAge) {
+      _ageController.clear();
+      _showError(context.l10n.onboardingErrorUnderMinimumAge);
       return;
     }
 
@@ -335,6 +346,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     _goalCard(goal),
                     if (goal != _goalDisplayOrder.last) const SizedBox(height: 12),
                   ],
+                  const SizedBox(height: 14),
+                  Text(
+                    context.l10n.onboardingMedicalDisclaimer,
+                    style: TextStyle(fontSize: 11.5, color: Colors.grey.shade500, height: 1.3),
+                  ),
                   const SizedBox(height: 28),
                   ElevatedButton(
                     onPressed: _isSubmitting ? null : _handleSubmit,

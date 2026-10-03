@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
+import 'terms_screen.dart' show kTermsVersion;
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -54,11 +55,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     try {
       final authService = ref.read(authServiceProvider);
       final response = await authService.signUp(
-            email: email,
-            password: password,
-            fullName: fullName,
-            lang: lang,
-          );
+        email: email,
+        password: password,
+        fullName: fullName,
+        lang: lang,
+      );
 
       if (!mounted) {
         return;
@@ -84,6 +85,24 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             targetWeight: onboarding.targetWeight!,
             heightCm: onboarding.heightCm!,
             goal: onboarding.goal!.name,
+            acceptedTermsAt: DateTime.now(),
+            acceptedTermsVersion: kTermsVersion,
+            lang: lang,
+          );
+        } else {
+          // Inscription sans onboarding préalable (ex : second compte créé
+          // depuis l'écran de connexion) : pas de profil complet à envoyer,
+          // mais l'acceptation des CGU doit quand même être tracée.
+          await authService.upsertProfile(
+            fullName: fullName,
+            sex: 'other',
+            age: 0,
+            currentWeight: 0,
+            targetWeight: 0,
+            heightCm: 0,
+            goal: 'maintain',
+            acceptedTermsAt: DateTime.now(),
+            acceptedTermsVersion: kTermsVersion,
             lang: lang,
           );
         }
@@ -168,7 +187,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 34),
-              Text(context.l10n.signupFullNameLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(
+                context.l10n.signupFullNameLabel,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: _fullNameController,
@@ -182,7 +204,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 18),
-              Text(context.l10n.signupEmailLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(
+                context.l10n.signupEmailLabel,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
@@ -197,7 +222,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 18),
-              Text(context.l10n.signupPasswordLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(
+                context.l10n.signupPasswordLabel,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: _passwordController,
@@ -231,25 +259,62 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       width: 22,
                       height: 22,
                       decoration: BoxDecoration(
-                        color: _acceptedTerms ? primaryColor : Colors.transparent,
+                        color: _acceptedTerms
+                            ? primaryColor
+                            : Colors.transparent,
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: _acceptedTerms ? primaryColor : Colors.grey.shade400,
+                          color: _acceptedTerms
+                              ? primaryColor
+                              : Colors.grey.shade400,
                         ),
                       ),
                       child: _acceptedTerms
-                          ? const Icon(Icons.check, color: Colors.white, size: 15)
+                          ? const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 15,
+                            )
                           : null,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        context.l10n.signupTermsAcceptance,
-                        style: TextStyle(
-                          color: Colors.grey.shade700,
-                          height: 1.35,
-                          fontSize: 13,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.l10n.signupTermsAcceptance,
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              height: 1.35,
+                              fontSize: 13,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => context.push('/terms'),
+                            child: Text(
+                              context.l10n.signupTermsLinkLabel,
+                              style: TextStyle(
+                                color: primaryColor,
+                                decoration: TextDecoration.underline,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => context.push('/privacy'),
+                            child: Text(
+                              context.l10n.signupPrivacyLinkLabel,
+                              style: TextStyle(
+                                color: primaryColor,
+                                decoration: TextDecoration.underline,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -287,7 +352,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                          const Icon(
+                            Icons.arrow_forward,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ],
                       ),
               ),
@@ -314,10 +383,17 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () =>
-                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.apple, lang: Localizations.localeOf(context).languageCode),
+                      onPressed: () => ref
+                          .read(authServiceProvider)
+                          .signInWithOAuth(
+                            OAuthProvider.apple,
+                            lang: Localizations.localeOf(context).languageCode,
+                          ),
                       icon: const Icon(Icons.apple, color: Colors.black),
-                      label: const Text('Apple', style: TextStyle(color: Colors.black)),
+                      label: const Text(
+                        'Apple',
+                        style: TextStyle(color: Colors.black),
+                      ),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
@@ -329,10 +405,21 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   const SizedBox(width: 14),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () =>
-                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.google, lang: Localizations.localeOf(context).languageCode),
-                      icon: const Icon(Icons.g_mobiledata, color: Colors.black, size: 28),
-                      label: const Text('Google', style: TextStyle(color: Colors.black)),
+                      onPressed: () => ref
+                          .read(authServiceProvider)
+                          .signInWithOAuth(
+                            OAuthProvider.google,
+                            lang: Localizations.localeOf(context).languageCode,
+                          ),
+                      icon: const Icon(
+                        Icons.g_mobiledata,
+                        color: Colors.black,
+                        size: 28,
+                      ),
+                      label: const Text(
+                        'Google',
+                        style: TextStyle(color: Colors.black),
+                      ),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
@@ -349,7 +436,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 children: [
                   Text(
                     context.l10n.signupAlreadyMember,
-                    style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   TextButton(
                     onPressed: _openLogin,
@@ -367,10 +457,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               Text(
                 context.l10n.signupSecureDataNotice,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey.shade500,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
               ),
             ],
           ),

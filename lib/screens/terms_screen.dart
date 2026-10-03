@@ -5,6 +5,12 @@ import 'package:intl/intl.dart';
 import '../l10n/l10n_extensions.dart';
 import 'about_screen.dart' show kSupportEmail;
 
+/// Version du texte des CGU/politique de confidentialité, enregistrée dans
+/// `profiles.accepted_terms_version` à l'inscription (voir signup_screen.dart
+/// et la migration 0018). À incrémenter chaque fois que le contenu légal
+/// ci-dessous change de façon substantielle.
+const String kTermsVersion = '2026-10-01';
+
 class _TermsSection {
   final String title;
   final String body;

@@ -1,135 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "jsr:@supabase/supabase-js@2"
 
-// 1. Headers CORS complets
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-/**
- * Copie volontaire de la logique de `_shared/quota.ts` (voir les autres
- * Edge Functions du projet) plutôt qu'un import relatif : cette fonction est
- * déployée depuis l'éditeur du Dashboard Supabase, qui ne bundle que les
- * fichiers ajoutés explicitement à CETTE fonction et ne voit pas le dossier
- * `_shared` partagé par les autres. La dupliquer ici évite l'erreur
- * "Module not found .../_shared/quota.ts" au déploiement.
- */
-interface QuotaCheckResult {
-    ok: boolean;
-    userId?: string;
-    response?: Response;
-}
-
-/**
- * True si l'appelant doit passer la limite quotidienne PAR UTILISATEUR
- * (admin de confiance, voir migration 0007, ou abonné PRO actif côté
- * RevenueCat). Le disjoncteur GLOBAL protège lui quand même le budget API
- * partagé, même pour ces comptes.
- *
- * Repli sur `false` (donc quota normal appliqué) si `REVENUECAT_SECRET_KEY`
- * n'est pas configuré ou si l'appel à RevenueCat échoue.
- */
-async function hasUnlimitedQuota(
-    // deno-lint-ignore no-explicit-any
-    serviceClient: any,
-    userId: string,
-): Promise<boolean> {
-    const { data: profile } = await serviceClient
-        .from("profiles")
-        .select("is_admin")
-        .eq("user_id", userId)
-        .maybeSingle();
-    if (profile?.is_admin) {
-        return true;
-    }
-
-    const revenueCatSecretKey = Deno.env.get("REVENUECAT_SECRET_KEY");
-    if (!revenueCatSecretKey) {
-        return false;
-    }
-
-    try {
-        const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${userId}`, {
-            headers: { Authorization: `Bearer ${revenueCatSecretKey}` },
-        });
-        if (!res.ok) {
-            return false;
-        }
-        const body = await res.json();
-        const expiresDate = body?.subscriber?.entitlements?.pro?.expires_date;
-        return expiresDate === null ||
-            (typeof expiresDate === "string" && new Date(expiresDate) > new Date());
-    } catch (_) {
-        return false;
-    }
-}
-
-async function checkAndIncrementQuota(
-    req: Request,
-    functionName: string,
-    dailyLimit: number,
-    corsHeaders: Record<string, string>,
-): Promise<QuotaCheckResult> {
-    const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
-
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-        return {
-            ok: false,
-            response: new Response(
-                JSON.stringify({ error: "Authentification requise." }),
-                { status: 401, headers: jsonHeaders },
-            ),
-        };
-    }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const userClient = createClient(supabaseUrl, anonKey, {
-        global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userError } = await userClient.auth.getUser();
-    if (userError || !userData?.user) {
-        return {
-            ok: false,
-            response: new Response(
-                JSON.stringify({ error: "Authentification invalide." }),
-                { status: 401, headers: jsonHeaders },
-            ),
-        };
-    }
-    const userId = userData.user.id;
-    const serviceClient = createClient(supabaseUrl, serviceRoleKey);
-
-    if (!(await hasUnlimitedQuota(serviceClient, userId))) {
-        const { data: allowed, error: quotaError } = await serviceClient.rpc(
-            "increment_api_usage",
-            { p_user_id: userId, p_function_name: functionName, p_daily_limit: dailyLimit },
-        );
-
-        if (quotaError) {
-            console.error(`Erreur quota (${functionName}) :`, quotaError.message);
-            return { ok: true, userId };
-        }
-
-        if (!allowed) {
-            return {
-                ok: false,
-                response: new Response(
-                    JSON.stringify({
-                        error: `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
-                    }),
-                    { status: 429, headers: jsonHeaders },
-                ),
-            };
-        }
-    }
-
-    return { ok: true, userId };
-}
+import { checkAndIncrementQuota } from "../_shared/quota.ts"
+import { corsHeaders } from "../_shared/cors.ts"
 
 /**
  * Hash simple et déterministe (FNV-1a) d'une chaîne, utilisé comme seed
@@ -343,72 +215,143 @@ async function generateMealImage(
     return generateWithPollinations(prompt, pollinationsToken, pollinationsModels, seed);
 }
 
+// Usage réel côté app (voir meal_suggestions_provider.dart: count=6,
+// pantry_recipes_provider.dart: count=3, ai_service.dart#getDishImage: 1) :
+// jamais plus de 6 images demandées en un seul appel. Au-delà, on tronque
+// plutôt que de rejeter l'appel (ces entrées supplémentaires ne peuvent
+// venir que d'un usage anormal, pas d'un cas légitime de l'app).
+const MAX_MEALS_PER_CALL = 6;
+const MAX_TITLE_LENGTH = 200;
+// Au lieu d'un Promise.all illimité (autant d'appels Cloudflare/Pollinations
+// simultanés que d'entrées), on traite par lots pour bornir la charge
+// instantanée sur ces fournisseurs gratuits.
+const MAX_CONCURRENT = 3;
+// Cloudflare Workers AI (FLUX.1 schnell) est gratuit jusqu'à ~10 000
+// Neurons/jour, soit ~100 images à 8 steps (voir generateWithCloudflare
+// ci-dessus) — budget partagé par TOUS les utilisateurs de l'app. Le
+// quota global ci-dessous compte désormais le nombre d'images réellement
+// demandées (après troncature à MAX_MEALS_PER_CALL), pas le nombre
+// d'appels HTTP, pour rester cohérent avec ce budget.
+const GLOBAL_DAILY_IMAGE_LIMIT = 100;
+
+function chunk<T>(items: T[], size: number): T[][] {
+    const out: T[][] = [];
+    for (let i = 0; i < items.length; i += size) {
+        out.push(items.slice(i, i + size));
+    }
+    return out;
+}
+
 Deno.serve(async (req) => {
     // === GESTION DU PREFLIGHT (CORS) ===
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
     }
 
-    // === QUOTA QUOTIDIEN PAR UTILISATEUR ===
-    const quota = await checkAndIncrementQuota(req, 'meal-images', 10, corsHeaders);
+    const jsonHeaders = { ...corsHeaders, 'Content-Type': 'application/json' };
+
+    // === 1. RECUPERATION DU BODY, avant le quota pour connaître la langue et
+    // le nombre d'images réellement demandées (voir GLOBAL_DAILY_IMAGE_LIMIT) ===
+    let body: Record<string, unknown> = {};
+    let bodyParseError = false;
+    try {
+        body = await req.json();
+    } catch (_e) {
+        bodyParseError = true;
+    }
+    const lang = body?.lang === 'en' ? 'en' : 'fr';
+    const isEn = lang === 'en';
+
+    if (bodyParseError) {
+        return new Response(
+            JSON.stringify({ error: isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé." }),
+            { status: 400, headers: jsonHeaders },
+        );
+    }
+
+    // === 2. VALIDATION ET PLAFONNEMENT DU TABLEAU `meals` ===
+    // On ignore silencieusement les entrées invalides (titre manquant/trop
+    // long) et on tronque à MAX_MEALS_PER_CALL plutôt que de rejeter tout
+    // l'appel : un seul titre malformé ou un tableau trop long ne doit pas
+    // casser la génération des images par ailleurs valides.
+    const rawMeals = Array.isArray(body?.meals) ? body.meals : [];
+    const meals = rawMeals
+        .filter((meal: unknown): meal is { title: string; description?: string } => {
+            if (meal === null || typeof meal !== 'object') return false;
+            const title = (meal as Record<string, unknown>).title;
+            const description = (meal as Record<string, unknown>).description;
+            if (typeof title !== 'string' || title.length === 0 || title.length > MAX_TITLE_LENGTH) {
+                return false;
+            }
+            if (description !== undefined && (typeof description !== 'string' || description.length > MAX_TITLE_LENGTH)) {
+                return false;
+            }
+            return true;
+        })
+        .slice(0, MAX_MEALS_PER_CALL);
+
+    if (meals.length === 0) {
+        return new Response(JSON.stringify({ images: [] }), {
+            headers: jsonHeaders,
+            status: 200,
+        });
+    }
+
+    // === QUOTA : PAR UTILISATEUR (1/appel) + GLOBAL (1/image, budget Cloudflare) ===
+    const quota = await checkAndIncrementQuota(
+        req,
+        'meal-images',
+        10,
+        corsHeaders,
+        GLOBAL_DAILY_IMAGE_LIMIT,
+        lang,
+        meals.length,
+    );
     if (!quota.ok) {
         return quota.response!;
     }
 
     try {
-        let body;
-        try {
-            body = await req.json();
-        } catch (e) {
-            throw new Error("Le corps de la requête est vide ou mal formé.");
-        }
-
-        const meals = Array.isArray(body?.meals) ? body.meals : [];
-        if (meals.length === 0) {
-            return new Response(JSON.stringify({ images: [] }), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200,
-            });
-        }
-
         const cfAccountId = Deno.env.get('CLOUDFLARE_ACCOUNT_ID') ?? null;
         const cfApiToken = Deno.env.get('CLOUDFLARE_API_TOKEN') ?? null;
         const pollinationsToken = Deno.env.get('POLLINATIONS_TOKEN') ?? null;
         const models = await fetchAvailableModels(pollinationsToken);
 
-        // Génération en parallèle, avec un décalage entre chaque requête.
-        // Cloudflare Workers AI n'a pas la limite de débit serrée de
-        // Pollinations, donc un décalage minime suffit quand il est
-        // configuré ; sinon on reste prudent pour l'offre anonyme
-        // Pollinations (~1 req/15s, voir APIDOCS.md).
+        // Génération par lots de MAX_CONCURRENT, avec un décalage entre
+        // chaque requête d'un même lot. Cloudflare Workers AI n'a pas la
+        // limite de débit serrée de Pollinations, donc un décalage minime
+        // suffit quand il est configuré ; sinon on reste prudent pour
+        // l'offre anonyme Pollinations (~1 req/15s, voir APIDOCS.md).
         const staggerMs = cfAccountId && cfApiToken ? 300 : pollinationsToken ? 1200 : 3000;
-        const images = await Promise.all(
-            meals.map((meal: { title?: string; description?: string }, index: number) =>
-                new Promise<string | null>((resolve) => {
-                    setTimeout(async () => {
-                        const title = typeof meal?.title === 'string' ? meal.title : 'Repas';
-                        const description = typeof meal?.description === 'string' ? meal.description : '';
-                        resolve(await generateMealImage(
-                            title,
-                            description,
-                            cfAccountId,
-                            cfApiToken,
-                            pollinationsToken,
-                            models,
-                        ));
-                    }, index * staggerMs);
-                })
-            ),
-        );
+        const images: (string | null)[] = [];
+        for (const batch of chunk(meals, MAX_CONCURRENT)) {
+            const batchImages = await Promise.all(
+                batch.map((meal, indexInBatch) =>
+                    new Promise<string | null>((resolve) => {
+                        setTimeout(async () => {
+                            resolve(await generateMealImage(
+                                meal.title,
+                                meal.description ?? '',
+                                cfAccountId,
+                                cfApiToken,
+                                pollinationsToken,
+                                models,
+                            ));
+                        }, indexInBatch * staggerMs);
+                    })
+                ),
+            );
+            images.push(...batchImages);
+        }
 
         return new Response(JSON.stringify({ images }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            headers: jsonHeaders,
             status: 200,
         });
     } catch (error) {
         console.error("Erreur fatale Edge Function (Meal Images):", (error as Error).message);
-        return new Response(JSON.stringify({ error: (error as Error).message }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        return new Response(JSON.stringify({ error: isEn ? "Image generation temporarily failed. Please try again later." : "La génération d'images a temporairement échoué. Réessaie plus tard." }), {
+            headers: jsonHeaders,
             status: 400,
         });
     }

@@ -68,6 +68,8 @@ class AuthService {
     required double heightCm,
     required String goal,
     String? avatarUrl,
+    DateTime? acceptedTermsAt,
+    String? acceptedTermsVersion,
     String lang = 'fr',
   }) async {
     final l10n = lookupAppLocalizations(Locale(lang));
@@ -92,6 +94,11 @@ class AuthService {
         'height_cm': heightCm,
         'goal': goal,
         'avatar_url': ?avatarUrl,
+        // Renseignés uniquement à l'inscription (voir signup_screen.dart) :
+        // on ne doit pas écraser ces colonnes lors des mises à jour de profil
+        // ultérieures (account_screen.dart, etc.) qui ne les fournissent pas.
+        if (acceptedTermsAt != null) 'accepted_terms_at': acceptedTermsAt.toIso8601String(),
+        'accepted_terms_version': ?acceptedTermsVersion,
       }, onConflict: 'user_id');
     } catch (e) {
       throw Exception(l10n.svcErrorSaveProfile(e.toString()));
@@ -203,6 +210,37 @@ class AuthService {
   Future<void> signOut() async {
     await _supabase.auth.signOut();
     await PurchaseService.instance.logOut();
+  }
+
+  /// Supprime définitivement le compte (Edge Function `delete-account`) :
+  /// Storage, toutes les lignes Postgres (cascade via `auth.users`) puis
+  /// l'utilisateur Auth lui-même. Ne déconnecte pas localement ni ne purge
+  /// les données locales : c'est à l'appelant de le faire une fois cet appel
+  /// terminé avec succès (voir delete_account_screen.dart).
+  Future<void> deleteAccount({String lang = 'fr'}) async {
+    final l10n = lookupAppLocalizations(Locale(lang));
+    try {
+      await _supabase.functions.invoke(
+        'delete-account',
+        body: {'confirm': true, 'lang': lang},
+      );
+    } catch (e) {
+      throw Exception(l10n.svcErrorDeleteAccount(_describeError(e)));
+    }
+  }
+
+  /// Extrait le message d'erreur renvoyé par l'Edge Function (voir
+  /// ai_service.dart#_describeError) plutôt que de laisser fuiter la
+  /// représentation brute de l'exception à l'utilisateur.
+  String _describeError(Object error) {
+    if (error is FunctionException) {
+      final details = error.details;
+      if (details is Map && details['error'] is String) {
+        return details['error'] as String;
+      }
+      return error.reasonPhrase ?? error.toString();
+    }
+    return error.toString();
   }
 
   /// Envoi de l'email pour le mot de passe oublié

@@ -13,10 +13,13 @@ const _uuid = Uuid();
 /// que [MealRepository] (soft-delete pour ne pas perdre une suppression
 /// survenue hors ligne).
 class HydrationRepository {
-  HydrationRepository(this._db);
+  /// [supabaseClient] n'est à fournir que pour les tests (voir
+  /// test/local_db/hydration_repository_test.dart).
+  HydrationRepository(this._db, [SupabaseClient? supabaseClient])
+      : _supabase = supabaseClient ?? Supabase.instance.client;
 
   final AppDatabase _db;
-  SupabaseClient get _supabase => Supabase.instance.client;
+  final SupabaseClient _supabase;
 
   /// Enregistre une prise d'eau et retourne son id, pour permettre l'action
   /// "Annuler" de la snackbar de confirmation.

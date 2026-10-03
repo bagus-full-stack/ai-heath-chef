@@ -282,6 +282,7 @@
       }
     }
   },
+  "dashboardCalorieFlooredNotice": "Objectif ajusté au minimum recommandé. Consulte un professionnel de santé pour un régime plus restrictif.",
   "dashboardCarbsLabel": "GLUCIDES",
   "dashboardEmptyMealsMessage": "Aucun repas enregistré aujourd'hui. Scannez votre première assiette !",
   "dashboardFatLabel": "LIPIDES",
@@ -406,7 +407,7 @@
   "helpCenterAccountQ1Question": "Comment modifier mon profil ou mes objectifs ?",
   "helpCenterAccountQ2Answer": "Ton abonnement est géré directement par l’App Store ou le Google Play Store (selon ton appareil), pas par l’app elle-même. Rends-toi dans les réglages d’abonnements de ton compte Apple/Google pour le modifier ou le résilier.",
   "helpCenterAccountQ2Question": "Comment gérer ou annuler mon abonnement PRO ?",
-  "helpCenterAccountQ3Answer": "Écris-nous à {supportEmail} depuis l’adresse email associée à ton compte, on s’occupe de la suppression de tes données.",
+  "helpCenterAccountQ3Answer": "Depuis Profil > Sécurité et Confidentialité > \"Supprimer mon compte\", tu peux supprimer définitivement ton compte et toutes tes données directement dans l'app, sans avoir à nous écrire. Si tu rencontres un problème avec ce parcours, tu peux toujours nous contacter à {supportEmail}.",
   "@helpCenterAccountQ3Answer": {
     "placeholders": {
       "supportEmail": {
@@ -725,6 +726,7 @@
   "onboardingAgeUnitSuffix": "ans",
   "onboardingErrorGoalRequired": "Choisis ton objectif principal.",
   "onboardingErrorInvalidAge": "Entre un âge valide.",
+  "onboardingErrorUnderMinimumAge": "AI Health Chef est réservé aux personnes de 16 ans ou plus. Ton âge n'a pas été enregistré.",
   "onboardingErrorInvalidHeight": "Entre ta taille en cm.",
   "onboardingErrorInvalidWeight": "Entre ton poids.",
   "onboardingErrorSaveProfile": "Impossible d'enregistrer le profil : {error}",
@@ -753,6 +755,7 @@
   "onboardingSubtitle": "Ces informations permettent à notre IA de calculer votre besoin calorique précis.",
   "onboardingTitle": "Apprenons à nous connaître",
   "onboardingWeightSectionLabel": "Votre Poids",
+  "onboardingMedicalDisclaimer": "Ces estimations sont indicatives et ne remplacent pas un avis médical. Consulte un professionnel de santé avant tout changement alimentaire important.",
   "paywallBadgePopular": "POPULAIRE",
   "paywallBenefitAdsFreeSubtitle": "Une expérience fluide, premium et concentrée.",
   "paywallBenefitAdsFreeTitle": "Sans publicité",
@@ -891,6 +894,28 @@
   "securityPasswordUpdateSuccess": "Mot de passe mis à jour.",
   "security2faTitle": "Authentification à deux facteurs",
   "security2faMessage": "Pas encore disponible — prévue dans une prochaine mise à jour.",
+  "securityDeleteAccountTitle": "Supprimer mon compte",
+  "securityDeleteAccountSubtitle": "Supprimer définitivement mon compte",
+  "deleteAccountAppBarTitle": "Supprimer mon compte",
+  "deleteAccountWarningTitle": "Action irréversible",
+  "deleteAccountWarningBody": "Une fois confirmée, cette suppression est définitive : ton compte et tes données ne pourront plus être récupérés.",
+  "deleteAccountDataListTitle": "Ce qui sera supprimé :",
+  "deleteAccountDataListBody": "• Ton profil, tes objectifs et préférences\n• Ton journal de repas et leurs photos\n• Ton historique de poids et ses photos\n• Ton historique d'hydratation\n• Tes conversations avec le Coach IA\n• Tes idées de repas et plannings hebdomadaires générés\n• Ta photo de profil\n\nLe modèle d'IA locale éventuellement téléchargé sur cet appareil n'est pas supprimé : il n'est pas lié à ton compte, c'est un fichier générique partagé par l'app.",
+  "deleteAccountSubscriptionWarningTitle": "Abonnement actif",
+  "deleteAccountSubscriptionWarningBody": "Supprimer ton compte n'annule PAS ton abonnement en cours : il continuera à être facturé tant que tu ne l'auras pas annulé depuis les paramètres de ton compte Apple ou Google.",
+  "deleteAccountManageSubscriptionButton": "Gérer mon abonnement",
+  "deleteAccountConfirmWord": "SUPPRIMER",
+  "deleteAccountConfirmInstructions": "Pour confirmer, tape {word} ci-dessous :",
+  "@deleteAccountConfirmInstructions": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountConfirmFieldLabel": "Mot de confirmation",
+  "deleteAccountConfirmMismatch": "Le mot de confirmation ne correspond pas.",
+  "deleteAccountButton": "Supprimer définitivement mon compte",
   "profileSubscriptionSubtitle": "Plan PRO et facturation",
   "profileSubscriptionTitle": "Abonnement",
   "profileTargetWeightLabel": "Poids cible",
@@ -916,7 +941,7 @@
   "signupDividerOrSignUpWith": "OU S'INSCRIRE AVEC",
   "signupEmailHint": "jean.dupont@exemple.fr",
   "signupEmailLabel": "ADRESSE E-MAIL",
-  "signupErrorAcceptTerms": "Vous devez accepter les conditions d'utilisation.",
+  "signupErrorAcceptTerms": "Tu dois confirmer avoir au moins 16 ans et accepter les CGU et la politique de confidentialité.",
   "signupErrorFillAllFields": "Veuillez remplir tous les champs.",
   "signupFullNameHint": "Jean Dupont",
   "signupFullNameLabel": "NOM COMPLET",
@@ -927,7 +952,8 @@
   "signupSubmitButton": "S'inscrire",
   "signupSubtitle": "Rejoignez-nous pour transformer votre nutrition avec intelligence artificielle.",
   "signupSuccessCheckEmail": "Compte créé ! Vérifiez vos emails pour confirmer.",
-  "signupTermsAcceptance": "J'accepte les Conditions d'utilisation et la Politique de confidentialité",
+  "signupTermsAcceptance": "J'ai au moins 16 ans et j'accepte les CGU et la politique de confidentialité.",
+  "signupTermsLinkLabel": "Lire les CGU",
   "termsAppBarTitle": "Conditions d’utilisation",
   "termsDraftBanner": "Brouillon : ce document décrit honnêtement le service, mais n’a pas encore été relu par un professionnel du droit et l’identité légale de l’éditeur reste à compléter. À finaliser avant toute publication publique de l’app.",
   "termsLastUpdated": "Dernière mise à jour : {date}",
@@ -979,7 +1005,7 @@
   "termsSection4Title": "4. Ce n’est pas un avis médical",
   "termsSection5Body": "Les ingrédients détectés sur photo, les valeurs nutritionnelles estimées, les réponses du coach IA et les idées de repas sont générés par des modèles d’IA tiers (actuellement Google Gemini) et peuvent contenir des erreurs, imprécisions ou approximations. Vérifie et ajuste les informations avant de t’y fier, en particulier en cas d’allergie ou de restriction alimentaire.",
   "termsSection5Title": "5. Contenu généré par intelligence artificielle",
-  "termsSection6Body": "L’utilisation de l’Application nécessite la création d’un compte. Tu es responsable de l’exactitude des informations fournies et de la confidentialité de tes identifiants de connexion. Toute activité réalisée depuis ton compte est présumée effectuée par toi.",
+  "termsSection6Body": "L’Application est réservée aux personnes âgées de 16 ans ou plus. L’utilisation de l’Application nécessite la création d’un compte. Tu es responsable de l’exactitude des informations fournies et de la confidentialité de tes identifiants de connexion. Toute activité réalisée depuis ton compte est présumée effectuée par toi.",
   "termsSection6Title": "6. Compte utilisateur",
   "termsSection7Body": "Certaines fonctionnalités sont réservées aux utilisateurs abonnés (« PRO »). L’achat, le renouvellement automatique et l’annulation de l’abonnement sont intégralement gérés par la plateforme de paiement de ton appareil (App Store ou Google Play), pas directement par l’éditeur. L’abonnement se renouvelle automatiquement sauf annulation au moins 24h avant la fin de la période en cours, depuis les réglages de ton compte Apple ou Google. Les demandes de remboursement relèvent des politiques d’Apple/Google, pas de l’éditeur.",
   "termsSection7Title": "7. Abonnement PRO",
@@ -1088,6 +1114,14 @@
   },
   "svcErrorFetchProfile": "Erreur lors de la récupération du profil : {error}",
   "@svcErrorFetchProfile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcErrorDeleteAccount": "Erreur lors de la suppression du compte : {error}",
+  "@svcErrorDeleteAccount": {
     "placeholders": {
       "error": {
         "type": "String"
@@ -1233,5 +1267,71 @@
   "pantryRecipesTitle": "Recettes suggérées",
   "pantryRecipesLoadError": "Impossible de générer des recettes pour le moment.",
   "pantryRecipesRetryButton": "Réessayer",
-  "pantryRecipesEmptyMessage": "Aucune recette générée."
+  "pantryRecipesEmptyMessage": "Aucune recette générée.",
+  "profilePrivacyTitle": "Politique de confidentialité",
+  "profilePrivacySubtitle": "Quelles données sont collectées et pourquoi",
+  "profileLicensesTitle": "Licences",
+  "profileLicensesSubtitle": "Crédits open source et tiers",
+  "aboutPrivacyLinkTitle": "Politique de confidentialité",
+  "aboutLicensesLinkTitle": "Licences",
+  "signupPrivacyLinkLabel": "Lire la politique de confidentialité",
+  "helpCenterPrivacyLinkLabel": "Politique de confidentialité",
+  "privacyAppBarTitle": "Politique de confidentialité",
+  "privacyDraftBanner": "Brouillon : ce document n'a pas encore été relu par un juriste et n'est pas juridiquement opposable en l'état.",
+  "privacyLastUpdated": "Dernière mise à jour : {date}",
+  "@privacyLastUpdated": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "privacySection1Title": "1. Responsable du traitement",
+  "privacySection1Body": "AI Health Chef est éditée par Baga Assami, développeur individuel (pas de société immatriculée à ce jour). Contact : {supportEmail}",
+  "@privacySection1Body": {
+    "placeholders": {
+      "supportEmail": {"type": "String"}
+    }
+  },
+  "privacySection2Title": "2. Données collectées",
+  "privacySection2Body": "Email/mot de passe du compte, profil de santé (poids, taille, âge, objectif, régime, allergies — donnée de santé au sens du RGPD), photos d'avatar/repas/progression/menu/frigo, historique de chat avec le coach, entrées de poids et d'hydratation, identifiants techniques, statut d'abonnement, suggestions et plans mis en cache, compteurs d'usage anti-abus, horodatages de tentative de suppression, preuve d'acceptation des CGU. Aucune géolocalisation, identifiant publicitaire, carnet de contacts, ni donnée de paiement en clair (gérée nativement par le store).",
+  "privacySection3Title": "3. Destinataires des données",
+  "privacySection3Body": "Supabase (hébergement backend, toutes les données). Google Gemini (photos de repas/produit/menu/frigo, texte du chat, régime/allergies pour le coach). Cloudflare Workers AI et Pollinations.ai (titre/description textuelle d'un repas uniquement, pour l'illustration). RevenueCat (gestion de l'abonnement, identifiant utilisateur Supabase). Open Food Facts (recherche anonyme par code-barres). Hugging Face (téléchargement du modèle d'IA locale). Apple/Google (paiement natif in-app). Plusieurs de ces transferts sortent de l'UE ; réduire le détail des allergies/régime envoyé au coach, et rendre privés les buckets de photos, sont des propositions non encore appliquées.",
+  "privacySection4Title": "4. Durées de conservation",
+  "privacySection4Body": "Les données sont conservées tant que le compte existe. Les compteurs d'usage sont remis à zéro quotidiennement. La suppression de compte supprime en cascade les données Supabase Auth et les données locales, mais oublie actuellement le bucket Storage chat_images (voir section 9 — un bug connu, pas encore corrigé).",
+  "privacySection5Title": "5. Tes droits",
+  "privacySection5Body": "Tu disposes d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de tes données, ainsi que du droit d'introduire une réclamation auprès de la CNIL. Accès/rectification : écran Profil. Effacement : Profil > Sécurité > Supprimer mon compte. Portabilité : exports CSV/PDF existants mais partiels (voir section 7).",
+  "privacySection6Title": "6. Âge minimum",
+  "privacySection6Body": "L'application est réservée aux personnes de 16 ans ou plus, l'âge de consentement numérique par défaut en RGPD, pour éviter de collecter des données de santé de mineurs sans consentement parental vérifiable. L'âge est déclaré par l'utilisateur, sans vérification indépendante.",
+  "privacySection7Title": "7. Export de données",
+  "privacySection7Body": "Les exports existants (CSV du journal de repas, PDF bilan hebdo/mensuel, export .ics du plan de repas) sont partiels : ils ne couvrent pas l'hydratation, le chat, le profil complet, ni les photos. Un export JSON complet est proposé mais pas encore implémenté. Pour toute demande liée à l'export de tes données, contacte {supportEmail}",
+  "@privacySection7Body": {
+    "placeholders": {
+      "supportEmail": {"type": "String"}
+    }
+  },
+  "privacySection8Title": "8. Sécurité",
+  "privacySection8Body": "Les mots de passe sont hashés par Supabase Auth et jamais stockés en clair. La Row Level Security limite chaque utilisateur à ses propres données. Les Edge Functions exigent une session Supabase valide et appliquent des quotas anti-abus. Le bucket chat_images est privé avec accès signé ; les buckets avatar, repas et progression sont actuellement publics (une proposition pour les rendre privés est en attente de validation).",
+  "privacySection9Title": "9. Point signalé — suppression de compte",
+  "privacySection9Body": "La suppression de compte efface tes photos d'avatar, de repas et de progression, mais un bug connu laisse actuellement tes images de chat orphelines dans le Storage au lieu de les supprimer aussi. Un correctif a été identifié et attend ta validation avant d'être appliqué.",
+  "privacySection10Title": "10. Contact",
+  "privacySection10Body": "Pour toute question sur cette politique ou sur tes données, contacte {supportEmail}",
+  "@privacySection10Body": {
+    "placeholders": {
+      "supportEmail": {"type": "String"}
+    }
+  },
+  "licensesAppBarTitle": "Licences",
+  "licensesIntro": "AI Health Chef s'appuie sur des packages open source ainsi que sur des données et modèles d'IA tiers. Les licences des packages open source sont listées ci-dessous ; les autres crédits sont listés ici.",
+  "licensesOpenFoodFactsBody": "Les données produits (lookup par code-barres) viennent d'Open Food Facts, une base collaborative et libre sous licence Open Database License (ODbL).",
+  "licensesGemmaBody": "L'analyse de repas sur l'appareil utilise le modèle Gemma 3n de Google, téléchargé directement sur ton appareil, sous les conditions d'utilisation Gemma de Google.",
+  "licensesFluxBody": "Les illustrations de repas sont générées avec le modèle FLUX.1 [schnell] (Apache 2.0), servi via Cloudflare Workers AI.",
+  "licensesPollinationsBody": "Les illustrations de repas peuvent aussi être générées via Pollinations.ai, utilisé comme service de génération d'image de secours.",
+  "licensesOpenSourceButton": "Voir les licences des packages open source",
+  "cloudAiConsentTitle": "Envoyer à l'IA pour analyse ?",
+  "cloudAiConsentBody": "Cette fonctionnalité peut envoyer ta photo ou ton message à un service d'IA cloud (comme Google Gemini) pour analyse. Tu peux changer ce choix à tout moment dans Sécurité et confidentialité.",
+  "cloudAiConsentAccept": "Accepter et continuer",
+  "cloudAiConsentDecline": "Pas maintenant",
+  "securityPrivacySectionTitle": "Confidentialité",
+  "securityCloudAiConsentTitle": "Analyse par IA cloud",
+  "securityCloudAiConsentSubtitle": "Autoriser l'envoi de photos et de messages à des services d'IA cloud pour analyse et coaching",
+  "securityPrivacyPolicyLinkLabel": "Lire la politique de confidentialité"
 }

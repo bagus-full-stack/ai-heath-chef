@@ -926,6 +926,12 @@ abstract class AppLocalizations {
   /// **' Objectif: {kcal}'**
   String dashboardCalorieGoalLabel(int kcal);
 
+  /// No description provided for @dashboardCalorieFlooredNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif ajusté au minimum recommandé. Consulte un professionnel de santé pour un régime plus restrictif.'**
+  String get dashboardCalorieFlooredNotice;
+
   /// No description provided for @dashboardCarbsLabel.
   ///
   /// In fr, this message translates to:
@@ -1277,7 +1283,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpCenterAccountQ3Answer.
   ///
   /// In fr, this message translates to:
-  /// **'Écris-nous à {supportEmail} depuis l’adresse email associée à ton compte, on s’occupe de la suppression de tes données.'**
+  /// **'Depuis Profil > Sécurité et Confidentialité > \"Supprimer mon compte\", tu peux supprimer définitivement ton compte et toutes tes données directement dans l\'app, sans avoir à nous écrire. Si tu rencontres un problème avec ce parcours, tu peux toujours nous contacter à {supportEmail}.'**
   String helpCenterAccountQ3Answer(String supportEmail);
 
   /// No description provided for @helpCenterAccountQ3Question.
@@ -2372,6 +2378,12 @@ abstract class AppLocalizations {
   /// **'Entre un âge valide.'**
   String get onboardingErrorInvalidAge;
 
+  /// No description provided for @onboardingErrorUnderMinimumAge.
+  ///
+  /// In fr, this message translates to:
+  /// **'AI Health Chef est réservé aux personnes de 16 ans ou plus. Ton âge n\'a pas été enregistré.'**
+  String get onboardingErrorUnderMinimumAge;
+
   /// No description provided for @onboardingErrorInvalidHeight.
   ///
   /// In fr, this message translates to:
@@ -2497,6 +2509,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Votre Poids'**
   String get onboardingWeightSectionLabel;
+
+  /// No description provided for @onboardingMedicalDisclaimer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces estimations sont indicatives et ne remplacent pas un avis médical. Consulte un professionnel de santé avant tout changement alimentaire important.'**
+  String get onboardingMedicalDisclaimer;
 
   /// No description provided for @paywallBadgePopular.
   ///
@@ -2978,6 +2996,96 @@ abstract class AppLocalizations {
   /// **'Pas encore disponible — prévue dans une prochaine mise à jour.'**
   String get security2faMessage;
 
+  /// No description provided for @securityDeleteAccountTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer mon compte'**
+  String get securityDeleteAccountTitle;
+
+  /// No description provided for @securityDeleteAccountSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer définitivement mon compte'**
+  String get securityDeleteAccountSubtitle;
+
+  /// No description provided for @deleteAccountAppBarTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer mon compte'**
+  String get deleteAccountAppBarTitle;
+
+  /// No description provided for @deleteAccountWarningTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Action irréversible'**
+  String get deleteAccountWarningTitle;
+
+  /// No description provided for @deleteAccountWarningBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une fois confirmée, cette suppression est définitive : ton compte et tes données ne pourront plus être récupérés.'**
+  String get deleteAccountWarningBody;
+
+  /// No description provided for @deleteAccountDataListTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui sera supprimé :'**
+  String get deleteAccountDataListTitle;
+
+  /// No description provided for @deleteAccountDataListBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'• Ton profil, tes objectifs et préférences\n• Ton journal de repas et leurs photos\n• Ton historique de poids et ses photos\n• Ton historique d\'hydratation\n• Tes conversations avec le Coach IA\n• Tes idées de repas et plannings hebdomadaires générés\n• Ta photo de profil\n\nLe modèle d\'IA locale éventuellement téléchargé sur cet appareil n\'est pas supprimé : il n\'est pas lié à ton compte, c\'est un fichier générique partagé par l\'app.'**
+  String get deleteAccountDataListBody;
+
+  /// No description provided for @deleteAccountSubscriptionWarningTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnement actif'**
+  String get deleteAccountSubscriptionWarningTitle;
+
+  /// No description provided for @deleteAccountSubscriptionWarningBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer ton compte n\'annule PAS ton abonnement en cours : il continuera à être facturé tant que tu ne l\'auras pas annulé depuis les paramètres de ton compte Apple ou Google.'**
+  String get deleteAccountSubscriptionWarningBody;
+
+  /// No description provided for @deleteAccountManageSubscriptionButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer mon abonnement'**
+  String get deleteAccountManageSubscriptionButton;
+
+  /// No description provided for @deleteAccountConfirmWord.
+  ///
+  /// In fr, this message translates to:
+  /// **'SUPPRIMER'**
+  String get deleteAccountConfirmWord;
+
+  /// No description provided for @deleteAccountConfirmInstructions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour confirmer, tape {word} ci-dessous :'**
+  String deleteAccountConfirmInstructions(String word);
+
+  /// No description provided for @deleteAccountConfirmFieldLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de confirmation'**
+  String get deleteAccountConfirmFieldLabel;
+
+  /// No description provided for @deleteAccountConfirmMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de confirmation ne correspond pas.'**
+  String get deleteAccountConfirmMismatch;
+
+  /// No description provided for @deleteAccountButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer définitivement mon compte'**
+  String get deleteAccountButton;
+
   /// No description provided for @profileSubscriptionSubtitle.
   ///
   /// In fr, this message translates to:
@@ -3089,7 +3197,7 @@ abstract class AppLocalizations {
   /// No description provided for @signupErrorAcceptTerms.
   ///
   /// In fr, this message translates to:
-  /// **'Vous devez accepter les conditions d\'utilisation.'**
+  /// **'Tu dois confirmer avoir au moins 16 ans et accepter les CGU et la politique de confidentialité.'**
   String get signupErrorAcceptTerms;
 
   /// No description provided for @signupErrorFillAllFields.
@@ -3155,8 +3263,14 @@ abstract class AppLocalizations {
   /// No description provided for @signupTermsAcceptance.
   ///
   /// In fr, this message translates to:
-  /// **'J\'accepte les Conditions d\'utilisation et la Politique de confidentialité'**
+  /// **'J\'ai au moins 16 ans et j\'accepte les CGU et la politique de confidentialité.'**
   String get signupTermsAcceptance;
+
+  /// No description provided for @signupTermsLinkLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire les CGU'**
+  String get signupTermsLinkLabel;
 
   /// No description provided for @termsAppBarTitle.
   ///
@@ -3299,7 +3413,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsSection6Body.
   ///
   /// In fr, this message translates to:
-  /// **'L’utilisation de l’Application nécessite la création d’un compte. Tu es responsable de l’exactitude des informations fournies et de la confidentialité de tes identifiants de connexion. Toute activité réalisée depuis ton compte est présumée effectuée par toi.'**
+  /// **'L’Application est réservée aux personnes âgées de 16 ans ou plus. L’utilisation de l’Application nécessite la création d’un compte. Tu es responsable de l’exactitude des informations fournies et de la confidentialité de tes identifiants de connexion. Toute activité réalisée depuis ton compte est présumée effectuée par toi.'**
   String get termsSection6Body;
 
   /// No description provided for @termsSection6Title.
@@ -3439,6 +3553,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur lors de la récupération du profil : {error}'**
   String svcErrorFetchProfile(String error);
+
+  /// No description provided for @svcErrorDeleteAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la suppression du compte : {error}'**
+  String svcErrorDeleteAccount(String error);
 
   /// No description provided for @svcErrorResetPassword.
   ///
@@ -3763,6 +3883,282 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aucune recette générée.'**
   String get pantryRecipesEmptyMessage;
+
+  /// No description provided for @profilePrivacyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Politique de confidentialité'**
+  String get profilePrivacyTitle;
+
+  /// No description provided for @profilePrivacySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelles données sont collectées et pourquoi'**
+  String get profilePrivacySubtitle;
+
+  /// No description provided for @profileLicensesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Licences'**
+  String get profileLicensesTitle;
+
+  /// No description provided for @profileLicensesSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédits open source et tiers'**
+  String get profileLicensesSubtitle;
+
+  /// No description provided for @aboutPrivacyLinkTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Politique de confidentialité'**
+  String get aboutPrivacyLinkTitle;
+
+  /// No description provided for @aboutLicensesLinkTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Licences'**
+  String get aboutLicensesLinkTitle;
+
+  /// No description provided for @signupPrivacyLinkLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire la politique de confidentialité'**
+  String get signupPrivacyLinkLabel;
+
+  /// No description provided for @helpCenterPrivacyLinkLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Politique de confidentialité'**
+  String get helpCenterPrivacyLinkLabel;
+
+  /// No description provided for @privacyAppBarTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Politique de confidentialité'**
+  String get privacyAppBarTitle;
+
+  /// No description provided for @privacyDraftBanner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Brouillon : ce document n\'a pas encore été relu par un juriste et n\'est pas juridiquement opposable en l\'état.'**
+  String get privacyDraftBanner;
+
+  /// No description provided for @privacyLastUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière mise à jour : {date}'**
+  String privacyLastUpdated(String date);
+
+  /// No description provided for @privacySection1Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'1. Responsable du traitement'**
+  String get privacySection1Title;
+
+  /// No description provided for @privacySection1Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'AI Health Chef est éditée par Baga Assami, développeur individuel (pas de société immatriculée à ce jour). Contact : {supportEmail}'**
+  String privacySection1Body(String supportEmail);
+
+  /// No description provided for @privacySection2Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'2. Données collectées'**
+  String get privacySection2Title;
+
+  /// No description provided for @privacySection2Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Email/mot de passe du compte, profil de santé (poids, taille, âge, objectif, régime, allergies — donnée de santé au sens du RGPD), photos d\'avatar/repas/progression/menu/frigo, historique de chat avec le coach, entrées de poids et d\'hydratation, identifiants techniques, statut d\'abonnement, suggestions et plans mis en cache, compteurs d\'usage anti-abus, horodatages de tentative de suppression, preuve d\'acceptation des CGU. Aucune géolocalisation, identifiant publicitaire, carnet de contacts, ni donnée de paiement en clair (gérée nativement par le store).'**
+  String get privacySection2Body;
+
+  /// No description provided for @privacySection3Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'3. Destinataires des données'**
+  String get privacySection3Title;
+
+  /// No description provided for @privacySection3Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supabase (hébergement backend, toutes les données). Google Gemini (photos de repas/produit/menu/frigo, texte du chat, régime/allergies pour le coach). Cloudflare Workers AI et Pollinations.ai (titre/description textuelle d\'un repas uniquement, pour l\'illustration). RevenueCat (gestion de l\'abonnement, identifiant utilisateur Supabase). Open Food Facts (recherche anonyme par code-barres). Hugging Face (téléchargement du modèle d\'IA locale). Apple/Google (paiement natif in-app). Plusieurs de ces transferts sortent de l\'UE ; réduire le détail des allergies/régime envoyé au coach, et rendre privés les buckets de photos, sont des propositions non encore appliquées.'**
+  String get privacySection3Body;
+
+  /// No description provided for @privacySection4Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'4. Durées de conservation'**
+  String get privacySection4Title;
+
+  /// No description provided for @privacySection4Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les données sont conservées tant que le compte existe. Les compteurs d\'usage sont remis à zéro quotidiennement. La suppression de compte supprime en cascade les données Supabase Auth et les données locales, mais oublie actuellement le bucket Storage chat_images (voir section 9 — un bug connu, pas encore corrigé).'**
+  String get privacySection4Body;
+
+  /// No description provided for @privacySection5Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'5. Tes droits'**
+  String get privacySection5Title;
+
+  /// No description provided for @privacySection5Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu disposes d\'un droit d\'accès, de rectification, d\'effacement, de limitation, d\'opposition et de portabilité de tes données, ainsi que du droit d\'introduire une réclamation auprès de la CNIL. Accès/rectification : écran Profil. Effacement : Profil > Sécurité > Supprimer mon compte. Portabilité : exports CSV/PDF existants mais partiels (voir section 7).'**
+  String get privacySection5Body;
+
+  /// No description provided for @privacySection6Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'6. Âge minimum'**
+  String get privacySection6Title;
+
+  /// No description provided for @privacySection6Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'application est réservée aux personnes de 16 ans ou plus, l\'âge de consentement numérique par défaut en RGPD, pour éviter de collecter des données de santé de mineurs sans consentement parental vérifiable. L\'âge est déclaré par l\'utilisateur, sans vérification indépendante.'**
+  String get privacySection6Body;
+
+  /// No description provided for @privacySection7Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'7. Export de données'**
+  String get privacySection7Title;
+
+  /// No description provided for @privacySection7Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les exports existants (CSV du journal de repas, PDF bilan hebdo/mensuel, export .ics du plan de repas) sont partiels : ils ne couvrent pas l\'hydratation, le chat, le profil complet, ni les photos. Un export JSON complet est proposé mais pas encore implémenté. Pour toute demande liée à l\'export de tes données, contacte {supportEmail}'**
+  String privacySection7Body(String supportEmail);
+
+  /// No description provided for @privacySection8Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'8. Sécurité'**
+  String get privacySection8Title;
+
+  /// No description provided for @privacySection8Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les mots de passe sont hashés par Supabase Auth et jamais stockés en clair. La Row Level Security limite chaque utilisateur à ses propres données. Les Edge Functions exigent une session Supabase valide et appliquent des quotas anti-abus. Le bucket chat_images est privé avec accès signé ; les buckets avatar, repas et progression sont actuellement publics (une proposition pour les rendre privés est en attente de validation).'**
+  String get privacySection8Body;
+
+  /// No description provided for @privacySection9Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'9. Point signalé — suppression de compte'**
+  String get privacySection9Title;
+
+  /// No description provided for @privacySection9Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'La suppression de compte efface tes photos d\'avatar, de repas et de progression, mais un bug connu laisse actuellement tes images de chat orphelines dans le Storage au lieu de les supprimer aussi. Un correctif a été identifié et attend ta validation avant d\'être appliqué.'**
+  String get privacySection9Body;
+
+  /// No description provided for @privacySection10Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'10. Contact'**
+  String get privacySection10Title;
+
+  /// No description provided for @privacySection10Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour toute question sur cette politique ou sur tes données, contacte {supportEmail}'**
+  String privacySection10Body(String supportEmail);
+
+  /// No description provided for @licensesAppBarTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Licences'**
+  String get licensesAppBarTitle;
+
+  /// No description provided for @licensesIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'AI Health Chef s\'appuie sur des packages open source ainsi que sur des données et modèles d\'IA tiers. Les licences des packages open source sont listées ci-dessous ; les autres crédits sont listés ici.'**
+  String get licensesIntro;
+
+  /// No description provided for @licensesOpenFoodFactsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les données produits (lookup par code-barres) viennent d\'Open Food Facts, une base collaborative et libre sous licence Open Database License (ODbL).'**
+  String get licensesOpenFoodFactsBody;
+
+  /// No description provided for @licensesGemmaBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'analyse de repas sur l\'appareil utilise le modèle Gemma 3n de Google, téléchargé directement sur ton appareil, sous les conditions d\'utilisation Gemma de Google.'**
+  String get licensesGemmaBody;
+
+  /// No description provided for @licensesFluxBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les illustrations de repas sont générées avec le modèle FLUX.1 [schnell] (Apache 2.0), servi via Cloudflare Workers AI.'**
+  String get licensesFluxBody;
+
+  /// No description provided for @licensesPollinationsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les illustrations de repas peuvent aussi être générées via Pollinations.ai, utilisé comme service de génération d\'image de secours.'**
+  String get licensesPollinationsBody;
+
+  /// No description provided for @licensesOpenSourceButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les licences des packages open source'**
+  String get licensesOpenSourceButton;
+
+  /// No description provided for @cloudAiConsentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer à l\'IA pour analyse ?'**
+  String get cloudAiConsentTitle;
+
+  /// No description provided for @cloudAiConsentBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette fonctionnalité peut envoyer ta photo ou ton message à un service d\'IA cloud (comme Google Gemini) pour analyse. Tu peux changer ce choix à tout moment dans Sécurité et confidentialité.'**
+  String get cloudAiConsentBody;
+
+  /// No description provided for @cloudAiConsentAccept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter et continuer'**
+  String get cloudAiConsentAccept;
+
+  /// No description provided for @cloudAiConsentDecline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas maintenant'**
+  String get cloudAiConsentDecline;
+
+  /// No description provided for @securityPrivacySectionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confidentialité'**
+  String get securityPrivacySectionTitle;
+
+  /// No description provided for @securityCloudAiConsentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Analyse par IA cloud'**
+  String get securityCloudAiConsentTitle;
+
+  /// No description provided for @securityCloudAiConsentSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autoriser l\'envoi de photos et de messages à des services d\'IA cloud pour analyse et coaching'**
+  String get securityCloudAiConsentSubtitle;
+
+  /// No description provided for @securityPrivacyPolicyLinkLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire la politique de confidentialité'**
+  String get securityPrivacyPolicyLinkLabel;
 }
 
 class _AppLocalizationsDelegate
