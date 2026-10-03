@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../l10n/app_localizations.dart';
 import '../local_db/local_db_provider.dart';
@@ -14,9 +17,16 @@ import 'locale_provider.dart';
 /// rappels personnalisés (2000+, voir custom_reminders_provider.dart).
 const _kNoLogReminderId = 1004;
 
+/// Vrai dès qu'une restauration depuis Supabase a été tentée sur cet appareil
+/// (voir [NotificationSettingsNotifier._restoreFromBackupIfNeeded]).
+const _kRestoredPrefsKey = 'meal_reminder_restored';
+
 /// Réglages des rappels de repas (activé + heure, par créneau), persistés
 /// localement et répercutés sur les notifications programmées à chaque
-/// changement.
+/// changement. Sauvegardés dans la même table Supabase que les rappels
+/// personnalisés (`custom_reminders_backup`, colonne `fixed_reminders`) pour
+/// survivre à une désinstallation (voir [_pushBackup]/[_restoreFromBackupIfNeeded],
+/// même logique one-shot que CustomRemindersNotifier).
 final notificationSettingsProvider =
     AsyncNotifierProvider<
       NotificationSettingsNotifier,
@@ -25,6 +35,8 @@ final notificationSettingsProvider =
 
 class NotificationSettingsNotifier
     extends AsyncNotifier<Map<MealReminderSlot, MealReminderSetting>> {
+  SupabaseClient get _supabase => Supabase.instance.client;
+
   @override
   Future<Map<MealReminderSlot, MealReminderSetting>> build() async {
     final prefs = await SharedPreferences.getInstance();
@@ -36,7 +48,10 @@ class NotificationSettingsNotifier
     final typicalTimes = await ref
         .read(mealRepositoryProvider)
         .getTypicalMealTimes();
-    return {
+    final hasAnyLocalSetting = MealReminderSlot.values.any(
+      (slot) => prefs.containsKey(_enabledKey(slot)),
+    );
+    final current = {
       for (final slot in MealReminderSlot.values)
         slot: MealReminderSetting(
           enabled: prefs.getBool(_enabledKey(slot)) ?? false,
@@ -50,6 +65,101 @@ class NotificationSettingsNotifier
               slot.defaultMinute,
         ),
     };
+
+    if (hasAnyLocalSetting) {
+      return current;
+    }
+    return _restoreFromBackupIfNeeded(prefs, current);
+  }
+
+  /// Tentative unique (par appareil) de restauration depuis la sauvegarde
+  /// Supabase, uniquement si l'utilisateur n'a encore jamais réglé un
+  /// créneau sur cet appareil — pour ne jamais écraser un réglage local.
+  Future<Map<MealReminderSlot, MealReminderSetting>>
+  _restoreFromBackupIfNeeded(
+    SharedPreferences prefs,
+    Map<MealReminderSlot, MealReminderSetting> fallback,
+  ) async {
+    if (prefs.getBool(_kRestoredPrefsKey) ?? false) {
+      return fallback;
+    }
+
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      return fallback;
+    }
+
+    try {
+      final row = await _supabase
+          .from('custom_reminders_backup')
+          .select('fixed_reminders')
+          .eq('user_id', user.id)
+          .maybeSingle();
+      await prefs.setBool(_kRestoredPrefsKey, true);
+
+      final backup = row?['fixed_reminders'] as Map<String, dynamic>?;
+      if (backup == null) {
+        return fallback;
+      }
+
+      final restored = <MealReminderSlot, MealReminderSetting>{};
+      for (final slot in MealReminderSlot.values) {
+        final saved = backup[slot.name] as Map<String, dynamic>?;
+        final setting = saved == null
+            ? fallback[slot]!
+            : MealReminderSetting(
+                enabled: saved['enabled'] as bool,
+                hour: saved['hour'] as int,
+                minute: saved['minute'] as int,
+              );
+        await prefs.setBool(_enabledKey(slot), setting.enabled);
+        await prefs.setInt(_hourKey(slot), setting.hour);
+        await prefs.setInt(_minuteKey(slot), setting.minute);
+        restored[slot] = setting;
+
+        if (setting.enabled) {
+          try {
+            final locale = ref.read(localeProvider).value ?? const Locale('fr');
+            await NotificationService.instance.scheduleReminder(
+              id: slot.notificationId,
+              title: 'AI Health Chef',
+              body: slot.notificationBody(lookupAppLocalizations(locale)),
+              hour: setting.hour,
+              minute: setting.minute,
+            );
+          } catch (_) {
+            // Permission pas encore accordée sur ce nouvel appareil : le
+            // réglage reste restauré, reprogrammable manuellement.
+          }
+        }
+      }
+      return restored;
+    } catch (_) {
+      // Pas de réseau : on retentera au prochain démarrage (flag pas posé).
+      return fallback;
+    }
+  }
+
+  Future<void> _pushBackup(
+    Map<MealReminderSlot, MealReminderSetting> settings,
+  ) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+    try {
+      await _supabase.from('custom_reminders_backup').upsert({
+        'user_id': user.id,
+        'fixed_reminders': {
+          for (final entry in settings.entries)
+            entry.key.name: {
+              'enabled': entry.value.enabled,
+              'hour': entry.value.hour,
+              'minute': entry.value.minute,
+            },
+        },
+      });
+    } catch (_) {
+      // Best-effort : la prochaine modification retentera la sauvegarde.
+    }
   }
 
   /// Active ou désactive le rappel d'un créneau. À l'activation, demande la
@@ -109,6 +219,7 @@ class NotificationSettingsNotifier
     );
     updated[slot] = setting;
     state = AsyncData(updated);
+    unawaited(_pushBackup(updated));
   }
 
   String _enabledKey(MealReminderSlot slot) =>
