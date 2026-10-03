@@ -2356,4 +2356,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get securityPrivacyPolicyLinkLabel => 'Read the privacy policy';
+
+  @override
+  String get securityDataExportTitle => 'Export my data';
+
+  @override
+  String get securityDataExportSubtitle =>
+      'Download a JSON file with all your data (profile, meals, weight, chat history, etc.)';
+
+  @override
+  String get securityDataExportButton => 'Export all my data';
+
+  @override
+  String get securityDataExportSuccess =>
+      'Export ready — choose where to save or share it.';
+
+  @override
+  String get securityDataExportError =>
+      'Export failed. Check your connection and try again.';
 }

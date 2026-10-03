@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/ai_consent_provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/journal_export.dart';
 
 /// Écran Sécurité et Confidentialité : changement de mot de passe (le seul
 /// réglage réellement actionnable pour l'instant). Remplace l'ancien stub
@@ -29,6 +30,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
   bool _obscureNew = true;
   bool _obscureConfirm = true;
   bool _isSaving = false;
+  bool _isExporting = false;
 
   @override
   void dispose() {
@@ -68,6 +70,21 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
       _showMessage(e.toString().replaceAll('Exception: ', ''), isError: true);
     } finally {
       if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _exportData() async {
+    if (_isExporting) return;
+    setState(() => _isExporting = true);
+    try {
+      await exportAllUserData(ref);
+      if (!mounted) return;
+      _showMessage(context.l10n.securityDataExportSuccess);
+    } catch (_) {
+      if (!mounted) return;
+      _showMessage(context.l10n.securityDataExportError, isError: true);
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
     }
   }
 
@@ -294,6 +311,56 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
             TextButton(
               onPressed: () => context.push('/privacy'),
               child: Text(context.l10n.securityPrivacyPolicyLinkLabel),
+            ),
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.l10n.securityDataExportTitle,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    context.l10n.securityDataExportSubtitle,
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 14),
+                  OutlinedButton(
+                    onPressed: _isExporting ? null : _exportData,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 54),
+                      side: const BorderSide(color: _primaryColor, width: 1.4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    child: _isExporting
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: _primaryColor,
+                            ),
+                          )
+                        : Text(
+                            context.l10n.securityDataExportButton,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: _primaryColor,
+                            ),
+                          ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 28),
             Text(

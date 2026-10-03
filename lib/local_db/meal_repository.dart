@@ -242,11 +242,10 @@ class MealRepository {
       totalFiber: row.totalFiber,
       totalSugar: row.totalSugar,
       totalSatFat: row.totalSatFat,
-      imageUrl:
-          row.imageUrl ??
-          (row.localImagePath != null
-              ? '$localImagePrefix${row.localImagePath}'
-              : null),
+      imageUrl: row.localImagePath != null
+          ? '$localImagePrefix${row.localImagePath}'
+          : null,
+      imagePath: row.imagePath,
       createdAt: row.createdAt,
     );
   }
@@ -279,12 +278,12 @@ class MealRepository {
             totalSugar: Value(row.totalSugar),
             totalSatFat: Value(row.totalSatFat),
             ingredientsJson: Value(row.ingredientsJson),
-            // On ne recopie que l'URL déjà uploadée, jamais [localImagePath] :
-            // deux lignes partageant le même fichier local casseraient l'image
-            // de l'une dès que l'autre est supprimée (deleteMeal efface le
-            // fichier). Repas pas encore synchronisé -> le doublon repart sans
-            // photo plutôt que de risquer ce partage.
-            imageUrl: Value(row.imageUrl),
+            // On ne recopie que le chemin Storage déjà uploadé, jamais
+            // [localImagePath] : deux lignes partageant le même fichier local
+            // casseraient l'image de l'une dès que l'autre est supprimée
+            // (deleteMeal efface le fichier). Repas pas encore synchronisé ->
+            // le doublon repart sans photo plutôt que de risquer ce partage.
+            imagePath: Value(row.imagePath),
             createdAt: DateTime.now(),
           ),
         );
@@ -334,9 +333,9 @@ class MealRepository {
           continue;
         }
 
-        var imageUrl = row.imageUrl;
-        if (imageUrl == null && row.localImagePath != null) {
-          imageUrl = await _uploadPhoto(user.id, row.id, row.localImagePath!);
+        var imagePath = row.imagePath;
+        if (imagePath == null && row.localImagePath != null) {
+          imagePath = await _uploadPhoto(user.id, row.id, row.localImagePath!);
         }
 
         await _supabase.from('meals').upsert({
@@ -351,7 +350,7 @@ class MealRepository {
           'total_sugar': row.totalSugar,
           'total_sat_fat': row.totalSatFat,
           'ingredients': jsonDecode(row.ingredientsJson),
-          'image_url': imageUrl,
+          'image_path': imagePath,
           'created_at': row.createdAt.toUtc().toIso8601String(),
         });
 
@@ -360,7 +359,7 @@ class MealRepository {
         )..where((m) => m.id.equals(row.id))).write(
           LocalMealsCompanion(
             isSynced: const Value(true),
-            imageUrl: Value(imageUrl),
+            imagePath: Value(imagePath),
           ),
         );
       } catch (_) {
@@ -387,6 +386,6 @@ class MealRepository {
             upsert: true,
           ),
         );
-    return _supabase.storage.from('meal_photos').getPublicUrl(storagePath);
+    return storagePath;
   }
 }

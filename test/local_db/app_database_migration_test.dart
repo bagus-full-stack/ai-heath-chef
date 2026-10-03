@@ -50,11 +50,55 @@ void main() {
     expect(meals.single.totalFiber, 0);
     expect(meals.single.totalSugar, 0);
     expect(meals.single.totalSatFat, 0);
+    expect(meals.single.imagePath, null);
 
     // weight_entries/hydration_entries didn't exist at v1: created along the way.
     expect(await db.select(db.weightEntries).get(), isEmpty);
     expect(await db.select(db.hydrationEntries).get(), isEmpty);
-    expect(raw.userVersion, 6);
+    expect(raw.userVersion, 7);
+    await db.close();
+  });
+
+  test('v6 -> v7: backfills image_path on meals and weight entries', () async {
+    final raw = sqlite3.sqlite3.openInMemory();
+    raw.execute('''
+      CREATE TABLE local_meals (
+        id TEXT NOT NULL, user_id TEXT NOT NULL, name TEXT NOT NULL,
+        total_kcal INTEGER NOT NULL,
+        total_prot REAL NOT NULL DEFAULT 0, total_gluc REAL NOT NULL DEFAULT 0,
+        total_lip REAL NOT NULL DEFAULT 0, total_fiber REAL NOT NULL DEFAULT 0,
+        total_sugar REAL NOT NULL DEFAULT 0, total_sat_fat REAL NOT NULL DEFAULT 0,
+        ingredients_json TEXT NOT NULL DEFAULT '[]',
+        image_url TEXT, local_image_path TEXT, created_at INTEGER NOT NULL,
+        is_synced INTEGER NOT NULL DEFAULT 0, is_deleted INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (id)
+      );
+      CREATE TABLE weight_entries (
+        id TEXT NOT NULL, user_id TEXT NOT NULL, weight_kg REAL NOT NULL,
+        recorded_at INTEGER NOT NULL, is_synced INTEGER NOT NULL DEFAULT 0,
+        image_url TEXT, local_image_path TEXT, PRIMARY KEY (id)
+      );
+      CREATE TABLE hydration_entries (
+        id TEXT NOT NULL, user_id TEXT NOT NULL, amount_ml INTEGER NOT NULL,
+        recorded_at INTEGER NOT NULL, is_synced INTEGER NOT NULL DEFAULT 0,
+        is_deleted INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (id)
+      );
+    ''');
+    raw.execute('''
+      INSERT INTO local_meals (id, user_id, name, total_kcal, created_at)
+      VALUES ('meal-1', 'user-1', 'Riz', 300, 1700000000);
+      INSERT INTO weight_entries (id, user_id, weight_kg, recorded_at, is_synced)
+      VALUES ('w1', 'user-1', 70.5, 1700000000, 1);
+    ''');
+
+    final db = openAtVersion(raw, 6);
+    final meals = await db.select(db.localMeals).get();
+    expect(meals.single.imagePath, null);
+
+    final weights = await db.select(db.weightEntries).get();
+    expect(weights.single.imagePath, null);
+    expect(weights.single.isSynced, isTrue); // not clobbered by the backfill
+    expect(raw.userVersion, 7);
     await db.close();
   });
 

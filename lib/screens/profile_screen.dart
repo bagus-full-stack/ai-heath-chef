@@ -12,6 +12,7 @@ import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../utils/journal_export.dart';
 import '../widgets/animated_async_value.dart';
+import '../widgets/storage_image.dart';
 
 const _kLanguageNames = {'fr': 'Français', 'en': 'English'};
 
@@ -387,15 +388,19 @@ class _ProfileHeader extends StatelessWidget {
         Stack(
           clipBehavior: Clip.none,
           children: [
-            CircleAvatar(
-              radius: 48,
-              backgroundColor: Colors.grey.shade200,
-              backgroundImage: profile.avatarUrl != null
-                  ? NetworkImage(profile.avatarUrl!)
-                  : null,
-              child: profile.avatarUrl == null
-                  ? Icon(Icons.person, size: 48, color: Colors.grey.shade500)
-                  : null,
+            StorageImage(
+              bucket: 'avatars',
+              path: profile.avatarPath,
+              builder: (context, snapshot) => CircleAvatar(
+                radius: 48,
+                backgroundColor: Colors.grey.shade200,
+                backgroundImage: snapshot.data != null
+                    ? NetworkImage(snapshot.data!)
+                    : null,
+                child: snapshot.data == null
+                    ? Icon(Icons.person, size: 48, color: Colors.grey.shade500)
+                    : null,
+              ),
             ),
             Positioned(
               right: -4,

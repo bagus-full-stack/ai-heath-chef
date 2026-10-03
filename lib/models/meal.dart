@@ -9,6 +9,7 @@ class Meal {
   final double totalSugar;
   final double totalSatFat;
   final String? imageUrl;
+  final String? imagePath;
   final DateTime createdAt;
 
   Meal({
@@ -22,6 +23,7 @@ class Meal {
     this.totalSugar = 0,
     this.totalSatFat = 0,
     this.imageUrl,
+    this.imagePath,
     required this.createdAt,
   });
 
@@ -38,6 +40,7 @@ class Meal {
       totalSugar: (json['total_sugar'] as num?)?.toDouble() ?? 0,
       totalSatFat: (json['total_sat_fat'] as num?)?.toDouble() ?? 0,
       imageUrl: json['image_url'] as String?,
+      imagePath: json['image_path'] as String?,
       createdAt: DateTime.parse(json['created_at']).toLocal(),
     );
   }

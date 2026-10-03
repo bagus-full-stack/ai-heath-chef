@@ -142,6 +142,17 @@ class $LocalMealsTable extends LocalMeals
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _localImagePathMeta = const VerificationMeta(
     'localImagePath',
   );
@@ -208,6 +219,7 @@ class $LocalMealsTable extends LocalMeals
     totalSatFat,
     ingredientsJson,
     imageUrl,
+    imagePath,
     localImagePath,
     createdAt,
     isSynced,
@@ -308,6 +320,12 @@ class $LocalMealsTable extends LocalMeals
         imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
       );
     }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
+      );
+    }
     if (data.containsKey('local_image_path')) {
       context.handle(
         _localImagePathMeta,
@@ -394,6 +412,10 @@ class $LocalMealsTable extends LocalMeals
         DriftSqlType.string,
         data['${effectivePrefix}image_url'],
       ),
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      ),
       localImagePath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}local_image_path'],
@@ -435,13 +457,20 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
   /// jsonb `ingredients` côté Supabase).
   final String ingredientsJson;
 
-  /// URL publique une fois la photo uploadée vers Supabase Storage. Null
-  /// tant que l'upload n'a pas eu lieu (ou si le repas n'a pas de photo).
+  /// URL publique une fois la photo uploadée vers Supabase Storage. Legacy :
+  /// plus jamais écrite depuis la migration 0020 (bucket meal_photos passé
+  /// en privé) — remplacée par [imagePath]. Conservée en lecture pour ne pas
+  /// perdre les lignes déjà synchronisées avant cette migration.
   final String? imageUrl;
 
+  /// Chemin de la photo dans le bucket Storage privé meal_photos
+  /// (`{user_id}/{meal_id}.jpg`), une fois uploadée. Affichée via une URL
+  /// signée (voir StorageImageService) plutôt que [imageUrl].
+  final String? imagePath;
+
   /// Chemin du fichier photo compressé sur le disque local, en attente
-  /// d'upload. Distinct de [imageUrl] : permet d'afficher la photo
-  /// immédiatement même hors ligne, avant toute synchronisation.
+  /// d'upload. Distinct de [imageUrl]/[imagePath] : permet d'afficher la
+  /// photo immédiatement même hors ligne, avant toute synchronisation.
   final String? localImagePath;
   final DateTime createdAt;
 
@@ -467,6 +496,7 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
     required this.totalSatFat,
     required this.ingredientsJson,
     this.imageUrl,
+    this.imagePath,
     this.localImagePath,
     required this.createdAt,
     required this.isSynced,
@@ -488,6 +518,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
     map['ingredients_json'] = Variable<String>(ingredientsJson);
     if (!nullToAbsent || imageUrl != null) {
       map['image_url'] = Variable<String>(imageUrl);
+    }
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
     }
     if (!nullToAbsent || localImagePath != null) {
       map['local_image_path'] = Variable<String>(localImagePath);
@@ -514,6 +547,9 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
       imageUrl: imageUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(imageUrl),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
       localImagePath: localImagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(localImagePath),
@@ -541,6 +577,7 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
       totalSatFat: serializer.fromJson<double>(json['totalSatFat']),
       ingredientsJson: serializer.fromJson<String>(json['ingredientsJson']),
       imageUrl: serializer.fromJson<String?>(json['imageUrl']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
       localImagePath: serializer.fromJson<String?>(json['localImagePath']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
@@ -563,6 +600,7 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
       'totalSatFat': serializer.toJson<double>(totalSatFat),
       'ingredientsJson': serializer.toJson<String>(ingredientsJson),
       'imageUrl': serializer.toJson<String?>(imageUrl),
+      'imagePath': serializer.toJson<String?>(imagePath),
       'localImagePath': serializer.toJson<String?>(localImagePath),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'isSynced': serializer.toJson<bool>(isSynced),
@@ -583,6 +621,7 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
     double? totalSatFat,
     String? ingredientsJson,
     Value<String?> imageUrl = const Value.absent(),
+    Value<String?> imagePath = const Value.absent(),
     Value<String?> localImagePath = const Value.absent(),
     DateTime? createdAt,
     bool? isSynced,
@@ -600,6 +639,7 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
     totalSatFat: totalSatFat ?? this.totalSatFat,
     ingredientsJson: ingredientsJson ?? this.ingredientsJson,
     imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
+    imagePath: imagePath.present ? imagePath.value : this.imagePath,
     localImagePath: localImagePath.present
         ? localImagePath.value
         : this.localImagePath,
@@ -629,6 +669,7 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
           ? data.ingredientsJson.value
           : this.ingredientsJson,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       localImagePath: data.localImagePath.present
           ? data.localImagePath.value
           : this.localImagePath,
@@ -653,6 +694,7 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
           ..write('totalSatFat: $totalSatFat, ')
           ..write('ingredientsJson: $ingredientsJson, ')
           ..write('imageUrl: $imageUrl, ')
+          ..write('imagePath: $imagePath, ')
           ..write('localImagePath: $localImagePath, ')
           ..write('createdAt: $createdAt, ')
           ..write('isSynced: $isSynced, ')
@@ -675,6 +717,7 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
     totalSatFat,
     ingredientsJson,
     imageUrl,
+    imagePath,
     localImagePath,
     createdAt,
     isSynced,
@@ -696,6 +739,7 @@ class LocalMeal extends DataClass implements Insertable<LocalMeal> {
           other.totalSatFat == this.totalSatFat &&
           other.ingredientsJson == this.ingredientsJson &&
           other.imageUrl == this.imageUrl &&
+          other.imagePath == this.imagePath &&
           other.localImagePath == this.localImagePath &&
           other.createdAt == this.createdAt &&
           other.isSynced == this.isSynced &&
@@ -715,6 +759,7 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
   final Value<double> totalSatFat;
   final Value<String> ingredientsJson;
   final Value<String?> imageUrl;
+  final Value<String?> imagePath;
   final Value<String?> localImagePath;
   final Value<DateTime> createdAt;
   final Value<bool> isSynced;
@@ -733,6 +778,7 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
     this.totalSatFat = const Value.absent(),
     this.ingredientsJson = const Value.absent(),
     this.imageUrl = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.localImagePath = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.isSynced = const Value.absent(),
@@ -752,6 +798,7 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
     this.totalSatFat = const Value.absent(),
     this.ingredientsJson = const Value.absent(),
     this.imageUrl = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.localImagePath = const Value.absent(),
     required DateTime createdAt,
     this.isSynced = const Value.absent(),
@@ -775,6 +822,7 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
     Expression<double>? totalSatFat,
     Expression<String>? ingredientsJson,
     Expression<String>? imageUrl,
+    Expression<String>? imagePath,
     Expression<String>? localImagePath,
     Expression<DateTime>? createdAt,
     Expression<bool>? isSynced,
@@ -794,6 +842,7 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
       if (totalSatFat != null) 'total_sat_fat': totalSatFat,
       if (ingredientsJson != null) 'ingredients_json': ingredientsJson,
       if (imageUrl != null) 'image_url': imageUrl,
+      if (imagePath != null) 'image_path': imagePath,
       if (localImagePath != null) 'local_image_path': localImagePath,
       if (createdAt != null) 'created_at': createdAt,
       if (isSynced != null) 'is_synced': isSynced,
@@ -815,6 +864,7 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
     Value<double>? totalSatFat,
     Value<String>? ingredientsJson,
     Value<String?>? imageUrl,
+    Value<String?>? imagePath,
     Value<String?>? localImagePath,
     Value<DateTime>? createdAt,
     Value<bool>? isSynced,
@@ -834,6 +884,7 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
       totalSatFat: totalSatFat ?? this.totalSatFat,
       ingredientsJson: ingredientsJson ?? this.ingredientsJson,
       imageUrl: imageUrl ?? this.imageUrl,
+      imagePath: imagePath ?? this.imagePath,
       localImagePath: localImagePath ?? this.localImagePath,
       createdAt: createdAt ?? this.createdAt,
       isSynced: isSynced ?? this.isSynced,
@@ -881,6 +932,9 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
     if (imageUrl.present) {
       map['image_url'] = Variable<String>(imageUrl.value);
     }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
     if (localImagePath.present) {
       map['local_image_path'] = Variable<String>(localImagePath.value);
     }
@@ -914,6 +968,7 @@ class LocalMealsCompanion extends UpdateCompanion<LocalMeal> {
           ..write('totalSatFat: $totalSatFat, ')
           ..write('ingredientsJson: $ingredientsJson, ')
           ..write('imageUrl: $imageUrl, ')
+          ..write('imagePath: $imagePath, ')
           ..write('localImagePath: $localImagePath, ')
           ..write('createdAt: $createdAt, ')
           ..write('isSynced: $isSynced, ')
@@ -996,6 +1051,17 @@ class $WeightEntriesTable extends WeightEntries
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _localImagePathMeta = const VerificationMeta(
     'localImagePath',
   );
@@ -1015,6 +1081,7 @@ class $WeightEntriesTable extends WeightEntries
     recordedAt,
     isSynced,
     imageUrl,
+    imagePath,
     localImagePath,
   ];
   @override
@@ -1070,6 +1137,12 @@ class $WeightEntriesTable extends WeightEntries
         imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
       );
     }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
+      );
+    }
     if (data.containsKey('local_image_path')) {
       context.handle(
         _localImagePathMeta,
@@ -1112,6 +1185,10 @@ class $WeightEntriesTable extends WeightEntries
         DriftSqlType.string,
         data['${effectivePrefix}image_url'],
       ),
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      ),
       localImagePath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}local_image_path'],
@@ -1135,9 +1212,12 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
   final bool isSynced;
 
   /// URL publique une fois la photo de progression uploadée vers Supabase
-  /// Storage. Null tant que l'upload n'a pas eu lieu (ou si la pesée n'a pas
-  /// de photo) — voir [LocalMeals.imageUrl].
+  /// Storage. Legacy, voir [LocalMeals.imageUrl] — remplacée par [imagePath].
   final String? imageUrl;
+
+  /// Chemin de la photo dans le bucket Storage privé weight_photos — voir
+  /// [LocalMeals.imagePath].
+  final String? imagePath;
 
   /// Chemin du fichier photo compressé sur le disque local, en attente
   /// d'upload — voir [LocalMeals.localImagePath].
@@ -1149,6 +1229,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     required this.recordedAt,
     required this.isSynced,
     this.imageUrl,
+    this.imagePath,
     this.localImagePath,
   });
   @override
@@ -1161,6 +1242,9 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     map['is_synced'] = Variable<bool>(isSynced);
     if (!nullToAbsent || imageUrl != null) {
       map['image_url'] = Variable<String>(imageUrl);
+    }
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
     }
     if (!nullToAbsent || localImagePath != null) {
       map['local_image_path'] = Variable<String>(localImagePath);
@@ -1178,6 +1262,9 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       imageUrl: imageUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(imageUrl),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
       localImagePath: localImagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(localImagePath),
@@ -1196,6 +1283,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       recordedAt: serializer.fromJson<DateTime>(json['recordedAt']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
       imageUrl: serializer.fromJson<String?>(json['imageUrl']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
       localImagePath: serializer.fromJson<String?>(json['localImagePath']),
     );
   }
@@ -1209,6 +1297,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       'recordedAt': serializer.toJson<DateTime>(recordedAt),
       'isSynced': serializer.toJson<bool>(isSynced),
       'imageUrl': serializer.toJson<String?>(imageUrl),
+      'imagePath': serializer.toJson<String?>(imagePath),
       'localImagePath': serializer.toJson<String?>(localImagePath),
     };
   }
@@ -1220,6 +1309,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     DateTime? recordedAt,
     bool? isSynced,
     Value<String?> imageUrl = const Value.absent(),
+    Value<String?> imagePath = const Value.absent(),
     Value<String?> localImagePath = const Value.absent(),
   }) => WeightEntry(
     id: id ?? this.id,
@@ -1228,6 +1318,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     recordedAt: recordedAt ?? this.recordedAt,
     isSynced: isSynced ?? this.isSynced,
     imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
+    imagePath: imagePath.present ? imagePath.value : this.imagePath,
     localImagePath: localImagePath.present
         ? localImagePath.value
         : this.localImagePath,
@@ -1242,6 +1333,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           : this.recordedAt,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       localImagePath: data.localImagePath.present
           ? data.localImagePath.value
           : this.localImagePath,
@@ -1257,6 +1349,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           ..write('recordedAt: $recordedAt, ')
           ..write('isSynced: $isSynced, ')
           ..write('imageUrl: $imageUrl, ')
+          ..write('imagePath: $imagePath, ')
           ..write('localImagePath: $localImagePath')
           ..write(')'))
         .toString();
@@ -1270,6 +1363,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     recordedAt,
     isSynced,
     imageUrl,
+    imagePath,
     localImagePath,
   );
   @override
@@ -1282,6 +1376,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           other.recordedAt == this.recordedAt &&
           other.isSynced == this.isSynced &&
           other.imageUrl == this.imageUrl &&
+          other.imagePath == this.imagePath &&
           other.localImagePath == this.localImagePath);
 }
 
@@ -1292,6 +1387,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
   final Value<DateTime> recordedAt;
   final Value<bool> isSynced;
   final Value<String?> imageUrl;
+  final Value<String?> imagePath;
   final Value<String?> localImagePath;
   final Value<int> rowid;
   const WeightEntriesCompanion({
@@ -1301,6 +1397,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     this.recordedAt = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.imageUrl = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.localImagePath = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1311,6 +1408,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     required DateTime recordedAt,
     this.isSynced = const Value.absent(),
     this.imageUrl = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.localImagePath = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1324,6 +1422,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     Expression<DateTime>? recordedAt,
     Expression<bool>? isSynced,
     Expression<String>? imageUrl,
+    Expression<String>? imagePath,
     Expression<String>? localImagePath,
     Expression<int>? rowid,
   }) {
@@ -1334,6 +1433,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
       if (recordedAt != null) 'recorded_at': recordedAt,
       if (isSynced != null) 'is_synced': isSynced,
       if (imageUrl != null) 'image_url': imageUrl,
+      if (imagePath != null) 'image_path': imagePath,
       if (localImagePath != null) 'local_image_path': localImagePath,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1346,6 +1446,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     Value<DateTime>? recordedAt,
     Value<bool>? isSynced,
     Value<String?>? imageUrl,
+    Value<String?>? imagePath,
     Value<String?>? localImagePath,
     Value<int>? rowid,
   }) {
@@ -1356,6 +1457,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
       recordedAt: recordedAt ?? this.recordedAt,
       isSynced: isSynced ?? this.isSynced,
       imageUrl: imageUrl ?? this.imageUrl,
+      imagePath: imagePath ?? this.imagePath,
       localImagePath: localImagePath ?? this.localImagePath,
       rowid: rowid ?? this.rowid,
     );
@@ -1382,6 +1484,9 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     if (imageUrl.present) {
       map['image_url'] = Variable<String>(imageUrl.value);
     }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
     if (localImagePath.present) {
       map['local_image_path'] = Variable<String>(localImagePath.value);
     }
@@ -1400,6 +1505,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
           ..write('recordedAt: $recordedAt, ')
           ..write('isSynced: $isSynced, ')
           ..write('imageUrl: $imageUrl, ')
+          ..write('imagePath: $imagePath, ')
           ..write('localImagePath: $localImagePath, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -1857,6 +1963,7 @@ typedef $$LocalMealsTableCreateCompanionBuilder =
       Value<double> totalSatFat,
       Value<String> ingredientsJson,
       Value<String?> imageUrl,
+      Value<String?> imagePath,
       Value<String?> localImagePath,
       required DateTime createdAt,
       Value<bool> isSynced,
@@ -1877,6 +1984,7 @@ typedef $$LocalMealsTableUpdateCompanionBuilder =
       Value<double> totalSatFat,
       Value<String> ingredientsJson,
       Value<String?> imageUrl,
+      Value<String?> imagePath,
       Value<String?> localImagePath,
       Value<DateTime> createdAt,
       Value<bool> isSynced,
@@ -1950,6 +2058,11 @@ class $$LocalMealsTableFilterComposer
 
   ColumnFilters<String> get imageUrl => $composableBuilder(
     column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2043,6 +2156,11 @@ class $$LocalMealsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get localImagePath => $composableBuilder(
     column: $table.localImagePath,
     builder: (column) => ColumnOrderings(column),
@@ -2117,6 +2235,9 @@ class $$LocalMealsTableAnnotationComposer
   GeneratedColumn<String> get imageUrl =>
       $composableBuilder(column: $table.imageUrl, builder: (column) => column);
 
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
   GeneratedColumn<String> get localImagePath => $composableBuilder(
     column: $table.localImagePath,
     builder: (column) => column,
@@ -2175,6 +2296,7 @@ class $$LocalMealsTableTableManager
                 Value<double> totalSatFat = const Value.absent(),
                 Value<String> ingredientsJson = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 Value<String?> localImagePath = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
@@ -2193,6 +2315,7 @@ class $$LocalMealsTableTableManager
                 totalSatFat: totalSatFat,
                 ingredientsJson: ingredientsJson,
                 imageUrl: imageUrl,
+                imagePath: imagePath,
                 localImagePath: localImagePath,
                 createdAt: createdAt,
                 isSynced: isSynced,
@@ -2213,6 +2336,7 @@ class $$LocalMealsTableTableManager
                 Value<double> totalSatFat = const Value.absent(),
                 Value<String> ingredientsJson = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 Value<String?> localImagePath = const Value.absent(),
                 required DateTime createdAt,
                 Value<bool> isSynced = const Value.absent(),
@@ -2231,6 +2355,7 @@ class $$LocalMealsTableTableManager
                 totalSatFat: totalSatFat,
                 ingredientsJson: ingredientsJson,
                 imageUrl: imageUrl,
+                imagePath: imagePath,
                 localImagePath: localImagePath,
                 createdAt: createdAt,
                 isSynced: isSynced,
@@ -2276,6 +2401,7 @@ typedef $$WeightEntriesTableCreateCompanionBuilder =
       required DateTime recordedAt,
       Value<bool> isSynced,
       Value<String?> imageUrl,
+      Value<String?> imagePath,
       Value<String?> localImagePath,
       Value<int> rowid,
     });
@@ -2287,6 +2413,7 @@ typedef $$WeightEntriesTableUpdateCompanionBuilder =
       Value<DateTime> recordedAt,
       Value<bool> isSynced,
       Value<String?> imageUrl,
+      Value<String?> imagePath,
       Value<String?> localImagePath,
       Value<int> rowid,
     });
@@ -2327,6 +2454,11 @@ class $$WeightEntriesTableFilterComposer
 
   ColumnFilters<String> get imageUrl => $composableBuilder(
     column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2375,6 +2507,11 @@ class $$WeightEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get localImagePath => $composableBuilder(
     column: $table.localImagePath,
     builder: (column) => ColumnOrderings(column),
@@ -2409,6 +2546,9 @@ class $$WeightEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get imageUrl =>
       $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
 
   GeneratedColumn<String> get localImagePath => $composableBuilder(
     column: $table.localImagePath,
@@ -2453,6 +2593,7 @@ class $$WeightEntriesTableTableManager
                 Value<DateTime> recordedAt = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 Value<String?> localImagePath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => WeightEntriesCompanion(
@@ -2462,6 +2603,7 @@ class $$WeightEntriesTableTableManager
                 recordedAt: recordedAt,
                 isSynced: isSynced,
                 imageUrl: imageUrl,
+                imagePath: imagePath,
                 localImagePath: localImagePath,
                 rowid: rowid,
               ),
@@ -2473,6 +2615,7 @@ class $$WeightEntriesTableTableManager
                 required DateTime recordedAt,
                 Value<bool> isSynced = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 Value<String?> localImagePath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => WeightEntriesCompanion.insert(
@@ -2482,6 +2625,7 @@ class $$WeightEntriesTableTableManager
                 recordedAt: recordedAt,
                 isSynced: isSynced,
                 imageUrl: imageUrl,
+                imagePath: imagePath,
                 localImagePath: localImagePath,
                 rowid: rowid,
               ),

@@ -915,5 +915,10 @@
   "securityPrivacySectionTitle": "Privacy",
   "securityCloudAiConsentTitle": "Cloud AI analysis",
   "securityCloudAiConsentSubtitle": "Allow sending photos and messages to cloud AI services for analysis and coaching",
-  "securityPrivacyPolicyLinkLabel": "Read the privacy policy"
+  "securityPrivacyPolicyLinkLabel": "Read the privacy policy",
+  "securityDataExportTitle": "Export my data",
+  "securityDataExportSubtitle": "Download a JSON file with all your data (profile, meals, weight, chat history, etc.)",
+  "securityDataExportButton": "Export all my data",
+  "securityDataExportSuccess": "Export ready — choose where to save or share it.",
+  "securityDataExportError": "Export failed. Check your connection and try again."
 }

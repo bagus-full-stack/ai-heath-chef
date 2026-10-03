@@ -4159,6 +4159,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Lire la politique de confidentialité'**
   String get securityPrivacyPolicyLinkLabel;
+
+  /// No description provided for @securityDataExportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter mes données'**
+  String get securityDataExportTitle;
+
+  /// No description provided for @securityDataExportSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger un fichier JSON avec toutes tes données (profil, repas, poids, historique du chat, etc.)'**
+  String get securityDataExportSubtitle;
+
+  /// No description provided for @securityDataExportButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter toutes mes données'**
+  String get securityDataExportButton;
+
+  /// No description provided for @securityDataExportSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Export prêt — choisis où l\'enregistrer ou le partager.'**
+  String get securityDataExportSuccess;
+
+  /// No description provided for @securityDataExportError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec de l\'export. Vérifie ta connexion et réessaie.'**
+  String get securityDataExportError;
 }
 
 class _AppLocalizationsDelegate

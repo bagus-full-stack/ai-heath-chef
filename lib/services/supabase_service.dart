@@ -3,9 +3,12 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 import '../l10n/app_localizations.dart';
 import 'purchase_service.dart';
+
+const _uuid = Uuid();
 
 class AuthService {
   // On récupère l'instance de Supabase initialisée dans le main.dart
@@ -56,8 +59,8 @@ class AuthService {
 
   /// Crée ou met à jour le profil métier de l'utilisateur connecté.
   ///
-  /// [avatarUrl] est optionnel : s'il n'est pas fourni, la colonne
-  /// `avatar_url` n'est pas touchée (la photo précédemment uploadée via
+  /// [avatarPath] est optionnel : s'il n'est pas fourni, la colonne
+  /// `avatar_path` n'est pas touchée (la photo précédemment uploadée via
   /// [uploadAvatar] est conservée).
   Future<void> upsertProfile({
     String? fullName,
@@ -67,7 +70,7 @@ class AuthService {
     required double targetWeight,
     required double heightCm,
     required String goal,
-    String? avatarUrl,
+    String? avatarPath,
     DateTime? acceptedTermsAt,
     String? acceptedTermsVersion,
     String lang = 'fr',
@@ -93,7 +96,7 @@ class AuthService {
         'target_weight': targetWeight,
         'height_cm': heightCm,
         'goal': goal,
-        'avatar_url': ?avatarUrl,
+        'avatar_path': ?avatarPath,
         // Renseignés uniquement à l'inscription (voir signup_screen.dart) :
         // on ne doit pas écraser ces colonnes lors des mises à jour de profil
         // ultérieures (account_screen.dart, etc.) qui ne les fournissent pas.
@@ -144,15 +147,19 @@ class AuthService {
     }
   }
 
-  /// Compresse puis uploade une photo de profil vers le bucket Supabase
-  /// Storage `avatars`, et retourne son URL publique.
+  /// Compresse puis uploade une photo de profil vers le bucket Storage privé
+  /// `avatars`, et retourne son chemin (affiché via une URL signée, voir
+  /// StorageImageService).
   ///
-  /// Nécessite qu'un bucket public nommé "avatars" existe sur le projet
-  /// Supabase, avec une policy de storage autorisant chaque utilisateur à
-  /// écrire uniquement dans son propre dossier (`{user_id}/...`). Ce bucket
-  /// n'est pas créé automatiquement par ce code, voir le dashboard Supabase
-  /// > Storage.
-  Future<String> uploadAvatar(File imageFile, {String lang = 'fr'}) async {
+  /// Nom de fichier unique (uuid) à chaque upload plutôt que `avatar.jpg` :
+  /// sinon le cache mémoire de StorageImageService continuerait de servir
+  /// l'ancienne photo sous le même chemin. [previousPath], si fourni, est
+  /// supprimé du bucket une fois le nouvel upload terminé.
+  Future<String> uploadAvatar(
+    File imageFile, {
+    String? previousPath,
+    String lang = 'fr',
+  }) async {
     final l10n = lookupAppLocalizations(Locale(lang));
     final user = _supabase.auth.currentUser;
     if (user == null) {
@@ -170,17 +177,18 @@ class AuthService {
         throw Exception(l10n.svcErrorProcessImage);
       }
 
-      final path = '${user.id}/avatar.jpg';
+      final path = '${user.id}/${_uuid.v4()}.jpg';
       await _supabase.storage.from('avatars').uploadBinary(
             path,
             compressedBytes,
-            fileOptions: const FileOptions(upsert: true, contentType: 'image/jpeg'),
+            fileOptions: const FileOptions(contentType: 'image/jpeg'),
           );
 
-      final publicUrl = _supabase.storage.from('avatars').getPublicUrl(path);
-      // On ajoute un paramètre de cache-busting pour que l'app affiche
-      // immédiatement la nouvelle image plutôt qu'une version mise en cache.
-      return '$publicUrl?updated=${DateTime.now().millisecondsSinceEpoch}';
+      if (previousPath != null) {
+        await _supabase.storage.from('avatars').remove([previousPath]);
+      }
+
+      return path;
     } catch (e) {
       throw Exception(l10n.svcErrorUploadPhoto(e.toString()));
     }

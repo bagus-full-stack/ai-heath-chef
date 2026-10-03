@@ -12,7 +12,7 @@ class UserProfile {
   final double targetWeight;
   final double heightCm;
   final String goal;
-  final String? avatarUrl;
+  final String? avatarPath;
   final String dietType;
   final List<String> allergies;
   final String cuisinePreference;
@@ -30,7 +30,7 @@ class UserProfile {
     required this.targetWeight,
     this.heightCm = 0,
     required this.goal,
-    this.avatarUrl,
+    this.avatarPath,
     this.dietType = 'none',
     this.allergies = const [],
     this.cuisinePreference = 'none',
@@ -50,7 +50,7 @@ class UserProfile {
       targetWeight: (json['target_weight'] as num?)?.toDouble() ?? 0,
       heightCm: (json['height_cm'] as num?)?.toDouble() ?? 0,
       goal: (json['goal'] as String?) ?? 'maintain',
-      avatarUrl: json['avatar_url'] as String?,
+      avatarPath: json['avatar_path'] as String?,
       dietType: (json['diet_type'] as String?) ?? 'none',
       allergies: (json['allergies'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [],
       cuisinePreference: (json['cuisine_preference'] as String?) ?? 'none',

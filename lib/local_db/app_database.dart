@@ -25,13 +25,20 @@ class LocalMeals extends Table {
   /// jsonb `ingredients` côté Supabase).
   TextColumn get ingredientsJson => text().withDefault(const Constant('[]'))();
 
-  /// URL publique une fois la photo uploadée vers Supabase Storage. Null
-  /// tant que l'upload n'a pas eu lieu (ou si le repas n'a pas de photo).
+  /// URL publique une fois la photo uploadée vers Supabase Storage. Legacy :
+  /// plus jamais écrite depuis la migration 0020 (bucket meal_photos passé
+  /// en privé) — remplacée par [imagePath]. Conservée en lecture pour ne pas
+  /// perdre les lignes déjà synchronisées avant cette migration.
   TextColumn get imageUrl => text().nullable()();
 
+  /// Chemin de la photo dans le bucket Storage privé meal_photos
+  /// (`{user_id}/{meal_id}.jpg`), une fois uploadée. Affichée via une URL
+  /// signée (voir StorageImageService) plutôt que [imageUrl].
+  TextColumn get imagePath => text().nullable()();
+
   /// Chemin du fichier photo compressé sur le disque local, en attente
-  /// d'upload. Distinct de [imageUrl] : permet d'afficher la photo
-  /// immédiatement même hors ligne, avant toute synchronisation.
+  /// d'upload. Distinct de [imageUrl]/[imagePath] : permet d'afficher la
+  /// photo immédiatement même hors ligne, avant toute synchronisation.
   TextColumn get localImagePath => text().nullable()();
 
   DateTimeColumn get createdAt => dateTime()();
@@ -65,9 +72,12 @@ class WeightEntries extends Table {
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 
   /// URL publique une fois la photo de progression uploadée vers Supabase
-  /// Storage. Null tant que l'upload n'a pas eu lieu (ou si la pesée n'a pas
-  /// de photo) — voir [LocalMeals.imageUrl].
+  /// Storage. Legacy, voir [LocalMeals.imageUrl] — remplacée par [imagePath].
   TextColumn get imageUrl => text().nullable()();
+
+  /// Chemin de la photo dans le bucket Storage privé weight_photos — voir
+  /// [LocalMeals.imagePath].
+  TextColumn get imagePath => text().nullable()();
 
   /// Chemin du fichier photo compressé sur le disque local, en attente
   /// d'upload — voir [LocalMeals.localImagePath].
@@ -102,7 +112,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -115,7 +125,7 @@ class AppDatabase extends _$AppDatabase {
           // `createTable` always uses the table's *current* Dart definition,
           // not the one from the version it historically corresponds to. So a
           // table created here in the same pass (e.g. a user jumping straight
-          // from v1 to v6) already has every column added by later branches
+          // from v1 to v7) already has every column added by later branches
           // below — adding them again would fail with "duplicate column".
           if (from < 3) {
             await m.createTable(weightEntries);
@@ -127,12 +137,20 @@ class AppDatabase extends _$AppDatabase {
               await m.addColumn(weightEntries, weightEntries.imageUrl);
               await m.addColumn(weightEntries, weightEntries.localImagePath);
             }
+            if (from < 7) {
+              await m.addColumn(weightEntries, weightEntries.imagePath);
+            }
           }
           if (from < 4) {
             await m.createTable(hydrationEntries);
           } else if (from < 5) {
             await m.addColumn(hydrationEntries, hydrationEntries.isSynced);
             await m.addColumn(hydrationEntries, hydrationEntries.isDeleted);
+          }
+          // localMeals existe depuis v1 (jamais créée par cette fonction) :
+          // pas de branche "else", on ajoute juste la colonne si elle manque.
+          if (from < 7) {
+            await m.addColumn(localMeals, localMeals.imagePath);
           }
         },
       );

@@ -2376,4 +2376,22 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get securityPrivacyPolicyLinkLabel =>
       'Lire la politique de confidentialité';
+
+  @override
+  String get securityDataExportTitle => 'Exporter mes données';
+
+  @override
+  String get securityDataExportSubtitle =>
+      'Télécharger un fichier JSON avec toutes tes données (profil, repas, poids, historique du chat, etc.)';
+
+  @override
+  String get securityDataExportButton => 'Exporter toutes mes données';
+
+  @override
+  String get securityDataExportSuccess =>
+      'Export prêt — choisis où l\'enregistrer ou le partager.';
+
+  @override
+  String get securityDataExportError =>
+      'Échec de l\'export. Vérifie ta connexion et réessaie.';
 }

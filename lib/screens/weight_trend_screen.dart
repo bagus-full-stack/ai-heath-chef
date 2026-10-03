@@ -13,6 +13,7 @@ import '../providers/auth_provider.dart';
 import '../providers/custom_reminders_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/profile_provider.dart';
+import '../widgets/storage_image.dart';
 
 const _primaryColor = Color(0xFF6B66FF);
 
@@ -144,7 +145,7 @@ class WeightTrendScreen extends ConsumerWidget {
             targetWeight: profile.targetWeight,
             heightCm: profile.heightCm,
             goal: profile.goal,
-            avatarUrl: profile.avatarUrl,
+            avatarPath: profile.avatarPath,
           );
     }
 
@@ -246,7 +247,7 @@ class WeightTrendScreen extends ConsumerWidget {
                     ),
                     child: _WeightChart(entries: entries, targetWeight: targetWeight),
                   ),
-                if (entries.any((e) => e.localImagePath != null || e.imageUrl != null)) ...[
+                if (entries.any((e) => e.localImagePath != null || e.imagePath != null)) ...[
                   const SizedBox(height: 24),
                   Text(
                     context.l10n.weightTrendProgressPhotosTitle,
@@ -320,8 +321,8 @@ class _StatCard extends StatelessWidget {
 
 /// Galerie horizontale des pesées avec photo, de la plus récente à la plus
 /// ancienne — [WeightEntry.localImagePath] sert de source immédiate (dispo
-/// hors ligne, avant upload), [WeightEntry.imageUrl] prend le relais une fois
-/// synchronisé.
+/// hors ligne, avant upload), [WeightEntry.imagePath] (résolu en URL signée
+/// via [StorageImage]) prend le relais une fois synchronisé.
 class _ProgressPhotoGallery extends StatelessWidget {
   final List<WeightEntry> entries;
   const _ProgressPhotoGallery({required this.entries});
@@ -329,7 +330,7 @@ class _ProgressPhotoGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final withPhoto =
-        entries.where((e) => e.localImagePath != null || e.imageUrl != null).toList().reversed.toList();
+        entries.where((e) => e.localImagePath != null || e.imagePath != null).toList().reversed.toList();
 
     return SizedBox(
       height: 96,
@@ -341,13 +342,23 @@ class _ProgressPhotoGallery extends StatelessWidget {
           final entry = withPhoto[i];
           final image = entry.localImagePath != null
               ? Image.file(File(entry.localImagePath!), width: 80, height: 80, fit: BoxFit.cover)
-              : Image.network(
-                  entry.imageUrl!,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+              : StorageImage(
+                  bucket: 'weight_photos',
+                  path: entry.imagePath,
+                  builder: (context, snapshot) => snapshot.data != null
+                      ? Image.network(
+                          snapshot.data!,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                        )
+                      : const SizedBox(
+                          width: 80,
+                          height: 80,
+                          child: Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                        ),
                 );
 
           return Column(

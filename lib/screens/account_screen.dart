@@ -10,9 +10,11 @@ import '../models/user_profile.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 import '../providers/profile_provider.dart';
+import '../providers/storage_image_provider.dart';
 import '../utils/age_policy.dart';
 import '../utils/bmi.dart';
 import '../widgets/animated_async_value.dart';
+import '../widgets/storage_image.dart';
 
 /// Écran d'édition du profil (identité + objectifs), ouvert depuis "Compte"
 /// et "Mes objectifs" dans lib/screens/profile_screen.dart.
@@ -34,7 +36,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
   OnboardingSex _sex = OnboardingSex.other;
   OnboardingGoal _goal = OnboardingGoal.maintain;
-  String? _avatarUrl;
+  String? _avatarPath;
   bool _isSaving = false;
   bool _isUploadingAvatar = false;
   bool _prefilled = false;
@@ -69,7 +71,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       (g) => g.name == profile.goal,
       orElse: () => OnboardingGoal.maintain,
     );
-    _avatarUrl = profile.avatarUrl;
+    _avatarPath = profile.avatarPath;
   }
 
   Future<void> _changeAvatar() async {
@@ -110,7 +112,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final lang = Localizations.localeOf(context).languageCode;
     try {
       final authService = ref.read(authServiceProvider);
-      final url = await authService.uploadAvatar(File(picked.path), lang: lang);
+      final previousPath = _avatarPath;
+      final path = await authService.uploadAvatar(
+        File(picked.path),
+        previousPath: previousPath,
+        lang: lang,
+      );
 
       final age = int.tryParse(_ageController.text.trim());
       final currentWeight =
@@ -128,16 +135,20 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           targetWeight: targetWeight,
           heightCm: height,
           goal: _goal.name,
-          avatarUrl: url,
+          avatarPath: path,
           lang: lang,
         );
         ref.invalidate(profileProvider);
       }
 
+      if (previousPath != null) {
+        ref.read(storageImageServiceProvider).invalidate('avatars', previousPath);
+      }
+
       if (!mounted) {
         return;
       }
-      setState(() => _avatarUrl = url);
+      setState(() => _avatarPath = path);
     } catch (e) {
       _showError(e.toString());
     } finally {
@@ -212,7 +223,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             targetWeight: targetWeight,
             heightCm: height,
             goal: _goal.name,
-            avatarUrl: _avatarUrl,
+            avatarPath: _avatarPath,
             lang: Localizations.localeOf(context).languageCode,
           );
       ref.invalidate(profileProvider);
@@ -280,13 +291,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        CircleAvatar(
-                          radius: 48,
-                          backgroundColor: Colors.grey.shade200,
-                          backgroundImage: _avatarUrl != null ? NetworkImage(_avatarUrl!) : null,
-                          child: _avatarUrl == null
-                              ? Icon(Icons.person, size: 48, color: Colors.grey.shade500)
-                              : null,
+                        StorageImage(
+                          bucket: 'avatars',
+                          path: _avatarPath,
+                          builder: (context, snapshot) => CircleAvatar(
+                            radius: 48,
+                            backgroundColor: Colors.grey.shade200,
+                            backgroundImage: snapshot.data != null
+                                ? NetworkImage(snapshot.data!)
+                                : null,
+                            child: snapshot.data == null
+                                ? Icon(Icons.person, size: 48, color: Colors.grey.shade500)
+                                : null,
+                          ),
                         ),
                         Positioned(
                           right: -4,

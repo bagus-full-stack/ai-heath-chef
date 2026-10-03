@@ -7,7 +7,9 @@ Brouillon technique, à cocher/compléter avant soumission. Pas une garantie de 
 - [ ] `docs/PRIVACY_POLICY_DRAFT.md` relu, validé (juridiquement si besoin), hébergé sur une **URL publique** (site web, GitHub Pages, ou page dédiée) — Play et Apple exigent un lien web, pas juste un écran in-app.
 - [ ] `lib/screens/privacy_screen.dart` lié depuis Profil, Aide, et l'écran d'inscription (fait dans cette tâche, voir code).
 - [ ] Suppression de compte : in-app **et** via une URL web (exigence Play Console depuis 2023 pour toute app proposant un compte supprimable) — actuellement seulement in-app (`/delete_account`), **URL web à créer**.
-- [ ] Corriger le bug `chat_images` manquant dans `delete-account/index.ts` (voir `docs/PRIVACY_POLICY_DRAFT.md` section 9) avant publication, pour que la suppression soit réellement complète.
+- [x] Corriger le bug `chat_images` manquant dans `delete-account` (voir `docs/PRIVACY_POLICY_DRAFT.md` section 9) — corrigé, `storage_buckets_test.ts` garde contre une régression future.
+- [x] Passer les buckets Storage `avatars`, `meal_photos`, `weight_photos` en privé (voir `docs/PRIVACY_POLICY_DRAFT.md` section 10) — corrigé, migration `0020_private_photo_buckets.sql` + accès par URL signée temporaire.
+- [x] Export complet des données (droit d'accès/portabilité, voir `docs/PRIVACY_POLICY_DRAFT.md` section 11) — ajouté, bouton Profil > Sécurité, `lib/services/data_export_service.dart`.
 - [ ] Âge minimum (16 ans) déclaré cohérent avec la classification de contenu du store (PEGI/rating).
 
 ## Permissions déclarées

@@ -1333,5 +1333,10 @@
   "securityPrivacySectionTitle": "Confidentialité",
   "securityCloudAiConsentTitle": "Analyse par IA cloud",
   "securityCloudAiConsentSubtitle": "Autoriser l'envoi de photos et de messages à des services d'IA cloud pour analyse et coaching",
-  "securityPrivacyPolicyLinkLabel": "Lire la politique de confidentialité"
+  "securityPrivacyPolicyLinkLabel": "Lire la politique de confidentialité",
+  "securityDataExportTitle": "Exporter mes données",
+  "securityDataExportSubtitle": "Télécharger un fichier JSON avec toutes tes données (profil, repas, poids, historique du chat, etc.)",
+  "securityDataExportButton": "Exporter toutes mes données",
+  "securityDataExportSuccess": "Export prêt — choisis où l'enregistrer ou le partager.",
+  "securityDataExportError": "Échec de l'export. Vérifie ta connexion et réessaie."
 }

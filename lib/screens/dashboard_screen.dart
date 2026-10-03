@@ -17,6 +17,7 @@ import '../utils/bmi.dart';
 import '../utils/nutrition_targets.dart';
 import '../utils/streak.dart';
 import '../widgets/animated_async_value.dart';
+import '../widgets/storage_image.dart';
 import '../l10n/l10n_extensions.dart';
 
 const _kLastCelebratedStreakMilestoneKey =
@@ -145,15 +146,19 @@ class DashboardScreen extends ConsumerWidget {
               child: profileAsync.maybeWhen(
                 data: (profile) => AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  child: CircleAvatar(
-                    key: ValueKey(profile?.avatarUrl ?? 'no-avatar'),
-                    backgroundColor: const Color(0xFFEEEEEE),
-                    backgroundImage: profile?.avatarUrl != null
-                        ? NetworkImage(profile!.avatarUrl!)
-                        : null,
-                    child: profile?.avatarUrl == null
-                        ? const Icon(Icons.person, color: Colors.grey)
-                        : null,
+                  child: StorageImage(
+                    key: ValueKey(profile?.avatarPath ?? 'no-avatar'),
+                    bucket: 'avatars',
+                    path: profile?.avatarPath,
+                    builder: (context, snapshot) => CircleAvatar(
+                      backgroundColor: const Color(0xFFEEEEEE),
+                      backgroundImage: snapshot.data != null
+                          ? NetworkImage(snapshot.data!)
+                          : null,
+                      child: snapshot.data == null
+                          ? const Icon(Icons.person, color: Colors.grey)
+                          : null,
+                    ),
                   ),
                 ),
                 orElse: () => const CircleAvatar(
@@ -486,6 +491,7 @@ class DashboardScreen extends ConsumerWidget {
                                     meal.totalKcal,
                                   ),
                                   meal.imageUrl,
+                                  meal.imagePath,
                                   () async {
                                     await ref
                                         .read(mealRepositoryProvider)
@@ -795,6 +801,7 @@ class DashboardScreen extends ConsumerWidget {
     String time,
     String calories,
     String? imageUrl,
+    String? imagePath,
     VoidCallback onRepeat,
   ) {
     return Container(
@@ -820,21 +827,25 @@ class DashboardScreen extends ConsumerWidget {
               width: 60,
               height: 60,
               color: Colors.grey.shade200,
-              child: imageUrl != null
-                  ? (imageUrl.startsWith(localImagePrefix)
-                        ? Image.file(
-                            File(imageUrl.substring(localImagePrefix.length)),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.fastfood, color: Colors.grey),
-                          )
-                        : Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.fastfood, color: Colors.grey),
-                          ))
-                  : const Icon(Icons.fastfood, color: Colors.grey),
+              child: imageUrl != null && imageUrl.startsWith(localImagePrefix)
+                  ? Image.file(
+                      File(imageUrl.substring(localImagePrefix.length)),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.fastfood, color: Colors.grey),
+                    )
+                  : StorageImage(
+                      bucket: 'meal_photos',
+                      path: imagePath,
+                      builder: (context, snapshot) => snapshot.data != null
+                          ? Image.network(
+                              snapshot.data!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.fastfood, color: Colors.grey),
+                            )
+                          : const Icon(Icons.fastfood, color: Colors.grey),
+                    ),
             ),
           ),
           const SizedBox(width: 16),

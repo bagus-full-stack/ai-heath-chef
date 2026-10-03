@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +9,9 @@ import 'package:share_plus/share_plus.dart';
 
 import '../local_db/local_db_provider.dart';
 import '../providers/profile_provider.dart';
+import '../providers/storage_image_provider.dart';
 import '../providers/weekly_meal_plan_provider.dart';
+import '../services/data_export_service.dart';
 import 'daily_nutrition_summary.dart';
 import 'ics_export.dart';
 import 'nutrition_targets.dart';
@@ -252,6 +255,26 @@ Future<void> exportWeeklyMealPlanIcs(WidgetRef ref) async {
   await file.writeAsString(ics);
 
   await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: 'Plan de repas de la semaine'));
+}
+
+/// Exporte toutes les données personnelles de l'utilisateur (profil, repas,
+/// poids, hydratation, chat, plans de repas, préférences — voir
+/// [DataExportService]) en un unique JSON et ouvre le sélecteur de partage
+/// natif. Droit d'accès/portabilité RGPD, voir
+/// docs/PRIVACY_POLICY_DRAFT.md section 7.
+Future<void> exportAllUserData(WidgetRef ref) async {
+  final service = DataExportService(
+    ref.read(appDatabaseProvider),
+    null,
+    ref.read(storageImageServiceProvider),
+  );
+  final export = await service.buildExport();
+
+  final dir = await getTemporaryDirectory();
+  final file = File('${dir.path}/export_donnees.json');
+  await file.writeAsString(jsonEncode(export));
+
+  await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: 'Export de mes données'));
 }
 
 String _csvEscape(String value) {

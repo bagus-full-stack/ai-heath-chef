@@ -15,6 +15,7 @@ import '../widgets/animated_async_value.dart';
 import '../widgets/cloud_ai_consent_gate.dart';
 import '../widgets/meal_suggestion_card.dart';
 import '../widgets/staggered_entrance.dart';
+import '../widgets/storage_image.dart';
 
 const Color kCoachPrimaryColor = Color(0xFF6B66FF);
 
@@ -214,8 +215,8 @@ class _Header extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(profileProvider);
-    final avatarUrl = profileAsync.maybeWhen(
-      data: (profile) => profile?.avatarUrl,
+    final avatarPath = profileAsync.maybeWhen(
+      data: (profile) => profile?.avatarPath,
       orElse: () => null,
     );
 
@@ -244,15 +245,19 @@ class _Header extends ConsumerWidget {
         Stack(
           clipBehavior: Clip.none,
           children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: Colors.grey.shade200,
-              backgroundImage: avatarUrl != null
-                  ? NetworkImage(avatarUrl)
-                  : null,
-              child: avatarUrl == null
-                  ? Icon(Icons.person, color: Colors.grey.shade500, size: 20)
-                  : null,
+            StorageImage(
+              bucket: 'avatars',
+              path: avatarPath,
+              builder: (context, snapshot) => CircleAvatar(
+                radius: 18,
+                backgroundColor: Colors.grey.shade200,
+                backgroundImage: snapshot.data != null
+                    ? NetworkImage(snapshot.data!)
+                    : null,
+                child: snapshot.data == null
+                    ? Icon(Icons.person, color: Colors.grey.shade500, size: 20)
+                    : null,
+              ),
             ),
             Positioned(
               right: -1,

@@ -77,9 +77,9 @@ class WeightRepository {
 
     for (final row in pending) {
       try {
-        var imageUrl = row.imageUrl;
-        if (imageUrl == null && row.localImagePath != null) {
-          imageUrl = await _uploadPhoto(user.id, row.id, row.localImagePath!);
+        var imagePath = row.imagePath;
+        if (imagePath == null && row.localImagePath != null) {
+          imagePath = await _uploadPhoto(user.id, row.id, row.localImagePath!);
         }
 
         await _supabase.from('weight_entries').upsert({
@@ -87,10 +87,10 @@ class WeightRepository {
           'user_id': row.userId,
           'weight_kg': row.weightKg,
           'recorded_at': row.recordedAt.toUtc().toIso8601String(),
-          'image_url': imageUrl,
+          'image_path': imagePath,
         });
         await (_db.update(_db.weightEntries)..where((w) => w.id.equals(row.id)))
-            .write(WeightEntriesCompanion(isSynced: const Value(true), imageUrl: Value(imageUrl)));
+            .write(WeightEntriesCompanion(isSynced: const Value(true), imagePath: Value(imagePath)));
       } catch (_) {
         // Réessayé au prochain appel (voir main.dart : démarrage + retour réseau).
       }
@@ -112,7 +112,7 @@ class WeightRepository {
                 weightKg: (row['weight_kg'] as num).toDouble(),
                 recordedAt: DateTime.parse(row['recorded_at'] as String),
                 isSynced: const Value(true),
-                imageUrl: Value(row['image_url'] as String?),
+                imagePath: Value(row['image_path'] as String?),
               ),
               mode: InsertMode.insertOrIgnore,
             );
@@ -131,6 +131,6 @@ class WeightRepository {
           bytes,
           fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
         );
-    return _supabase.storage.from('weight_photos').getPublicUrl(storagePath);
+    return storagePath;
   }
 }

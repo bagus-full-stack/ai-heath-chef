@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "jsr:@supabase/supabase-js@2"
+import { STORAGE_BUCKETS } from "./storage_buckets.ts"
 
 // 1. Headers CORS complets
 const corsHeaders = {
@@ -7,15 +8,6 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Buckets contenant des fichiers par utilisateur (dossier `{user_id}/...`,
-// voir policies de storage.objects dans 0001/0006/0012). Les lignes des
-// tables Postgres (profiles, meals, chat_messages, meal_suggestions,
-// weight_entries, hydration_entries, custom_reminders_backup,
-// weekly_meal_plans, api_usage) ont TOUTES un `on delete cascade` vers
-// auth.users : elles sont supprimées automatiquement par
-// `auth.admin.deleteUser` ci-dessous, sans DELETE explicite. Seul le
-// Storage (aucune relation FK avec auth.users) doit être nettoyé à la main.
-const STORAGE_BUCKETS = ["avatars", "meal_photos", "weight_photos"];
 const STORAGE_LIST_PAGE_SIZE = 1000;
 
 const RATE_LIMIT_MAX_ATTEMPTS = 3;
