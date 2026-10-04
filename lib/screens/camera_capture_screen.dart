@@ -263,6 +263,21 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
     );
   }
 
+  // Modes qui restent sur cet écran (scanner/manuel ouvrent un autre écran,
+  // voir _selectMode) : seuls ceux-ci peuvent être atteints par glissement.
+  static const _swipeModes = [
+    _CaptureMode.repas,
+    _CaptureMode.produit,
+    _CaptureMode.menu,
+    _CaptureMode.frigo,
+  ];
+
+  void _cycleMode(int delta) {
+    final i = _swipeModes.indexOf(_mode);
+    if (i == -1) return;
+    _selectMode(_swipeModes[(i + delta) % _swipeModes.length]);
+  }
+
   void _selectMode(_CaptureMode mode) {
     // Le scan de code-barres et la saisie manuelle utilisent leur propre
     // écran (le premier a besoin de sa propre caméra dédiée mobile_scanner,
@@ -466,7 +481,16 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                           ],
                         ),
                         const SizedBox(height: 18),
-                        PopupMenuButton<_CaptureMode>(
+                        GestureDetector(
+                          onHorizontalDragEnd: (details) {
+                            final v = details.primaryVelocity ?? 0;
+                            if (v < -200) {
+                              _cycleMode(1);
+                            } else if (v > 200) {
+                              _cycleMode(-1);
+                            }
+                          },
+                          child: PopupMenuButton<_CaptureMode>(
                           color: const Color(0xFF1B1B26),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -514,6 +538,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                               ],
                             ),
                           ),
+                        ),
                         ),
                       ],
                     ),
