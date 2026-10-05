@@ -245,8 +245,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                     // code-barres. En saisie manuelle, une liste vide est le
                     // point de départ normal (l'utilisateur ajoute via le
                     // bouton "Ajouter un ingrédient" ci-dessous).
-                    if (ingredients.isEmpty && !_isManualFlow)
+                    if (ingredients.isEmpty && !_isManualFlow) {
                       return const SizedBox.shrink();
+                    }
 
                     // Calculs totaux
                     final totalKcal = ingredients.fold<int>(
@@ -547,8 +548,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                       );
 
                                       // On ferme le dialogue de chargement
-                                      if (context.mounted)
+                                      if (context.mounted) {
                                         Navigator.pop(context);
+                                      }
 
                                       // On retourne au Dashboard !
                                       if (context.mounted) {
@@ -567,10 +569,11 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                         context.go('/dashboard');
                                       }
                                     } catch (e) {
-                                      if (context.mounted)
+                                      if (context.mounted) {
                                         Navigator.pop(
                                           context,
                                         ); // Fermer le loader
+                                      }
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(
                                           context,

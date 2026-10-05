@@ -20,6 +20,9 @@ jobs:
       - name: Récupération des dépendances
         run: flutter pub get
 
+      - name: Création du .env (asset requis, non commité)
+        run: cp .env.example .env
+
       - name: Analyse statique
         run: flutter analyze
 

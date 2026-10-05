@@ -200,8 +200,8 @@ class AIService {
           'allergies': allergies,
           'cuisinePreference': cuisinePreference,
           'count': count,
-          if (days != null) 'days': days,
-          if (mealsPerDay != null) 'mealsPerDay': mealsPerDay,
+          'days': ?days,
+          'mealsPerDay': ?mealsPerDay,
           if (availableIngredients != null && availableIngredients.isNotEmpty)
             'availableIngredients': availableIngredients,
           'lang': lang,
