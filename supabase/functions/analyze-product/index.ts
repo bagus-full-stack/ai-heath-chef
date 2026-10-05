@@ -135,12 +135,12 @@ ${langInstruction}`;
 
         console.log(`SUCCÈS : Analyse produit générée avec ${usedModel}`);
 
-        let jsonString = successData.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const jsonString = successData.replace(/```json/gi, '').replace(/```/g, '').trim();
 
         let parsedJson;
         try {
             parsedJson = JSON.parse(jsonString);
-        } catch (e) {
+        } catch {
             throw new Error(
                 isEn
                     ? `The model replied with invalid JSON: ${jsonString}`
@@ -154,9 +154,10 @@ ${langInstruction}`;
         })
 
     } catch (error) {
-        console.error("Erreur fatale Edge Function (Analyze Product):", error.message);
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("Erreur fatale Edge Function (Analyze Product):", message);
 
-        return new Response(JSON.stringify({ error: error.message }), {
+        return new Response(JSON.stringify({ error: message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: error instanceof HttpError ? error.status : 400,
         })

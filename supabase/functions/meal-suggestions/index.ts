@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
             : 3;
         const suggestionCount = isWeeklyPlan
             ? Math.min((days as number) * weeklyMealsPerDay, 35)
-            : (Number.isFinite(count) && count > 0 ? Math.min(count, 10) : 6);
+            : (Number.isFinite(count) && (count as number) > 0 ? Math.min(count as number, 10) : 6);
         const goalLabel = GOAL_LABELS[goal as string] ?? GOAL_LABELS.maintain;
         const dietLabel = DIET_LABELS[dietType as string];
         const cuisineLabel = CUISINE_LABELS[cuisinePreference as string];
@@ -212,7 +212,7 @@ ${langInstruction}`;
         let parsedJson;
         try {
             parsedJson = JSON.parse(jsonString);
-        } catch (e) {
+        } catch {
             throw new Error(
                 isEn
                     ? `The model replied with invalid JSON: ${jsonString}`
@@ -226,9 +226,10 @@ ${langInstruction}`;
         })
 
     } catch (error) {
-        console.error("Erreur fatale Edge Function (Meal Suggestions):", error.message);
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("Erreur fatale Edge Function (Meal Suggestions):", message);
 
-        return new Response(JSON.stringify({ error: error.message }), {
+        return new Response(JSON.stringify({ error: message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400,
         })

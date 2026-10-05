@@ -25,7 +25,7 @@ function jsonResponse(body: unknown) {
 /** `rpcResults` associe un nom de RPC (increment_api_usage, increment_global_api_usage) à la valeur booléenne qu'il doit renvoyer. */
 function stubFetch(options: { authOk: boolean; isAdmin?: boolean; rpcResults?: Record<string, boolean> }) {
     const original = globalThis.fetch;
-    globalThis.fetch = ((input: Request | string | URL, init?: RequestInit) => {
+    globalThis.fetch = ((input: Request | string | URL, _init?: RequestInit) => {
         const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
 
         if (url.includes("/auth/v1/user")) {

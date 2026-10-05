@@ -349,7 +349,8 @@ Deno.serve(async (req) => {
             status: 200,
         });
     } catch (error) {
-        console.error("Erreur fatale Edge Function (Meal Images):", (error as Error).message);
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("Erreur fatale Edge Function (Meal Images):", message);
         return new Response(JSON.stringify({ error: isEn ? "Image generation temporarily failed. Please try again later." : "La génération d'images a temporairement échoué. Réessaie plus tard." }), {
             headers: jsonHeaders,
             status: 400,

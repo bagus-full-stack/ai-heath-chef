@@ -76,8 +76,9 @@ Deno.serve(async (req) => {
             headers: jsonHeaders,
         });
     } catch (error) {
-        console.error("Erreur fatale Edge Function (Hugging Face Token):", (error as Error).message);
-        return new Response(JSON.stringify({ error: (error as Error).message }), {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("Erreur fatale Edge Function (Hugging Face Token):", message);
+        return new Response(JSON.stringify({ error: message }), {
             status: 400,
             headers: jsonHeaders,
         });
