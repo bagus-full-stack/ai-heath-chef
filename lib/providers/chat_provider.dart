@@ -26,6 +26,11 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
   bool _hasMoreHistory = true;
   bool _isLoadingOlder = false;
 
+  // Incrémenté à chaque resetConversation : permet à un sendMessage en vol
+  // de détecter qu'il a été réinitialisé pendant l'appel réseau et d'annuler
+  // son écriture tardive plutôt que de ressusciter un message supprimé.
+  int _conversationGeneration = 0;
+
   bool get hasMoreHistory => _hasMoreHistory;
   bool get isLoadingOlder => _isLoadingOlder;
 
@@ -175,6 +180,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
       return;
     }
 
+    final generation = _conversationGeneration;
     final currentMessages = state.value ?? const <ChatMessage>[];
     final historyForGemini = currentMessages
         .where((entry) => entry.text != _welcomeText)
@@ -202,18 +208,31 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     // donc pas d'illustration pour les réponses générées hors-ligne.
     String? suggestedDish;
     final localSettings = ref.read(localAiSettingsProvider).value;
-    if (localSettings?.isReadyToUse == true) {
-      try {
-        final local = ref.read(localAiServiceProvider);
-        aiReplyText = await local.chatWithCoach(
-          trimmed,
-          geminiHistory,
-          coachTone: coachTone,
-          dietType: dietType,
-          allergies: allergies,
-          lang: lang,
-        );
-      } catch (_) {
+    try {
+      if (localSettings?.isReadyToUse == true) {
+        try {
+          final local = ref.read(localAiServiceProvider);
+          aiReplyText = await local.chatWithCoach(
+            trimmed,
+            geminiHistory,
+            coachTone: coachTone,
+            dietType: dietType,
+            allergies: allergies,
+            lang: lang,
+          );
+        } catch (_) {
+          final cloudReply = await _aiService.chatWithCoach(
+            trimmed,
+            geminiHistory,
+            coachTone: coachTone,
+            dietType: dietType,
+            allergies: allergies,
+            lang: lang,
+          );
+          aiReplyText = cloudReply.reply;
+          suggestedDish = cloudReply.suggestedDish;
+        }
+      } else {
         final cloudReply = await _aiService.chatWithCoach(
           trimmed,
           geminiHistory,
@@ -225,17 +244,20 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
         aiReplyText = cloudReply.reply;
         suggestedDish = cloudReply.suggestedDish;
       }
-    } else {
-      final cloudReply = await _aiService.chatWithCoach(
-        trimmed,
-        geminiHistory,
-        coachTone: coachTone,
-        dietType: dietType,
-        allergies: allergies,
-        lang: lang,
-      );
-      aiReplyText = cloudReply.reply;
-      suggestedDish = cloudReply.suggestedDish;
+    } catch (e) {
+      // Local ET cloud ont échoué (quota épuisé, réseau, tous les modèles
+      // Gemini en échec...) : on affiche l'erreur comme réponse du coach
+      // plutôt que de laisser l'exception remonter sans réponse visible
+      // (voir chat_provider.dart historique : sendMessage n'avait aucun
+      // catch englobant avant ce correctif).
+      aiReplyText = e.toString().replaceAll('Exception: ', '');
+      suggestedDish = null;
+    }
+
+    if (generation != _conversationGeneration) {
+      // Conversation réinitialisée pendant l'appel réseau : ne pas
+      // ressusciter ce message dans l'état ni en base après le reset.
+      return;
     }
 
     String? imagePath;
@@ -260,6 +282,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
   }
 
   Future<void> resetConversation() async {
+    _conversationGeneration++;
     final user = _supabase.auth.currentUser;
     if (user != null) {
       await _supabase.from('chat_messages').delete().eq('user_id', user.id);
