@@ -129,7 +129,10 @@ class WeightTrendScreen extends ConsumerWidget {
         );
       },
     );
-    controller.dispose();
+    // Pas de controller.dispose() ici : la sheet peut encore être en
+    // animation de fermeture quand ce Future se résout, et le TextField
+    // serait reconstruit avec un controller déjà disposed (crash). Le
+    // controller est local à cet appel et sera simplement garbage-collected.
     if (result == null || !context.mounted) return;
     final (weight, capturedPhotoPath) = result;
 
