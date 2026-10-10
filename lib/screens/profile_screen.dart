@@ -658,7 +658,9 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Container(
         width: 44,
@@ -706,6 +708,7 @@ class _SettingsTile extends StatelessWidget {
         ],
       ),
       onTap: item.onTap,
+      ),
     );
   }
 }
