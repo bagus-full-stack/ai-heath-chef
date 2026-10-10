@@ -86,7 +86,9 @@ class CoachScreen extends ConsumerWidget {
               sliver: SliverToBoxAdapter(child: _MealSuggestionsRow()),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+              // 100 = dégage la hauteur du FAB flottant + sa marge, pour
+              // que la dernière carte ne soit pas tappable sous le bouton.
+              padding: const EdgeInsets.fromLTRB(20, 28, 20, 100),
               sliver: SliverToBoxAdapter(
                 child: _CoachTipCard(
                   title: context.l10n.coachTipTitle,

@@ -12,6 +12,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'AI Health Chef';
 
   @override
+  String get navHome => 'Home';
+
+  @override
+  String get navCoach => 'AI Coach';
+
+  @override
+  String get navProfile => 'Profile';
+
+  @override
   String get bmiCategoryUnderweight => 'Underweight';
 
   @override

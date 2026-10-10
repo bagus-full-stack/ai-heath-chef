@@ -1,6 +1,9 @@
 {
   "@@locale": "fr",
   "appTitle": "AI Health Chef",
+  "navHome": "Accueil",
+  "navCoach": "Coach IA",
+  "navProfile": "Profil",
   "bmiCategoryUnderweight": "Insuffisance pondérale",
   "bmiCategoryNormal": "Corpulence normale",
   "bmiCategoryOverweight": "Surpoids",

@@ -104,6 +104,24 @@ abstract class AppLocalizations {
   /// **'AI Health Chef'**
   String get appTitle;
 
+  /// No description provided for @navHome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accueil'**
+  String get navHome;
+
+  /// No description provided for @navCoach.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coach IA'**
+  String get navCoach;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get navProfile;
+
   /// No description provided for @bmiCategoryUnderweight.
   ///
   /// In fr, this message translates to:

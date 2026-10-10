@@ -1,6 +1,9 @@
 {
   "@@locale": "en",
   "appTitle": "AI Health Chef",
+  "navHome": "Home",
+  "navCoach": "AI Coach",
+  "navProfile": "Profile",
   "bmiCategoryUnderweight": "Underweight",
   "bmiCategoryNormal": "Normal weight",
   "bmiCategoryOverweight": "Overweight",
