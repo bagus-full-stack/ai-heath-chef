@@ -613,7 +613,9 @@ class _NeedRow extends StatelessWidget {
                       LinearProgressIndicator(
                         value: animatedProgress,
                         minHeight: 6,
-                        backgroundColor: iconColor.withValues(alpha: 0.16),
+                        // Gris neutre plutôt qu'une teinte de iconColor : sinon
+                        // la piste vide à 0% ressemble à une barre pleine.
+                        backgroundColor: Colors.grey.shade200,
                         color: iconColor,
                       ),
                 ),
