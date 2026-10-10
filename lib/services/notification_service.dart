@@ -75,6 +75,9 @@ class NotificationService {
     required int minute,
     int? weekday,
   }) async {
+    // flutter_local_notifications n'implémente pas zonedSchedule() sur le web.
+    if (kIsWeb) return;
+
     await _plugin.zonedSchedule(
       id: id,
       title: title,
