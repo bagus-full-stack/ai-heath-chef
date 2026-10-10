@@ -24,9 +24,9 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  final TextEditingController _ageController = TextEditingController();
-  final TextEditingController _weightController = TextEditingController();
-  final TextEditingController _heightController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController(text: '25');
+  final TextEditingController _weightController = TextEditingController(text: '70');
+  final TextEditingController _heightController = TextEditingController(text: '175');
 
   bool _isSubmitting = false;
   OnboardingSex? _selectedSex;
