@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
@@ -47,11 +45,12 @@ Future<void> exportMealJournalCsv(WidgetRef ref, {int days = 90}) async {
     ].join(','));
   }
 
-  final dir = await getTemporaryDirectory();
-  final file = File('${dir.path}/journal_repas.csv');
-  await file.writeAsString(buffer.toString());
-
-  await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: 'Journal alimentaire'));
+  await SharePlus.instance.share(ShareParams(
+    files: [
+      XFile.fromData(utf8.encode(buffer.toString()), name: 'journal_repas.csv', mimeType: 'text/csv'),
+    ],
+    text: 'Journal alimentaire',
+  ));
 }
 
 /// Exporte le bilan nutritionnel des 7 derniers jours en PDF (jour par jour
@@ -133,11 +132,12 @@ Future<void> exportWeeklyNutritionSummaryPdf(WidgetRef ref) async {
     ),
   );
 
-  final dir = await getTemporaryDirectory();
-  final file = File('${dir.path}/bilan_nutritionnel_hebdo.pdf');
-  await file.writeAsBytes(await doc.save());
-
-  await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: 'Bilan nutritionnel hebdomadaire'));
+  await SharePlus.instance.share(ShareParams(
+    files: [
+      XFile.fromData(await doc.save(), name: 'bilan_nutritionnel_hebdo.pdf', mimeType: 'application/pdf'),
+    ],
+    text: 'Bilan nutritionnel hebdomadaire',
+  ));
 }
 
 /// Exporte un bilan des 30 derniers jours (nutrition jour par jour + poids)
@@ -233,11 +233,12 @@ Future<void> exportMonthlyNutritionSummaryPdf(WidgetRef ref) async {
     ),
   );
 
-  final dir = await getTemporaryDirectory();
-  final file = File('${dir.path}/bilan_nutritionnel_mensuel.pdf');
-  await file.writeAsBytes(await doc.save());
-
-  await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: 'Bilan nutritionnel mensuel'));
+  await SharePlus.instance.share(ShareParams(
+    files: [
+      XFile.fromData(await doc.save(), name: 'bilan_nutritionnel_mensuel.pdf', mimeType: 'application/pdf'),
+    ],
+    text: 'Bilan nutritionnel mensuel',
+  ));
 }
 
 /// Exporte le plan de repas des 7 prochains jours (voir
@@ -250,11 +251,12 @@ Future<void> exportWeeklyMealPlanIcs(WidgetRef ref) async {
   final monday = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
   final ics = buildWeeklyMealPlanIcs(plan, monday);
 
-  final dir = await getTemporaryDirectory();
-  final file = File('${dir.path}/plan_repas_semaine.ics');
-  await file.writeAsString(ics);
-
-  await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: 'Plan de repas de la semaine'));
+  await SharePlus.instance.share(ShareParams(
+    files: [
+      XFile.fromData(utf8.encode(ics), name: 'plan_repas_semaine.ics', mimeType: 'text/calendar'),
+    ],
+    text: 'Plan de repas de la semaine',
+  ));
 }
 
 /// Exporte toutes les données personnelles de l'utilisateur (profil, repas,
@@ -270,11 +272,12 @@ Future<void> exportAllUserData(WidgetRef ref) async {
   );
   final export = await service.buildExport();
 
-  final dir = await getTemporaryDirectory();
-  final file = File('${dir.path}/export_donnees.json');
-  await file.writeAsString(jsonEncode(export));
-
-  await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: 'Export de mes données'));
+  await SharePlus.instance.share(ShareParams(
+    files: [
+      XFile.fromData(utf8.encode(jsonEncode(export)), name: 'export_donnees.json', mimeType: 'application/json'),
+    ],
+    text: 'Export de mes données',
+  ));
 }
 
 String _csvEscape(String value) {

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:fl_chart/fl_chart.dart';
@@ -6,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../l10n/l10n_extensions.dart';
@@ -579,11 +577,9 @@ class _WeeklySummaryShareSection extends ConsumerWidget {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final bytes = byteData!.buffer.asUint8List();
 
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/resume_semaine.png');
-      await file.writeAsBytes(bytes);
-
-      await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile.fromData(bytes, name: 'resume_semaine.png', mimeType: 'image/png')],
+      ));
     } catch (_) {
       // Best-effort : capture ou partage annulé/échoué, pas bloquant.
     }
