@@ -47,7 +47,8 @@ class MealSuggestionsNotifier extends AsyncNotifier<List<MealSuggestion>> {
     final dietType = profile?.dietType ?? 'none';
     final allergies = profile?.allergies ?? const [];
     final cuisinePreference = profile?.cuisinePreference ?? 'none';
-    final signature = _preferencesSignature(dietType, allergies, cuisinePreference);
+    final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
+    final signature = _preferencesSignature(dietType, allergies, cuisinePreference, lang);
 
     if (!forceRefresh) {
       final cached = await dbService.getCachedMealSuggestions(dayKey, signature);
@@ -58,7 +59,6 @@ class MealSuggestionsNotifier extends AsyncNotifier<List<MealSuggestion>> {
 
     final targets = computeNutritionTargets(profile);
     final aiService = AIService();
-    final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
     final suggestions = await aiService.getMealSuggestions(
       goal: profile?.goal ?? 'maintain',
       targetKcal: targets.kcal,
@@ -85,10 +85,15 @@ class MealSuggestionsNotifier extends AsyncNotifier<List<MealSuggestion>> {
   }
 
   /// Identifie les préférences utilisées pour générer un lot de suggestions,
-  /// afin de détecter un changement de régime/allergies en cours de journée
-  /// (voir [DatabaseService.getCachedMealSuggestions]).
-  String _preferencesSignature(String dietType, List<String> allergies, String cuisinePreference) {
+  /// afin de détecter un changement de régime/allergies/langue en cours de
+  /// journée (voir [DatabaseService.getCachedMealSuggestions]).
+  String _preferencesSignature(
+    String dietType,
+    List<String> allergies,
+    String cuisinePreference,
+    String lang,
+  ) {
     final sortedAllergies = [...allergies]..sort();
-    return '$dietType|${sortedAllergies.join(',')}|$cuisinePreference';
+    return '$dietType|${sortedAllergies.join(',')}|$cuisinePreference|$lang';
   }
 }
