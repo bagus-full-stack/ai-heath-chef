@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +9,7 @@ import '../providers/dashboard_provider.dart';
 import '../providers/meal_provider.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/cloud_ai_consent_gate.dart';
+import '../widgets/local_file_image.dart';
 
 const _primaryColor = Color(0xFF6B66FF);
 
@@ -102,8 +101,8 @@ class _MenuScanScreenState extends ConsumerState<MenuScanScreen> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.file(
-                  File(widget.imagePath),
+                child: LocalFileImage(
+                  widget.imagePath,
                   height: 160,
                   width: double.infinity,
                   fit: BoxFit.cover,

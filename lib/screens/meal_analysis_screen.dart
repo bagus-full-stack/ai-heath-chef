@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +7,7 @@ import '../local_db/local_db_provider.dart';
 import '../models/ingredient.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/cloud_ai_consent_gate.dart';
+import '../widgets/local_file_image.dart';
 import '../widgets/success_transition_dialog.dart';
 import '../l10n/l10n_extensions.dart';
 
@@ -125,7 +125,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                     fit: StackFit.expand,
                     children: [
                       if (widget.imagePath != null)
-                        Image.file(File(widget.imagePath!), fit: BoxFit.cover)
+                        LocalFileImage(widget.imagePath!, fit: BoxFit.cover)
                       else
                         Icon(
                           widget.barcode != null

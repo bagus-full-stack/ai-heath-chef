@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
 
 import '../providers/dashboard_provider.dart';
 import '../providers/notification_settings_provider.dart';
@@ -17,6 +16,7 @@ import '../utils/bmi.dart';
 import '../utils/nutrition_targets.dart';
 import '../utils/streak.dart';
 import '../widgets/animated_async_value.dart';
+import '../widgets/local_file_image.dart';
 import '../widgets/storage_image.dart';
 import '../l10n/l10n_extensions.dart';
 
@@ -828,8 +828,8 @@ class DashboardScreen extends ConsumerWidget {
               height: 60,
               color: Colors.grey.shade200,
               child: imageUrl != null && imageUrl.startsWith(localImagePrefix)
-                  ? Image.file(
-                      File(imageUrl.substring(localImagePrefix.length)),
+                  ? LocalFileImage(
+                      imageUrl.substring(localImagePrefix.length),
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           const Icon(Icons.fastfood, color: Colors.grey),

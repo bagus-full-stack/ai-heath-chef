@@ -64,17 +64,17 @@ class AIService {
     final l10n = lookupAppLocalizations(Locale(lang));
     try {
       // 1. COMPRESSION DE L'IMAGE
-      // On réduit la taille (max 800x800) et la qualité (70%) pour un envoi ultra-rapide
-      final compressedBytes = await FlutterImageCompress.compressWithFile(
-        imagePath,
+      // On réduit la taille (max 800x800) et la qualité (70%) pour un envoi ultra-rapide.
+      // `compressWithFile` n'est pas supporté sur Flutter Web (dart:io uniquement) :
+      // on lit d'abord les octets via XFile (gère aussi bien un chemin natif qu'une
+      // URL blob: web), puis on compresse via `compressWithList`, supporté partout.
+      final rawBytes = await XFile(imagePath).readAsBytes();
+      final compressedBytes = await FlutterImageCompress.compressWithList(
+        rawBytes,
         minWidth: 800,
         minHeight: 800,
         quality: 70,
       );
-
-      if (compressedBytes == null) {
-        throw Exception(l10n.svcErrorCompressImage);
-      }
 
       // 2. ENCODAGE EN BASE64
       // L'API attend du texte, on transforme donc notre image en longue chaîne de caractères

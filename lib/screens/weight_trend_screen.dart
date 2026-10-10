@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +11,7 @@ import '../providers/auth_provider.dart';
 import '../providers/custom_reminders_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/profile_provider.dart';
+import '../widgets/local_file_image.dart';
 import '../widgets/storage_image.dart';
 
 const _primaryColor = Color(0xFF6B66FF);
@@ -72,7 +71,7 @@ class WeightTrendScreen extends ConsumerWidget {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
-                          child: Image.file(File(photoPath!), width: 56, height: 56, fit: BoxFit.cover),
+                          child: LocalFileImage(photoPath!, width: 56, height: 56, fit: BoxFit.cover),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -344,7 +343,7 @@ class _ProgressPhotoGallery extends StatelessWidget {
         itemBuilder: (_, i) {
           final entry = withPhoto[i];
           final image = entry.localImagePath != null
-              ? Image.file(File(entry.localImagePath!), width: 80, height: 80, fit: BoxFit.cover)
+              ? LocalFileImage(entry.localImagePath!, width: 80, height: 80, fit: BoxFit.cover)
               : StorageImage(
                   bucket: 'weight_photos',
                   path: entry.imagePath,
