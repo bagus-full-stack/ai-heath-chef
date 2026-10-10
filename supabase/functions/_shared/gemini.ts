@@ -14,7 +14,7 @@
  * ne doit pas faire attendre l'utilisateur indéfiniment.
  */
 export const GEMINI_MODEL_TIMEOUT_MS = 8000;
-export const GEMINI_MAX_MODELS_TRIED = 5;
+export const GEMINI_MAX_MODELS_TRIED = 25;
 
 export interface GeminiCascadeResult {
     text: string;
