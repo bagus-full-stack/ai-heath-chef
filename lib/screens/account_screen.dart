@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../models/user_profile.dart';
@@ -277,9 +278,23 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           ),
         ),
         data: (profile) {
-          if (profile != null) {
-            _prefill(profile);
-          }
+          final user = Supabase.instance.client.auth.currentUser;
+          final currentProfile =
+              profile ??
+              UserProfile(
+                userId: user?.id ?? '',
+                fullName:
+                    user?.userMetadata?['full_name'] as String? ??
+                    user?.email?.split('@').first.replaceAll('.', ' ') ??
+                    context.l10n.profileDefaultUserName,
+                email: user?.email ?? '',
+                sex: 'other',
+                age: 0,
+                currentWeight: 0,
+                targetWeight: 0,
+                goal: 'maintain',
+              );
+          _prefill(currentProfile);
           return SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
             child: Column(
