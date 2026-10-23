@@ -54,9 +54,16 @@ class PurchaseService {
   String get _currentApiKey =>
       defaultTargetPlatform == TargetPlatform.iOS ? _iosApiKey : _androidApiKey;
 
-  /// True tant que les clés API RevenueCat n'ont pas été renseignées.
-  bool get isDemoMode =>
+  bool get _hasPlaceholderKey =>
       _currentApiKey == 'REVENUECAT_ANDROID_API_KEY' || _currentApiKey == 'REVENUECAT_IOS_API_KEY';
+
+  /// True tant que les clés API RevenueCat n'ont pas été renseignées, en
+  /// debug/profile uniquement : un build release sans clés ne doit jamais
+  /// simuler un achat (PRO gratuit), voir [_unavailable].
+  bool get isDemoMode => !kReleaseMode && _hasPlaceholderKey;
+
+  /// Build release sans vraies clés : aucun achat possible, jamais PRO.
+  bool get _unavailable => kReleaseMode && _hasPlaceholderKey;
 
   Future<void> configure({String? appUserId}) async {
     if (_configured) {
@@ -73,6 +80,9 @@ class PurchaseService {
       }
       return;
     }
+    if (_unavailable) {
+      return;
+    }
 
     await Purchases.setLogLevel(
       kDebugMode ? LogLevel.debug : LogLevel.warn,
@@ -86,7 +96,7 @@ class PurchaseService {
   /// RevenueCat (Offerings > Packages). Renvoie `null` en mode démo — les
   /// écrans utilisent alors leurs plans de secours pour l'affichage.
   Future<Offering?> fetchCurrentOffering() async {
-    if (isDemoMode) {
+    if (isDemoMode || _unavailable) {
       return null;
     }
     final offerings = await Purchases.getOfferings();
@@ -123,6 +133,9 @@ class PurchaseService {
       await Future<void>.delayed(const Duration(milliseconds: 600));
       return _demoEntitled ? PurchaseOutcome.success : PurchaseOutcome.none;
     }
+    if (_unavailable) {
+      return PurchaseOutcome.none;
+    }
 
     final info = await Purchases.restorePurchases();
     final isEntitled = info.entitlements.active.containsKey(entitlementId);
@@ -133,6 +146,9 @@ class PurchaseService {
     if (isDemoMode) {
       return _demoEntitled;
     }
+    if (_unavailable) {
+      return false;
+    }
     final info = await Purchases.getCustomerInfo();
     return info.entitlements.active.containsKey(entitlementId);
   }
@@ -140,7 +156,7 @@ class PurchaseService {
   /// Associe l'identité RevenueCat à l'utilisateur Supabase connecté, pour
   /// que l'abonnement soit bien rattaché au bon compte.
   Future<void> logIn(String appUserId) async {
-    if (!_configured || isDemoMode) {
+    if (!_configured || isDemoMode || _unavailable) {
       return;
     }
     await Purchases.logIn(appUserId);
@@ -148,7 +164,7 @@ class PurchaseService {
 
   /// Détache l'identité RevenueCat lors de la déconnexion.
   Future<void> logOut() async {
-    if (!_configured || isDemoMode) {
+    if (!_configured || isDemoMode || _unavailable) {
       return;
     }
     await Purchases.logOut();
