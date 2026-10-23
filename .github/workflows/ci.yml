@@ -53,3 +53,4 @@ jobs:
           deno test --allow-env --allow-read supabase/functions/delete-account/
           deno test --allow-env supabase/functions/coach-chat/
           deno test --allow-env supabase/functions/meal-images/
+          deno test --allow-env supabase/functions/huggingface-token/
