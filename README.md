@@ -128,9 +128,10 @@ supabase/
                 cascade entre modèles Gemini (fetch, timeout, retry) — chaque
                 fonction garde néanmoins SA PROPRE liste de modèles `MODELS`
                 (elles divergent entre fonctions par drift historique, non
-                harmonisées). analyze-menu et analyze-pantry sont des quasi-copies
-                d'analyze-meal (même contrat JSON `{ ingredients: [...] }`), seul le prompt
-                change (carte de restaurant / inventaire de frigo plutôt qu'assiette).
+                harmonisées). analyze-meal, analyze-menu et analyze-pantry partagent le même handler
+                (`_shared/analyze_image.ts`, contrat JSON `{ ingredients: [...] }`), seul
+                le prompt de leur `index.ts` change (assiette / carte de restaurant /
+                inventaire de frigo).
                 delete-account n'a pas de quota IA (aucun appel GEMINI_API_KEY) mais applique
                 son propre rate limit (3 tentatives/heure, voir migration 0017).
                 coach-chat sépare la logique (`handler.ts`, exportée pour les tests)

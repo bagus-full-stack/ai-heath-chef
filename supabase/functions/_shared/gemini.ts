@@ -39,10 +39,11 @@ export async function callGeminiWithFallback(
             console.log(`Tentative avec le modèle : ${modelName}...`);
 
             const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`,
                 {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    // Clé en en-tête plutôt que dans l'URL : l'URL finit dans des logs/traces.
+                    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
                     body: JSON.stringify(requestBody),
                     signal: controller.signal,
                 },
