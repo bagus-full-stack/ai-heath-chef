@@ -13,6 +13,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Analyse de produit par photo** — même principe pour un produit emballé (Edge Function `analyze-product`), lit l'étiquette nutritionnelle plutôt qu'une assiette
 - **Scan de menu restaurant** — photo de la carte d'un restaurant (Edge Function `analyze-menu`) : un plat détecté = une carte indépendante (portion + macros estimées), affichée sans total combiné puisque les plats d'une carte ne sont pas mangés ensemble, ajoutable individuellement au journal
 - **Recette à partir du frigo/placard** — photo de l'intérieur d'un frigo ou d'un placard (Edge Function `analyze-pantry`) : inventaire des aliments identifiés, corrigible (ajout/suppression manuelle) avant de lancer la génération de 3 recettes (`meal-suggestions`) qui priorisent ces ingrédients déjà disponibles
+- **Sélecteur de modes de capture** — rangée horizontale circulaire (Scanner, Repas, Produit, Menu, Frigo, Manuel) sur l'écran caméra : glissement gauche/droite ou tap sur un libellé, le mode actif reste au centre ; le déclencheur ouvre l'écran de scan de code-barres ou de saisie manuelle quand l'un d'eux est au centre
 - **Scan de code-barres** — recherche instantanée d'un produit (EAN/UPC) via la base publique Open Food Facts, sans appel IA
 - **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`, ou en IA locale, voir [IA locale](#ia-locale)), et idées de repas personnalisées selon le profil/objectif (Edge Function `meal-suggestions`, mises en cache un jour à la fois), chacune illustrée par une image générée via Pollinations.ai (Edge Function `meal-images`, voir ci-dessous). Chaque ingrédient d'une recette signale une correspondance avec une allergie déclarée et propose un substitut (mots-clés locaux, ex. lait → lait d'avoine), aussi utilisable en dépannage ("je n'ai pas ça dans mon placard") même sans allergie. Garde-fous santé identiques sur les deux moteurs (plancher calorique, orientation vers un professionnel en cas de signal de trouble alimentaire) + filet de sécurité déterministe avant tout appel modèle en cas de détresse/urgence évoquée ; le chat a aussi accès aux données du jour (repas, calories/macros restantes), un disclaimer visible + indicateur du moteur ayant répondu (local/cloud), et un signalement possible pour toute réponse jugée problématique
 - **Plan de repas hebdomadaire** — génère en un seul appel IA un plan complet (7 jours × 3 repas) adapté au profil/régime/allergies, mis en cache par semaine, ouvert depuis l'icône calendrier de l'écran "Idées repas" ; chaque repas garde recette/macros et peut être ajouté individuellement à la liste de courses, ou la semaine entière en un tap. Pas d'illustrations IA générées pour ce plan (21 repas d'un coup serait trop coûteux/lent) — les cartes retombent sur l'icône du moment de la journée. Export du plan en calendrier (`.ics`, un événement par repas à des heures par défaut) importable dans Google/Apple/Outlook Calendar via le partage natif
@@ -66,7 +67,9 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 
 ```
 lib/
-  config/       Paramètres du modèle IA locale (local_ai_config)
+  config/       Paramètres du modèle IA locale (local_ai_config), prompt système du
+                coach (coach_prompt, miroir de _shared/coach_prompt.ts) et contacts
+                d'urgence (emergency_contacts)
   l10n/         Localisation FR/EN : fichiers source app_fr.arb/app_en.arb, AppLocalizations
                 généré par flutter gen-l10n, extension context.l10n
   local_db/     Base de données locale (drift/SQLite) et synchronisation hors ligne :
@@ -102,13 +105,15 @@ lib/
                 (daily_nutrition_summary), export calendrier .ics du plan hebdomadaire
                 (ics_export), heures de repas habituelles déduites de l'historique
                 (typical_meal_times), suggestion de substitut d'ingrédient par mots-clés
-                (ingredient_substitution)
+                (ingredient_substitution), contexte du jour injecté au coach
+                (coach_context_builder), filtre de risque santé déterministe
+                (health_risk_filter, miroir de _shared/health_risk_filter.ts)
   widgets/      Composants réutilisables (layout principal, carte de suggestion de repas)
 android/app/src/main/kotlin/.../HealthChefWidgetProvider.kt
                 Rendu natif du widget écran d'accueil (RemoteViews), alimenté par les
                 données poussées depuis home_widget_service.dart
 supabase/
-  migrations/   Schéma SQL versionné (0001 à 0017, voir ci-dessous)
+  migrations/   Schéma SQL versionné (0001 à 0022, voir ci-dessous)
   functions/    Edge Functions : analyze-meal, analyze-product, analyze-menu,
                 analyze-pantry, coach-chat, meal-suggestions, meal-images,
                 huggingface-token, delete-account — déployées en CI via la CLI
@@ -117,7 +122,9 @@ supabase/
                 global partagé) vivent dans `_shared/quota.ts`, importé par
                 chaque fonction IA ; `_shared/cors.ts` et `_shared/errors.ts`
                 mutualisent de même les headers CORS et la classe d'erreur HTTP
-                (`HttpError`), et `_shared/gemini.ts` mutualise le mécanisme de
+                (`HttpError`), `_shared/coach_prompt.ts` et
+                `_shared/health_risk_filter.ts` (prompt et garde-fou santé du coach),
+                et `_shared/gemini.ts` mutualise le mécanisme de
                 cascade entre modèles Gemini (fetch, timeout, retry) — chaque
                 fonction garde néanmoins SA PROPRE liste de modèles `MODELS`
                 (elles divergent entre fonctions par drift historique, non
@@ -126,7 +133,15 @@ supabase/
                 change (carte de restaurant / inventaire de frigo plutôt qu'assiette).
                 delete-account n'a pas de quota IA (aucun appel GEMINI_API_KEY) mais applique
                 son propre rate limit (3 tentatives/heure, voir migration 0017).
-test/           Tests unitaires (providers, utils)
+                coach-chat sépare la logique (`handler.ts`, exportée pour les tests)
+                du point d'entrée (`index.ts`, qui ne fait que `Deno.serve`).
+test/           Tests Flutter (providers, utils, widgets, local_db)
+.github/workflows/
+                CI (ci.yml), déploiement Supabase (deploy_functions.yml) et
+                keep-alive Supabase (supabase_keepalive.yml), voir CI/CD ci-dessous
+web/            drift_worker.js et sqlite3.wasm : requis par drift pour la base
+                locale sur le web (voir lib/local_db/app_database.dart), à régénérer
+                lors d'une mise à jour des paquets drift/sqlite3
 ```
 
 ## Prérequis
@@ -164,6 +179,8 @@ flutter pub get
    - `0017` : table `delete_account_attempts` + fonction `check_delete_account_rate_limit`, pour le rate limit (3 tentatives/heure) sur la suppression de compte
    - `0018` : traçabilité de l'acceptation des CGU (`accepted_terms_at`/`accepted_terms_version` sur `profiles`)
    - `0019` : illustrations du coach dans Storage plutôt qu'en base64 (`image_path` sur `chat_messages`) + bucket **privé** `chat_images` (policies scopées à `{user_id}/...`, URL signée générée à la demande côté app) — voir `supabase/scripts/backfill_chat_images.dart` pour migrer les anciens messages (`image_url`, conservée en lecture pour rétrocompatibilité) vers ce bucket
+   - `0020` : buckets photo privés (`meal_photos`, `weight_photos`, `avatars`), accès par URL signée
+   - `0021` : sauvegarde des rappels fixes (`fixed_reminders` sur `custom_reminders_backup`)
    - `0022` : table `chat_reports` — signalement d'une réponse du Coach IA jugée problématique (exigence Google Play, voir [Notes](#notes))
 3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images`, `huggingface-token` et `delete-account` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas (et par `delete-account`) sont injectés automatiquement par Supabase, rien à configurer pour eux. En CI, `.github/workflows/deploy_functions.yml` déploie automatiquement tous les sous-dossiers de `supabase/functions/`, `delete-account` inclus — aucune modification du workflow n'est nécessaire.
    - Les fonctions IA (`analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images`) importent la logique commune depuis `supabase/functions/_shared/` (`quota.ts`, `cors.ts`, `errors.ts`, `gemini.ts`) via des imports relatifs (`../_shared/...`) : la CLI Supabase les bundle automatiquement au déploiement, il n'y a rien à copier manuellement. Chaque fonction garde en revanche sa propre liste de modèles Gemini (`MODELS`), volontairement non harmonisée (voir ci-dessus).
@@ -227,8 +244,27 @@ storeFile=upload-keystore.jks
 ## Tests
 
 ```bash
+flutter analyze
 flutter test
 ```
+
+Edge Functions (nécessite [Deno](https://deno.com), 2.x) :
+
+```bash
+deno test --allow-env supabase/functions/_shared/
+deno test --allow-env --allow-read supabase/functions/delete-account/
+deno test --allow-env supabase/functions/coach-chat/
+```
+
+Évaluation du coach sur `supabase/functions/coach-chat/eval_cases.json` : `deno run --allow-env --allow-net --allow-read supabase/functions/coach-chat/run_eval.ts` (voir l'en-tête du script pour les variables requises).
+
+## CI/CD
+
+Workflows GitHub Actions (`.github/workflows/`) :
+
+- `ci.yml` — sur chaque push et pull request : `flutter analyze` + `flutter test` (job `flutter`), tests Deno des Edge Functions (job `deno`).
+- `deploy_functions.yml` — sur push vers `master` touchant `supabase/functions/` ou `supabase/migrations/` : `supabase db push` puis déploiement des fonctions. Secrets requis : `SUPABASE_ACCESS_TOKEN` (token personnel `sbp_...`), `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`.
+- `supabase_keepalive.yml` — tous les 3 jours (et à la demande) : requête REST vers la base pour éviter la mise en pause d'un projet Supabase gratuit après 7 jours d'inactivité. Secrets requis : `SUPABASE_PROJECT_ID`, `SUPABASE_ANON_KEY`.
 
 ## Notes
 
@@ -238,7 +274,7 @@ flutter test
 - **Identité visuelle** — le logo source (`assets/icon/icon.png` / `icon_foreground.png`) alimente à la fois l'icône d'app (générée par `flutter_launcher_icons`, voir `pubspec.yaml`) et, depuis peu, le splash screen (Android/iOS) et l'écran de connexion. L'identifiant d'app est unifié en `com.aihealthchef.app` sur Android/iOS/macOS/Linux (Windows n'a pas d'identifiant de ce type).
 - **CGU/mentions légales à finaliser** — le contenu de `lib/screens/terms_screen.dart` décrit honnêtement le fonctionnement actuel de l'app (données collectées, absence de conseil médical, contenu généré par IA, abonnement, âge minimum) et identifie l'éditeur (Baga Assami, projet personnel sans société immatriculée) et son contact (`kSupportEmail`), mais reste un brouillon : le texte doit être relu par un professionnel du droit avant toute publication publique — un bandeau d'avertissement s'affiche sur l'écran tant que ce n'est pas fait.
 - **Âge minimum (RGPD art. 8/9)** — l'app est réservée aux personnes de 16 ans ou plus (`kMinimumAge` dans `lib/utils/age_policy.dart`), sans flux de consentement parental : en-dessous, la création de profil est bloquée (onboarding et écran "Mes objectifs"). L'inscription (`signup_screen.dart`) exige en plus une case explicite "J'ai au moins 16 ans et j'accepte les CGU…", dont l'horodatage et la version acceptée sont tracés dans `profiles.accepted_terms_at`/`accepted_terms_version` (migration 0018). Ceci n'empêche pas, par construction, qu'un compte créé avant ce changement ait un âge < 16 ans déjà enregistré ; requête de détection en lecture seule : `supabase/scripts/detect_underage_accounts.sql` (non exécutée automatiquement par l'app, aucun traitement/suppression automatique — décision humaine requise sur les comptes trouvés).
-- **Quotas IA** — les limites quotidiennes sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque `supabase/functions/<nom>/index.ts` si besoin (4ᵉ argument = quota par utilisateur, 5ᵉ argument optionnel = quota global partagé par toute l'app, voir migration 0009). Cette fonction vit dans `supabase/functions/_shared/quota.ts` et est importée par chaque Edge Function IA (voir Architecture ci-dessus) : un changement dans `_shared/quota.ts` s'applique à toutes d'un coup, pas besoin de le reporter manuellement. Un compte admin (`profiles.is_admin`) n'en est **pas** exempté — le quota s'applique à tout le monde, y compris toi.
+- **Quotas IA** — les limites quotidiennes sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque `supabase/functions/<nom>/index.ts` (`handler.ts` pour `coach-chat`) si besoin (4ᵉ argument = quota par utilisateur, 5ᵉ argument optionnel = quota global partagé par toute l'app, voir migration 0009). Cette fonction vit dans `supabase/functions/_shared/quota.ts` et est importée par chaque Edge Function IA (voir Architecture ci-dessus) : un changement dans `_shared/quota.ts` s'applique à toutes d'un coup, pas besoin de le reporter manuellement. Un compte admin (`profiles.is_admin`) n'en est **pas** exempté — le quota s'applique à tout le monde, y compris toi.
 
 ## Ressources Flutter
 
