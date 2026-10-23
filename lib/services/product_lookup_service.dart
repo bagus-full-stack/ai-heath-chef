@@ -13,7 +13,7 @@ class ProductLookupService {
   Future<Ingredient> lookupBarcode(String barcode, {String lang = 'fr'}) async {
     final l10n = lookupAppLocalizations(Locale(lang));
     final uri = Uri.parse(
-      'https://world.openfoodfacts.org/api/v2/product/$barcode.json'
+      'https://world.openfoodfacts.org/api/v2/product/${Uri.encodeComponent(barcode)}.json'
       '?fields=product_name,brands,serving_quantity,nutriments',
     );
 
@@ -39,7 +39,7 @@ class ProductLookupService {
     final name = (product['product_name'] as String?)?.trim();
     final brand = (product['brands'] as String?)?.trim();
     final label = (name == null || name.isEmpty)
-        ? (brand?.isNotEmpty == true ? brand! : 'Produit scanné')
+        ? (brand?.isNotEmpty == true ? brand! : l10n.svcScannedProductFallbackName)
         : (brand?.isNotEmpty == true ? '$name ($brand)' : name);
 
     final servingQuantity = (product['serving_quantity'] as num?)?.toInt();

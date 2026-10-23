@@ -792,6 +792,7 @@
       }
     }
   },
+  "svcScannedProductFallbackName": "Scanned product",
   "svcErrorProductNotFound": "Product not found for this barcode. Try taking a photo of the product instead, or add it manually.",
   "svcErrorLocalAiUnexpectedResponse": "Unexpected local AI response: {response}",
   "@svcErrorLocalAiUnexpectedResponse": {

@@ -44,6 +44,7 @@ const MAX_HISTORY_ENTRIES = 50;
 // coach_context_builder.dart) : borne défensive contre un appelant
 // malveillant/bugué, pas un budget normal.
 const MAX_DAILY_CONTEXT_LENGTH = 2000;
+const MAX_HISTORY_PARTS = 4;
 
 /** Extrait pour être appelable directement depuis `index_test.ts` (Deno.serve ne peut pas être importé). */
 export async function handleCoachChat(req: Request): Promise<Response> {
@@ -71,7 +72,7 @@ export async function handleCoachChat(req: Request): Promise<Response> {
 
     try {
         if (bodyParseError) {
-            throw new Error(isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé.");
+            throw new HttpError(400, isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé.");
         }
 
         const { message, history, coachTone, dietType, allergies, dailyContext } = body;
@@ -117,20 +118,20 @@ export async function handleCoachChat(req: Request): Promise<Response> {
 
         // On prépare le payload exact attendu par l'API REST de Google
         // On combine l'historique (s'il y en a) avec le nouveau message
+        // L'historique vient du client : on ne garde que des tours texte
+        // user/model (pas d'images ni d'autres types de parties, nombre de
+        // parties borné), pour qu'il ne serve ni à gonfler le coût d'un appel
+        // ni à forger de fausses réponses du modèle avec des champs inattendus.
         const contents = [];
         if (history && Array.isArray(history)) {
-            const truncatedHistory = history.slice(-MAX_HISTORY_ENTRIES).map((entry: Record<string, unknown>) => {
-                if (!entry || !Array.isArray(entry.parts)) return entry;
-                return {
-                    ...entry,
-                    parts: entry.parts.map((part: Record<string, unknown>) =>
-                        part && typeof part.text === 'string' && part.text.length > MAX_MESSAGE_LENGTH
-                            ? { ...part, text: part.text.slice(0, MAX_MESSAGE_LENGTH) }
-                            : part
-                    ),
-                };
-            });
-            contents.push(...truncatedHistory);
+            for (const entry of history.slice(-MAX_HISTORY_ENTRIES) as Record<string, unknown>[]) {
+                if ((entry?.role !== 'user' && entry?.role !== 'model') || !Array.isArray(entry.parts)) continue;
+                const parts = (entry.parts as Record<string, unknown>[])
+                    .filter((part) => typeof part?.text === 'string')
+                    .slice(0, MAX_HISTORY_PARTS)
+                    .map((part) => ({ text: (part.text as string).slice(0, MAX_MESSAGE_LENGTH) }));
+                if (parts.length > 0) contents.push({ role: entry.role, parts });
+            }
         }
         contents.push({ role: "user", parts: [{ text: message }] });
 
@@ -150,7 +151,7 @@ export async function handleCoachChat(req: Request): Promise<Response> {
             usedModel = result.usedModel;
         } catch (err) {
             console.error(`Tous les modèles de chat ont échoué (coach-chat). Dernière erreur : ${(err as Error).message}`);
-            throw new Error(isEn ? "The coach temporarily failed. Please try again later." : "Le coach a temporairement échoué. Réessaie plus tard.");
+            throw new HttpError(502, isEn ? "The coach temporarily failed. Please try again later." : "Le coach a temporairement échoué. Réessaie plus tard.");
         }
 
         console.log(`SUCCÈS : Réponse générée avec ${usedModel}`);
@@ -177,10 +178,14 @@ export async function handleCoachChat(req: Request): Promise<Response> {
         const message = error instanceof Error ? error.message : String(error);
         console.error("Erreur fatale Edge Function (Coach):", message);
 
-        // On renvoie l'erreur au format JSON
-        return new Response(JSON.stringify({ error: message }), {
+        // Seules les HttpError portent un message prévu pour l'utilisateur ;
+        // toute autre erreur (config manquante, bug) reste dans les logs.
+        const userMessage = error instanceof HttpError
+            ? message
+            : (isEn ? "Something went wrong. Please try again later." : "Une erreur est survenue. Réessaie plus tard.");
+        return new Response(JSON.stringify({ error: userMessage }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: error instanceof HttpError ? error.status : 400,
+            status: error instanceof HttpError ? error.status : 500,
         })
     }
 }

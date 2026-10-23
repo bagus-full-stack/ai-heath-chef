@@ -2179,6 +2179,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get svcScannedProductFallbackName => 'Scanned product';
+
+  @override
   String get svcErrorProductNotFound =>
       'Product not found for this barcode. Try taking a photo of the product instead, or add it manually.';
 

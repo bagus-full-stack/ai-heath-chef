@@ -3870,6 +3870,12 @@ abstract class AppLocalizations {
   /// **'Erreur réseau lors de la recherche du produit ({status}).'**
   String svcErrorProductLookupHttp(String status);
 
+  /// No description provided for @svcScannedProductFallbackName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit scanné'**
+  String get svcScannedProductFallbackName;
+
   /// No description provided for @svcErrorProductNotFound.
   ///
   /// In fr, this message translates to:

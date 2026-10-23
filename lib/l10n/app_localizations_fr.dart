@@ -2196,6 +2196,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get svcScannedProductFallbackName => 'Produit scanné';
+
+  @override
   String get svcErrorProductNotFound =>
       'Produit introuvable pour ce code-barres. Essaie une photo du produit, ou ajoute-le manuellement.';
 

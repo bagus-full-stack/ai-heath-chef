@@ -1233,6 +1233,7 @@
       }
     }
   },
+  "svcScannedProductFallbackName": "Produit scanné",
   "svcErrorProductNotFound": "Produit introuvable pour ce code-barres. Essaie une photo du produit, ou ajoute-le manuellement.",
   "svcErrorLocalAiUnexpectedResponse": "Réponse IA locale inattendue : {response}",
   "@svcErrorLocalAiUnexpectedResponse": {
