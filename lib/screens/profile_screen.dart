@@ -7,10 +7,13 @@ import '../l10n/l10n_extensions.dart';
 import '../models/user_profile.dart';
 import '../providers/ai_consent_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/custom_reminders_provider.dart';
+import '../providers/fasting_provider.dart';
 import '../providers/local_ai_provider.dart';
 import '../providers/locale_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart';
+import '../providers/shopping_list_provider.dart';
 import '../services/home_widget_service.dart';
 import '../utils/journal_export.dart';
 import '../widgets/animated_async_value.dart';
@@ -121,6 +124,9 @@ class ProfileScreen extends ConsumerWidget {
       await ref.read(cloudAiConsentProvider.notifier).revoke();
       await ref.read(cloudAiConsentDeclinedProvider.notifier).clear();
       await HomeWidgetService.update(kcal: 0, targetKcal: 0, streak: 0);
+      await ref.read(shoppingListProvider.notifier).clear();
+      await ref.read(fastingProvider.notifier).clear();
+      await ref.read(customRemindersProvider.notifier).clear();
 
       if (context.mounted) {
         Navigator.pop(context);

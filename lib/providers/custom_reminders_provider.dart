@@ -45,6 +45,21 @@ class CustomRemindersNotifier extends AsyncNotifier<List<CustomReminder>> {
     return _restoreFromBackupIfNeeded(prefs, local);
   }
 
+  /// Déconnexion : annule les notifications et vide la liste locale. Le
+  /// compte suivant repart de sa sauvegarde Supabase (flag de restauration remis à zéro).
+  Future<void> clear() async {
+    final current = await future;
+    for (final reminder in current) {
+      try {
+        await NotificationService.instance.cancelReminder(reminder.id);
+      } catch (_) {}
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kPrefsKey);
+    await prefs.remove(_kRestoredPrefsKey);
+    state = const AsyncData([]);
+  }
+
   /// Tentative unique (par appareil) de restauration depuis la sauvegarde
   /// Supabase, uniquement si rien n'existe encore localement — pour ne
   /// jamais écraser des rappels déjà présents sur cet appareil.

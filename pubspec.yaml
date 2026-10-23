@@ -140,12 +140,6 @@ flutter_launcher_icons:
     image_path: "assets/icon/icon.png"
     background_color: "#3E6B4F"
     theme_color: "#3E6B4F"
-  windows:
-    generate: true
-    image_path: "assets/icon/icon.png"
-  macos:
-    generate: true
-    image_path: "assets/icon/icon.png"
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

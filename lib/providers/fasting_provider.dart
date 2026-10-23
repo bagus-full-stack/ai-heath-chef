@@ -38,6 +38,14 @@ class FastingNotifier extends AsyncNotifier<FastingState> {
     );
   }
 
+  /// Remet l'état par défaut (déconnexion : le jeûne appartient au compte précédent).
+  Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_goalHoursKey);
+    await prefs.remove(_startedAtKey);
+    state = const AsyncData(FastingState(goalHours: 16));
+  }
+
   Future<void> setGoalHours(int hours) async {
     final current = state.value;
     if (current == null) return;

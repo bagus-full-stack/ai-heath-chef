@@ -2,4 +2,6 @@
 <resources>
     <!-- Nom affiché dans le sélecteur de widgets Android -->
     <string name="health_chef_widget_label">AI Health Chef</string>
+    <string name="widget_streak_days">🔥 %1$d days</string>
+    <string name="widget_no_streak">No streak yet</string>
 </resources>

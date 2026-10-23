@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:home_widget/home_widget.dart';
 
 /// Widget écran d'accueil Android (macros du jour + streak) — voir
@@ -20,7 +21,8 @@ class HomeWidgetService {
     required int targetKcal,
     required int streak,
   }) async {
-    if (!Platform.isAndroid) return;
+    // `Platform` lève une exception sur le web : tester kIsWeb d'abord.
+    if (kIsWeb || !Platform.isAndroid) return;
     try {
       await HomeWidget.saveWidgetData<int>('kcal', kcal);
       await HomeWidget.saveWidgetData<int>('targetKcal', targetKcal);

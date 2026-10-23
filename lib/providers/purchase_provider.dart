@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../services/purchase_service.dart';
 import 'profile_provider.dart';
@@ -25,11 +26,13 @@ final entitlementProvider = FutureProvider<bool>((ref) async {
   }
 
   final prefs = await SharedPreferences.getInstance();
+  // Par compte : le cache survit à la déconnexion, un autre compte ne doit pas en hériter.
+  final cacheKey = '$_kCachedEntitlementKey:${Supabase.instance.client.auth.currentUser?.id}';
   try {
     final entitled = await PurchaseService.instance.isEntitledToPro();
-    await prefs.setBool(_kCachedEntitlementKey, entitled);
+    await prefs.setBool(cacheKey, entitled);
     return entitled;
   } catch (_) {
-    return prefs.getBool(_kCachedEntitlementKey) ?? false;
+    return prefs.getBool(cacheKey) ?? false;
   }
 });

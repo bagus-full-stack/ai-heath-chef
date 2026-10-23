@@ -30,7 +30,8 @@ class HealthChefWidgetProvider : HomeWidgetProvider() {
                 setTextViewText(R.id.widget_kcal, "$kcal / $targetKcal kcal")
                 setTextViewText(
                     R.id.widget_streak,
-                    if (streak > 0) "🔥 $streak jours" else "Aucun repas loggé aujourd'hui",
+                    if (streak > 0) context.getString(R.string.widget_streak_days, streak)
+                    else context.getString(R.string.widget_no_streak),
                 )
                 setOnClickPendingIntent(
                     R.id.widget_container,

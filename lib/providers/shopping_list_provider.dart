@@ -24,6 +24,13 @@ class ShoppingListNotifier extends AsyncNotifier<List<ShoppingItem>> {
     return decoded.map(ShoppingItem.fromJson).toList();
   }
 
+  /// Vide la liste (déconnexion : elle appartient au compte précédent).
+  Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_prefsKey);
+    state = const AsyncData([]);
+  }
+
   Future<void> _persist(List<ShoppingItem> items) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefsKey, jsonEncode(items.map((i) => i.toJson()).toList()));

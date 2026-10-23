@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -89,7 +90,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
   }
 
   Future<void> _openSubscriptionManagement() async {
-    final url = Platform.isIOS ? _kAppleSubscriptionsUrl : _kGoogleSubscriptionsUrl;
+    final url = !kIsWeb && Platform.isIOS ? _kAppleSubscriptionsUrl : _kGoogleSubscriptionsUrl;
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 

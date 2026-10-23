@@ -15,8 +15,15 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
+  // Plateformes visées : Android, iOS, web. Ailleurs, le plugin lève une
+  // ArgumentError à l'initialisation (pas de réglages fournis).
+  bool get _supported =>
+      kIsWeb ||
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS;
+
   Future<void> initialize() async {
-    if (_initialized) {
+    if (_initialized || !_supported) {
       return;
     }
 
@@ -76,7 +83,7 @@ class NotificationService {
     int? weekday,
   }) async {
     // flutter_local_notifications n'implémente pas zonedSchedule() sur le web.
-    if (kIsWeb) return;
+    if (kIsWeb || !_supported) return;
 
     await _plugin.zonedSchedule(
       id: id,
@@ -100,11 +107,15 @@ class NotificationService {
     );
   }
 
-  Future<void> cancelReminder(int id) => _plugin.cancel(id: id);
+  Future<void> cancelReminder(int id) async {
+    if (_supported) await _plugin.cancel(id: id);
+  }
 
   /// Annule tous les rappels programmés — utilisé lors de la purge locale
   /// après suppression de compte (voir local_data_purge.dart).
-  Future<void> cancelAll() => _plugin.cancelAll();
+  Future<void> cancelAll() async {
+    if (_supported) await _plugin.cancelAll();
+  }
 
   /// Affiche une notification immédiatement (pas de programmation) — utilisé
   /// pour les résumés (poids/kcal) calculés au moment où l'app est ouverte,
