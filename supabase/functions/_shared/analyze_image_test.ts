@@ -84,3 +84,16 @@ Deno.test("handleImageAnalysis - JSON invalide du modèle : message générique,
         stub.restore();
     }
 });
+
+Deno.test("handleImageAnalysis - `names` personnalise la consigne de langue", async () => {
+    setEnv();
+    const stub = stubFetch('{"ingredients":[]}');
+    try {
+        const config = { ...CONFIG, names: { en: "product name", fr: "nom du produit" } };
+        const res = await handleImageAnalysis(request({ image: "aGVsbG8=", lang: "en" }), config);
+        assertEquals(res.status, 200);
+        assert(stub.seen.geminiBody.includes("(product name)"));
+    } finally {
+        stub.restore();
+    }
+});

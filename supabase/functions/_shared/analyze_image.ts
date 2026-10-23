@@ -40,13 +40,14 @@ const MODELS = [
 
 
 /**
- * Corps commun d'analyze-meal / analyze-menu / analyze-pantry : même contrat
+ * Corps commun d'analyze-meal / analyze-menu / analyze-pantry / analyze-product : même contrat
  * (`{ image, lang }` -> `{ ingredients: [...] }`), seul le prompt et le nom de
  * fonction (clé de quota) changent.
  */
 export async function handleImageAnalysis(
     req: Request,
-    config: { functionName: string; prompt: string },
+    // `names` : ce que le modèle doit écrire dans la langue de l'utilisateur (défaut : noms d'ingrédients).
+    config: { functionName: string; prompt: string; names?: { en: string; fr: string } },
 ): Promise<Response> {
     // === GESTION DU PREFLIGHT (CORS) ===
     if (req.method === 'OPTIONS') {
@@ -81,8 +82,8 @@ export async function handleImageAnalysis(
         }
         validateBase64Image(image, isEn);
         const langInstruction = isEn
-            ? "Respond with English text values (ingredient names) in the JSON."
-            : "Réponds avec des valeurs textuelles en français (noms des ingrédients) dans le JSON.";
+            ? `Respond with English text values (${config.names?.en ?? "ingredient names"}) in the JSON.`
+            : `Réponds avec des valeurs textuelles en français (${config.names?.fr ?? "noms des ingrédients"}) dans le JSON.`;
 
         // === 2. VÉRIFICATION CLÉ API GEMINI ===
         const apiKey = Deno.env.get('GEMINI_API_KEY');
