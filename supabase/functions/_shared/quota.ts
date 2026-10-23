@@ -34,6 +34,11 @@ function nextUtcMidnightIso(): string {
  * n'est pas configuré ou si l'appel à RevenueCat échoue — une panne du
  * fournisseur d'abonnement ne doit jamais accorder un accès illimité.
  */
+// Cache court de l'état PRO par utilisateur : évite un appel RevenueCat à chaque requête IA.
+// shortcut: cache par instance de fonction, un abonnement résilié reste illimité jusqu'à 60 s de plus.
+const PRO_CACHE_TTL_MS = 60_000;
+const proCache = new Map<string, { value: boolean; expires: number }>();
+
 async function hasUnlimitedQuota(
     // deno-lint-ignore no-explicit-any
     serviceClient: any,
@@ -52,6 +57,10 @@ async function hasUnlimitedQuota(
     if (!revenueCatSecretKey) {
         return false;
     }
+    const cached = proCache.get(userId);
+    if (cached && cached.expires > Date.now()) {
+        return cached.value;
+    }
 
     try {
         const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${userId}`, {
@@ -62,8 +71,10 @@ async function hasUnlimitedQuota(
         }
         const body = await res.json();
         const expiresDate = body?.subscriber?.entitlements?.pro?.expires_date;
-        return expiresDate === null ||
+        const isPro = expiresDate === null ||
             (typeof expiresDate === "string" && new Date(expiresDate) > new Date());
+        proCache.set(userId, { value: isPro, expires: Date.now() + PRO_CACHE_TTL_MS });
+        return isPro;
     } catch (_) {
         return false;
     }

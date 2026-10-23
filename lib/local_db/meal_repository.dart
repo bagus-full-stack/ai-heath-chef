@@ -305,7 +305,15 @@ class MealRepository {
   /// suppressions). Best-effort : une ligne qui échoue (pas de réseau,
   /// erreur serveur...) est simplement retentée au prochain appel, sans
   /// bloquer la synchronisation des autres.
-  Future<void> syncPendingMeals() async {
+  // Démarrage et retours de réseau peuvent lancer deux synchros en même temps,
+  // qui enverraient chacune la même photo (fichier orphelin).
+  Future<void>? _inFlight;
+
+  // Un second appel attend la synchro déjà en cours au lieu d'en lancer une autre.
+  Future<void> syncPendingMeals() =>
+      _inFlight ??= _syncPendingMealsOnce().whenComplete(() => _inFlight = null);
+
+  Future<void> _syncPendingMealsOnce() async {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 

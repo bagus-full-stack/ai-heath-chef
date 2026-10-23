@@ -27,7 +27,6 @@ const MODELS = [
     "gemini-2.5-flash-lite",
     "gemini-3-pro-preview",
     "gemini-3-flash-preview",
-    "gemini-1.5-flash" // Sécurité ultime (le plus stable)
 ];
 
 const GOAL_LABELS: Record<string, string> = {
@@ -213,11 +212,8 @@ ${langInstruction}`;
         try {
             parsedJson = JSON.parse(jsonString);
         } catch {
-            throw new Error(
-                isEn
-                    ? `The model replied with invalid JSON: ${jsonString}`
-                    : `Le modèle a répondu avec un JSON invalide : ${jsonString}`,
-            );
+            console.error("JSON invalide du modèle :", jsonString.slice(0, 500));
+            throw new Error(isEn ? "The model returned an unreadable answer. Please try again." : "Le modèle a renvoyé une réponse illisible. Réessaie.");
         }
 
         return new Response(JSON.stringify(parsedJson), {

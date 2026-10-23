@@ -67,7 +67,15 @@ class HydrationRepository {
   /// rapatrie celles enregistrées depuis un autre appareil — restaure
   /// l'historique du jour après une désinstallation et le partage entre
   /// appareils. Best-effort, comme [MealRepository.syncPendingMeals].
-  Future<void> syncEntries() async {
+  // Démarrage et retours de réseau peuvent lancer deux synchros en même temps,
+  // qui enverraient chacune la même photo (fichier orphelin).
+  Future<void>? _inFlight;
+
+  // Un second appel attend la synchro déjà en cours au lieu d'en lancer une autre.
+  Future<void> syncEntries() =>
+      _inFlight ??= _syncEntriesOnce().whenComplete(() => _inFlight = null);
+
+  Future<void> _syncEntriesOnce() async {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 

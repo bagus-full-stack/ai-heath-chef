@@ -3,6 +3,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { checkAndIncrementQuota } from "../_shared/quota.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 import { HttpError } from "../_shared/errors.ts"
+import { validateBase64Image } from "../_shared/image.ts"
 import { callGeminiWithFallback } from "../_shared/gemini.ts"
 
 // Liste de priorité des modèles (voir README : diverge volontairement/par
@@ -28,11 +29,8 @@ const MODELS = [
     "gemini-2.5-flash-lite",
     "gemini-3-pro-preview",
     "gemini-3-flash-preview",
-    "gemini-1.5-flash" // Sécurité ultime
 ];
 
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 Mo, cohérent avec le budget Cloudflare/Gemini existant
-const BASE64_IMAGE_RE = /^[A-Za-z0-9+/]+={0,2}$/;
 
 Deno.serve(async (req) => {
     // === GESTION DU PREFLIGHT (CORS) ===
@@ -66,12 +64,7 @@ Deno.serve(async (req) => {
         if (!image || typeof image !== 'string') {
             throw new HttpError(400, isEn ? "No image was provided in the request." : "Aucune image n'a été fournie dans la requête.");
         }
-        if (!BASE64_IMAGE_RE.test(image)) {
-            throw new HttpError(400, isEn ? "The image is not valid base64 data." : "L'image n'est pas une donnée base64 valide.");
-        }
-        if ((image.length * 3) / 4 > MAX_IMAGE_BYTES) {
-            throw new HttpError(413, isEn ? "The image is too large (8 MB max)." : "L'image est trop volumineuse (8 Mo max).");
-        }
+        validateBase64Image(image, isEn);
         const langInstruction = isEn
             ? "Respond with English text values (product name) in the JSON."
             : "Réponds avec des valeurs textuelles en français (nom du produit) dans le JSON.";
@@ -141,11 +134,8 @@ ${langInstruction}`;
         try {
             parsedJson = JSON.parse(jsonString);
         } catch {
-            throw new Error(
-                isEn
-                    ? `The model replied with invalid JSON: ${jsonString}`
-                    : `Le modèle a répondu avec un JSON invalide : ${jsonString}`,
-            );
+            console.error("JSON invalide du modèle :", jsonString.slice(0, 500));
+            throw new Error(isEn ? "The model returned an unreadable answer. Please try again." : "Le modèle a renvoyé une réponse illisible. Réessaie.");
         }
 
         return new Response(JSON.stringify(parsedJson), {
