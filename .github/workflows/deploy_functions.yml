@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Installation de la CLI Supabase
         uses: supabase/setup-cli@v1
@@ -42,7 +42,7 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Installation de la CLI Supabase
         uses: supabase/setup-cli@v1
