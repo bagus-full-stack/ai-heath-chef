@@ -53,10 +53,9 @@
 	<string>L’application a besoin d’accéder à la caméra pour photographier ton repas.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>L’application a besoin d’accéder à tes photos pour analyser un repas depuis ta galerie.</string>
-	<!-- IA locale (flutter_gemma) : accès fichiers + réseau local requis par
-	     le moteur d'inférence .litertlm. -->
-	<key>UIFileSharingEnabled</key>
-	<true/>
+	<!-- IA locale (flutter_gemma) : réseau local requis par le moteur d'inférence
+	     .litertlm. UIFileSharingEnabled est volontairement absent : il exposerait
+	     le dossier Documents (base locale, photos) dans Fichiers/Finder. -->
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Utilisé par le moteur d'IA locale pour les fonctionnalités hors connexion.</string>
 	<key>UILaunchStoryboardName</key>
