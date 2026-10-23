@@ -113,7 +113,7 @@ android/app/src/main/kotlin/.../HealthChefWidgetProvider.kt
                 Rendu natif du widget écran d'accueil (RemoteViews), alimenté par les
                 données poussées depuis home_widget_service.dart
 supabase/
-  migrations/   Schéma SQL versionné (0001 à 0022, voir ci-dessous)
+  migrations/   Schéma SQL versionné (0001 à 0023, voir ci-dessous)
   functions/    Edge Functions : analyze-meal, analyze-product, analyze-menu,
                 analyze-pantry, coach-chat, meal-suggestions, meal-images,
                 huggingface-token, delete-account — déployées en CI via la CLI
@@ -160,7 +160,7 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0022) depuis le **SQL Editor** du dashboard Supabase, ou laisse la CI le faire : `.github/workflows/deploy_functions.yml` lance automatiquement `supabase db push` sur push vers `master` dès qu'un fichier change dans `supabase/migrations/` (nécessite les secrets GitHub `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID` et `SUPABASE_DB_PASSWORD` — mot de passe de la base, Project Settings > Database). ⚠️ Ne mélange pas les deux : si tu as déjà appliqué une migration manuellement via le SQL Editor, le `supabase db push` CI échouera ou la rejouera en double tant que l'historique local (`supabase migration list`) n'est pas resynchronisé avec la prod.
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0023) depuis le **SQL Editor** du dashboard Supabase, ou laisse la CI le faire : `.github/workflows/deploy_functions.yml` lance automatiquement `supabase db push` sur push vers `master` dès qu'un fichier change dans `supabase/migrations/` (nécessite les secrets GitHub `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID` et `SUPABASE_DB_PASSWORD` — mot de passe de la base, Project Settings > Database). ⚠️ Ne mélange pas les deux : si tu as déjà appliqué une migration manuellement via le SQL Editor, le `supabase db push` CI échouera ou la rejouera en double tant que l'historique local (`supabase migration list`) n'est pas resynchronisé avec la prod.
    - `0001` : tables `profiles`, `meals`, `chat_messages` + policies RLS + bucket `avatars`
    - `0002` : taille (`height_cm`) sur `profiles`
    - `0003` : table `meal_suggestions` (cache des idées de repas IA)
@@ -183,6 +183,7 @@ flutter pub get
    - `0020` : buckets photo privés (`meal_photos`, `weight_photos`, `avatars`), accès par URL signée
    - `0021` : sauvegarde des rappels fixes (`fixed_reminders` sur `custom_reminders_backup`)
    - `0022` : table `chat_reports` — signalement d'une réponse du Coach IA jugée problématique (exigence Google Play, voir [Notes](#notes))
+   - `0023` : déclencheur qui interdit de modifier `profiles.is_admin` depuis l'API (le SQL Editor reste possible, voir migration 0007)
 3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images`, `huggingface-token` et `delete-account` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas (et par `delete-account`) sont injectés automatiquement par Supabase, rien à configurer pour eux. En CI, `.github/workflows/deploy_functions.yml` déploie automatiquement tous les sous-dossiers de `supabase/functions/`, `delete-account` inclus — aucune modification du workflow n'est nécessaire.
    - Les fonctions IA (`analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images`) importent la logique commune depuis `supabase/functions/_shared/` (`quota.ts`, `cors.ts`, `errors.ts`, `gemini.ts`) via des imports relatifs (`../_shared/...`) : la CLI Supabase les bundle automatiquement au déploiement, il n'y a rien à copier manuellement. Chaque fonction garde en revanche sa propre liste de modèles Gemini (`MODELS`), volontairement non harmonisée (voir ci-dessus).
 4. **Illustrations des idées de repas (optionnel, 100% gratuit)** — `meal-images` génère une image IA par suggestion, en cascade entre deux fournisseurs gratuits :

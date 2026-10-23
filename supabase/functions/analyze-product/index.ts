@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
 
     try {
         if (bodyParseError) {
-            throw new Error(isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé.");
+            throw new HttpError(400, isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé.");
         }
 
         const { image } = body;
@@ -123,7 +123,7 @@ ${langInstruction}`;
             usedModel = result.usedModel;
         } catch (err) {
             console.error(`Tous les modèles ont échoué (analyze-product). Dernière erreur : ${(err as Error).message}`);
-            throw new Error(isEn ? "Analysis temporarily failed. Please try again later." : "L'analyse a temporairement échoué. Réessaie plus tard.");
+            throw new HttpError(502, isEn ? "Analysis temporarily failed. Please try again later." : "L'analyse a temporairement échoué. Réessaie plus tard.");
         }
 
         console.log(`SUCCÈS : Analyse produit générée avec ${usedModel}`);
@@ -135,7 +135,7 @@ ${langInstruction}`;
             parsedJson = JSON.parse(jsonString);
         } catch {
             console.error("JSON invalide du modèle :", jsonString.slice(0, 500));
-            throw new Error(isEn ? "The model returned an unreadable answer. Please try again." : "Le modèle a renvoyé une réponse illisible. Réessaie.");
+            throw new HttpError(502, isEn ? "The model returned an unreadable answer. Please try again." : "Le modèle a renvoyé une réponse illisible. Réessaie.");
         }
 
         return new Response(JSON.stringify(parsedJson), {
@@ -147,9 +147,9 @@ ${langInstruction}`;
         const message = error instanceof Error ? error.message : String(error);
         console.error("Erreur fatale Edge Function (Analyze Product):", message);
 
-        return new Response(JSON.stringify({ error: message }), {
+        return new Response(JSON.stringify({ error: error instanceof HttpError ? message : (isEn ? "Something went wrong. Please try again later." : "Une erreur est survenue. Réessaie plus tard.") }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: error instanceof HttpError ? error.status : 400,
+            status: error instanceof HttpError ? error.status : 500,
         })
     }
 })

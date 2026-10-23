@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 
+import { HttpError } from "../_shared/errors.ts"
 import { checkAndIncrementQuota } from "../_shared/quota.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 import { callGeminiWithFallback } from "../_shared/gemini.ts"
@@ -79,7 +80,7 @@ Deno.serve(async (req) => {
 
     try {
         if (bodyParseError) {
-            throw new Error(isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé.");
+            throw new HttpError(400, isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé.");
         }
 
         const {
@@ -106,6 +107,16 @@ Deno.serve(async (req) => {
         const suggestionCount = isWeeklyPlan
             ? Math.min((days as number) * weeklyMealsPerDay, 35)
             : (Number.isFinite(count) && (count as number) > 0 ? Math.min(count as number, 10) : 6);
+        // Cibles fournies par le client : converties en nombres bornés avant d'entrer
+        // dans le prompt (pas de texte libre, pas de cible sous le plancher de 1200 kcal).
+        const clampNum = (v: unknown, fallback: number, min: number, max: number) => {
+            const n = Number(v);
+            return Number.isFinite(n) ? Math.round(Math.min(Math.max(n, min), max)) : fallback;
+        };
+        const kcal = clampNum(targetKcal, 2200, 1200, 6000);
+        const prot = clampNum(targetProt, 160, 0, 500);
+        const gluc = clampNum(targetGluc, 250, 0, 800);
+        const lip = clampNum(targetLip, 75, 0, 300);
         const goalLabel = GOAL_LABELS[goal as string] ?? GOAL_LABELS.maintain;
         const dietLabel = DIET_LABELS[dietType as string];
         const cuisineLabel = CUISINE_LABELS[cuisinePreference as string];
@@ -164,7 +175,7 @@ Deno.serve(async (req) => {
         const promptText = `
 Tu es AI Health Chef, un coach en nutrition expert et créatif.
 Propose ${suggestionCount} idées de repas variées et réalistes, adaptées à un objectif de ${goalLabel}.
-L'utilisateur vise environ ${targetKcal ?? 2200} kcal, ${targetProt ?? 160}g de protéines, ${targetGluc ?? 250}g de glucides et ${targetLip ?? 75}g de lipides par jour au total.${constraintsText}${weeklyPlanInstruction}
+L'utilisateur vise environ ${kcal} kcal, ${prot}g de protéines, ${gluc}g de glucides et ${lip}g de lipides par jour au total.${constraintsText}${weeklyPlanInstruction}
 ${safetyInstruction}
 Varie les moments de la journée (Petit-déjeuner, Déjeuner, Dîner, Collation) et les types de plats — ne propose jamais deux fois le même plat.
 Pour chaque plat, donne aussi la liste des ingrédients (avec quantités approximatives) et les étapes de préparation, courtes et actionnables.
@@ -200,7 +211,7 @@ ${langInstruction}`;
             usedModel = result.usedModel;
         } catch (err) {
             console.error(`Tous les modèles ont échoué (meal-suggestions). Dernière erreur : ${(err as Error).message}`);
-            throw new Error(isEn ? "Suggestions temporarily failed. Please try again later." : "La génération de suggestions a temporairement échoué. Réessaie plus tard.");
+            throw new HttpError(502, isEn ? "Suggestions temporarily failed. Please try again later." : "La génération de suggestions a temporairement échoué. Réessaie plus tard.");
         }
 
         console.log(`SUCCÈS : Suggestions générées avec ${usedModel}`);
@@ -213,7 +224,7 @@ ${langInstruction}`;
             parsedJson = JSON.parse(jsonString);
         } catch {
             console.error("JSON invalide du modèle :", jsonString.slice(0, 500));
-            throw new Error(isEn ? "The model returned an unreadable answer. Please try again." : "Le modèle a renvoyé une réponse illisible. Réessaie.");
+            throw new HttpError(502, isEn ? "The model returned an unreadable answer. Please try again." : "Le modèle a renvoyé une réponse illisible. Réessaie.");
         }
 
         return new Response(JSON.stringify(parsedJson), {
@@ -225,9 +236,9 @@ ${langInstruction}`;
         const message = error instanceof Error ? error.message : String(error);
         console.error("Erreur fatale Edge Function (Meal Suggestions):", message);
 
-        return new Response(JSON.stringify({ error: message }), {
+        return new Response(JSON.stringify({ error: error instanceof HttpError ? message : (isEn ? "Something went wrong. Please try again later." : "Une erreur est survenue. Réessaie plus tard.") }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 400,
+            status: error instanceof HttpError ? error.status : 500,
         })
     }
 })
