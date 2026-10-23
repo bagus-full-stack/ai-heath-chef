@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -316,6 +317,8 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       onTap: () => context.push('/coach_personalization'),
                     ),
+                    // Modèle de plusieurs centaines de Mo : pas adapté à un onglet de navigateur.
+                    if (!kIsWeb)
                     _SettingsItem(
                       icon: Icons.memory_rounded,
                       title: context.l10n.profileLocalAiTitle,
