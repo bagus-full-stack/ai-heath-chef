@@ -21,6 +21,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navProfile => 'Profil';
 
   @override
+  String get commonBackButtonTooltip => 'Retour';
+
+  @override
+  String get commonCloseButtonTooltip => 'Fermer';
+
+  @override
+  String get commonFlashButtonTooltip => 'Flash';
+
+  @override
+  String get commonHelpButtonTooltip => 'Aide';
+
+  @override
+  String get commonDeleteActionLabel => 'Supprimer';
+
+  @override
+  String get navHomeLabel => 'Accueil';
+
+  @override
+  String get navCoachLabel => 'Coach IA';
+
+  @override
+  String get navProfileLabel => 'Profil';
+
+  @override
   String get bmiCategoryUnderweight => 'Insuffisance pondérale';
 
   @override
@@ -259,6 +283,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cameraCaptureRetryButton => 'Réessayer';
+
+  @override
+  String get cameraCaptureShutterButtonLabel => 'Prendre une photo';
 
   @override
   String get checkoutAppBarTitle => 'Finaliser la commande';
@@ -544,6 +571,12 @@ class AppLocalizationsFr extends AppLocalizations {
       'Bonjour, je suis votre coach nutrition. Que souhaitez-vous améliorer aujourd\'hui ?';
 
   @override
+  String get coachChatImageSemanticLabel => 'Photo envoyée';
+
+  @override
+  String get coachTypingIndicatorSemanticLabel => 'Le coach écrit une réponse';
+
+  @override
   String get comingSoonDefaultMessage =>
       'Cette fonctionnalité arrive prochainement.';
 
@@ -568,6 +601,23 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get dashboardCalorieFlooredNotice =>
       'Objectif ajusté au minimum recommandé. Consulte un professionnel de santé pour un régime plus restrictif.';
+
+  @override
+  String dashboardCaloriesGaugeSemanticLabel(int remaining, int goal) {
+    return 'Calories : $remaining restantes sur un objectif de $goal';
+  }
+
+  @override
+  String dashboardMacroProgressSemanticLabel(
+    String label,
+    int current,
+    int target,
+  ) {
+    return '$label : $current g sur un objectif de $target g';
+  }
+
+  @override
+  String get dashboardAvatarTooltip => 'Profil';
 
   @override
   String get dashboardCarbsLabel => 'GLUCIDES';
@@ -993,6 +1043,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mealAnalysisDefaultMealName => 'Repas IA';
 
   @override
+  String get mealAnalysisDecreaseQuantityTooltip => 'Diminuer la quantité';
+
+  @override
+  String get mealAnalysisIncreaseQuantityTooltip => 'Augmenter la quantité';
+
+  @override
+  String get mealAnalysisDeleteIngredientTooltip => 'Supprimer l\'ingrédient';
+
+  @override
   String get mealAnalysisErrorCaloriesInvalid =>
       'Entre les calories de cette portion.';
 
@@ -1131,6 +1190,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mealSuggestionCardProtLabel => 'PROT';
 
   @override
+  String get mealSuggestionCardAddToShoppingListTooltip =>
+      'Ajouter à la liste de courses';
+
+  @override
+  String get mealSuggestionCardAddToJournalTooltip => 'Ajouter au journal';
+
+  @override
+  String get mealSuggestionCardSubstituteTooltip => 'Voir le remplacement';
+
+  @override
   String mealSuggestionsAddedToShoppingListMessage(String title) {
     return '\"$title\" ajouté à la liste de courses';
   }
@@ -1222,6 +1291,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get notificationSettingsCustomRemindersTitle =>
       'RAPPELS PERSONNALISÉS';
+
+  @override
+  String get notificationSettingsDeleteReminderTooltip => 'Supprimer le rappel';
 
   @override
   String get notificationSettingsDisabledLabel => 'Désactivé';
