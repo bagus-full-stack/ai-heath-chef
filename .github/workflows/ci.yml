@@ -16,6 +16,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
 
       - name: Récupération des dépendances
         run: flutter pub get
@@ -45,3 +46,4 @@ jobs:
         run: |
           deno test --allow-env supabase/functions/_shared/
           deno test --allow-env --allow-read supabase/functions/delete-account/
+          deno test --allow-env supabase/functions/coach-chat/
