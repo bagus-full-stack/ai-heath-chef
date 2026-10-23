@@ -572,7 +572,7 @@
   "securityNewPasswordLabel": "New password",
   "securityConfirmPasswordLabel": "Confirm new password",
   "securityUpdatePasswordButton": "Update password",
-  "securityErrorPasswordTooShort": "Password must be at least 6 characters long.",
+  "securityErrorPasswordTooShort": "Password must be at least 8 characters long.",
   "securityErrorPasswordMismatch": "Passwords don't match.",
   "securityPasswordUpdateSuccess": "Password updated.",
   "security2faTitle": "Two-factor authentication",

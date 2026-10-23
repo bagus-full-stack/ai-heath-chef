@@ -6,6 +6,7 @@ import '../l10n/l10n_extensions.dart';
 import '../providers/ai_consent_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/journal_export.dart';
+import '../utils/password_policy.dart';
 
 /// Écran Sécurité et Confidentialité : changement de mot de passe (le seul
 /// réglage réellement actionnable pour l'instant). Remplace l'ancien stub
@@ -45,7 +46,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
     final newPassword = _newPasswordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < kMinPasswordLength) {
       _showMessage(context.l10n.securityErrorPasswordTooShort, isError: true);
       return;
     }

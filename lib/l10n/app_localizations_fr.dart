@@ -1807,7 +1807,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get securityErrorPasswordTooShort =>
-      'Le mot de passe doit contenir au moins 6 caractères.';
+      'Le mot de passe doit contenir au moins 8 caractères.';
 
   @override
   String get securityErrorPasswordMismatch =>

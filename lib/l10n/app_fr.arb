@@ -957,7 +957,7 @@
   "securityNewPasswordLabel": "Nouveau mot de passe",
   "securityConfirmPasswordLabel": "Confirmer le nouveau mot de passe",
   "securityUpdatePasswordButton": "Mettre à jour le mot de passe",
-  "securityErrorPasswordTooShort": "Le mot de passe doit contenir au moins 6 caractères.",
+  "securityErrorPasswordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
   "securityErrorPasswordMismatch": "Les mots de passe ne correspondent pas.",
   "securityPasswordUpdateSuccess": "Mot de passe mis à jour.",
   "security2faTitle": "Authentification à deux facteurs",

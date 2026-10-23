@@ -1794,7 +1794,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get securityErrorPasswordTooShort =>
-      'Password must be at least 6 characters long.';
+      'Password must be at least 8 characters long.';
 
   @override
   String get securityErrorPasswordMismatch => 'Passwords don\'t match.';

@@ -3243,7 +3243,7 @@ abstract class AppLocalizations {
   /// No description provided for @securityErrorPasswordTooShort.
   ///
   /// In fr, this message translates to:
-  /// **'Le mot de passe doit contenir au moins 6 caractères.'**
+  /// **'Le mot de passe doit contenir au moins 8 caractères.'**
   String get securityErrorPasswordTooShort;
 
   /// No description provided for @securityErrorPasswordMismatch.

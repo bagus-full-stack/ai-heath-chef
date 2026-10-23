@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
+import '../utils/password_policy.dart';
 import 'terms_screen.dart' show kTermsVersion;
 
 class SignUpScreen extends ConsumerStatefulWidget {
@@ -39,6 +40,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     if (fullName.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.signupErrorFillAllFields)),
+      );
+      return;
+    }
+
+    if (password.length < kMinPasswordLength) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.securityErrorPasswordTooShort)),
       );
       return;
     }
