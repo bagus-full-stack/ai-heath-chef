@@ -335,6 +335,7 @@ class MealRepository {
         if (row.isDeleted) {
           if (row.isSynced) {
             await _supabase.from('meals').delete().eq('id', row.id);
+            await _removeRemotePhotoIfOrphan(row.imagePath);
           }
           if (!kIsWeb && row.localImagePath != null) {
             final file = File(row.localImagePath!);
@@ -379,6 +380,20 @@ class MealRepository {
         // Échec (réseau, serveur...) : ce repas reste en attente et sera
         // retenté au prochain appel de syncPendingMeals.
       }
+    }
+  }
+
+  /// Supprime la photo Storage d'un repas supprimé, sauf si un autre repas
+  /// (ex. "refaire ce repas", qui réutilise le même fichier) la référence encore.
+  Future<void> _removeRemotePhotoIfOrphan(String? imagePath) async {
+    if (imagePath == null) return;
+    final stillUsed = await _supabase
+        .from('meals')
+        .select('id')
+        .eq('image_path', imagePath)
+        .limit(1);
+    if (stillUsed.isEmpty) {
+      await _supabase.storage.from('meal_photos').remove([imagePath]);
     }
   }
 

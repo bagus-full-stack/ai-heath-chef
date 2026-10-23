@@ -65,14 +65,23 @@ android {
 
     buildTypes {
         release {
-            // Signe avec la vraie clé release si key.properties est présent,
-            // sinon retombe sur la clé debug (ex. CI sans les secrets).
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
+            // Pas de repli sur la clé debug : un build release sans key.properties
+            // doit échouer (voir la vérification juste après android {}).
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
+    }
+}
+
+// Un build release sans clé de signature doit échouer, pas sortir signé en debug.
+gradle.taskGraph.whenReady {
+    val releaseBuild = allTasks.any {
+        it.name.startsWith("assemble") && it.name.endsWith("Release") ||
+            it.name.startsWith("bundle") && it.name.endsWith("Release")
+    }
+    if (releaseBuild && !keystorePropertiesFile.exists()) {
+        throw GradleException("key.properties introuvable : build release impossible sans clé de signature.")
     }
 }
 

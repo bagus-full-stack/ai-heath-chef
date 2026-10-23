@@ -24,7 +24,7 @@ void main() {
     await db.close();
   });
 
-  Future<void> insertPendingMeal(String id, {bool isSynced = false}) {
+  Future<void> insertPendingMeal(String id, {bool isSynced = false, String? imagePath}) {
     return db.into(db.localMeals).insert(
           LocalMealsCompanion.insert(
             id: id,
@@ -32,6 +32,7 @@ void main() {
             name: 'Riz',
             totalKcal: 100,
             isSynced: Value(isSynced),
+            imagePath: Value(imagePath),
             createdAt: DateTime.now(),
           ),
         );
@@ -142,6 +143,42 @@ void main() {
       expect(deleteCalls, 1);
       final rows = await db.select(db.localMeals).get();
       expect(rows, isEmpty);
+    });
+
+    // [stillReferencedBy] : lignes `meals` renvoyées par la requête "ce fichier est-il encore utilisé ?".
+    Future<List<String>> deleteMealWithPhoto(List<Map<String, String>> stillReferencedBy) async {
+      await insertPendingMeal('meal-1', isSynced: true, imagePath: '$_userId/meal-1.jpg');
+      await (db.update(db.localMeals)..where((m) => m.id.equals('meal-1')))
+          .write(const LocalMealsCompanion(isDeleted: Value(true)));
+
+      final removedFromStorage = <String>[];
+      final repo = MealRepository(
+        db,
+        await fakeAuthenticatedClient(_userId, (request) async {
+          if (request.method == 'DELETE' && request.url.path.endsWith('/rest/v1/meals')) {
+            return jsonResponse(request, [], status: 200);
+          }
+          if (request.method == 'GET' && request.url.path.endsWith('/rest/v1/meals')) {
+            return jsonResponse(request, stillReferencedBy, status: 200);
+          }
+          if (request.method == 'DELETE' && request.url.path.contains('/storage/v1/object/meal_photos')) {
+            removedFromStorage.add(request.url.path);
+            return jsonResponse(request, [], status: 200);
+          }
+          return http.Response('not found', 404);
+        }),
+      );
+
+      await repo.syncPendingMeals();
+      return removedFromStorage;
+    }
+
+    test('deleting a synced meal also removes its photo from Storage', () async {
+      expect(await deleteMealWithPhoto([]), hasLength(1));
+    });
+
+    test('deleting a meal keeps the Storage photo while another meal still uses it', () async {
+      expect(await deleteMealWithPhoto([{'id': 'meal-2'}]), isEmpty);
     });
 
     test('a meal never synced to Supabase is deleted locally without calling DELETE remotely', () async {

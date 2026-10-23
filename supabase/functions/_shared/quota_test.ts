@@ -153,3 +153,25 @@ Deno.test("checkAndIncrementQuota - N appels concurrents n'autorisent jamais plu
         globalThis.fetch = original;
     }
 });
+
+Deno.test("checkAndIncrementQuota - admin/PRO : limite par utilisateur x10, jamais illimitée", async () => {
+    setEnv();
+    const restore = stubFetch({ authOk: true, isAdmin: true, rpcResults: { increment_api_usage: true } });
+    const stubbed = globalThis.fetch;
+    let sentLimit: number | undefined;
+    globalThis.fetch = ((input: Request | string | URL, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
+        if (url.includes("/rpc/increment_api_usage")) {
+            sentLimit = JSON.parse(init?.body as string).p_daily_limit;
+        }
+        return stubbed(input, init);
+    }) as typeof fetch;
+    try {
+        const result = await checkAndIncrementQuota(authRequest(), "test-fn", 20, {});
+        assertEquals(result.ok, true);
+        assertEquals(sentLimit, 200);
+    } finally {
+        globalThis.fetch = stubbed;
+        restore();
+    }
+});

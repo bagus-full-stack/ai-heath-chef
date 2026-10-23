@@ -37,6 +37,7 @@ function nextUtcMidnightIso(): string {
 // Cache court de l'état PRO par utilisateur : évite un appel RevenueCat à chaque requête IA.
 // shortcut: cache par instance de fonction, un abonnement résilié reste illimité jusqu'à 60 s de plus.
 const PRO_CACHE_TTL_MS = 60_000;
+const UNLIMITED_FACTOR = 10;
 const proCache = new Map<string, { value: boolean; expires: number }>();
 
 async function hasUnlimitedQuota(
@@ -146,33 +147,33 @@ export async function checkAndIncrementQuota(
     const userId = userData.user.id;
     const serviceClient = createClient(supabaseUrl, serviceRoleKey);
 
-    if (!(await hasUnlimitedQuota(serviceClient, userId))) {
-        const { data: allowed, error: quotaError } = await serviceClient.rpc(
-            "increment_api_usage",
-            { p_user_id: userId, p_function_name: functionName, p_daily_limit: dailyLimit },
-        );
+    // Admin/PRO : plafond élargi plutôt que supprimé, sinon un seul compte peut vider le plafond global.
+    const userLimit = (await hasUnlimitedQuota(serviceClient, userId)) ? dailyLimit * UNLIMITED_FACTOR : dailyLimit;
+    const { data: allowed, error: quotaError } = await serviceClient.rpc(
+        "increment_api_usage",
+        { p_user_id: userId, p_function_name: functionName, p_daily_limit: userLimit },
+    );
 
-        if (quotaError) {
-            // Une panne sur le mécanisme de quota lui-même ne doit pas bloquer
-            // l'utilisateur — seul un quota effectivement dépassé bloque.
-            console.error(`Erreur quota (${functionName}) :`, quotaError.message);
-            return { ok: true, userId };
-        }
+    if (quotaError) {
+        // Une panne sur le mécanisme de quota lui-même ne doit pas bloquer
+        // l'utilisateur — seul un quota effectivement dépassé bloque.
+        console.error(`Erreur quota (${functionName}) :`, quotaError.message);
+        return { ok: true, userId };
+    }
 
-        if (!allowed) {
-            return {
-                ok: false,
-                response: new Response(
-                    JSON.stringify({
-                        error: isEn
-                            ? `Daily limit reached (${dailyLimit}/day) for this feature. Try again tomorrow.`
-                            : `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
-                        resetAt: nextUtcMidnightIso(),
-                    }),
-                    { status: 429, headers: jsonHeaders },
-                ),
-            };
-        }
+    if (!allowed) {
+        return {
+            ok: false,
+            response: new Response(
+                JSON.stringify({
+                    error: isEn
+                        ? `Daily limit reached (${userLimit}/day) for this feature. Try again tomorrow.`
+                        : `Limite quotidienne atteinte (${userLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
+                    resetAt: nextUtcMidnightIso(),
+                }),
+                { status: 429, headers: jsonHeaders },
+            ),
+        };
     }
 
     if (globalDailyLimit !== undefined) {
