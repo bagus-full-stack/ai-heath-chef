@@ -6,36 +6,12 @@ import { callGeminiWithFallback } from "./gemini.ts"
 
 // Liste de priorité des modèles (voir README : diverge volontairement/par
 // drift historique des autres fonctions IA du projet, non harmonisée).
+// Seuls les GEMINI_MAX_MODELS_TRIED premiers sont essayés (voir gemini.ts) : inutile d'en lister plus.
 const MODELS = [
     "gemini-2.5-flash",
     "gemini-2.5-pro",
     "gemini-2.0-flash-exp",
     "gemini-2.0-flash",
-    "gemini-2.0-flash-001",
-    "gemini-2.0-flash-lite-001",
-    "gemini-2.0-flash-lite",
-    "gemini-2.0-flash-lite-preview-02-05",
-    "gemini-2.0-flash-lite-preview",
-    "gemini-exp-1206",
-    "gemini-2.5-flash-preview-tts",
-    "gemini-2.5-pro-preview-tts",
-    "gemma-3-1b-it",
-    "gemma-3-4b-it",
-    "gemma-3-12b-it",
-    "gemma-3-27b-it",
-    "gemma-3n-e4b-it",
-    "gemma-3n-e2b-it",
-    "gemini-flash-latest",
-    "gemini-flash-lite-latest",
-    "gemini-pro-latest",
-    "gemini-2.5-flash-lite",
-    "gemini-2.5-flash-image-preview",
-    "gemini-2.5-flash-image",
-    "gemini-2.5-flash-preview-09-2025",
-    "gemini-2.5-flash-lite-preview-09-2025",
-    "gemini-3-pro-preview",
-    "gemini-3-flash-preview",
-    "gemini-3-pro-image-preview",
 ];
 
 
@@ -65,12 +41,6 @@ export async function handleImageAnalysis(
     const lang = body?.lang === 'en' ? 'en' : 'fr';
     const isEn = lang === 'en';
 
-    // === QUOTA QUOTIDIEN PAR UTILISATEUR ===
-    const quota = await checkAndIncrementQuota(req, config.functionName, 20, corsHeaders, 500, lang);
-    if (!quota.ok) {
-        return quota.response!;
-    }
-
     try {
         if (bodyParseError) {
             throw new HttpError(400, isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé.");
@@ -81,6 +51,13 @@ export async function handleImageAnalysis(
             throw new HttpError(400, isEn ? "No image was provided in the request." : "Aucune image n'a été fournie dans la requête.");
         }
         validateBase64Image(image, isEn);
+
+        // === QUOTA QUOTIDIEN PAR UTILISATEUR === après validation : une requête invalide ne consomme pas de crédit.
+        const quota = await checkAndIncrementQuota(req, config.functionName, 20, corsHeaders, 500, lang);
+        if (!quota.ok) {
+            return quota.response!;
+        }
+
         const langInstruction = isEn
             ? `Respond with English text values (${config.names?.en ?? "ingredient names"}) in the JSON.`
             : `Réponds avec des valeurs textuelles en français (${config.names?.fr ?? "noms des ingrédients"}) dans le JSON.`;

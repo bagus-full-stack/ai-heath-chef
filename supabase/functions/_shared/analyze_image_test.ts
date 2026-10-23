@@ -52,6 +52,7 @@ Deno.test("handleImageAnalysis - image absente -> 400", async () => {
     try {
         const res = await handleImageAnalysis(request({ lang: "fr" }), CONFIG);
         assertEquals(res.status, 400);
+        assertEquals(stub.seen.quotaFunction, ""); // requête invalide : aucun crédit de quota consommé
     } finally {
         stub.restore();
     }

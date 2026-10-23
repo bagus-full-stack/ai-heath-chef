@@ -1,16 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "jsr:@supabase/supabase-js@2"
-
-// 1. Headers CORS complets
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders } from "../_shared/cors.ts"
+import { authenticate } from "../_shared/auth.ts"
 
 /**
- * Fonction autonome (pas d'import vers _shared/) : déployée depuis l'éditeur
- * du Dashboard Supabase, qui ne bundle pas les fichiers hors de la fonction
- * elle-même (voir les 5 autres Edge Functions du projet, même contrainte).
+ * À déployer avec la CLI (`supabase functions deploy`, comme la CI le fait) :
+ * l'éditeur du Dashboard ne bundle pas les imports vers `_shared/`.
  *
  * Donne le token Hugging Face (secret HUGGINGFACE_TOKEN) à un utilisateur
  * authentifié, pour qu'il puisse télécharger le modèle Gemma3n "gated"
@@ -39,26 +33,9 @@ Deno.serve(async (req) => {
 
     try {
         // === VÉRIFICATION JWT (authentification requise, pas de quota) ===
-        const authHeader = req.headers.get('Authorization');
-        if (!authHeader) {
-            return new Response(
-                JSON.stringify({ error: 'Authentification requise.' }),
-                { status: 401, headers: jsonHeaders },
-            );
-        }
-
-        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-        const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-
-        const userClient = createClient(supabaseUrl, anonKey, {
-            global: { headers: { Authorization: authHeader } },
-        });
-        const { data: userData, error: userError } = await userClient.auth.getUser();
-        if (userError || !userData?.user) {
-            return new Response(
-                JSON.stringify({ error: 'Authentification invalide.' }),
-                { status: 401, headers: jsonHeaders },
-            );
+        const auth = await authenticate(req, jsonHeaders, false);
+        if (!auth.ok) {
+            return auth.response;
         }
 
         // === RÉCUPÉRATION DU TOKEN ===

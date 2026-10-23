@@ -1,4 +1,5 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { authenticate } from "./auth.ts";
 
 /**
  * Résultat de la vérification de quota : soit l'appel est autorisé (`ok:
@@ -37,6 +38,7 @@ function nextUtcMidnightIso(): string {
 // Cache court de l'état PRO par utilisateur : évite un appel RevenueCat à chaque requête IA.
 // shortcut: cache par instance de fonction, un abonnement résilié reste illimité jusqu'à 60 s de plus.
 const PRO_CACHE_TTL_MS = 60_000;
+const PRO_CACHE_MAX_ENTRIES = 1000; // purge des entrées expirées au-delà, pour ne pas grossir sans fin
 const UNLIMITED_FACTOR = 10;
 const proCache = new Map<string, { value: boolean; expires: number }>();
 
@@ -74,6 +76,10 @@ async function hasUnlimitedQuota(
         const expiresDate = body?.subscriber?.entitlements?.pro?.expires_date;
         const isPro = expiresDate === null ||
             (typeof expiresDate === "string" && new Date(expiresDate) > new Date());
+        if (proCache.size >= PRO_CACHE_MAX_ENTRIES) {
+            const now = Date.now();
+            for (const [id, entry] of proCache) if (entry.expires <= now) proCache.delete(id);
+        }
         proCache.set(userId, { value: isPro, expires: Date.now() + PRO_CACHE_TTL_MS });
         return isPro;
     } catch (_) {
@@ -116,35 +122,14 @@ export async function checkAndIncrementQuota(
     const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
     const isEn = lang === "en";
 
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-        return {
-            ok: false,
-            response: new Response(
-                JSON.stringify({ error: isEn ? "Authentication required." : "Authentification requise." }),
-                { status: 401, headers: jsonHeaders },
-            ),
-        };
+    const auth = await authenticate(req, jsonHeaders, isEn);
+    if (!auth.ok) {
+        return { ok: false, response: auth.response };
     }
+    const userId = auth.userId;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const userClient = createClient(supabaseUrl, anonKey, {
-        global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userError } = await userClient.auth.getUser();
-    if (userError || !userData?.user) {
-        return {
-            ok: false,
-            response: new Response(
-                JSON.stringify({ error: isEn ? "Invalid authentication." : "Authentification invalide." }),
-                { status: 401, headers: jsonHeaders },
-            ),
-        };
-    }
-    const userId = userData.user.id;
     const serviceClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Admin/PRO : plafond élargi plutôt que supprimé, sinon un seul compte peut vider le plafond global.
@@ -157,7 +142,7 @@ export async function checkAndIncrementQuota(
     if (quotaError) {
         // Une panne sur le mécanisme de quota lui-même ne doit pas bloquer
         // l'utilisateur — seul un quota effectivement dépassé bloque.
-        console.error(`Erreur quota (${functionName}) :`, quotaError.message);
+        console.error(`[QUOTA_FAIL_OPEN] Erreur quota (${functionName}) :`, quotaError.message);
         return { ok: true, userId };
     }
 
@@ -183,7 +168,7 @@ export async function checkAndIncrementQuota(
         );
 
         if (globalQuotaError) {
-            console.error(`Erreur quota global (${functionName}) :`, globalQuotaError.message);
+            console.error(`[QUOTA_FAIL_OPEN] Erreur quota global (${functionName}) :`, globalQuotaError.message);
         } else if (!globalAllowed) {
             return {
                 ok: false,

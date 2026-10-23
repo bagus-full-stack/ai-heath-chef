@@ -175,3 +175,28 @@ Deno.test("checkAndIncrementQuota - admin/PRO : limite par utilisateur x10, jama
         restore();
     }
 });
+
+Deno.test("checkAndIncrementQuota - panne du RPC de quota : appel autorisé (fail-open) et log [QUOTA_FAIL_OPEN] à surveiller", async () => {
+    setEnv();
+    const restore = stubFetch({ authOk: true });
+    const stubbed = globalThis.fetch;
+    globalThis.fetch = ((input: Request | string | URL, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
+        if (url.includes("/rpc/increment_api_usage")) {
+            return Promise.resolve(new Response(JSON.stringify({ message: "boom" }), { status: 500 }));
+        }
+        return stubbed(input, init);
+    }) as typeof fetch;
+    const originalError = console.error;
+    const logs: string[] = [];
+    console.error = (...args: unknown[]) => logs.push(args.join(" "));
+    try {
+        const result = await checkAndIncrementQuota(authRequest(), "test-fn", 10, {});
+        assertEquals(result.ok, true);
+        assertEquals(logs.some((l) => l.includes("[QUOTA_FAIL_OPEN]")), true);
+    } finally {
+        console.error = originalError;
+        globalThis.fetch = stubbed;
+        restore();
+    }
+});
