@@ -26,7 +26,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Préférences alimentaires** — régime (végétarien, végétalien, pescétarien, halal, kasher) et allergies/intolérances, pris en compte par les idées de repas et le Coach IA
 - **Rappels** — notifications locales quotidiennes pour les repas (petit-déjeuner/déjeuner/dîner, activables et personnalisables individuellement) et rappels personnalisés illimités (nom + heure au choix, quotidien ou un jour de la semaine donné — ex. le rappel de pesée hebdomadaire), réglables depuis Profil > Notifications. Tant qu'un créneau repas n'a jamais été réglé manuellement, son heure par défaut est déduite de l'historique de repas de l'utilisateur (heure habituelle sur les 30 derniers jours) plutôt qu'un horaire fixe générique. Les rappels personnalisés sont aussi sauvegardés sur Supabase et restaurés automatiquement sur un appareil "vide" (nouvelle install/nouveau téléphone) ; les créneaux fixes petit-déjeuner/déjeuner/dîner restent purement locaux (rapides à réactiver manuellement)
 - **Profil & compte** — gestion du profil utilisateur, paramètres de compte, photo de profil
-- **Sécurité et confidentialité** — changement du mot de passe depuis Profil > Sécurité (session active requise, pas de ré-saisie de l'ancien mot de passe). Le 2FA n'est pas encore implémenté (chantier séparé : nécessite aussi une vérification à la connexion, pas seulement un écran d'inscription)
+- **Sécurité et confidentialité** — changement du mot de passe depuis Profil > Sécurité (session active requise, pas de ré-saisie de l'ancien mot de passe). Mot de passe : 8 caractères minimum (constante `kMinPasswordLength` ; règle à aligner dans Supabase > Authentication > Providers > Email > « Minimum password length »). Le 2FA n'est pas encore implémenté (chantier séparé : nécessite aussi une vérification à la connexion, pas seulement un écran d'inscription)
 - **Suppression de compte** — parcours complet depuis Profil > Sécurité > Supprimer mon compte : confirmation explicite (mot de confirmation à ressaisir), suppression côté serveur (Storage + lignes Postgres via cascade + compte Auth, Edge Function `delete-account`), purge locale (base SQLite, préférences, rappels programmés, widget écran d'accueil) puis déconnexion. Avertit qu'un abonnement Apple/Google actif n'est pas annulé automatiquement (lien vers la gestion des abonnements du store)
 - **Centre d'aide** — FAQ groupée par thème + contact support par email
 - **Conditions d'utilisation** — CGU et mentions légales (⚠️ contenu de brouillon, voir [Notes](#notes) ci-dessous)
@@ -128,10 +128,12 @@ supabase/
                 cascade entre modèles Gemini (fetch, timeout, retry) — chaque
                 fonction garde néanmoins SA PROPRE liste de modèles `MODELS`
                 (elles divergent entre fonctions par drift historique, non
-                harmonisées). analyze-meal, analyze-menu et analyze-pantry partagent le même handler
+                harmonisées). analyze-meal, analyze-menu, analyze-pantry et analyze-product partagent le même handler
                 (`_shared/analyze_image.ts`, contrat JSON `{ ingredients: [...] }`), seul
                 le prompt de leur `index.ts` change (assiette / carte de restaurant /
-                inventaire de frigo).
+                inventaire de frigo / produit emballé).
+                Les erreurs inattendues des fonctions IA renvoient un message générique (500) ; seules les
+                `HttpError` exposent leur message.
                 delete-account n'a pas de quota IA (aucun appel GEMINI_API_KEY) mais applique
                 son propre rate limit (3 tentatives/heure, voir migration 0017).
                 coach-chat sépare la logique (`handler.ts`, exportée pour les tests)
