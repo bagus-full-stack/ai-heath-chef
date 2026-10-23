@@ -4,7 +4,7 @@
 ///
 /// ATTENTION : les numéros ci-dessous n'ont pas été vérifiés par un tiers
 /// dans le cadre de cet audit — à confirmer manuellement avant mise en
-/// production (voir docs/AUDIT_CHATBOT.md, étape 1) :
+/// production :
 /// - "3114" : numéro national de prévention du suicide (France), gratuit, 24/7.
 /// - "15" : SAMU, urgences médicales (France).
 /// - "112" : numéro d'urgence unique, valable dans toute l'Union européenne.

@@ -3,7 +3,7 @@
 /// supabase/functions/coach-chat/index.ts (filtre équivalent côté serveur).
 /// Un petit modèle on-device ne peut pas être la seule défense contre un
 /// message évoquant un risque vital ou un trouble du comportement
-/// alimentaire — voir docs/AUDIT_CHATBOT.md, étape 1.
+/// alimentaire.
 ///
 /// Détection par sous-chaînes sur texte normalisé, pas de NLP : rapide,
 /// testable, mais contournable par une formulation suffisamment différente

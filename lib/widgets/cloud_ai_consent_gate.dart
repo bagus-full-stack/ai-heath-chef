@@ -185,7 +185,7 @@ Future<bool> ensureCloudAiConsent(BuildContext context, WidgetRef ref) async {
   if (accepted == false) {
     // Refus explicite (bouton "Pas maintenant") : le dismiss par toucher du
     // fond renvoie `null`, pas `false` — seul le refus explicite déclenche
-    // la carte persistante du chat (voir docs/AUDIT_CHATBOT.md étape 3).
+    // la carte persistante du chat.
     await ref.read(cloudAiConsentDeclinedProvider.notifier).markDeclined();
   }
   return false;

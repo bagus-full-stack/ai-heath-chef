@@ -1,5 +1,5 @@
 /**
- * Script d'évaluation sur `eval_cases.json` (docs/AUDIT_CHATBOT.md étape 9).
+ * Script d'évaluation sur `eval_cases.json`.
  *
  * Deux modes, choisis automatiquement selon les variables d'environnement :
  *

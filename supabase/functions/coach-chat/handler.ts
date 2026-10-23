@@ -42,7 +42,7 @@ const MAX_MESSAGE_LENGTH = 4000;
 const MAX_HISTORY_ENTRIES = 50;
 // Généreux par rapport aux ~500 caractères attendus d'un vrai bloc (voir
 // coach_context_builder.dart) : borne défensive contre un appelant
-// malveillant/bugué, pas un budget normal (docs/AUDIT_CHATBOT.md étape 6).
+// malveillant/bugué, pas un budget normal.
 const MAX_DAILY_CONTEXT_LENGTH = 2000;
 
 /** Extrait pour être appelable directement depuis `index_test.ts` (Deno.serve ne peut pas être importé). */
@@ -84,8 +84,7 @@ export async function handleCoachChat(req: Request): Promise<Response> {
 
         // === FILET DE SÉCURITÉ DÉTERMINISTE (avant tout appel modèle) ===
         // Complémentaire au safetyInstruction du prompt : un modèle peut
-        // ignorer une instruction, pas ce filtre. Voir health_risk_filter.ts
-        // et docs/AUDIT_CHATBOT.md étape 1.
+        // ignorer une instruction, pas ce filtre. Voir health_risk_filter.ts.
         const riskCategory = detectHealthRisk(message);
         if (riskCategory) {
             return new Response(JSON.stringify({ reply: safetyReplyFor(riskCategory, isEn), suggestedDish: null }), {

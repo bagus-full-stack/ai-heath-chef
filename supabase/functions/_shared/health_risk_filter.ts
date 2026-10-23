@@ -4,7 +4,7 @@
  * peut être ignoré ou contourné par le modèle, pas ce filtre. Miroir
  * volontaire de lib/utils/health_risk_filter.dart côté Flutter (pas de code
  * partagé possible entre Dart et Deno) — toute évolution des phrases
- * détectées doit être répercutée des deux côtés, voir docs/AUDIT_CHATBOT.md
+ * détectées doit être répercutée des deux côtés
  * étape 1.
  */
 
@@ -138,7 +138,7 @@ function hasDangerousWeightLossRate(normalized: string): boolean {
  * orientation vers un professionnel. Doit rester alignée avec les clés ARB
  * `coachSafetyReply*` côté Flutter (lib/l10n/app_fr.arb, app_en.arb) et avec
  * lib/config/emergency_contacts.dart pour la ligne d'urgence — numéros à
- * vérifier manuellement (voir docs/AUDIT_CHATBOT.md étape 1).
+ * vérifier manuellement.
  */
 export function safetyReplyFor(category: HealthRiskCategory, isEn: boolean): string {
     switch (category) {

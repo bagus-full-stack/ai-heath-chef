@@ -742,7 +742,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
     }
     // Consentement cloud demandé seulement si l'IA locale n'est pas prête :
     // si elle l'est, le chat reste 100% local et aucun prompt n'est jamais
-    // affiché (voir docs/AUDIT_CHATBOT.md étape 3, cas 1).
+    // affiché.
     final localReady = ref.read(localAiSettingsProvider).value?.isReadyToUse == true;
     if (!localReady && ref.read(cloudAiConsentProvider).value != true) {
       // Consentement absent (jamais demandé ou refusé) : on demande ici,
@@ -809,7 +809,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
     const primaryColor = kCoachPrimaryColor;
     final messagesAsync = ref.watch(chatProvider);
     final messages = messagesAsync.value ?? const <ChatMessage>[];
-    // Cas 4 (étape 3) : IA locale pas prête ET consentement cloud refusé
+    // Cas 4 : IA locale pas prête ET consentement cloud refusé
     // explicitement -> carte explicative à la place du champ de saisie,
     // jamais un champ silencieusement bloqué.
     final localReady =
@@ -891,7 +891,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                   ),
                 ),
                 // Disclaimer permanent (jamais masquable) : exigence de
-                // transparence store/conformité, voir docs/AUDIT_CHATBOT.md
+                // transparence store/conformité
                 // étape 5 — "IA, ne remplace pas un avis médical".
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
@@ -1252,7 +1252,7 @@ class _ChatBubble extends ConsumerWidget {
                 height: 1.35,
               ),
             ),
-            // Signalement (docs/AUDIT_CHATBOT.md étape 7) : jamais pour le
+            // Signalement : jamais pour le
             // message de bienvenue statique, rien à signaler dedans.
             if (!isUser && message.id != 'welcome')
               Padding(
@@ -1277,7 +1277,7 @@ class _ChatBubble extends ConsumerWidget {
 
 /// Icône de signalement d'une réponse du coach — ouvre un bottom sheet pour
 /// choisir un motif (+ commentaire optionnel) et l'envoyer via
-/// [ChatNotifier.reportMessage] (docs/AUDIT_CHATBOT.md étape 7).
+/// [ChatNotifier.reportMessage].
 class _ReportButton extends StatelessWidget {
   final ChatMessage message;
 
@@ -1421,7 +1421,7 @@ class _ReportSheetState extends ConsumerState<_ReportSheet> {
 }
 
 /// Indicateur du moteur ayant généré une réponse (local vs cloud) — exigence
-/// de transparence, docs/AUDIT_CHATBOT.md étape 5. Rendu uniquement quand
+/// de transparence. Rendu uniquement quand
 /// [ChatMessage.engine] est connu (réponse générée pendant la session en
 /// cours, jamais pour un message rechargé depuis l'historique).
 class _EngineBadge extends StatelessWidget {

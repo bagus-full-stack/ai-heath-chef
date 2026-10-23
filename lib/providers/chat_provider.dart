@@ -51,7 +51,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
   Future<List<ChatMessage>> build() async {
     // `watch` (pas `read`) : un changement de langue doit reconstruire
     // immédiatement le message de bienvenue, pas seulement après un
-    // resetConversation() (voir docs/AUDIT_CHATBOT.md, étape 2).
+    // resetConversation().
     ref.watch(localeProvider);
 
     final user = _supabase.auth.currentUser;
@@ -217,7 +217,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     final geminiHistory = _toGeminiHistory(historyForGemini);
     final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
 
-    // Bloc contexte du jour (docs/AUDIT_CHATBOT.md étape 6) : lu depuis les
+    // Bloc contexte du jour : lu depuis les
     // providers déjà existants (DB locale), jamais de nouvelle requête ici.
     // En lecture seule via `read` : sendMessage() est un instantané au
     // moment de l'envoi, pas un flux réactif.
@@ -238,7 +238,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     // donc pas d'illustration pour les réponses générées hors-ligne.
     String aiReplyText;
     String? suggestedDish;
-    // Indicateur de transparence (docs/AUDIT_CHATBOT.md étape 5) : quel
+    // Indicateur de transparence : quel
     // moteur a réellement généré cette réponse, pas quel moteur était
     // configuré — distingue un repli cloud après échec local (null = aucun
     // modèle, ex. filet de sécurité ou double échec).
@@ -247,8 +247,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     // Filet de sécurité déterministe, avant tout appel modèle : un petit
     // modèle local n'a pas le garde-fou santé du prompt cloud, donc ce
     // filtre doit intercepter le message avant la branche local/cloud, pas
-    // dans le prompt (voir lib/utils/health_risk_filter.dart et
-    // docs/AUDIT_CHATBOT.md étape 1).
+    // dans le prompt (voir lib/utils/health_risk_filter.dart).
     final riskCategory = detectHealthRisk(trimmed);
     if (riskCategory != null) {
       aiReplyText = _buildSafetyReply(riskCategory, lang);
@@ -276,7 +275,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
           } catch (_) {
             // Repli cloud uniquement si le consentement a déjà été donné
             // (étape 3, cas 5) : jamais d'appel cloud silencieux faute de
-            // mieux (voir docs/AUDIT_CHATBOT.md étape 3).
+            // mieux.
             if (ref.read(cloudAiConsentProvider).value == true) {
               final cloudReply = await _aiService.chatWithCoach(
                 trimmed,
@@ -356,8 +355,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
   static const int _reportExcerptMaxLength = 1000;
 
   /// Signale [message] comme problématique (dangereux/incorrect/inapproprié/
-  /// autre), exigence de modération Google Play (docs/AUDIT_CHATBOT.md étape
-  /// 7). RLS (migration 0022_add_chat_reports.sql) n'autorise l'insertion
+  /// autre), exigence de modération Google Play. RLS (migration 0022_add_chat_reports.sql) n'autorise l'insertion
   /// que de ses propres signalements, jamais leur modification/suppression.
   /// `message.id` n'est pas la clé primaire de la ligne `chat_messages`
   /// correspondante (générée côté serveur) : `excerpt` conserve donc le
@@ -452,7 +450,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
   /// Lit la langue courante à chaque appel (plutôt qu'une constante figée) :
   /// affiché à la fois au chargement initial et après un changement de
   /// langue suivi d'un resetConversation(), donc jamais figé dans la langue
-  /// de démarrage de l'app (voir docs/AUDIT_CHATBOT.md, étape 2).
+  /// de démarrage de l'app.
   ChatMessage _buildWelcomeMessage() {
     final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
     return ChatMessage(

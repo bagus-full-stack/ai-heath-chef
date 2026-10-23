@@ -19,7 +19,7 @@ class ChatMessage {
   // chargement à la demande côté UI.
   final bool hasLegacyImage;
   // Quel moteur a généré cette réponse ('local' ou 'cloud'), pour
-  // l'indicateur de transparence (docs/AUDIT_CHATBOT.md étape 5). Non
+  // l'indicateur de transparence. Non
   // persisté en base (pas de colonne dédiée) : null pour tout message
   // utilisateur, tout message rechargé depuis l'historique, ou toute réponse
   // du filet de sécurité déterministe (aucun modèle n'a répondu).

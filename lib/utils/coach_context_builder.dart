@@ -4,8 +4,7 @@ import '../models/user_profile.dart';
 import '../utils/nutrition_targets.dart';
 
 /// Nombre maximum de repas inclus dans le bloc — borne la taille même pour
-/// une journée avec un nombre de repas inhabituel (voir
-/// docs/AUDIT_CHATBOT.md étape 6, "size overflow").
+/// une journée avec un nombre de repas inhabituel.
 const int kMaxMealsInContext = 8;
 
 /// Longueur maximale d'un nom de repas inclus dans le bloc, après
@@ -37,14 +36,14 @@ class DailyContextInput {
 
 /// Construit le bloc de contexte du jour (profil, cibles, consommé/restant,
 /// repas, hydratation, poids, jeûne) à injecter dans le prompt système à
-/// chaque tour — voir docs/AUDIT_CHATBOT.md étape 6.
+/// chaque tour.
 ///
 /// Minimisation des données : ni email, ni identifiant, ni photo — seulement
 /// ce qui sert la conversation (voir [UserProfile], on ne lit jamais
 /// `userId`/`email`/`fullName` ici).
 ///
 /// Sécurité : le nom d'un repas est une donnée libre saisie par
-/// l'utilisateur (comme les allergies, étape 4) — neutralisé via
+/// l'utilisateur (comme les allergies) — neutralisé via
 /// [CoachPrompt.neutralizeDelimiters] avant interpolation, sinon ce bloc
 /// redeviendrait un vecteur d'injection dès qu'un nom de repas y est inclus
 /// (voir eval_cases.json, cas "injection_meal_name", désormais applicable).

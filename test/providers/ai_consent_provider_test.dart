@@ -5,8 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ai_health_chef/providers/ai_consent_provider.dart';
 import 'package:ai_health_chef/providers/local_ai_provider.dart';
 
-// Vérifie les 5 cas de routage local/cloud décrits dans
-// docs/AUDIT_CHATBOT.md (étape 3), via les primitives d'état qui pilotent le
+// Vérifie les 5 cas de routage local/cloud décrits ci-dessous, via les primitives d'état qui pilotent le
 // branchement (coach_screen.dart / chat_provider.dart) :
 // - LocalAiSettings.isReadyToUse (IA locale prête ou non)
 // - cloudAiConsentProvider (consentement cloud accordé ou non)

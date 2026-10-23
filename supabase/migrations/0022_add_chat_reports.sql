@@ -1,6 +1,5 @@
 -- ============================================================================
--- Signalement d'une réponse du coach IA jugée problématique — exigence Google
--- Play (voir docs/AUDIT_CHATBOT.md étape 7, correctif #7).
+-- Signalement d'une réponse du coach IA jugée problématique — exigence Google Play.
 -- ============================================================================
 -- `message_id` référence l'id client (ChatMessage.id, généré localement),
 -- pas une clé étrangère vers chat_messages.id (généré côté serveur à
@@ -20,7 +19,7 @@ create table if not exists public.chat_reports (
 );
 
 comment on table public.chat_reports is
-  'Signalements utilisateur d''une réponse du coach IA (docs/AUDIT_CHATBOT.md étape 7).';
+  'Signalements utilisateur d''une réponse du coach IA.';
 
 create index if not exists idx_chat_reports_user_id_created_at
   on public.chat_reports (user_id, created_at desc);

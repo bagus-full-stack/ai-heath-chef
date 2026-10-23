@@ -262,8 +262,7 @@ Future<void> exportWeeklyMealPlanIcs(WidgetRef ref) async {
 /// Exporte toutes les données personnelles de l'utilisateur (profil, repas,
 /// poids, hydratation, chat, plans de repas, préférences — voir
 /// [DataExportService]) en un unique JSON et ouvre le sélecteur de partage
-/// natif. Droit d'accès/portabilité RGPD, voir
-/// docs/PRIVACY_POLICY_DRAFT.md section 7.
+/// natif. Droit d'accès/portabilité RGPD.
 Future<void> exportAllUserData(WidgetRef ref) async {
   final service = DataExportService(
     ref.read(appDatabaseProvider),

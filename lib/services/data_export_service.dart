@@ -8,8 +8,7 @@ import '../local_db/app_database.dart';
 import 'storage_image_service.dart';
 
 /// Rassemble toutes les données personnelles de l'utilisateur connecté en un
-/// unique JSON exportable (droit d'accès/portabilité RGPD, voir
-/// docs/PRIVACY_POLICY_DRAFT.md section 7).
+/// unique JSON exportable (droit d'accès/portabilité RGPD).
 ///
 /// Chaque source distante est lue en best-effort (voir
 /// [MealRepository.syncPendingMeals] pour le même principe) : une erreur
@@ -198,7 +197,7 @@ class DataExportService {
   }
 
   /// Signalements soumis par l'utilisateur sur des réponses du coach IA
-  /// (docs/AUDIT_CHATBOT.md étape 7) — faible volume, pas de pagination
+  /// — faible volume, pas de pagination
   /// nécessaire contrairement à [_exportChatMessages].
   Future<List<Map<String, dynamic>>> _exportChatReports(String userId) async {
     try {

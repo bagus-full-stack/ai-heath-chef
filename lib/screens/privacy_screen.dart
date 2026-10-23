@@ -20,10 +20,9 @@ class _PrivacySection {
 // ============================================================================
 // CONTENU — BROUILLON
 // ----------------------------------------------------------------------------
-// Résumé in-app de docs/PRIVACY_POLICY_DRAFT.md (voir ce fichier pour le
-// détail complet, tableaux inclus, FR+EN). Produit à partir d'une lecture du
+// Résumé in-app de la politique de confidentialité. Produit à partir d'une lecture du
 // code (pas du README). N'a PAS été relu par un professionnel du droit — voir
-// bandeau affiché à l'écran et docs/STORE_CHECKLIST.md pour la liste des
+// bandeau affiché à l'écran pour la liste des
 // points à faire valider avant mise en ligne publique.
 // ============================================================================
 List<_PrivacySection> _sections(BuildContext context) {

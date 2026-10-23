@@ -5,8 +5,7 @@ const _consentKey = 'cloud_ai_consent_given';
 const _declinedKey = 'cloud_ai_consent_declined';
 
 /// Consentement explicite avant le premier envoi de photo/texte à l'IA
-/// cloud (Google Gemini, Cloudflare Workers AI / Pollinations.ai) — voir
-/// docs/PRIVACY_POLICY_DRAFT.md. Purement local (SharedPreferences),
+/// cloud (Google Gemini, Cloudflare Workers AI / Pollinations.ai) — Purement local (SharedPreferences),
 /// révocable depuis Profil > Sécurité, même pattern que fasting_provider.dart.
 /// N'affecte pas l'IA locale (flutter_gemma), qui n'envoie rien au cloud.
 final cloudAiConsentProvider =
@@ -39,7 +38,7 @@ class CloudAiConsentNotifier extends AsyncNotifier<bool> {
 /// Distinct de `false` dans [cloudAiConsentProvider], qui ne permet pas de
 /// différencier "jamais demandé" de "refusé explicitement" — utilisé par le
 /// chat coach pour afficher une carte explicative plutôt que de redemander à
-/// chaque envoi (voir coach_screen.dart, docs/AUDIT_CHATBOT.md étape 3).
+/// chaque envoi (voir coach_screen.dart).
 final cloudAiConsentDeclinedProvider =
     AsyncNotifierProvider<CloudAiConsentDeclinedNotifier, bool>(
       CloudAiConsentDeclinedNotifier.new,

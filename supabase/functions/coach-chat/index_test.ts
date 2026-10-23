@@ -200,8 +200,7 @@ Deno.test("handleCoachChat - allergie déclarée dès le message 1 reste épingl
         // MAX_HISTORY_ENTRIES=50 (index.ts), donc une partie de l'historique est tronquée.
         // L'allergie n'est jamais portée par l'historique : elle vient de `allergies` dans
         // le body de CETTE requête (= le profil, réinjecté à chaque appel), donc son
-        // épinglage ne dépend pas de ce qui survit à la troncature. Voir docs/AUDIT_CHATBOT.md
-        // étape 10 et ligne 198 (le vrai risque concerne une contrainte dite SEULEMENT en
+        // épinglage ne dépend pas de ce qui survit à la troncature. Voir ligne 198 (le vrai risque concerne une contrainte dite SEULEMENT en
         // chat, jamais reportée dans `allergies`/profil — hors-scope ici, non résolu).
         const history = [];
         for (let i = 1; i <= 40; i++) {
