@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
@@ -121,6 +122,10 @@ class MealRepository {
     String sourcePath,
     AppLocalizations l10n,
   ) async {
+    // Web : ni dossier de l'app ni compression par fichier. L'URL blob: de la photo
+    // est gardée telle quelle et envoyée à la synchro (valable le temps de la session).
+    if (kIsWeb) return sourcePath;
+
     final compressedBytes = await FlutterImageCompress.compressWithFile(
       sourcePath,
       minWidth: 800,
@@ -331,7 +336,7 @@ class MealRepository {
           if (row.isSynced) {
             await _supabase.from('meals').delete().eq('id', row.id);
           }
-          if (row.localImagePath != null) {
+          if (!kIsWeb && row.localImagePath != null) {
             final file = File(row.localImagePath!);
             if (await file.exists()) await file.delete();
           }
@@ -382,7 +387,7 @@ class MealRepository {
     String mealId,
     String localPath,
   ) async {
-    final bytes = await File(localPath).readAsBytes();
+    final bytes = await XFile(localPath).readAsBytes();
     final storagePath = '$userId/$mealId.jpg';
     await _supabase.storage
         .from('meal_photos')

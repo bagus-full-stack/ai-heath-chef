@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:drift/drift.dart';
+import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -134,7 +134,7 @@ class WeightRepository {
   }
 
   Future<String> _uploadPhoto(String userId, String entryId, String localPath) async {
-    final bytes = await File(localPath).readAsBytes();
+    final bytes = await XFile(localPath).readAsBytes();
     final storagePath = '$userId/$entryId.jpg';
     await _supabase.storage.from('weight_photos').uploadBinary(
           storagePath,
