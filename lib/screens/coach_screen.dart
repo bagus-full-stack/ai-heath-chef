@@ -1395,6 +1395,7 @@ class _ReportSheetState extends ConsumerState<_ReportSheet> {
           TextField(
             controller: _commentController,
             maxLines: 2,
+            maxLength: 2000, // limite alignée sur la contrainte de chat_reports (migration 0024)
             decoration: InputDecoration(
               labelText: l10n.coachReportCommentLabel,
               border: const OutlineInputBorder(),

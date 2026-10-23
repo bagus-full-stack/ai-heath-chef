@@ -66,7 +66,10 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
       // locale et la déconnexion sont best-effort, on ne peut plus revenir
       // en arrière même si l'une d'elles échoue.
       await purgeLocalUserData(ref.read(appDatabaseProvider));
-      await ref.read(authServiceProvider).signOut();
+      // Le compte n'existe plus : un échec ici (réseau) ne doit pas passer pour un échec de suppression.
+      try {
+        await ref.read(authServiceProvider).signOut();
+      } catch (_) {}
 
       if (!mounted) return;
       context.go('/');
