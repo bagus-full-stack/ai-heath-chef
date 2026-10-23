@@ -1,5 +1,5 @@
 import { assertEquals } from "jsr:@std/assert@1";
-import { handleCoachChat } from "./index.ts";
+import { handleCoachChat } from "./handler.ts";
 
 /**
  * Même approche de stub que `_shared/quota_test.ts` (pas de client injectable

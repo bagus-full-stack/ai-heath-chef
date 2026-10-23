@@ -30,7 +30,7 @@
  *     supabase/functions/coach-chat/run_eval.ts
  */
 
-import { handleCoachChat } from "./index.ts";
+import { handleCoachChat } from "./handler.ts";
 
 interface EvalCase {
     id: string;
