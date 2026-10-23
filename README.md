@@ -267,7 +267,7 @@ deno test --allow-env supabase/functions/coach-chat/
 
 Workflows GitHub Actions (`.github/workflows/`) :
 
-- `ci.yml` — sur chaque push et pull request : `flutter analyze` + `flutter test` (job `flutter`), tests Deno des Edge Functions (job `deno`).
+- `ci.yml` — sur chaque push et pull request : `flutter analyze` + `flutter test` + `flutter build web` (job `flutter`), tests Deno des Edge Functions (job `deno`).
 - `deploy_functions.yml` — sur push vers `master` touchant `supabase/functions/` ou `supabase/migrations/` : `supabase db push` puis déploiement des fonctions. Secrets requis : `SUPABASE_ACCESS_TOKEN` (token personnel `sbp_...`), `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`.
 - `supabase_keepalive.yml` — tous les 3 jours (et à la demande) : requête REST vers la base pour éviter la mise en pause d'un projet Supabase gratuit après 7 jours d'inactivité. Secrets requis : `SUPABASE_PROJECT_ID`, `SUPABASE_ANON_KEY`.
 
