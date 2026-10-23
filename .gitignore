@@ -54,3 +54,12 @@ app.*.map.json
 /android/key.properties
 *.jks
 *.keystore
+
+# Outils locaux / sorties générées
+.claude/.headroom_*
+.claude/settings.local.json
+.claude/worktrees/
+.playwright-mcp/
+.serena/
+graphify-out/
+/android/build/
