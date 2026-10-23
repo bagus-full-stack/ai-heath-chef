@@ -118,17 +118,19 @@ supabase/
                 analyze-pantry, coach-chat, meal-suggestions, meal-images,
                 huggingface-token, delete-account — déployées en CI via la CLI
                 Supabase (voir ci-dessous), qui bundle les imports relatifs. La
-                vérification d'identité et le quota (quotidien par utilisateur +
-                global partagé) vivent dans `_shared/quota.ts`, importé par
-                chaque fonction IA ; `_shared/cors.ts` et `_shared/errors.ts`
+                vérification d'identité (`_shared/auth.ts`, `authenticate()`,
+                utilisée aussi par delete-account et huggingface-token) et le
+                quota (quotidien par utilisateur + global partagé) vivent dans
+                `_shared/quota.ts`, importé par chaque fonction IA ;
+                `_shared/cors.ts` (respecte `ALLOWED_ORIGIN`) et `_shared/errors.ts`
                 mutualisent de même les headers CORS et la classe d'erreur HTTP
                 (`HttpError`), `_shared/coach_prompt.ts` et
                 `_shared/health_risk_filter.ts` (prompt et garde-fou santé du coach),
                 et `_shared/gemini.ts` mutualise le mécanisme de
                 cascade entre modèles Gemini (fetch, timeout, retry) — chaque
                 fonction garde néanmoins SA PROPRE liste de modèles `MODELS`
-                (elles divergent entre fonctions par drift historique, non
-                harmonisées). analyze-meal, analyze-menu, analyze-pantry et analyze-product partagent le même handler
+                (réduite aux 4 premiers : seuls `GEMINI_MAX_MODELS_TRIED` modèles
+                sont essayés, voir `_shared/gemini.ts`). analyze-meal, analyze-menu, analyze-pantry et analyze-product partagent le même handler
                 (`_shared/analyze_image.ts`, contrat JSON `{ ingredients: [...] }`), seul
                 le prompt de leur `index.ts` change (assiette / carte de restaurant /
                 inventaire de frigo / produit emballé).
@@ -136,8 +138,11 @@ supabase/
                 `HttpError` exposent leur message.
                 delete-account n'a pas de quota IA (aucun appel GEMINI_API_KEY) mais applique
                 son propre rate limit (3 tentatives/heure, voir migration 0017).
-                coach-chat sépare la logique (`handler.ts`, exportée pour les tests)
-                du point d'entrée (`index.ts`, qui ne fait que `Deno.serve`).
+                coach-chat, delete-account et meal-images séparent la logique
+                (`handler.ts`, exportée pour les tests) du point d'entrée
+                (`index.ts`, qui ne fait que `Deno.serve`).
+                huggingface-token et delete-account doivent être déployées via la CLI
+                (pas l'éditeur du Dashboard) car elles importent `_shared/`.
 test/           Tests Flutter (providers, utils, widgets, local_db)
 .github/workflows/
                 CI (ci.yml), déploiement Supabase (deploy_functions.yml) et
@@ -226,7 +231,7 @@ L'APK généré se trouve dans `build/app/outputs/flutter-apk/app-release.apk`.
 
 ### Signature release (Play Store)
 
-Le build release est signé via `android/key.properties`, qui référence un keystore local (`.jks`). Ni l'un ni l'autre ne sont commités (voir `.gitignore`) — si `key.properties` est absent, le build retombe automatiquement sur la clé debug (utile en CI sans les secrets).
+Le build release est signé via `android/key.properties`, qui référence un keystore local (`.jks`). Ni l'un ni l'autre ne sont commités (voir `.gitignore`) — si `key.properties` est absent, un build release (`assembleRelease`, `bundleRelease`) échoue volontairement plutôt que de sortir signé avec la clé debug. Les builds debug n'en ont pas besoin.
 
 Pour générer ta propre clé sur une nouvelle machine :
 
@@ -259,6 +264,7 @@ Edge Functions (nécessite [Deno](https://deno.com), 2.x) :
 deno test --allow-env supabase/functions/_shared/
 deno test --allow-env --allow-read supabase/functions/delete-account/
 deno test --allow-env supabase/functions/coach-chat/
+deno test --allow-env supabase/functions/meal-images/
 ```
 
 Évaluation du coach sur `supabase/functions/coach-chat/eval_cases.json` : `deno run --allow-env --allow-net --allow-read supabase/functions/coach-chat/run_eval.ts` (voir l'en-tête du script pour les variables requises).
@@ -275,12 +281,12 @@ Workflows GitHub Actions (`.github/workflows/`) :
 
 - **Repas, poids et hydratation hors ligne** — écrits dans une base SQLite locale (`lib/local_db/`) avant toute tentative réseau, puis synchronisés vers Supabase (tables `meals`/`weight_entries`/`hydration_entries`) au prochain démarrage ou retour de connexion, sans action de l'utilisateur. Pour le poids et l'hydratation, la synchronisation est aussi descendante (`syncEntries()` rapatrie les lignes présentes sur Supabase mais absentes en local) : l'historique se restaure après une désinstallation et se partage entre appareils. Le poids actuel du profil (`profiles.current_weight`, mis à jour à chaque pesée) reste la valeur utilisée pour l'IMC et les cibles caloriques, indépendamment de cet historique.
 - **Notifications locales, rappels personnalisés sauvegardés** — les rappels (créneaux fixes et personnalisés) sont programmés en local sur l'appareil (`flutter_local_notifications`) et persistés dans `shared_preferences`. Les rappels personnalisés sont en plus sauvegardés dans la table Supabase `custom_reminders_backup` à chaque modification, et restaurés automatiquement (nouvelle installation ou nouvel appareil sans rappel local) — voir `lib/providers/custom_reminders_provider.dart`. Les créneaux fixes petit-déjeuner/déjeuner/dîner suivent désormais la même sauvegarde (table `custom_reminders_backup`, colonne `fixed_reminders`, voir migration 0021 et `lib/providers/notification_settings_provider.dart`). ⚠️ Restauration one-shot dans les deux cas, pas de fusion en cas d'usage simultané sur deux appareils avant leur première synchronisation.
-- **Photos de repas** — uploadées dans le bucket `meal_photos` uniquement pour les analyses par photo ("Repas"/"Produit") ; un repas issu d'un scan de code-barres n'a pas de photo.
+- **Photos de repas** — uploadées dans le bucket `meal_photos` uniquement pour les analyses par photo ("Repas"/"Produit") ; un repas issu d'un scan de code-barres n'a pas de photo. Supprimer un repas synchronisé supprime aussi sa photo du bucket, sauf si un autre repas (ex. « refaire ce repas ») utilise encore le même fichier.
 - **Plateformes** — Android, iOS et web uniquement (les dossiers `windows/`, `linux/` et `macos/` ont été retirés : `camera` et `flutter_image_compress` n'y fonctionnent pas).
 - **Identité visuelle** — le logo source (`assets/icon/icon.png` / `icon_foreground.png`) alimente à la fois l'icône d'app (générée par `flutter_launcher_icons`, voir `pubspec.yaml`) et, depuis peu, le splash screen (Android/iOS) et l'écran de connexion. L'identifiant d'app est unifié en `com.aihealthchef.app` sur Android/iOS/macOS/Linux (Windows n'a pas d'identifiant de ce type).
 - **CGU/mentions légales à finaliser** — le contenu de `lib/screens/terms_screen.dart` décrit honnêtement le fonctionnement actuel de l'app (données collectées, absence de conseil médical, contenu généré par IA, abonnement, âge minimum) et identifie l'éditeur (Baga Assami, projet personnel sans société immatriculée) et son contact (`kSupportEmail`), mais reste un brouillon : le texte doit être relu par un professionnel du droit avant toute publication publique — un bandeau d'avertissement s'affiche sur l'écran tant que ce n'est pas fait.
 - **Âge minimum (RGPD art. 8/9)** — l'app est réservée aux personnes de 16 ans ou plus (`kMinimumAge` dans `lib/utils/age_policy.dart`), sans flux de consentement parental : en-dessous, la création de profil est bloquée (onboarding et écran "Mes objectifs"). L'inscription (`signup_screen.dart`) exige en plus une case explicite "J'ai au moins 16 ans et j'accepte les CGU…", dont l'horodatage et la version acceptée sont tracés dans `profiles.accepted_terms_at`/`accepted_terms_version` (migration 0018). Ceci n'empêche pas, par construction, qu'un compte créé avant ce changement ait un âge < 16 ans déjà enregistré ; requête de détection en lecture seule : `supabase/scripts/detect_underage_accounts.sql` (non exécutée automatiquement par l'app, aucun traitement/suppression automatique — décision humaine requise sur les comptes trouvés).
-- **Quotas IA** — les limites quotidiennes sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque `supabase/functions/<nom>/index.ts` (`handler.ts` pour `coach-chat`) si besoin (4ᵉ argument = quota par utilisateur, 5ᵉ argument optionnel = quota global partagé par toute l'app, voir migration 0009). Cette fonction vit dans `supabase/functions/_shared/quota.ts` et est importée par chaque Edge Function IA (voir Architecture ci-dessus) : un changement dans `_shared/quota.ts` s'applique à toutes d'un coup, pas besoin de le reporter manuellement. Un compte admin (`profiles.is_admin`) n'en est **pas** exempté — le quota s'applique à tout le monde, y compris toi.
+- **Quotas IA** — les limites quotidiennes sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque `supabase/functions/<nom>/index.ts` (`handler.ts` pour `coach-chat`) si besoin (4ᵉ argument = quota par utilisateur, 5ᵉ argument optionnel = quota global partagé par toute l'app, voir migration 0009). Cette fonction vit dans `supabase/functions/_shared/quota.ts` et est importée par chaque Edge Function IA (voir Architecture ci-dessus) : un changement dans `_shared/quota.ts` s'applique à toutes d'un coup, pas besoin de le reporter manuellement. Un compte admin (`profiles.is_admin`) ou PRO actif (RevenueCat) a une limite par utilisateur ×10 (`UNLIMITED_FACTOR`) et non illimitée, et reste soumis au quota global : un seul compte ne peut pas vider le budget partagé. Le quota est consommé après validation de la requête (une image invalide ne coûte rien), mais une panne Gemini (502) coûte encore un crédit. Si le RPC de quota lui-même est en panne, l'appel passe (fail-open) et le log `[QUOTA_FAIL_OPEN]` est émis : crée une alerte dessus.
 
 ## Ressources Flutter
 
