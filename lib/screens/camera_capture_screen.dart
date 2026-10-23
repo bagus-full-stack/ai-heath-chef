@@ -263,39 +263,33 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
     );
   }
 
-  // Modes qui restent sur cet écran (scanner/manuel ouvrent un autre écran,
-  // voir _selectMode) : seuls ceux-ci peuvent être atteints par glissement.
-  static const _swipeModes = [
-    _CaptureMode.repas,
-    _CaptureMode.produit,
-    _CaptureMode.menu,
-    _CaptureMode.frigo,
-  ];
+  // Le mode au centre de la rangée circulaire. Scanner et manuel ouvrent leur
+  // propre écran (caméra mobile_scanner dédiée / aucune caméra) : ils ne
+  // changent donc pas _mode, ils s'activent via le déclencheur (_onShutter).
+  _CaptureMode _focus = _CaptureMode.repas;
 
-  void _cycleMode(int delta) {
-    final i = _swipeModes.indexOf(_mode);
-    if (i == -1) return;
-    _selectMode(_swipeModes[(i + delta) % _swipeModes.length]);
+  _CaptureMode _modeAt(int offset) {
+    const all = _CaptureMode.values;
+    return all[(all.indexOf(_focus) + offset) % all.length];
   }
 
-  void _selectMode(_CaptureMode mode) {
-    // Le scan de code-barres et la saisie manuelle utilisent leur propre
-    // écran (le premier a besoin de sa propre caméra dédiée mobile_scanner,
-    // incompatible avec le CameraController de cet écran ; le second n'a pas
-    // besoin de caméra du tout) : on ouvre un écran séparé plutôt que de
-    // basculer le mode en place.
-    if (mode == _CaptureMode.scanner) {
+  void _moveFocus(int delta) {
+    if (delta == 0) return;
+    final mode = _modeAt(delta);
+    setState(() {
+      _focus = mode;
+      if (mode != _CaptureMode.scanner && mode != _CaptureMode.manuel) _mode = mode;
+    });
+  }
+
+  void _onShutter() {
+    if (_focus == _CaptureMode.scanner) {
       context.push('/barcode_scanner');
-      return;
-    }
-    if (mode == _CaptureMode.manuel) {
+    } else if (_focus == _CaptureMode.manuel) {
       context.push('/food_search');
-      return;
+    } else {
+      _capturePhoto();
     }
-    if (mode == _mode) {
-      return;
-    }
-    setState(() => _mode = mode);
   }
 
   String _modeLabel(_CaptureMode mode) {
@@ -436,7 +430,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                               isLoading: _isPickingFromGallery,
                             ),
                             GestureDetector(
-                              onTap: _isCapturing ? null : _capturePhoto,
+                              onTap: _isCapturing ? null : _onShutter,
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 180),
                                 width: 84,
@@ -482,63 +476,28 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                         ),
                         const SizedBox(height: 18),
                         GestureDetector(
+                          behavior: HitTestBehavior.opaque,
                           onHorizontalDragEnd: (details) {
                             final v = details.primaryVelocity ?? 0;
                             if (v < -200) {
-                              _cycleMode(1);
+                              _moveFocus(1);
                             } else if (v > 200) {
-                              _cycleMode(-1);
+                              _moveFocus(-1);
                             }
                           },
-                          child: PopupMenuButton<_CaptureMode>(
-                          color: const Color(0xFF1B1B26),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Rotation circulaire : le mode actif reste au centre.
+                              for (var k = -2; k <= 2; k++)
+                                _ModeLabel(
+                                  label: _modeLabel(_modeAt(k)),
+                                  selected: k == 0,
+                                  color: primaryColor,
+                                  onTap: () => _moveFocus(k),
+                                ),
+                            ],
                           ),
-                          onSelected: _selectMode,
-                          itemBuilder: (context) => _CaptureMode.values
-                              .map(
-                                (mode) => PopupMenuItem(
-                                  value: mode,
-                                  child: Text(
-                                    _modeLabel(mode),
-                                    style: TextStyle(
-                                      color: mode == _mode ? primaryColor : Colors.white,
-                                      fontWeight: mode == _mode ? FontWeight.bold : FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.45),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _modeLabel(_mode).toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                    letterSpacing: 0.6,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                const Icon(
-                                  Icons.keyboard_arrow_up_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                         ),
                       ],
                     ),
@@ -599,6 +558,40 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ModeLabel extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ModeLabel({
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            color: selected ? color : Colors.white70,
+            fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+            fontSize: selected ? 13 : 11,
+            letterSpacing: 0.6,
           ),
         ),
       ),
