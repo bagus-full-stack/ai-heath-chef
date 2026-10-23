@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../models/user_profile.dart';
+import '../providers/ai_consent_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/local_ai_provider.dart';
 import '../providers/locale_provider.dart';
@@ -115,6 +116,9 @@ class ProfileScreen extends ConsumerWidget {
       );
 
       await ref.read(authServiceProvider).signOut();
+      // Le consentement IA est personnel : le compte suivant sur cet appareil doit le redonner.
+      await ref.read(cloudAiConsentProvider.notifier).revoke();
+      await ref.read(cloudAiConsentDeclinedProvider.notifier).clear();
 
       if (context.mounted) {
         Navigator.pop(context);

@@ -81,7 +81,9 @@ class WeightRepository {
     if (user == null) return;
 
     final pending =
-        await (_db.select(_db.weightEntries)..where((w) => w.isSynced.equals(false))).get();
+        await (_db.select(_db.weightEntries)
+              ..where((w) => w.userId.equals(user.id) & w.isSynced.equals(false)))
+            .get();
 
     for (final row in pending) {
       try {

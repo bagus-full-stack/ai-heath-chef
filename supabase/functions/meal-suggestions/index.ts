@@ -110,12 +110,12 @@ Deno.serve(async (req) => {
         const dietLabel = DIET_LABELS[dietType as string];
         const cuisineLabel = CUISINE_LABELS[cuisinePreference as string];
         const allergyList: string[] = Array.isArray(allergies)
-            ? allergies.filter((a) => typeof a === 'string' && a.trim().length > 0)
+            ? allergies.filter((a) => typeof a === 'string' && a.trim().length > 0).slice(0, 20).map((a) => a.slice(0, 60))
             : [];
         // Photo frigo/placard (voir analyze-pantry/index.ts) : priorise ces
         // ingrédients déjà disponibles plutôt que d'en proposer de nouveaux.
         const availableIngredientsList: string[] = Array.isArray(availableIngredients)
-            ? availableIngredients.filter((a) => typeof a === 'string' && a.trim().length > 0)
+            ? availableIngredients.filter((a) => typeof a === 'string' && a.trim().length > 0).slice(0, 50).map((a) => a.slice(0, 60))
             : [];
 
         // === 2. VÉRIFICATION CLÉ API GEMINI ===

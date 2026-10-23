@@ -69,7 +69,11 @@ export function buildCoachSystemInstruction(
     const isEn = lang === "en"
     const toneInstruction = TONE_INSTRUCTIONS[coachTone ?? ""] ?? TONE_INSTRUCTIONS.motivant
     const dietLabel = DIET_LABELS[dietType ?? ""]
-    const allergyList = (allergies ?? []).filter((a) => typeof a === "string" && a.trim().length > 0)
+    // Liste fournie par le client : bornée en nombre et en longueur (coût du prompt, injection).
+    const allergyList = (allergies ?? [])
+        .filter((a) => typeof a === "string" && a.trim().length > 0)
+        .slice(0, 20)
+        .map((a) => a.slice(0, 60))
 
     let dietaryNote = ""
     if (dietLabel) {

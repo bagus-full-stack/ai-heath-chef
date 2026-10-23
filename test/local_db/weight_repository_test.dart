@@ -52,6 +52,36 @@ void main() {
       expect(row.isSynced, isTrue);
     });
 
+    test("ignores another account's pending entry left on the device", () async {
+      await db.into(db.weightEntries).insert(
+            WeightEntriesCompanion.insert(
+              id: 'other',
+              userId: 'user-2',
+              weightKg: 80,
+              recordedAt: DateTime.now(),
+            ),
+          );
+
+      var upsertCalls = 0;
+      final repo = WeightRepository(
+        db,
+        await fakeAuthenticatedClient(_userId, (request) async {
+          if (request.method == 'POST') {
+            upsertCalls++;
+            return jsonResponse(request, [], status: 201);
+          }
+          if (request.method == 'GET') return jsonResponse(request, []);
+          return http.Response('not found', 404);
+        }),
+      );
+
+      await repo.syncEntries();
+
+      expect(upsertCalls, 0);
+      final row = await (db.select(db.weightEntries)..where((w) => w.id.equals('other'))).getSingle();
+      expect(row.isSynced, isFalse);
+    });
+
     test('pulls a remote-only entry without overwriting a newer local one sharing its id', () async {
       await db.into(db.weightEntries).insert(
             WeightEntriesCompanion.insert(
