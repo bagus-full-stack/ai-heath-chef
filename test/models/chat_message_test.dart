@@ -63,5 +63,36 @@ void main() {
       expect(message.imagePath, isNull);
       expect(message.hasLegacyImage, isTrue);
     });
+
+    test('engine est null par défaut (message utilisateur ou historique rechargé)', () {
+      final message = ChatMessage(
+        id: 'm5',
+        text: 'Bonjour',
+        isUser: true,
+        createdAt: DateTime(2026, 1, 1),
+      );
+
+      expect(message.engine, isNull);
+    });
+
+    test('engine porte le moteur ayant répondu (local ou cloud)', () {
+      final local = ChatMessage(
+        id: 'm6',
+        text: 'Réponse locale',
+        isUser: false,
+        createdAt: DateTime(2026, 1, 1),
+        engine: 'local',
+      );
+      final cloud = ChatMessage(
+        id: 'm7',
+        text: 'Réponse cloud',
+        isUser: false,
+        createdAt: DateTime(2026, 1, 1),
+        engine: 'cloud',
+      );
+
+      expect(local.engine, 'local');
+      expect(cloud.engine, 'cloud');
+    });
   });
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
 import '../models/ingredient.dart';
@@ -104,7 +105,7 @@ class AIService {
       )).toList();
 
     } catch (e) {
-      throw Exception(buildErrorMessage(l10n, _describeError(e)));
+      throw Exception(buildErrorMessage(l10n, _describeError(e, lang)));
     }
   }
 
@@ -119,6 +120,7 @@ class AIService {
     String dietType = 'none',
     List<String> allergies = const [],
     String lang = 'fr',
+    String? dailyContext,
   }) async {
     try {
       final response = await Supabase.instance.client.functions.invoke(
@@ -130,6 +132,7 @@ class AIService {
           'dietType': dietType,
           'allergies': allergies,
           'lang': lang,
+          'dailyContext': ?dailyContext,
         },
       );
 
@@ -138,7 +141,7 @@ class AIService {
         suggestedDish: response.data['suggestedDish'] as String?,
       );
     } catch (e) {
-      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorCoachChat(_describeError(e)));
+      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorCoachChat(_describeError(e, lang)));
     }
   }
 
@@ -213,7 +216,7 @@ class AIService {
           .map((item) => MealSuggestion.fromJson(item as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorMealSuggestions(_describeError(e)));
+      throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorMealSuggestions(_describeError(e, lang)));
     }
   }
 
@@ -250,11 +253,22 @@ class AIService {
   /// Extrait un message d'erreur lisible d'une [FunctionException] (le champ
   /// `error` renvoyé par nos Edge Functions, ex. quota dépassé), au lieu de
   /// laisser fuiter la représentation brute de l'exception à l'utilisateur.
-  String _describeError(Object error) {
+  /// Si le quota dépassé inclut `resetAt` (UTC, voir `_shared/quota.ts`), on
+  /// l'ajoute converti à l'heure locale de l'utilisateur.
+  String _describeError(Object error, String lang) {
     if (error is FunctionException) {
       final details = error.details;
       if (details is Map && details['error'] is String) {
-        return details['error'] as String;
+        final message = details['error'] as String;
+        final resetAt = details['resetAt'];
+        if (resetAt is String) {
+          final localReset = DateTime.tryParse(resetAt)?.toLocal();
+          if (localReset != null) {
+            final time = DateFormat('d MMM HH:mm', lang).format(localReset);
+            return '$message ${lookupAppLocalizations(Locale(lang)).svcQuotaResetAt(time)}';
+          }
+        }
+        return message;
       }
       return error.reasonPhrase ?? error.toString();
     }

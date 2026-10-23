@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../config/coach_prompt.dart';
 import '../config/local_ai_config.dart';
 import '../l10n/app_localizations.dart';
 import '../models/ingredient.dart';
@@ -66,25 +67,6 @@ Le JSON doit avoir cette structure exacte :
     }
   ]
 }''';
-
-  static const Map<String, String> _toneInstructions = {
-    'motivant':
-        "Tu es empathique et motivant : tu encourages l'utilisateur et le pousses gentiment à avancer.",
-    'bienveillant':
-        "Tu es calme, doux et bienveillant : tu rassures l'utilisateur, sans jamais le juger sur ses écarts.",
-    'direct':
-        "Tu es direct et concis : tu vas droit au but avec des conseils actionnables, sans détour ni fioriture.",
-    'humoristique':
-        "Tu es léger et plein d'humour, tout en restant utile et sérieux sur le fond nutritionnel.",
-  };
-
-  static const Map<String, String> _dietLabels = {
-    'vegetarian': 'végétarien (sans viande ni poisson)',
-    'vegan': 'végétalien (sans aucun produit d\'origine animale)',
-    'pescetarian': 'pescétarien (sans viande, poisson autorisé)',
-    'halal': 'halal',
-    'kosher': 'kasher',
-  };
 
   /// Vérifie si le modèle est déjà téléchargé sur l'appareil.
   Future<bool> isModelReady() {
@@ -191,22 +173,15 @@ Le JSON doit avoir cette structure exacte :
     String dietType = 'none',
     List<String> allergies = const [],
     String lang = 'fr',
+    String? dailyContext,
   }) async {
-    final toneInstruction = _toneInstructions[coachTone] ?? _toneInstructions['motivant']!;
-    final dietLabel = _dietLabels[dietType];
-
-    var dietaryNote = '';
-    if (dietLabel != null) {
-      dietaryNote += " L'utilisateur suit un régime $dietLabel : ne recommande jamais un aliment qui l'enfreint.";
-    }
-    if (allergies.isNotEmpty) {
-      dietaryNote += " L'utilisateur est allergique/intolérant à : ${allergies.join(', ')}. Ne recommande jamais ces aliments.";
-    }
-
-    final langInstruction =
-        lang == 'en' ? ' Always respond in English.' : ' Réponds toujours en français.';
-    final systemInstruction =
-        "Tu es AI Health Chef, un coach en nutrition expert. $toneInstruction Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.$dietaryNote Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.$langInstruction";
+    final systemInstruction = CoachPrompt.buildSystemInstruction(
+      lang: lang,
+      coachTone: coachTone,
+      dietType: dietType,
+      allergies: allergies,
+      dailyContext: dailyContext,
+    );
 
     final model = await FlutterGemma.getActiveModel(maxTokens: 2048);
     final chat = await model.createChat();

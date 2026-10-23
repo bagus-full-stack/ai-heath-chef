@@ -135,9 +135,14 @@ class _CloudAiConsentGateState extends ConsumerState<CloudAiConsentGate> {
               child: Padding(
                 padding: const EdgeInsets.all(28),
                 child: _ConsentExplanation(
-                  onAccept: () =>
-                      ref.read(cloudAiConsentProvider.notifier).accept(),
-                  onDecline: () => context.pop(),
+                  onAccept: () async {
+                    await ref.read(cloudAiConsentProvider.notifier).accept();
+                    await ref.read(cloudAiConsentDeclinedProvider.notifier).clear();
+                  },
+                  onDecline: () {
+                    ref.read(cloudAiConsentDeclinedProvider.notifier).markDeclined();
+                    context.pop();
+                  },
                 ),
               ),
             ),
@@ -174,7 +179,14 @@ Future<bool> ensureCloudAiConsent(BuildContext context, WidgetRef ref) async {
 
   if (accepted == true) {
     await ref.read(cloudAiConsentProvider.notifier).accept();
+    await ref.read(cloudAiConsentDeclinedProvider.notifier).clear();
     return true;
+  }
+  if (accepted == false) {
+    // Refus explicite (bouton "Pas maintenant") : le dismiss par toucher du
+    // fond renvoie `null`, pas `false` — seul le refus explicite déclenche
+    // la carte persistante du chat (voir docs/AUDIT_CHATBOT.md étape 3).
+    await ref.read(cloudAiConsentDeclinedProvider.notifier).markDeclined();
   }
   return false;
 }

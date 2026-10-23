@@ -1,9 +1,18 @@
+import 'package:ai_health_chef/config/coach_prompt.dart';
+import 'package:ai_health_chef/config/emergency_contacts.dart';
+import 'package:ai_health_chef/l10n/app_localizations.dart';
 import 'package:ai_health_chef/models/chat_message.dart';
+import 'package:ai_health_chef/providers/ai_consent_provider.dart';
 import 'package:ai_health_chef/providers/local_ai_provider.dart';
 import 'package:ai_health_chef/providers/locale_provider.dart';
+import 'package:ai_health_chef/providers/dashboard_provider.dart';
+import 'package:ai_health_chef/providers/fasting_provider.dart';
 import 'package:ai_health_chef/providers/profile_provider.dart';
 import 'package:ai_health_chef/services/ai_service.dart';
+import 'package:ai_health_chef/utils/coach_context_builder.dart';
+import 'package:ai_health_chef/utils/health_risk_filter.dart';
 import 'package:ai_health_chef/utils/image_data_uri.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -14,11 +23,15 @@ final chatProvider =
     AsyncNotifierProvider<ChatNotifier, List<ChatMessage>>(ChatNotifier.new);
 
 class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
-  final _aiService = AIService();
-  final _supabase = Supabase.instance.client;
+  /// Params optionnels : permet d'injecter des doubles de test (voir
+  /// test/providers/chat_provider_test.dart) sans toucher au comportement
+  /// réel, où `Supabase.instance.client`/`AIService()` restent les défauts.
+  ChatNotifier({AIService? aiService, SupabaseClient? supabase})
+      : _aiService = aiService ?? AIService(),
+        _supabase = supabase ?? Supabase.instance.client;
 
-  static const _welcomeText =
-      'Bonjour, je suis votre coach nutrition. Que souhaitez-vous améliorer aujourd\'hui ?';
+  final AIService _aiService;
+  final SupabaseClient _supabase;
 
   // Pagination simple de l'historique (voir loadOlderMessages) : un petit
   // lot à la fois plutôt que tout l'historique au chargement de l'écran.
@@ -36,6 +49,11 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
 
   @override
   Future<List<ChatMessage>> build() async {
+    // `watch` (pas `read`) : un changement de langue doit reconstruire
+    // immédiatement le message de bienvenue, pas seulement après un
+    // resetConversation() (voir docs/AUDIT_CHATBOT.md, étape 2).
+    ref.watch(localeProvider);
+
     final user = _supabase.auth.currentUser;
     if (user == null) {
       return [_buildWelcomeMessage()];
@@ -182,9 +200,11 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
 
     final generation = _conversationGeneration;
     final currentMessages = state.value ?? const <ChatMessage>[];
-    final historyForGemini = currentMessages
-        .where((entry) => entry.text != _welcomeText)
-        .toList();
+    // Comparaison par id plutôt que par texte : un id stable ('welcome')
+    // reste correct même si le message de bienvenue change de langue ou de
+    // formulation, contrairement à une égalité de texte.
+    final historyForGemini =
+        currentMessages.where((entry) => entry.id != 'welcome').toList();
     final userMessage = _buildUserMessage(trimmed);
     state = AsyncData([...currentMessages, userMessage]);
 
@@ -197,30 +217,85 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     final geminiHistory = _toGeminiHistory(historyForGemini);
     final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
 
-    // IA locale d'abord si activée et téléchargée (pas de connexion requise,
-    // n'utilise pas le quota cloud partagé), sinon/en cas d'échec repli sur
-    // le cloud. Le try/catch ci-dessous n'existait pas avant l'ajout du mode
-    // local — nécessaire pour savoir quand replier, pas un élargissement du
-    // périmètre de cette fonction.
-    String aiReplyText;
+    // Bloc contexte du jour (docs/AUDIT_CHATBOT.md étape 6) : lu depuis les
+    // providers déjà existants (DB locale), jamais de nouvelle requête ici.
+    // En lecture seule via `read` : sendMessage() est un instantané au
+    // moment de l'envoi, pas un flux réactif.
+    final fasting = ref.read(fastingProvider).value;
+    final contextInput = DailyContextInput(
+      profile: profile,
+      todayMeals: ref.read(todayMealsProvider).value ?? const [],
+      hydrationMl: (ref.read(hydrationTodayProvider).value ?? const [])
+          .fold<int>(0, (sum, entry) => sum + entry.amountMl),
+      isFasting: fasting?.isFasting ?? false,
+      fastingElapsedHours: fasting?.elapsed.inHours ?? 0,
+      fastingGoalHours: fasting?.goalHours ?? 16,
+      lang: lang,
+    );
+
     // Non-null seulement pour une réponse cloud recommandant un plat précis
     // (voir coach-chat/index.ts) : l'IA locale ne produit pas cette balise,
     // donc pas d'illustration pour les réponses générées hors-ligne.
+    String aiReplyText;
     String? suggestedDish;
-    final localSettings = ref.read(localAiSettingsProvider).value;
-    try {
-      if (localSettings?.isReadyToUse == true) {
-        try {
-          final local = ref.read(localAiServiceProvider);
-          aiReplyText = await local.chatWithCoach(
-            trimmed,
-            geminiHistory,
-            coachTone: coachTone,
-            dietType: dietType,
-            allergies: allergies,
-            lang: lang,
-          );
-        } catch (_) {
+    // Indicateur de transparence (docs/AUDIT_CHATBOT.md étape 5) : quel
+    // moteur a réellement généré cette réponse, pas quel moteur était
+    // configuré — distingue un repli cloud après échec local (null = aucun
+    // modèle, ex. filet de sécurité ou double échec).
+    String? usedEngine;
+
+    // Filet de sécurité déterministe, avant tout appel modèle : un petit
+    // modèle local n'a pas le garde-fou santé du prompt cloud, donc ce
+    // filtre doit intercepter le message avant la branche local/cloud, pas
+    // dans le prompt (voir lib/utils/health_risk_filter.dart et
+    // docs/AUDIT_CHATBOT.md étape 1).
+    final riskCategory = detectHealthRisk(trimmed);
+    if (riskCategory != null) {
+      aiReplyText = _buildSafetyReply(riskCategory, lang);
+    } else {
+      // IA locale d'abord si activée et téléchargée (pas de connexion
+      // requise, n'utilise pas le quota cloud partagé), sinon/en cas
+      // d'échec repli sur le cloud. Le try/catch ci-dessous n'existait pas
+      // avant l'ajout du mode local — nécessaire pour savoir quand replier,
+      // pas un élargissement du périmètre de cette fonction.
+      final localSettings = ref.read(localAiSettingsProvider).value;
+      try {
+        if (localSettings?.isReadyToUse == true) {
+          try {
+            final local = ref.read(localAiServiceProvider);
+            aiReplyText = await local.chatWithCoach(
+              trimmed,
+              geminiHistory,
+              coachTone: coachTone,
+              dietType: dietType,
+              allergies: allergies,
+              lang: lang,
+              dailyContext: buildDailyContextBlock(contextInput, compact: true),
+            );
+            usedEngine = 'local';
+          } catch (_) {
+            // Repli cloud uniquement si le consentement a déjà été donné
+            // (étape 3, cas 5) : jamais d'appel cloud silencieux faute de
+            // mieux (voir docs/AUDIT_CHATBOT.md étape 3).
+            if (ref.read(cloudAiConsentProvider).value == true) {
+              final cloudReply = await _aiService.chatWithCoach(
+                trimmed,
+                geminiHistory,
+                coachTone: coachTone,
+                dietType: dietType,
+                allergies: allergies,
+                lang: lang,
+                dailyContext: buildDailyContextBlock(contextInput),
+              );
+              aiReplyText = cloudReply.reply;
+              suggestedDish = cloudReply.suggestedDish;
+              usedEngine = 'cloud';
+            } else {
+              aiReplyText =
+                  lookupAppLocalizations(Locale(lang)).coachLocalAiFailedNoCloudConsent;
+            }
+          }
+        } else {
           final cloudReply = await _aiService.chatWithCoach(
             trimmed,
             geminiHistory,
@@ -228,30 +303,21 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
             dietType: dietType,
             allergies: allergies,
             lang: lang,
+            dailyContext: buildDailyContextBlock(contextInput),
           );
           aiReplyText = cloudReply.reply;
           suggestedDish = cloudReply.suggestedDish;
+          usedEngine = 'cloud';
         }
-      } else {
-        final cloudReply = await _aiService.chatWithCoach(
-          trimmed,
-          geminiHistory,
-          coachTone: coachTone,
-          dietType: dietType,
-          allergies: allergies,
-          lang: lang,
-        );
-        aiReplyText = cloudReply.reply;
-        suggestedDish = cloudReply.suggestedDish;
+      } catch (e) {
+        // Local ET cloud ont échoué (quota épuisé, réseau, tous les modèles
+        // Gemini en échec...) : on affiche l'erreur comme réponse du coach
+        // plutôt que de laisser l'exception remonter sans réponse visible
+        // (voir chat_provider.dart historique : sendMessage n'avait aucun
+        // catch englobant avant ce correctif).
+        aiReplyText = e.toString().replaceAll('Exception: ', '');
+        suggestedDish = null;
       }
-    } catch (e) {
-      // Local ET cloud ont échoué (quota épuisé, réseau, tous les modèles
-      // Gemini en échec...) : on affiche l'erreur comme réponse du coach
-      // plutôt que de laisser l'exception remonter sans réponse visible
-      // (voir chat_provider.dart historique : sendMessage n'avait aucun
-      // catch englobant avant ce correctif).
-      aiReplyText = e.toString().replaceAll('Exception: ', '');
-      suggestedDish = null;
     }
 
     if (generation != _conversationGeneration) {
@@ -265,7 +331,11 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
       final dataUri = await _aiService.getDishImage(suggestedDish);
       imagePath = await _uploadDishImage(dataUri);
     }
-    final assistantMessage = _buildAssistantMessage(aiReplyText, imagePath: imagePath);
+    final assistantMessage = _buildAssistantMessage(
+      aiReplyText,
+      imagePath: imagePath,
+      engine: usedEngine,
+    );
 
     state = AsyncData([...(state.value ?? currentMessages), assistantMessage]);
     await _storeMessage(assistantMessage);
@@ -279,6 +349,42 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     final current = state.value ?? const <ChatMessage>[];
     state = AsyncData([...current, message]);
     await _storeMessage(message);
+  }
+
+  // Longueur max du texte signalé conservé dans chat_reports.excerpt — borne
+  // défensive, les réponses du coach sont limitées à 3 phrases en pratique.
+  static const int _reportExcerptMaxLength = 1000;
+
+  /// Signale [message] comme problématique (dangereux/incorrect/inapproprié/
+  /// autre), exigence de modération Google Play (docs/AUDIT_CHATBOT.md étape
+  /// 7). RLS (migration 0022_add_chat_reports.sql) n'autorise l'insertion
+  /// que de ses propres signalements, jamais leur modification/suppression.
+  /// `message.id` n'est pas la clé primaire de la ligne `chat_messages`
+  /// correspondante (générée côté serveur) : `excerpt` conserve donc le
+  /// texte signalé indépendamment de toute jointure.
+  Future<void> reportMessage(
+    ChatMessage message, {
+    required String motif,
+    String? commentaire,
+  }) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw const AuthException('User must be authenticated to report a message.');
+    }
+
+    final excerpt = message.text.length > _reportExcerptMaxLength
+        ? message.text.substring(0, _reportExcerptMaxLength)
+        : message.text;
+
+    await _supabase.from('chat_reports').insert({
+      'user_id': user.id,
+      'message_id': message.id,
+      'motif': motif,
+      'commentaire': commentaire,
+      'excerpt': excerpt,
+      'prompt_version': CoachPrompt.version,
+      'engine': message.engine,
+    });
   }
 
   Future<void> resetConversation() async {
@@ -343,10 +449,15 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     }
   }
 
+  /// Lit la langue courante à chaque appel (plutôt qu'une constante figée) :
+  /// affiché à la fois au chargement initial et après un changement de
+  /// langue suivi d'un resetConversation(), donc jamais figé dans la langue
+  /// de démarrage de l'app (voir docs/AUDIT_CHATBOT.md, étape 2).
   ChatMessage _buildWelcomeMessage() {
+    final lang = ref.read(localeProvider).value?.languageCode ?? 'fr';
     return ChatMessage(
       id: 'welcome',
-      text: _welcomeText,
+      text: lookupAppLocalizations(Locale(lang)).coachWelcomeMessage,
       isUser: false,
       createdAt: DateTime.now(),
     );
@@ -361,14 +472,31 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     );
   }
 
-  ChatMessage _buildAssistantMessage(String text, {String? imagePath}) {
+  ChatMessage _buildAssistantMessage(String text, {String? imagePath, String? engine}) {
     return ChatMessage(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       text: text,
       isUser: false,
       createdAt: DateTime.now(),
       imagePath: imagePath,
+      engine: engine,
     );
+  }
+
+  /// Réponse fixe du filet de sécurité (voir [detectHealthRisk]) : jamais de
+  /// chiffre ni de plan, uniquement une orientation vers un professionnel.
+  /// Numéros d'urgence ajoutés uniquement pour le risque suicidaire, à
+  /// vérifier manuellement (voir lib/config/emergency_contacts.dart).
+  String _buildSafetyReply(HealthRiskCategory category, String lang) {
+    final l10n = lookupAppLocalizations(Locale(lang));
+    switch (category) {
+      case HealthRiskCategory.selfHarm:
+        return '${l10n.coachSafetyReplySelfHarm} ${EmergencyContacts.lineFor(lang)}';
+      case HealthRiskCategory.eatingDisorder:
+        return l10n.coachSafetyReplyEatingDisorder;
+      case HealthRiskCategory.dangerousGoal:
+        return l10n.coachSafetyReplyDangerousGoal;
+    }
   }
 
   List<Map<String, dynamic>> _toGeminiHistory(List<ChatMessage> messages) {

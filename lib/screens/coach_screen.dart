@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../models/chat_message.dart';
+import '../providers/ai_consent_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/dashboard_provider.dart';
+import '../providers/local_ai_provider.dart';
 import '../providers/meal_suggestions_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/shopping_list_provider.dart';
@@ -738,11 +740,17 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
     if (text.isEmpty || _isSending) {
       return;
     }
-    // ponytail: le chat utilise l'IA locale si prête (voir chat_provider.dart),
-    // mais ce choix se fait à l'intérieur de sendMessage — on ne peut pas le
-    // savoir à l'avance ici. On demande le consentement cloud par prudence
-    // dans tous les cas plutôt que dupliquer la logique de chat_provider.
-    if (!await ensureCloudAiConsent(context, ref)) return;
+    // Consentement cloud demandé seulement si l'IA locale n'est pas prête :
+    // si elle l'est, le chat reste 100% local et aucun prompt n'est jamais
+    // affiché (voir docs/AUDIT_CHATBOT.md étape 3, cas 1).
+    final localReady = ref.read(localAiSettingsProvider).value?.isReadyToUse == true;
+    if (!localReady && ref.read(cloudAiConsentProvider).value != true) {
+      // Consentement absent (jamais demandé ou refusé) : on demande ici,
+      // sans vider le champ de saisie si l'utilisateur refuse (cas 3). Le cas
+      // "déjà refusé" affiche normalement la carte explicative (cas 4,
+      // voir build()) avant même d'arriver ici.
+      if (!await ensureCloudAiConsent(context, ref)) return;
+    }
     _textController.clear();
     setState(() => _isSending = true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -801,6 +809,13 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
     const primaryColor = kCoachPrimaryColor;
     final messagesAsync = ref.watch(chatProvider);
     final messages = messagesAsync.value ?? const <ChatMessage>[];
+    // Cas 4 (étape 3) : IA locale pas prête ET consentement cloud refusé
+    // explicitement -> carte explicative à la place du champ de saisie,
+    // jamais un champ silencieusement bloqué.
+    final localReady =
+        ref.watch(localAiSettingsProvider).value?.isReadyToUse == true;
+    final cloudDeclined = ref.watch(cloudAiConsentDeclinedProvider).value == true;
+    final showLocalAiRequiredCard = !localReady && cloudDeclined;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.88,
@@ -875,6 +890,32 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                     ],
                   ),
                 ),
+                // Disclaimer permanent (jamais masquable) : exigence de
+                // transparence store/conformité, voir docs/AUDIT_CHATBOT.md
+                // étape 5 — "IA, ne remplace pas un avis médical".
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                  child: Semantics(
+                    label: context.l10n.coachDisclaimer,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.info_outline_rounded,
+                            size: 14, color: Colors.black45),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            context.l10n.coachDisclaimer,
+                            style: const TextStyle(
+                              color: Colors.black45,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Wrap(
@@ -930,77 +971,150 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                           },
                         ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: SafeArea(
-                    top: false,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _textController,
-                            textInputAction: TextInputAction.send,
-                            onSubmitted: (_) => _sendMessage(),
-                            decoration: InputDecoration(
-                              hintText: context.l10n.coachInputHint,
-                              filled: true,
-                              fillColor: Colors.grey.shade100,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
+                if (showLocalAiRequiredCard)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: SafeArea(
+                      top: false,
+                      child: _LocalAiRequiredCard(
+                        onEnableLocalAi: () {
+                          Navigator.of(context).pop();
+                          context.push('/local_ai_settings');
+                        },
+                        onAcceptCloud: () async {
+                          await ref.read(cloudAiConsentProvider.notifier).accept();
+                          await ref
+                              .read(cloudAiConsentDeclinedProvider.notifier)
+                              .clear();
+                        },
+                      ),
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: SafeArea(
+                      top: false,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _textController,
+                              textInputAction: TextInputAction.send,
+                              onSubmitted: (_) => _sendMessage(),
+                              decoration: InputDecoration(
+                                hintText: context.l10n.coachInputHint,
+                                filled: true,
+                                fillColor: Colors.grey.shade100,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        InkWell(
-                          onTap: _isSending ? null : _sendMessage,
-                          borderRadius: BorderRadius.circular(18),
-                          child: Container(
-                            width: 52,
-                            height: 52,
-                            decoration: BoxDecoration(
-                              color: _isSending
-                                  ? primaryColor.withValues(alpha: 0.5)
-                                  : primaryColor,
-                              shape: BoxShape.circle,
-                            ),
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 200),
-                              child: _isSending
-                                  ? const SizedBox(
-                                      key: ValueKey('sending'),
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation(
-                                          Colors.white,
+                          const SizedBox(width: 10),
+                          InkWell(
+                            onTap: _isSending ? null : _sendMessage,
+                            borderRadius: BorderRadius.circular(18),
+                            child: Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: _isSending
+                                    ? primaryColor.withValues(alpha: 0.5)
+                                    : primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 200),
+                                child: _isSending
+                                    ? const SizedBox(
+                                        key: ValueKey('sending'),
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation(
+                                            Colors.white,
+                                          ),
                                         ),
+                                      )
+                                    : const Icon(
+                                        Icons.send_rounded,
+                                        key: ValueKey('send'),
+                                        color: Colors.white,
+                                        size: 20,
                                       ),
-                                    )
-                                  : const Icon(
-                                      Icons.send_rounded,
-                                      key: ValueKey('send'),
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+/// Carte affichée à la place du champ de saisie quand l'IA locale n'est pas
+/// prête et que le consentement cloud a été explicitement refusé (étape 3,
+/// cas 4) : jamais un champ silencieusement désactivé sans explication.
+class _LocalAiRequiredCard extends StatelessWidget {
+  final VoidCallback onEnableLocalAi;
+  final VoidCallback onAcceptCloud;
+
+  const _LocalAiRequiredCard({
+    required this.onEnableLocalAi,
+    required this.onAcceptCloud,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            context.l10n.coachLocalAiRequiredTitle,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            context.l10n.coachLocalAiRequiredBody,
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 13, height: 1.4),
+          ),
+          const SizedBox(height: 14),
+          ElevatedButton(
+            onPressed: onEnableLocalAi,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kCoachPrimaryColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+            child: Text(context.l10n.coachEnableLocalAiButton),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: onAcceptCloud,
+            child: Text(context.l10n.cloudAiConsentAccept),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1099,13 +1213,13 @@ class _TypingBubbleState extends State<_TypingBubble>
   }
 }
 
-class _ChatBubble extends StatelessWidget {
+class _ChatBubble extends ConsumerWidget {
   final ChatMessage message;
 
   const _ChatBubble({required this.message});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isUser = message.isUser;
 
     return Align(
@@ -1137,6 +1251,205 @@ class _ChatBubble extends StatelessWidget {
                 fontSize: 14,
                 height: 1.35,
               ),
+            ),
+            // Signalement (docs/AUDIT_CHATBOT.md étape 7) : jamais pour le
+            // message de bienvenue statique, rien à signaler dedans.
+            if (!isUser && message.id != 'welcome')
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (message.engine != null)
+                      _EngineBadge(engine: message.engine!)
+                    else
+                      const SizedBox.shrink(),
+                    _ReportButton(message: message),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Icône de signalement d'une réponse du coach — ouvre un bottom sheet pour
+/// choisir un motif (+ commentaire optionnel) et l'envoyer via
+/// [ChatNotifier.reportMessage] (docs/AUDIT_CHATBOT.md étape 7).
+class _ReportButton extends StatelessWidget {
+  final ChatMessage message;
+
+  const _ReportButton({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: context.l10n.coachReportTooltip,
+      button: true,
+      child: InkWell(
+        onTap: () => _openReportSheet(context),
+        borderRadius: BorderRadius.circular(12),
+        child: const Padding(
+          padding: EdgeInsets.all(2),
+          child: Icon(Icons.flag_outlined, size: 14, color: Colors.black38),
+        ),
+      ),
+    );
+  }
+
+  void _openReportSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => _ReportSheet(message: message),
+    );
+  }
+}
+
+class _ReportSheet extends ConsumerStatefulWidget {
+  final ChatMessage message;
+
+  const _ReportSheet({required this.message});
+
+  @override
+  ConsumerState<_ReportSheet> createState() => _ReportSheetState();
+}
+
+class _ReportSheetState extends ConsumerState<_ReportSheet> {
+  String _motif = 'dangerous';
+  final _commentController = TextEditingController();
+  bool _sending = false;
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    setState(() => _sending = true);
+    final l10n = context.l10n;
+    try {
+      await ref.read(chatProvider.notifier).reportMessage(
+            widget.message,
+            motif: _motif,
+            commentaire: _commentController.text.trim().isEmpty
+                ? null
+                : _commentController.text.trim(),
+          );
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.coachReportSuccessSnackbar)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _sending = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.coachReportErrorSnackbar)),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final reasons = <String, String>{
+      'dangerous': l10n.coachReportReasonDangerous,
+      'incorrect': l10n.coachReportReasonIncorrect,
+      'inappropriate': l10n.coachReportReasonInappropriate,
+      'other': l10n.coachReportReasonOther,
+    };
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 16,
+        bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.coachReportSheetTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const SizedBox(height: 8),
+          RadioGroup<String>(
+            groupValue: _motif,
+            onChanged: (value) => setState(() => _motif = value!),
+            child: Column(
+              children: [
+                for (final entry in reasons.entries)
+                  RadioListTile<String>(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text(entry.value),
+                    value: entry.key,
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _commentController,
+            maxLines: 2,
+            decoration: InputDecoration(
+              labelText: l10n.coachReportCommentLabel,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: _sending ? null : _submit,
+              child: _sending
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text(l10n.coachReportSubmitButton),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Indicateur du moteur ayant généré une réponse (local vs cloud) — exigence
+/// de transparence, docs/AUDIT_CHATBOT.md étape 5. Rendu uniquement quand
+/// [ChatMessage.engine] est connu (réponse générée pendant la session en
+/// cours, jamais pour un message rechargé depuis l'historique).
+class _EngineBadge extends StatelessWidget {
+  final String engine;
+
+  const _EngineBadge({required this.engine});
+
+  @override
+  Widget build(BuildContext context) {
+    final isLocal = engine == 'local';
+    final label =
+        isLocal ? context.l10n.coachEngineLocalLabel : context.l10n.coachEngineCloudLabel;
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Semantics(
+        label: label,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isLocal ? Icons.phone_iphone_rounded : Icons.cloud_outlined,
+              size: 12,
+              color: Colors.black38,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 10, color: Colors.black38),
             ),
           ],
         ),

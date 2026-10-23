@@ -339,6 +339,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coachDailyObjectiveTitle => 'DAILY GOAL';
 
   @override
+  String get coachDisclaimer => 'AI, not a substitute for medical advice';
+
+  @override
+  String get coachEnableLocalAiButton => 'Enable local AI';
+
+  @override
+  String get coachEngineCloudLabel => 'Cloud';
+
+  @override
+  String get coachEngineLocalLabel => 'Local';
+
+  @override
   String get coachFatLabel => 'FAT';
 
   @override
@@ -352,6 +364,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coachKcalUnitLabel => ' kcal';
+
+  @override
+  String get coachLocalAiFailedNoCloudConsent =>
+      'The local coach ran into a problem and you haven\'t allowed cloud AI. Try again, or allow cloud AI in settings so I can reply.';
+
+  @override
+  String get coachLocalAiRequiredBody =>
+      'The coach needs the local (offline) AI or your consent to use cloud AI. Enable local AI to continue without sending anything online, or allow cloud AI to continue now.';
+
+  @override
+  String get coachLocalAiRequiredTitle => 'Local AI not enabled';
 
   @override
   String get coachMealSuggestionsEmptyText =>
@@ -439,6 +462,37 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get coachReportCommentLabel => 'Comment (optional)';
+
+  @override
+  String get coachReportErrorSnackbar =>
+      'The report could not be sent. Please try again later.';
+
+  @override
+  String get coachReportReasonDangerous => 'Dangerous';
+
+  @override
+  String get coachReportReasonInappropriate => 'Inappropriate';
+
+  @override
+  String get coachReportReasonIncorrect => 'Incorrect';
+
+  @override
+  String get coachReportReasonOther => 'Other';
+
+  @override
+  String get coachReportSheetTitle => 'Report this reply';
+
+  @override
+  String get coachReportSubmitButton => 'Send report';
+
+  @override
+  String get coachReportSuccessSnackbar => 'Report sent, thank you.';
+
+  @override
+  String get coachReportTooltip => 'Report this reply';
+
+  @override
   String get coachResetButton => 'Reset';
 
   @override
@@ -455,6 +509,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coachRetryButton => 'Retry';
 
   @override
+  String get coachSafetyReplyDangerousGoal =>
+      'I can\'t guide you toward a goal that fast or restrictive, since it could be dangerous for your health. A doctor or dietitian can help you move toward your goal safely.';
+
+  @override
+  String get coachSafetyReplyEatingDisorder =>
+      'Thank you for trusting me with this. I won\'t give you numbers or a plan on this topic, but what you\'re describing deserves to be heard by a doctor, dietitian, or mental health professional. You don\'t have to go through this alone.';
+
+  @override
+  String get coachSafetyReplySelfHarm =>
+      'What you\'re feeling matters, and you shouldn\'t have to face it alone. I\'m not able to help with this, but a professional can. Please reach out, as soon as you can, to someone you trust or a health professional.';
+
+  @override
   String get coachSeeAllButton => 'See all';
 
   @override
@@ -469,6 +535,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coachTitle => 'AI Coach';
+
+  @override
+  String get coachWelcomeMessage =>
+      'Hello, I\'m your nutrition coach. What would you like to improve today?';
 
   @override
   String get comingSoonDefaultMessage => 'This feature is coming soon.';
@@ -1963,6 +2033,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String svcErrorMealSuggestions(String error) {
     return 'Error generating meal ideas: $error';
+  }
+
+  @override
+  String svcQuotaResetAt(String time) {
+    return 'Try again after $time.';
   }
 
   @override

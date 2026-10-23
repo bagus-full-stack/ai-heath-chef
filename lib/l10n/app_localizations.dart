@@ -680,6 +680,30 @@ abstract class AppLocalizations {
   /// **'OBJECTIF QUOTIDIEN'**
   String get coachDailyObjectiveTitle;
 
+  /// No description provided for @coachDisclaimer.
+  ///
+  /// In fr, this message translates to:
+  /// **'IA, ne remplace pas un avis médical'**
+  String get coachDisclaimer;
+
+  /// No description provided for @coachEnableLocalAiButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer l\'IA locale'**
+  String get coachEnableLocalAiButton;
+
+  /// No description provided for @coachEngineCloudLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cloud'**
+  String get coachEngineCloudLabel;
+
+  /// No description provided for @coachEngineLocalLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Local'**
+  String get coachEngineLocalLabel;
+
   /// No description provided for @coachFatLabel.
   ///
   /// In fr, this message translates to:
@@ -709,6 +733,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **' kcal'**
   String get coachKcalUnitLabel;
+
+  /// No description provided for @coachLocalAiFailedNoCloudConsent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le coach local a rencontré un problème et tu n\'as pas autorisé l\'IA cloud. Réessaie, ou autorise l\'IA cloud dans les réglages pour que je puisse répondre.'**
+  String get coachLocalAiFailedNoCloudConsent;
+
+  /// No description provided for @coachLocalAiRequiredBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le coach a besoin de l\'IA locale (hors-ligne) ou de ton accord pour utiliser l\'IA cloud. Active l\'IA locale pour continuer sans rien envoyer en ligne, ou autorise l\'IA cloud pour continuer maintenant.'**
+  String get coachLocalAiRequiredBody;
+
+  /// No description provided for @coachLocalAiRequiredTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'IA locale non activée'**
+  String get coachLocalAiRequiredTitle;
 
   /// No description provided for @coachMealSuggestionsEmptyText.
   ///
@@ -854,6 +896,66 @@ abstract class AppLocalizations {
   /// **'Il vous reste {remainingKcal} kcal pour atteindre votre objectif de {goalLabel}.'**
   String coachRemainingKcalText(int remainingKcal, String goalLabel);
 
+  /// No description provided for @coachReportCommentLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commentaire (optionnel)'**
+  String get coachReportCommentLabel;
+
+  /// No description provided for @coachReportErrorSnackbar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le signalement n\'a pas pu être envoyé. Réessaie plus tard.'**
+  String get coachReportErrorSnackbar;
+
+  /// No description provided for @coachReportReasonDangerous.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dangereux'**
+  String get coachReportReasonDangerous;
+
+  /// No description provided for @coachReportReasonInappropriate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inapproprié'**
+  String get coachReportReasonInappropriate;
+
+  /// No description provided for @coachReportReasonIncorrect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Incorrect'**
+  String get coachReportReasonIncorrect;
+
+  /// No description provided for @coachReportReasonOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get coachReportReasonOther;
+
+  /// No description provided for @coachReportSheetTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler cette réponse'**
+  String get coachReportSheetTitle;
+
+  /// No description provided for @coachReportSubmitButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le signalement'**
+  String get coachReportSubmitButton;
+
+  /// No description provided for @coachReportSuccessSnackbar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalement envoyé, merci.'**
+  String get coachReportSuccessSnackbar;
+
+  /// No description provided for @coachReportTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler cette réponse'**
+  String get coachReportTooltip;
+
   /// No description provided for @coachResetButton.
   ///
   /// In fr, this message translates to:
@@ -884,6 +986,24 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get coachRetryButton;
 
+  /// No description provided for @coachSafetyReplyDangerousGoal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je ne peux pas t\'accompagner vers un objectif aussi rapide ou restrictif, car cela peut être dangereux pour ta santé. Un·e médecin ou un·e diététicien·ne pourra t\'aider à avancer vers ton objectif en toute sécurité.'**
+  String get coachSafetyReplyDangerousGoal;
+
+  /// No description provided for @coachSafetyReplyEatingDisorder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci de me faire confiance pour en parler. Je ne vais pas te donner de chiffres ni de plan sur ce sujet, mais ce que tu décris mérite d\'être entendu par un médecin, un·e diététicien·ne ou un·e psychologue. Tu n\'as pas à traverser ça seul·e.'**
+  String get coachSafetyReplyEatingDisorder;
+
+  /// No description provided for @coachSafetyReplySelfHarm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que tu ressens compte, et tu ne devrais pas rester seul·e avec ça. Je ne suis pas en mesure de t\'aider sur ce sujet, mais un professionnel peut. Parle-en, dès que possible, à quelqu\'un de confiance ou à un professionnel de santé.'**
+  String get coachSafetyReplySelfHarm;
+
   /// No description provided for @coachSeeAllButton.
   ///
   /// In fr, this message translates to:
@@ -913,6 +1033,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Coach IA'**
   String get coachTitle;
+
+  /// No description provided for @coachWelcomeMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour, je suis votre coach nutrition. Que souhaitez-vous améliorer aujourd\'hui ?'**
+  String get coachWelcomeMessage;
 
   /// No description provided for @comingSoonDefaultMessage.
   ///
@@ -3517,6 +3643,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur lors de la génération des idées de repas : {error}'**
   String svcErrorMealSuggestions(String error);
+
+  /// No description provided for @svcQuotaResetAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessaie après {time}.'**
+  String svcQuotaResetAt(String time);
 
   /// No description provided for @svcErrorAuthRequired.
   ///

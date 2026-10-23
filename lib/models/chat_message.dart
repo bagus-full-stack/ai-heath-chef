@@ -18,6 +18,12 @@ class ChatMessage {
   // base64 en masse (voir ChatNotifier._fetchPage) — déclenche un
   // chargement à la demande côté UI.
   final bool hasLegacyImage;
+  // Quel moteur a généré cette réponse ('local' ou 'cloud'), pour
+  // l'indicateur de transparence (docs/AUDIT_CHATBOT.md étape 5). Non
+  // persisté en base (pas de colonne dédiée) : null pour tout message
+  // utilisateur, tout message rechargé depuis l'historique, ou toute réponse
+  // du filet de sécurité déterministe (aucun modèle n'a répondu).
+  final String? engine;
 
   ChatMessage({
     required this.id,
@@ -27,5 +33,6 @@ class ChatMessage {
     this.imageUrl,
     this.imagePath,
     this.hasLegacyImage = false,
+    this.engine,
   });
 }

@@ -20,6 +20,8 @@ Contact : bagaassami009@gmail.com
 | Photos de progression (poids) | Local + Supabase Storage, bucket `weight_photos` (**privé**, accès par URL signée temporaire) | Suivi visuel de la perte/prise de poids — **donnée de santé** | Consentement explicite |
 | Photos de menu / frigo-placard (scan) | Transmises à l'IA cloud, pas stockées de façon pérenne côté app (sauf cache temporaire local) | Reconnaissance de plats / ingrédients | Consentement |
 | Historique de chat avec le coach IA | Supabase (`chat_messages`), images du chat dans Storage bucket `chat_images` (**privé**, accès signé) | Fonctionnalité de coaching conversationnel | Exécution du contrat |
+| Signalement d'une réponse du coach IA (motif, commentaire libre optionnel, extrait du message signalé, version du prompt, moteur utilisé) | Supabase (`chat_reports`) | Modération/sécurité — permettre à l'utilisateur de signaler une réponse dangereuse, incorrecte ou inappropriée | Intérêt légitime (sécurité du service) ; lecture/écriture limitées à l'auteur (RLS), ni modification ni suppression possible après envoi (preuve de modération) |
+| Contexte du jour envoyé au coach IA à chaque message (objectif, régime, allergies, préférence culinaire, cibles et macros du jour, noms et kcal des repas du jour, hydratation, poids actuel, jeûne en cours) | Jamais stocké : reconstruit depuis les données locales/Supabase ci-dessus à chaque appel, envoyé à Gemini (cloud) ou traité uniquement sur l'appareil (IA locale) | Personnaliser la réponse du coach sans qu'il ait à demander ces informations | Exécution du contrat ; allergies/régime = donnée de santé, base légale = consentement explicite (même consentement que la ligne profil ci-dessus) |
 | Entrées de poids et d'hydratation | Local + Supabase (`weight_entries`, `hydration_entries`) | Suivi de progression — **donnée de santé** pour le poids | Consentement explicite |
 | Identifiants techniques (user ID Supabase, jeton de session) | Supabase Auth, mémoire locale de l'app | Authentification, synchronisation | Exécution du contrat |
 | Statut d'abonnement (PRO/gratuit) | RevenueCat (identifié par le user ID Supabase comme `appUserID`), cache local | Gestion de l'abonnement payant | Exécution du contrat |
@@ -35,7 +37,7 @@ Donnée **non** collectée à ce jour (à vérifier avant publication si ça cha
 | Tiers | Donnée transmise | Rôle | Transfert hors UE | Risque identifié |
 |---|---|---|---|---|
 | **Supabase Inc.** | Toutes les données ci-dessus (base de données, Auth, Storage, Edge Functions) | Hébergement backend | Oui, selon la région du projet Supabase (à vérifier dans le dashboard — US par défaut sauf région EU choisie) | Vérifier la région du projet et les clauses contractuelles types (SCC) de Supabase |
-| **Google (Gemini API)** | Photo de repas/produit/menu/frigo (base64) + prompt texte ; message de chat + historique + ton du coach + régime + allergies | Analyse d'image et chat coach par IA | Oui (serveurs Google, le plus souvent hors UE) | Allergies/régime = donnée de santé envoyée à un tiers US — **point sensible**, minimiser si possible (ex. n'envoyer que la liste d'allergies sans autre contexte) |
+| **Google (Gemini API)** | Photo de repas/produit/menu/frigo (base64) + prompt texte ; message de chat + historique + ton du coach + régime + allergies + contexte du jour (objectif, cibles/consommé, noms+kcal des repas, hydratation, poids, jeûne) | Analyse d'image et chat coach par IA | Oui (serveurs Google, le plus souvent hors UE) | Allergies/régime/contexte du jour = donnée de santé envoyée à un tiers US — **point sensible**, minimisé à la conception (voir note sous le tableau : ni email, ni nom, ni identifiant, ni photo dans ce contexte, taille bornée) |
 | **Cloudflare (Workers AI, modèle FLUX.1 schnell)** | Titre + description textuelle d'une suggestion de repas (pas de photo, pas de donnée perso directe) | Génération d'illustration de plat | Oui (réseau Cloudflare global) | Faible — pas de donnée personnelle identifiable dans le texte envoyé |
 | **Pollinations.ai** | Idem Cloudflare (fallback si quota Cloudflare dépassé) | Génération d'illustration de plat | Oui | Faible, mais service tiers moins documenté juridiquement — à surveiller |
 | **RevenueCat** | User ID Supabase (`appUserID`), événements d'achat | Gestion des abonnements | Oui (US) | Standard pour ce type de service, CGU RevenueCat à référencer |
@@ -46,6 +48,7 @@ Donnée **non** collectée à ce jour (à vérifier avant publication si ça cha
 ### Recommandations de réduction/anonymisation (techniques, à valider)
 
 1. **Chat coach → Gemini** : `allergies` et `dietType` sont injectés tels quels dans le prompt système envoyé à Gemini à chaque message (voir `coach-chat/index.ts`). Minimisation possible : n'envoyer qu'un résumé catégoriel (ex. "a des restrictions alimentaires") plutôt que la liste brute, si l'utilisateur n'a pas explicitement consenti à l'envoi détaillé. **Décision produit à prendre, pas appliquée ici.**
+2. **Contexte du jour → Gemini/IA locale** (`lib/utils/coach_context_builder.dart`, voir `docs/AUDIT_CHATBOT.md` étape 6) : **minimisation déjà appliquée à la conception**, pas une recommandation en attente — le bloc ne contient jamais `email`/`userId`/`fullName`/photo, uniquement objectif/régime/allergies/préférence culinaire, cibles et macros du jour, noms (tronqués, délimiteurs neutralisés) et kcal des repas du jour, hydratation, poids actuel et jeûne en cours. Taille bornée (8 repas max, noms tronqués à 40 caractères) pour limiter à la fois le volume envoyé et le coût du modèle local.
 2. **Buckets Storage publics** (`avatars`, `meal_photos`, `weight_photos`) : **appliqué** (migration `0020_private_photo_buckets.sql`) — ces buckets sont désormais privés, avec policies RLS par dossier utilisateur identiques à `chat_images` (migration 0019), et accès exclusivement via URL signée temporaire (voir section 10).
 3. **Suppression de compte** : voir point résolu à la section 9.
 
@@ -62,7 +65,7 @@ Conformément au RGPD, tu disposes d'un droit d'accès, de rectification, d'effa
 
 - **Accès/rectification** : directement dans l'app (écran Profil).
 - **Effacement** : écran Profil > Sécurité > Supprimer mon compte (suppression immédiate, limitée à 3 tentatives/heure par anti-abus).
-- **Portabilité** : export JSON complet (profil, repas, poids, hydratation, chat, plans de repas, préférences, photos) depuis Profil > Sécurité > « Exporter toutes mes données », en plus des exports CSV/PDF existants (journal des repas, bilans hebdo/mensuels) — voir section 7.
+- **Portabilité** : export JSON complet (profil, repas, poids, hydratation, chat, signalements, plans de repas, préférences, photos) depuis Profil > Sécurité > « Exporter toutes mes données », en plus des exports CSV/PDF existants (journal des repas, bilans hebdo/mensuels) — voir section 7.
 - **Contact pour toute demande** : bagaassami009@gmail.com
 
 ## 6. Âge minimum
@@ -76,7 +79,7 @@ Exports partiels existants (`lib/utils/journal_export.dart`) :
 - PDF bilan nutritionnel hebdomadaire/mensuel
 - Export .ics du plan de repas hebdomadaire
 
-**Export complet** (droit d'accès/portabilité, Art. 15/20 RGPD) : bouton « Exporter toutes mes données » dans Profil > Sécurité, qui génère un fichier JSON unique (`DataExportService`, voir section 11) regroupant profil, repas (avec ingrédients), poids, hydratation, historique du chat, plans de repas hebdomadaires, liste de courses, rappels personnalisés, consentements, et métadonnées/liens signés temporaires des photos. Partagé via le sélecteur natif (`share_plus`). Aucun secret ni token, et aucune donnée d'un autre utilisateur.
+**Export complet** (droit d'accès/portabilité, Art. 15/20 RGPD) : bouton « Exporter toutes mes données » dans Profil > Sécurité, qui génère un fichier JSON unique (`DataExportService`, voir section 11) regroupant profil, repas (avec ingrédients), poids, hydratation, historique du chat, signalements de réponses du coach, plans de repas hebdomadaires, liste de courses, rappels personnalisés, consentements, et métadonnées/liens signés temporaires des photos. Partagé via le sélecteur natif (`share_plus`). Aucun secret ni token, et aucune donnée d'un autre utilisateur.
 
 ## 8. Sécurité
 
@@ -113,7 +116,15 @@ Jusqu'ici, aucun export ne couvrait l'ensemble des données personnelles (voir a
 
 Jamais inclus : mots de passe, jetons de session, ou données d'un autre utilisateur (chaque requête est filtrée par l'id de l'utilisateur authentifié). Couvert par `test/services/data_export_service_test.dart`.
 
-## 12. Contact
+## 12. Point résolu — signalement d'une réponse du coach IA
+
+`supabase/migrations/0022_add_chat_reports.sql` (voir `docs/AUDIT_CHATBOT.md` étape 7) ajoute une table `chat_reports` : un bouton (icône drapeau) sur chaque réponse du coach ouvre un formulaire (motif parmi dangereux/incorrect/inapproprié/autre + commentaire libre optionnel). L'envoi stocke le motif, le commentaire, un extrait du message signalé (1000 caractères max), la version du prompt système et le moteur utilisé (cloud/local) — jamais l'historique complet de la conversation.
+
+RLS : lecture et création limitées à l'auteur du signalement ; **aucune policy de modification ni de suppression** n'est créée, pour préserver l'intégrité de la preuve de modération. Inclus dans l'export complet des données (section 11) et nettoyé automatiquement à la suppression du compte (clé étrangère `on delete cascade` vers `auth.users`, même mécanisme que les autres tables).
+
+**Point à faire valider par un juriste** : base légale retenue (intérêt légitime pour la sécurité du service) et durée de conservation (actuellement illimitée hors suppression de compte) — voir `docs/STORE_CHECKLIST.md`.
+
+## 13. Contact
 
 bagaassami009@gmail.com
 
@@ -132,13 +143,13 @@ Contact: bagaassami009@gmail.com
 
 ## 2. Data collected
 
-See the French table in section 2 above — identical content: account email/password, health profile (weight, height, age, goal, diet, allergies — special category health data under GDPR Art. 9), avatar/meal/progress/menu/pantry photos, coach chat history, weight/hydration entries, technical identifiers, subscription status, cached suggestions/plans, anti-abuse usage counters, deletion attempt timestamps, terms-acceptance record.
+See the French table in section 2 above — identical content: account email/password, health profile (weight, height, age, goal, diet, allergies — special category health data under GDPR Art. 9), avatar/meal/progress/menu/pantry photos, coach chat history, a per-message daily context sent to the coach (goal, diet, allergies, cuisine preference, today's targets/consumed macros, today's meal names+kcal, hydration, current weight, ongoing fast — never persisted, rebuilt from the data above on every message), weight/hydration entries, technical identifiers, subscription status, cached suggestions/plans, anti-abuse usage counters, deletion attempt timestamps, terms-acceptance record.
 
 ## 3. Recipients / processors
 
-Same third parties as listed in the French section 3: **Supabase** (backend hosting, all data), **Google Gemini** (meal/product/menu/pantry photos + chat text + diet/allergies for the coach), **Cloudflare Workers AI** and **Pollinations.ai** (meal title/description text only, for illustration generation), **RevenueCat** (subscription management, Supabase user ID), **Open Food Facts** (anonymous barcode/search lookup, no personal data sent), **Hugging Face** (on-device model download via a shared server token), **Apple/Google** (native in-app payment, handled entirely by the store).
+Same third parties as listed in the French section 3: **Supabase** (backend hosting, all data), **Google Gemini** (meal/product/menu/pantry photos + chat text + diet/allergies/daily context for the coach), **Cloudflare Workers AI** and **Pollinations.ai** (meal title/description text only, for illustration generation), **RevenueCat** (subscription management, Supabase user ID), **Open Food Facts** (anonymous barcode/search lookup, no personal data sent), **Hugging Face** (on-device model download via a shared server token), **Apple/Google** (native in-app payment, handled entirely by the store).
 
-Same minimization recommendations apply (see French section 3): reduce the allergy/diet detail sent to the coach chat prompt (**not applied — product decision pending your approval**); move `avatars`/`meal_photos`/`weight_photos` Storage buckets from public to private+signed URLs like `chat_images` already is (**applied**, migration `0020_private_photo_buckets.sql` — resolved, see section 10).
+Same minimization recommendations apply (see French section 3): reduce the allergy/diet detail sent to the coach chat prompt (**not applied — product decision pending your approval**); move `avatars`/`meal_photos`/`weight_photos` Storage buckets from public to private+signed URLs like `chat_images` already is (**applied**, migration `0020_private_photo_buckets.sql` — resolved, see section 10). The daily context block (`lib/utils/coach_context_builder.dart`) is **minimized by design, already applied**: never includes email/userId/fullName/photos, size-bounded (max 8 meals, names truncated to 40 characters).
 
 ## 4. Retention
 
@@ -182,6 +193,14 @@ No export used to cover all personal data (see former section 7) — a gap with 
 
 Never included: passwords, session tokens, or another user's data (every query is scoped to the authenticated user's id). Covered by `test/services/data_export_service_test.dart`.
 
-## 12. Contact
+## 12. Resolved — reporting a coach reply
+
+`supabase/migrations/0022_add_chat_reports.sql` (see `docs/AUDIT_CHATBOT.md` step 7) adds a `chat_reports` table: a flag icon on each coach reply opens a form (reason: dangerous/incorrect/inappropriate/other, plus an optional free-text comment). Submitting stores the reason, comment, an excerpt of the reported message (max 1000 characters), the system-prompt version, and the engine used (cloud/local) — never the full conversation history.
+
+RLS: read and insert scoped to the report's author; **no update or delete policy exists**, to preserve the integrity of this moderation evidence. Included in the full data export (section 11) and automatically wiped on account deletion (`on delete cascade` foreign key to `auth.users`, same mechanism as every other table).
+
+**Needs legal sign-off**: the legal basis used (legitimate interest for service safety) and the retention period (currently unlimited outside account deletion) — see `docs/STORE_CHECKLIST.md`.
+
+## 13. Contact
 
 bagaassami009@gmail.com

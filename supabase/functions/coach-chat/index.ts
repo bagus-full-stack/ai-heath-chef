@@ -4,6 +4,8 @@ import { checkAndIncrementQuota } from "../_shared/quota.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 import { HttpError } from "../_shared/errors.ts"
 import { callGeminiWithFallback } from "../_shared/gemini.ts"
+import { detectHealthRisk, safetyReplyFor } from "../_shared/health_risk_filter.ts"
+import { buildCoachSystemInstruction } from "../_shared/coach_prompt.ts"
 
 // Liste de priorité des modèles (voir README : diverge volontairement/par
 // drift historique des autres fonctions IA du projet, non harmonisée).
@@ -38,8 +40,13 @@ const MODELS = [
 
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_HISTORY_ENTRIES = 50;
+// Généreux par rapport aux ~500 caractères attendus d'un vrai bloc (voir
+// coach_context_builder.dart) : borne défensive contre un appelant
+// malveillant/bugué, pas un budget normal (docs/AUDIT_CHATBOT.md étape 6).
+const MAX_DAILY_CONTEXT_LENGTH = 2000;
 
-Deno.serve(async (req) => {
+/** Extrait pour être appelable directement depuis `index_test.ts` (Deno.serve ne peut pas être importé). */
+export async function handleCoachChat(req: Request): Promise<Response> {
     // === GESTION DU PREFLIGHT (CORS) ===
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
@@ -67,12 +74,24 @@ Deno.serve(async (req) => {
             throw new Error(isEn ? "The request body is empty or malformed." : "Le corps de la requête est vide ou mal formé.");
         }
 
-        const { message, history, coachTone, dietType, allergies } = body;
+        const { message, history, coachTone, dietType, allergies, dailyContext } = body;
         if (!message || typeof message !== 'string') {
             throw new HttpError(400, isEn ? "No message was provided in the request." : "Aucun message n'a été fourni dans la requête.");
         }
         if (message.length > MAX_MESSAGE_LENGTH) {
             throw new HttpError(400, isEn ? `The message is too long (max ${MAX_MESSAGE_LENGTH} characters).` : `Le message est trop long (max ${MAX_MESSAGE_LENGTH} caractères).`);
+        }
+
+        // === FILET DE SÉCURITÉ DÉTERMINISTE (avant tout appel modèle) ===
+        // Complémentaire au safetyInstruction du prompt : un modèle peut
+        // ignorer une instruction, pas ce filtre. Voir health_risk_filter.ts
+        // et docs/AUDIT_CHATBOT.md étape 1.
+        const riskCategory = detectHealthRisk(message);
+        if (riskCategory) {
+            return new Response(JSON.stringify({ reply: safetyReplyFor(riskCategory, isEn), suggestedDish: null }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200,
+            })
         }
 
         // === 2. VÉRIFICATION CLÉ API GEMINI ===
@@ -82,48 +101,20 @@ Deno.serve(async (req) => {
             throw new Error(isEn ? "Missing server configuration (API Key)." : "Configuration serveur manquante (API Key).");
         }
 
-        // === 3. PRÉPARATION DES INSTRUCTIONS SYSTÈME ===
-        const TONE_INSTRUCTIONS: Record<string, string> = {
-            motivant: "Tu es empathique et motivant : tu encourages l'utilisateur et le pousses gentiment à avancer.",
-            bienveillant: "Tu es calme, doux et bienveillant : tu rassures l'utilisateur, sans jamais le juger sur ses écarts.",
-            direct: "Tu es direct et concis : tu vas droit au but avec des conseils actionnables, sans détour ni fioriture.",
-            humoristique: "Tu es léger et plein d'humour, tout en restant utile et sérieux sur le fond nutritionnel.",
-        };
-        const toneInstruction = TONE_INSTRUCTIONS[coachTone as string] ?? TONE_INSTRUCTIONS.motivant;
-
-        const DIET_LABELS: Record<string, string> = {
-            vegetarian: "végétarien (sans viande ni poisson)",
-            vegan: "végétalien (sans aucun produit d'origine animale)",
-            pescetarian: "pescétarien (sans viande, poisson autorisé)",
-            halal: "halal",
-            kosher: "kasher",
-        };
-        const dietLabel = DIET_LABELS[dietType as string];
+        // === 3. PRÉPARATION DES INSTRUCTIONS SYSTÈME (voir _shared/coach_prompt.ts) ===
         const allergyList: string[] = Array.isArray(allergies)
             ? allergies.filter((a) => typeof a === 'string' && a.trim().length > 0)
             : [];
-
-        let dietaryNote = "";
-        if (dietLabel) {
-            dietaryNote += ` L'utilisateur suit un régime ${dietLabel} : ne recommande jamais un aliment qui l'enfreint.`;
-        }
-        if (allergyList.length > 0) {
-            dietaryNote += ` L'utilisateur est allergique/intolérant à : ${allergyList.join(', ')}. Ne recommande jamais ces aliments.`;
-        }
-
-        const langInstruction = lang === 'en' ? " Always respond in English." : " Réponds toujours en français.";
-        const dishTagInstruction = isEn
-            ? " If, and only if, you recommend one specific dish or recipe the user could cook or order, end your reply with a separate line in the exact format \"[DISH: Dish name]\" (short name, no description). Never add this tag for general advice, questions, or encouragement."
-            : " Si, et seulement si, tu recommandes un plat ou une recette précise que l'utilisateur pourrait cuisiner ou commander, termine ta réponse par une ligne séparée au format exact \"[DISH: Nom du plat]\" (nom court, sans description). N'ajoute JAMAIS cette balise pour un conseil général, une question ou un encouragement.";
-        // Garde-fou santé : voir lib/utils/nutrition_targets.dart pour le
-        // plancher calorique appliqué côté app (1200/1500 kcal). Le coach ne
-        // doit jamais recommander moins, ni un jeûne extrême ou un régime
-        // dangereux, et doit orienter vers un professionnel en cas de signal
-        // de trouble du comportement alimentaire.
-        const safetyInstruction = isEn
-            ? " Never recommend a daily calorie target below 1200 kcal for a woman or 1500 kcal for a man, an extreme/prolonged fast, or any other dangerous or extremely restrictive diet. If the user mentions signs of disordered eating (extreme restriction, purging, obsession with weight), respond with warmth and without judgment, and gently encourage them to talk to a doctor, dietitian, or mental health professional."
-            : " Ne recommande jamais une cible calorique quotidienne inférieure à 1200 kcal pour une femme ou 1500 kcal pour un homme, un jeûne extrême/prolongé, ni aucun autre régime dangereux ou extrêmement restrictif. Si l'utilisateur évoque des signes de trouble du comportement alimentaire (restriction extrême, purge, obsession du poids), réponds avec bienveillance et sans jugement, et encourage-le doucement à en parler à un médecin, un·e diététicien·ne ou un·e psychologue.";
-        const systemInstruction = `Tu es AI Health Chef, un coach en nutrition expert. ${toneInstruction} Tu réponds de manière concise (maximum 3 phrases) et claire. Tu tutoies l'utilisateur.${dietaryNote} Tu ne dois jamais utiliser de balises Markdown complexes, reste en texte simple.${langInstruction}${dishTagInstruction}${safetyInstruction}`;
+        const safeDailyContext = typeof dailyContext === 'string'
+            ? dailyContext.slice(0, MAX_DAILY_CONTEXT_LENGTH)
+            : undefined;
+        const systemInstruction = buildCoachSystemInstruction({
+            lang,
+            coachTone: coachTone as string,
+            dietType: dietType as string,
+            allergies: allergyList,
+            dailyContext: safeDailyContext,
+        });
 
         // On prépare le payload exact attendu par l'API REST de Google
         // On combine l'historique (s'il y en a) avec le nouveau message
@@ -193,4 +184,6 @@ Deno.serve(async (req) => {
             status: error instanceof HttpError ? error.status : 400,
         })
     }
-})
+}
+
+Deno.serve(handleCoachChat)

@@ -10,6 +10,7 @@ Brouillon technique, à cocher/compléter avant soumission. Pas une garantie de 
 - [x] Corriger le bug `chat_images` manquant dans `delete-account` (voir `docs/PRIVACY_POLICY_DRAFT.md` section 9) — corrigé, `storage_buckets_test.ts` garde contre une régression future.
 - [x] Passer les buckets Storage `avatars`, `meal_photos`, `weight_photos` en privé (voir `docs/PRIVACY_POLICY_DRAFT.md` section 10) — corrigé, migration `0020_private_photo_buckets.sql` + accès par URL signée temporaire.
 - [x] Export complet des données (droit d'accès/portabilité, voir `docs/PRIVACY_POLICY_DRAFT.md` section 11) — ajouté, bouton Profil > Sécurité, `lib/services/data_export_service.dart`.
+- [x] Signalement d'une réponse du coach IA (voir `docs/PRIVACY_POLICY_DRAFT.md` section 12) — ajouté, migration `0022_add_chat_reports.sql` + UI dans `coach_screen.dart`, inclus dans l'export et la suppression de compte.
 - [ ] Âge minimum (16 ans) déclaré cohérent avec la classification de contenu du store (PEGI/rating).
 
 ## Permissions déclarées
@@ -59,3 +60,4 @@ Brouillon technique, à cocher/compléter avant soumission. Pas une garantie de 
 4. Transferts de données hors UE vers Google (Gemini), Cloudflare, Pollinations.ai, RevenueCat, Hugging Face, et Supabase selon la région réelle du projet — clauses contractuelles types (SCC), analyse d'impact (AIPD/DPIA) à envisager pour le traitement de données de santé à cette échelle.
 5. Statut "donnée de santé" (Art. 9 RGPD) du profil/allergies/poids/photos de progression, et base légale retenue (consentement explicite vs autre base) — confirmation juridique de l'adéquation du mécanisme de consentement in-app ajouté dans cette tâche.
 6. Garde-fous du coach IA (refus des régimes extrêmes, redirection en cas de trouble alimentaire) : suffisance au regard d'une éventuelle qualification de "dispositif médical" ou de conseil de santé réglementé.
+7. Signalement d'une réponse du coach IA (`chat_reports`, voir `docs/PRIVACY_POLICY_DRAFT.md` section 12) : base légale retenue (intérêt légitime) et durée de conservation (actuellement illimitée hors suppression de compte) à confirmer.

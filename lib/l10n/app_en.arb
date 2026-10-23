@@ -97,11 +97,18 @@
   "coachCancelButton": "Cancel",
   "coachCarbsLabel": "CARBS",
   "coachDailyObjectiveTitle": "DAILY GOAL",
+  "coachDisclaimer": "AI, not a substitute for medical advice",
+  "coachEnableLocalAiButton": "Enable local AI",
+  "coachEngineCloudLabel": "Cloud",
+  "coachEngineLocalLabel": "Local",
   "coachFatLabel": "FAT",
   "coachGoalMaintainLabel": "Maintenance",
   "coachHeaderTitle": "NUTRITION COACH",
   "coachInputHint": "Type your question...",
   "coachKcalUnitLabel": " kcal",
+  "coachLocalAiFailedNoCloudConsent": "The local coach ran into a problem and you haven't allowed cloud AI. Try again, or allow cloud AI in settings so I can reply.",
+  "coachLocalAiRequiredBody": "The coach needs the local (offline) AI or your consent to use cloud AI. Enable local AI to continue without sending anything online, or allow cloud AI to continue now.",
+  "coachLocalAiRequiredTitle": "Local AI not enabled",
   "coachMealSuggestionsEmptyText": "No meal ideas available right now.",
   "coachMealSuggestionsErrorText": "We couldn't generate meal ideas right now.",
   "coachNeedValueGrams": "{current}/{target}g",
@@ -126,16 +133,30 @@
   "coachProteinLabel": "PROTEIN",
   "coachRealtimeBannerLabel": "REAL-TIME ANALYSIS",
   "coachRemainingKcalText": "You have {remainingKcal} kcal left to reach your {goalLabel} goal.",
+  "coachReportCommentLabel": "Comment (optional)",
+  "coachReportErrorSnackbar": "The report could not be sent. Please try again later.",
+  "coachReportReasonDangerous": "Dangerous",
+  "coachReportReasonInappropriate": "Inappropriate",
+  "coachReportReasonIncorrect": "Incorrect",
+  "coachReportReasonOther": "Other",
+  "coachReportSheetTitle": "Report this reply",
+  "coachReportSubmitButton": "Send report",
+  "coachReportSuccessSnackbar": "Report sent, thank you.",
+  "coachReportTooltip": "Report this reply",
   "coachResetButton": "Reset",
   "coachResetDialogContent": "Your entire chat history with the coach will be deleted.",
   "coachResetDialogTitle": "Reset the conversation?",
   "coachResetTooltip": "Reset the conversation",
   "coachRetryButton": "Retry",
+  "coachSafetyReplyDangerousGoal": "I can't guide you toward a goal that fast or restrictive, since it could be dangerous for your health. A doctor or dietitian can help you move toward your goal safely.",
+  "coachSafetyReplyEatingDisorder": "Thank you for trusting me with this. I won't give you numbers or a plan on this topic, but what you're describing deserves to be heard by a doctor, dietitian, or mental health professional. You don't have to go through this alone.",
+  "coachSafetyReplySelfHarm": "What you're feeling matters, and you shouldn't have to face it alone. I'm not able to help with this, but a professional can. Please reach out, as soon as you can, to someone you trust or a health professional.",
   "coachSeeAllButton": "See all",
   "coachSheetSubtitle": "Ask a question about your meals",
   "coachTipFatLossText": "To optimize your fat loss, go for lean protein sources like chicken breast or tofu for your next meal.",
   "coachTipTitle": "AI Chef's Tip",
   "coachTitle": "AI Coach",
+  "coachWelcomeMessage": "Hello, I'm your nutrition coach. What would you like to improve today?",
   "comingSoonDefaultMessage": "This feature is coming soon.",
   "comingSoonDefaultTitle": "Coming soon",
   "dashboardBmiLabel": "BMI: {label}",
@@ -657,6 +678,14 @@
   "@svcErrorMealSuggestions": {
     "placeholders": {
       "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcQuotaResetAt": "Try again after {time}.",
+  "@svcQuotaResetAt": {
+    "placeholders": {
+      "time": {
         "type": "String"
       }
     }

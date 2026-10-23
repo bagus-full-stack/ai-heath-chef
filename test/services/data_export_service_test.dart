@@ -40,6 +40,7 @@ void main() {
     expect(export['weight_entries'], isEmpty);
     expect(export['hydration_entries'], isEmpty);
     expect(export['chat_messages'], isEmpty);
+    expect(export['chat_reports'], isEmpty);
     expect(export['weekly_meal_plans'], isEmpty);
     expect(export['shopping_list'], isEmpty);
     expect(export['custom_reminders'], isEmpty);

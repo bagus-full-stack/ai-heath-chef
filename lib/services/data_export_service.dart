@@ -46,6 +46,7 @@ class DataExportService {
     final weightEntries = await _exportWeightEntries(userId);
     final hydrationEntries = await _exportHydrationEntries(userId);
     final chatMessages = await _exportChatMessages(userId);
+    final chatReports = await _exportChatReports(userId);
     final weeklyMealPlans = await _exportWeeklyMealPlans(userId);
     final localPrefs = await _exportLocalPreferences();
 
@@ -64,6 +65,7 @@ class DataExportService {
       'weight_entries': weightEntries,
       'hydration_entries': hydrationEntries,
       'chat_messages': chatMessages,
+      'chat_reports': chatReports,
       'weekly_meal_plans': weeklyMealPlans,
       'shopping_list': localPrefs.shoppingList,
       'custom_reminders': localPrefs.customReminders,
@@ -193,6 +195,18 @@ class DataExportService {
       // Hors ligne : pas d'historique de chat conservé en local.
     }
     return result;
+  }
+
+  /// Signalements soumis par l'utilisateur sur des réponses du coach IA
+  /// (docs/AUDIT_CHATBOT.md étape 7) — faible volume, pas de pagination
+  /// nécessaire contrairement à [_exportChatMessages].
+  Future<List<Map<String, dynamic>>> _exportChatReports(String userId) async {
+    try {
+      final rows = await _supabase.from('chat_reports').select().eq('user_id', userId);
+      return (rows as List).cast<Map<String, dynamic>>();
+    } catch (_) {
+      return [];
+    }
   }
 
   Future<List<Map<String, dynamic>>> _exportWeeklyMealPlans(String userId) async {

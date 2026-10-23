@@ -340,6 +340,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get coachDailyObjectiveTitle => 'OBJECTIF QUOTIDIEN';
 
   @override
+  String get coachDisclaimer => 'IA, ne remplace pas un avis médical';
+
+  @override
+  String get coachEnableLocalAiButton => 'Activer l\'IA locale';
+
+  @override
+  String get coachEngineCloudLabel => 'Cloud';
+
+  @override
+  String get coachEngineLocalLabel => 'Local';
+
+  @override
   String get coachFatLabel => 'LIPIDES';
 
   @override
@@ -353,6 +365,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get coachKcalUnitLabel => ' kcal';
+
+  @override
+  String get coachLocalAiFailedNoCloudConsent =>
+      'Le coach local a rencontré un problème et tu n\'as pas autorisé l\'IA cloud. Réessaie, ou autorise l\'IA cloud dans les réglages pour que je puisse répondre.';
+
+  @override
+  String get coachLocalAiRequiredBody =>
+      'Le coach a besoin de l\'IA locale (hors-ligne) ou de ton accord pour utiliser l\'IA cloud. Active l\'IA locale pour continuer sans rien envoyer en ligne, ou autorise l\'IA cloud pour continuer maintenant.';
+
+  @override
+  String get coachLocalAiRequiredTitle => 'IA locale non activée';
 
   @override
   String get coachMealSuggestionsEmptyText =>
@@ -442,6 +465,37 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get coachReportCommentLabel => 'Commentaire (optionnel)';
+
+  @override
+  String get coachReportErrorSnackbar =>
+      'Le signalement n\'a pas pu être envoyé. Réessaie plus tard.';
+
+  @override
+  String get coachReportReasonDangerous => 'Dangereux';
+
+  @override
+  String get coachReportReasonInappropriate => 'Inapproprié';
+
+  @override
+  String get coachReportReasonIncorrect => 'Incorrect';
+
+  @override
+  String get coachReportReasonOther => 'Autre';
+
+  @override
+  String get coachReportSheetTitle => 'Signaler cette réponse';
+
+  @override
+  String get coachReportSubmitButton => 'Envoyer le signalement';
+
+  @override
+  String get coachReportSuccessSnackbar => 'Signalement envoyé, merci.';
+
+  @override
+  String get coachReportTooltip => 'Signaler cette réponse';
+
+  @override
   String get coachResetButton => 'Réinitialiser';
 
   @override
@@ -458,6 +512,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get coachRetryButton => 'Réessayer';
 
   @override
+  String get coachSafetyReplyDangerousGoal =>
+      'Je ne peux pas t\'accompagner vers un objectif aussi rapide ou restrictif, car cela peut être dangereux pour ta santé. Un·e médecin ou un·e diététicien·ne pourra t\'aider à avancer vers ton objectif en toute sécurité.';
+
+  @override
+  String get coachSafetyReplyEatingDisorder =>
+      'Merci de me faire confiance pour en parler. Je ne vais pas te donner de chiffres ni de plan sur ce sujet, mais ce que tu décris mérite d\'être entendu par un médecin, un·e diététicien·ne ou un·e psychologue. Tu n\'as pas à traverser ça seul·e.';
+
+  @override
+  String get coachSafetyReplySelfHarm =>
+      'Ce que tu ressens compte, et tu ne devrais pas rester seul·e avec ça. Je ne suis pas en mesure de t\'aider sur ce sujet, mais un professionnel peut. Parle-en, dès que possible, à quelqu\'un de confiance ou à un professionnel de santé.';
+
+  @override
   String get coachSeeAllButton => 'Tout voir';
 
   @override
@@ -472,6 +538,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get coachTitle => 'Coach IA';
+
+  @override
+  String get coachWelcomeMessage =>
+      'Bonjour, je suis votre coach nutrition. Que souhaitez-vous améliorer aujourd\'hui ?';
 
   @override
   String get comingSoonDefaultMessage =>
@@ -1979,6 +2049,11 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String svcErrorMealSuggestions(String error) {
     return 'Erreur lors de la génération des idées de repas : $error';
+  }
+
+  @override
+  String svcQuotaResetAt(String time) {
+    return 'Réessaie après $time.';
   }
 
   @override

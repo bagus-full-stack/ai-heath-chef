@@ -197,11 +197,18 @@
   "coachCancelButton": "Annuler",
   "coachCarbsLabel": "GLUCIDES",
   "coachDailyObjectiveTitle": "OBJECTIF QUOTIDIEN",
+  "coachDisclaimer": "IA, ne remplace pas un avis médical",
+  "coachEnableLocalAiButton": "Activer l'IA locale",
+  "coachEngineCloudLabel": "Cloud",
+  "coachEngineLocalLabel": "Local",
   "coachFatLabel": "LIPIDES",
   "coachGoalMaintainLabel": "Maintien",
   "coachHeaderTitle": "COACH NUTRITION",
   "coachInputHint": "Écris ta question...",
   "coachKcalUnitLabel": " kcal",
+  "coachLocalAiFailedNoCloudConsent": "Le coach local a rencontré un problème et tu n'as pas autorisé l'IA cloud. Réessaie, ou autorise l'IA cloud dans les réglages pour que je puisse répondre.",
+  "coachLocalAiRequiredBody": "Le coach a besoin de l'IA locale (hors-ligne) ou de ton accord pour utiliser l'IA cloud. Active l'IA locale pour continuer sans rien envoyer en ligne, ou autorise l'IA cloud pour continuer maintenant.",
+  "coachLocalAiRequiredTitle": "IA locale non activée",
   "coachMealSuggestionsEmptyText": "Aucune idée de repas disponible pour le moment.",
   "coachMealSuggestionsErrorText": "Impossible de générer des idées de repas pour le moment.",
   "coachNeedValueGrams": "{current}/{target}g",
@@ -246,16 +253,30 @@
       }
     }
   },
+  "coachReportCommentLabel": "Commentaire (optionnel)",
+  "coachReportErrorSnackbar": "Le signalement n'a pas pu être envoyé. Réessaie plus tard.",
+  "coachReportReasonDangerous": "Dangereux",
+  "coachReportReasonInappropriate": "Inapproprié",
+  "coachReportReasonIncorrect": "Incorrect",
+  "coachReportReasonOther": "Autre",
+  "coachReportSheetTitle": "Signaler cette réponse",
+  "coachReportSubmitButton": "Envoyer le signalement",
+  "coachReportSuccessSnackbar": "Signalement envoyé, merci.",
+  "coachReportTooltip": "Signaler cette réponse",
   "coachResetButton": "Réinitialiser",
   "coachResetDialogContent": "Tout l'historique de discussion avec le coach sera supprimé.",
   "coachResetDialogTitle": "Réinitialiser la conversation ?",
   "coachResetTooltip": "Réinitialiser la conversation",
   "coachRetryButton": "Réessayer",
+  "coachSafetyReplyDangerousGoal": "Je ne peux pas t'accompagner vers un objectif aussi rapide ou restrictif, car cela peut être dangereux pour ta santé. Un·e médecin ou un·e diététicien·ne pourra t'aider à avancer vers ton objectif en toute sécurité.",
+  "coachSafetyReplyEatingDisorder": "Merci de me faire confiance pour en parler. Je ne vais pas te donner de chiffres ni de plan sur ce sujet, mais ce que tu décris mérite d'être entendu par un médecin, un·e diététicien·ne ou un·e psychologue. Tu n'as pas à traverser ça seul·e.",
+  "coachSafetyReplySelfHarm": "Ce que tu ressens compte, et tu ne devrais pas rester seul·e avec ça. Je ne suis pas en mesure de t'aider sur ce sujet, mais un professionnel peut. Parle-en, dès que possible, à quelqu'un de confiance ou à un professionnel de santé.",
   "coachSeeAllButton": "Tout voir",
   "coachSheetSubtitle": "Pose une question sur tes repas",
   "coachTipFatLossText": "Pour optimiser votre perte de gras, privilégiez des sources de protéines maigres comme le blanc de poulet ou le tofu pour votre prochain repas.",
   "coachTipTitle": "Conseil du Chef IA",
   "coachTitle": "Coach IA",
+  "coachWelcomeMessage": "Bonjour, je suis votre coach nutrition. Que souhaitez-vous améliorer aujourd'hui ?",
   "comingSoonDefaultMessage": "Cette fonctionnalité arrive prochainement.",
   "comingSoonDefaultTitle": "Bientôt disponible",
   "dashboardBmiLabel": "IMC : {label}",
@@ -1068,6 +1089,14 @@
   "@svcErrorMealSuggestions": {
     "placeholders": {
       "error": {
+        "type": "String"
+      }
+    }
+  },
+  "svcQuotaResetAt": "Réessaie après {time}.",
+  "@svcQuotaResetAt": {
+    "placeholders": {
+      "time": {
         "type": "String"
       }
     }

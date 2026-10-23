@@ -76,19 +76,25 @@ Deno.test("checkAndIncrementQuota - premier appel de la journée (quota non atte
     }
 });
 
-Deno.test("checkAndIncrementQuota - quota quotidien par utilisateur atteint -> 429", async () => {
+Deno.test("checkAndIncrementQuota - quota quotidien par utilisateur atteint -> 429 avec resetAt (minuit UTC) et message par-utilisateur", async () => {
     setEnv();
     const restore = stubFetch({ authOk: true, rpcResults: { increment_api_usage: false } });
     try {
         const result = await checkAndIncrementQuota(authRequest(), "test-fn", 10, {});
         assertEquals(result.ok, false);
         assertEquals(result.response?.status, 429);
+        const body = await result.response!.json();
+        assertEquals(typeof body.error, "string");
+        assertEquals(body.error.includes("Limite quotidienne atteinte"), true);
+        assertEquals(new Date(body.resetAt).getUTCHours(), 0);
+        assertEquals(new Date(body.resetAt).getUTCMinutes(), 0);
+        assertEquals(new Date(body.resetAt).getTime() > Date.now(), true);
     } finally {
         restore();
     }
 });
 
-Deno.test("checkAndIncrementQuota - quota global atteint -> 429", async () => {
+Deno.test("checkAndIncrementQuota - quota global atteint -> 429 avec resetAt et message distinct (limite partagée)", async () => {
     setEnv();
     const restore = stubFetch({
         authOk: true,
@@ -98,6 +104,9 @@ Deno.test("checkAndIncrementQuota - quota global atteint -> 429", async () => {
         const result = await checkAndIncrementQuota(authRequest(), "test-fn", 10, {}, 100);
         assertEquals(result.ok, false);
         assertEquals(result.response?.status, 429);
+        const body = await result.response!.json();
+        assertEquals(body.error.includes("très sollicitée"), true);
+        assertEquals(new Date(body.resetAt).getUTCHours(), 0);
     } finally {
         restore();
     }

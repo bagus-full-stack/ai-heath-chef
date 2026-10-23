@@ -12,6 +12,19 @@ export interface QuotaCheckResult {
 }
 
 /**
+ * Minuit UTC suivant, en ISO 8601 — moment où `day` (colonne `current_date`,
+ * calculée en UTC par Postgres sur Supabase) bascule et où le compteur de
+ * quota repart donc à zéro. Renvoyé au format UTC pour que l'app convertisse
+ * elle-même vers l'heure locale de l'utilisateur (`quota.ts` n'a aucune idée
+ * du fuseau horaire de l'appelant).
+ */
+function nextUtcMidnightIso(): string {
+    const d = new Date();
+    d.setUTCHours(24, 0, 0, 0);
+    return d.toISOString();
+}
+
+/**
  * True si l'appelant doit passer la limite quotidienne PAR UTILISATEUR
  * (admin de confiance, voir migration 0007, ou abonné PRO actif côté
  * RevenueCat). Le disjoncteur GLOBAL (voir `globalDailyLimit`) protège lui
@@ -143,6 +156,7 @@ export async function checkAndIncrementQuota(
                         error: isEn
                             ? `Daily limit reached (${dailyLimit}/day) for this feature. Try again tomorrow.`
                             : `Limite quotidienne atteinte (${dailyLimit}/jour) pour cette fonctionnalité. Réessaie demain.`,
+                        resetAt: nextUtcMidnightIso(),
                     }),
                     { status: 429, headers: jsonHeaders },
                 ),
@@ -166,6 +180,7 @@ export async function checkAndIncrementQuota(
                         error: isEn
                             ? "This AI feature is in high demand today and has reached its shared limit. Try again tomorrow."
                             : "Cette fonctionnalité IA est très sollicitée aujourd'hui et a atteint sa limite partagée. Réessaie demain.",
+                        resetAt: nextUtcMidnightIso(),
                     }),
                     { status: 429, headers: jsonHeaders },
                 ),
