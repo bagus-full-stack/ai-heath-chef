@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/user_profile.dart';
 import 'auth_provider.dart';
@@ -22,7 +23,10 @@ final profileProvider = FutureProvider<UserProfile?>((ref) async {
   } catch (_) {
     final cached = prefs.getString(_kCachedProfileKey);
     if (cached == null) rethrow;
-    return UserProfile.fromJson(jsonDecode(cached) as Map<String, dynamic>);
+    final json = jsonDecode(cached) as Map<String, dynamic>;
+    // Le cache survit à la déconnexion : jamais le profil d'un autre compte.
+    if (json['user_id'] != Supabase.instance.client.auth.currentUser?.id) rethrow;
+    return UserProfile.fromJson(json);
   }
 
   if (data == null) {

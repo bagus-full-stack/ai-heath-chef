@@ -11,6 +11,7 @@ import '../providers/local_ai_provider.dart';
 import '../providers/locale_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart';
+import '../services/home_widget_service.dart';
 import '../utils/journal_export.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/storage_image.dart';
@@ -119,6 +120,7 @@ class ProfileScreen extends ConsumerWidget {
       // Le consentement IA est personnel : le compte suivant sur cet appareil doit le redonner.
       await ref.read(cloudAiConsentProvider.notifier).revoke();
       await ref.read(cloudAiConsentDeclinedProvider.notifier).clear();
+      await HomeWidgetService.update(kcal: 0, targetKcal: 0, streak: 0);
 
       if (context.mounted) {
         Navigator.pop(context);

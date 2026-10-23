@@ -89,7 +89,10 @@ class DataExportService {
 
     final prefs = await SharedPreferences.getInstance();
     final cached = prefs.getString('cached_profile_json');
-    return cached == null ? null : Map<String, dynamic>.from(jsonDecode(cached) as Map);
+    if (cached == null) return null;
+    final json = Map<String, dynamic>.from(jsonDecode(cached) as Map);
+    // Le cache survit à la déconnexion : jamais le profil d'un autre compte.
+    return json['user_id'] == userId ? json : null;
   }
 
   Future<List<Map<String, dynamic>>> _exportMeals(String userId) async {
