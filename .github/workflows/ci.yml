@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Installation de Flutter
         uses: subosito/flutter-action@v2
@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Installation de Deno
         uses: denoland/setup-deno@v2
