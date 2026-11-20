@@ -2,7 +2,7 @@ import '../models/meal_suggestion.dart';
 
 /// Heure de repas par défaut selon la position dans la journée — l'IA
 /// renvoie déjà les repas dans l'ordre chronologique (petit-déj/déjeuner/
-/// dîner, voir supabase/functions/meal-suggestions/index.ts).
+/// dîner, voir supabase/functions/hc-meal-suggestions/index.ts).
 ///
 /// ponytail: heuristique par position plutôt que par lecture du champ
 /// `timeSlot` (libellé libre généré par l'IA, ex. "Petit-déjeuner" ou

@@ -1,8 +1,8 @@
 // Migre les anciennes illustrations base64 de `chat_messages.image_url`
-// (voir migration 0015) vers le bucket Storage privé `chat_images`
+// (voir migration 0015) vers le bucket Storage privé `hc_chat_images`
 // (migration 0019) : pour chaque ligne avec `image_path is null` et
 // `image_url is not null`, upload les octets décodés vers
-// `chat_images/{user_id}/{uuid}.jpg` puis renseigne `image_path`.
+// `hc_chat_images/{user_id}/{uuid}.jpg` puis renseigne `image_path`.
 //
 // Ne touche JAMAIS `image_url` (lecture seule) — sa mise à NULL est un choix
 // humain séparé, voir supabase/scripts/CLEANUP_image_url_apres_backfill.sql.
@@ -73,6 +73,9 @@ Future<void> main(List<String> args) async {
   final headers = {
     'apikey': serviceKey,
     'Authorization': 'Bearer $serviceKey',
+    // Schéma dédié de l'app (lecture / écriture).
+    'Accept-Profile': 'health_chef',
+    'Content-Profile': 'health_chef',
   };
 
   var migrated = 0;
@@ -116,7 +119,7 @@ Future<void> main(List<String> args) async {
         final path = '$userId/${_uuid.v4()}.jpg';
 
         if (dryRun) {
-          stdout.writeln('[DRY-RUN] $id -> chat_images/$path (${bytes.length} octets)');
+          stdout.writeln('[DRY-RUN] $id -> hc_chat_images/$path (${bytes.length} octets)');
           migrated++;
           // En dry-run on ne peut pas sortir la ligne du filtre, donc on
           // arrête après ce lot pour ne pas boucler indéfiniment sur les
@@ -125,7 +128,7 @@ Future<void> main(List<String> args) async {
         }
 
         final uploadResponse = await client.post(
-          Uri.parse('$baseUrl/storage/v1/object/chat_images/$path'),
+          Uri.parse('$baseUrl/storage/v1/object/hc_chat_images/$path'),
           headers: {...headers, 'Content-Type': mimeType, 'x-upsert': 'true'},
           body: bytes,
         );
@@ -146,7 +149,7 @@ Future<void> main(List<String> args) async {
           continue;
         }
 
-        stdout.writeln('[OK] $id -> chat_images/$path');
+        stdout.writeln('[OK] $id -> hc_chat_images/$path');
         migrated++;
       }
 

@@ -234,7 +234,7 @@ class MealSuggestionCard extends StatelessWidget {
 
 /// Feuille modale listant les ingrédients et les étapes de préparation d'une
 /// suggestion — générés par l'IA en même temps que le reste de la suggestion
-/// (voir supabase/functions/meal-suggestions).
+/// (voir supabase/functions/hc-meal-suggestions).
 class _RecipeSheet extends StatelessWidget {
   final MealSuggestion suggestion;
   final List<String> allergies;

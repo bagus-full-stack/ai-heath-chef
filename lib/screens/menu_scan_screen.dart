@@ -14,7 +14,7 @@ import '../widgets/local_file_image.dart';
 const _primaryColor = Color(0xFF6B66FF);
 
 /// Résultat du scan d'une carte de restaurant : un plat détecté = un
-/// [Ingredient] indépendant (voir analyze-menu/index.ts) — contrairement à
+/// [Ingredient] indépendant (voir hc-analyze-menu/index.ts) — contrairement à
 /// meal_analysis_screen.dart, on n'affiche pas de total combiné (les plats
 /// d'un menu ne sont pas mangés ensemble), chaque carte peut être ajoutée au
 /// journal séparément.

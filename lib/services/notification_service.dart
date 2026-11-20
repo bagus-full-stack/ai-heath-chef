@@ -15,10 +15,9 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
-  // Plateformes visées : Android, iOS, web. Ailleurs, le plugin lève une
+  // Plateformes visées : Android, iOS. Ailleurs, le plugin lève une
   // ArgumentError à l'initialisation (pas de réglages fournis).
   bool get _supported =>
-      kIsWeb ||
       defaultTargetPlatform == TargetPlatform.android ||
       defaultTargetPlatform == TargetPlatform.iOS;
 
@@ -82,8 +81,7 @@ class NotificationService {
     required int minute,
     int? weekday,
   }) async {
-    // flutter_local_notifications n'implémente pas zonedSchedule() sur le web.
-    if (kIsWeb || !_supported) return;
+    if (!_supported) return;
 
     await _plugin.zonedSchedule(
       id: id,

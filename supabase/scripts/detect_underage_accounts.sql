@@ -17,7 +17,7 @@ select
   p.email,
   u.created_at as account_created_at,
   p.accepted_terms_at
-from public.profiles p
+from health_chef.profiles p
 join auth.users u on u.id = p.user_id
 where p.age < 16
   and p.accepted_terms_at is null

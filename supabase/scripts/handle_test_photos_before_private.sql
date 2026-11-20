@@ -11,13 +11,13 @@
 -- ============================================================================
 
 select 'profiles' as table_name, user_id::text as row_id, avatar_url as old_url
-  from public.profiles where avatar_path is null and avatar_url is not null
+  from health_chef.profiles where avatar_path is null and avatar_url is not null
 union all
 select 'meals', id::text, image_url
-  from public.meals where image_path is null and image_url is not null
+  from health_chef.meals where image_path is null and image_url is not null
 union all
 select 'weight_entries', id::text, image_url
-  from public.weight_entries where image_path is null and image_url is not null;
+  from health_chef.weight_entries where image_path is null and image_url is not null;
 
 -- ============================================================================
 -- OPTION A — Backfill : déduit le chemin Storage à partir du schéma d'upload
@@ -28,15 +28,15 @@ select 'weight_entries', id::text, image_url
 -- Décommenter pour l'utiliser :
 -- ============================================================================
 
--- update public.profiles
+-- update health_chef.profiles
 -- set avatar_path = user_id || '/avatar.jpg'
 -- where avatar_path is null and avatar_url is not null;
 --
--- update public.meals
+-- update health_chef.meals
 -- set image_path = user_id || '/' || id || '.jpg'
 -- where image_path is null and image_url is not null;
 --
--- update public.weight_entries
+-- update health_chef.weight_entries
 -- set image_path = user_id || '/' || id || '.jpg'
 -- where image_path is null and image_url is not null;
 
@@ -49,6 +49,6 @@ select 'weight_entries', id::text, image_url
 -- Décommenter pour l'utiliser :
 -- ============================================================================
 
--- update public.profiles set avatar_url = null where avatar_path is null and avatar_url is not null;
--- update public.meals set image_url = null where image_path is null and image_url is not null;
--- update public.weight_entries set image_url = null where image_path is null and image_url is not null;
+-- update health_chef.profiles set avatar_url = null where avatar_path is null and avatar_url is not null;
+-- update health_chef.meals set image_url = null where image_path is null and image_url is not null;
+-- update health_chef.weight_entries set image_url = null where image_path is null and image_url is not null;

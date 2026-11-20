@@ -31,10 +31,6 @@ jobs:
       - name: Tests
         run: flutter test
 
-      # Le web est une cible : analyze et test ne détectent pas une erreur de compilation web.
-      - name: Build web
-        run: flutter build web
-
   deno:
     runs-on: ubuntu-latest
 
@@ -49,8 +45,8 @@ jobs:
 
       - name: Tests des Edge Functions
         run: |
-          deno test --allow-env supabase/functions/_shared/
-          deno test --allow-env --allow-read supabase/functions/delete-account/
-          deno test --allow-env supabase/functions/coach-chat/
-          deno test --allow-env supabase/functions/meal-images/
-          deno test --allow-env supabase/functions/huggingface-token/
+          deno test --allow-env supabase/functions/_shared_hc/
+          deno test --allow-env --allow-read supabase/functions/hc-delete-account/
+          deno test --allow-env supabase/functions/hc-coach-chat/
+          deno test --allow-env supabase/functions/hc-meal-images/
+          deno test --allow-env supabase/functions/hc-huggingface-token/

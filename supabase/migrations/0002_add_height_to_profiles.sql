@@ -4,8 +4,8 @@
 -- une taille moyenne assumée par sexe, faute de champ dédié).
 -- ============================================================================
 
-alter table public.profiles
+alter table health_chef.profiles
   add column if not exists height_cm numeric(5, 1) not null default 0 check (height_cm >= 0);
 
-comment on column public.profiles.height_cm is
+comment on column health_chef.profiles.height_cm is
   'Taille en centimètres. 0 = non renseignée (profils créés avant cette colonne).';

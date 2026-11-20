@@ -4,8 +4,8 @@
 -- et meal-images/index.ts pour la génération de l'image).
 -- ============================================================================
 
-alter table public.chat_messages
+alter table health_chef.chat_messages
   add column if not exists image_url text;
 
-comment on column public.chat_messages.image_url is
+comment on column health_chef.chat_messages.image_url is
   'Data URI de l''illustration générée pour un plat recommandé par le coach. NULL si aucun plat précis n''a été suggéré.';

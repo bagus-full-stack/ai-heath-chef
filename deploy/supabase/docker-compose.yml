@@ -1,0 +1,24 @@
+# App Coolify "health-chef-supabase-deployer" : build pack Docker Compose
+#   Base Directory: /deploy/supabase    Compose Location: /docker-compose.yml
+# Env (Coolify) : POSTGRES_PASSWORD = SERVICE_PASSWORD_POSTGRES du service Supabase
+services:
+  deployer:
+    build:
+      context: ../..
+      dockerfile: deploy/supabase/Dockerfile
+    restart: 'no'
+    environment:
+      PGHOST: supabase-db
+      PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      APP_SCHEMA: health_chef
+      FUNCTIONS_DIR: /functions
+      SUDO: ''
+    volumes:
+      - /data/coolify/services/cpahgclbkgadccrsd81ioi7o/volumes/functions:/functions
+    networks:
+      - supabase
+
+networks:
+  supabase:
+    external: true
+    name: cpahgclbkgadccrsd81ioi7o

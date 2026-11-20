@@ -7,12 +7,12 @@
 -- créés, qui doit être décidé/exécuté manuellement).
 -- ============================================================================
 
-alter table public.profiles
+alter table health_chef.profiles
   add column if not exists accepted_terms_at timestamptz,
   add column if not exists accepted_terms_version text;
 
-comment on column public.profiles.accepted_terms_at is
+comment on column health_chef.profiles.accepted_terms_at is
   'Horodatage auquel l''utilisateur a coché la case d''acceptation des CGU/politique de confidentialité à l''inscription. Null pour les comptes créés avant l''ajout de cette case.';
 
-comment on column public.profiles.accepted_terms_version is
+comment on column health_chef.profiles.accepted_terms_version is
   'Version des CGU/politique de confidentialité acceptée (voir kTermsVersion dans lib/screens/terms_screen.dart). Null pour les comptes créés avant l''ajout de cette case.';

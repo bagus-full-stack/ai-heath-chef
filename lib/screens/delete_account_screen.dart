@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,7 +12,8 @@ import '../providers/auth_provider.dart';
 import '../services/purchase_service.dart';
 
 const _kAppleSubscriptionsUrl = 'https://apps.apple.com/account/subscriptions';
-const _kGoogleSubscriptionsUrl = 'https://play.google.com/store/account/subscriptions';
+const _kGoogleSubscriptionsUrl =
+    'https://play.google.com/store/account/subscriptions';
 
 /// Écran de confirmation de suppression de compte (Profil > Sécurité >
 /// "Supprimer mon compte"), exigence Google Play. Remplace l'ancienne FAQ
@@ -23,7 +23,8 @@ class DeleteAccountScreen extends ConsumerStatefulWidget {
   const DeleteAccountScreen({super.key});
 
   @override
-  ConsumerState<DeleteAccountScreen> createState() => _DeleteAccountScreenState();
+  ConsumerState<DeleteAccountScreen> createState() =>
+      _DeleteAccountScreenState();
 }
 
 class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
@@ -46,7 +47,8 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
   }
 
   bool _confirmationMatches(String expectedWord) {
-    return _confirmController.text.trim().toUpperCase() == expectedWord.toUpperCase();
+    return _confirmController.text.trim().toUpperCase() ==
+        expectedWord.toUpperCase();
   }
 
   Future<void> _deleteAccount() async {
@@ -59,9 +61,9 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
     setState(() => _isDeleting = true);
     try {
-      await ref.read(authServiceProvider).deleteAccount(
-            lang: Localizations.localeOf(context).languageCode,
-          );
+      await ref
+          .read(authServiceProvider)
+          .deleteAccount(lang: Localizations.localeOf(context).languageCode);
 
       // Le compte est déjà supprimé côté serveur à ce stade : la purge
       // locale et la déconnexion sont best-effort, on ne peut plus revenir
@@ -85,12 +87,17 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
   void _showMessage(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: isError ? Colors.redAccent : Colors.green),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.redAccent : Colors.green,
+      ),
     );
   }
 
   Future<void> _openSubscriptionManagement() async {
-    final url = !kIsWeb && Platform.isIOS ? _kAppleSubscriptionsUrl : _kGoogleSubscriptionsUrl;
+    final url = Platform.isIOS
+        ? _kAppleSubscriptionsUrl
+        : _kGoogleSubscriptionsUrl;
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 
@@ -106,7 +113,11 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
         elevation: 0,
         title: Text(
           l10n.deleteAccountAppBarTitle,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
         ),
         centerTitle: true,
       ),
@@ -120,19 +131,27 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
               decoration: BoxDecoration(
                 color: Colors.redAccent.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: Colors.redAccent.withValues(alpha: 0.3),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.redAccent,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           l10n.deleteAccountWarningTitle,
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.redAccent,
+                          ),
                         ),
                       ),
                     ],
@@ -153,7 +172,11 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
             const SizedBox(height: 10),
             Text(
               l10n.deleteAccountDataListBody,
-              style: TextStyle(color: Colors.grey.shade700, height: 1.5, fontSize: 13),
+              style: TextStyle(
+                color: Colors.grey.shade700,
+                height: 1.5,
+                fontSize: 13,
+              ),
             ),
             if (_isPro) ...[
               const SizedBox(height: 20),
@@ -162,19 +185,27 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                 decoration: BoxDecoration(
                   color: Colors.orange.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: Colors.orange.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.credit_card_outlined, color: Colors.orange),
+                        const Icon(
+                          Icons.credit_card_outlined,
+                          color: Colors.orange,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             l10n.deleteAccountSubscriptionWarningTitle,
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                            ),
                           ),
                         ),
                       ],
@@ -222,7 +253,10 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                   borderRadius: BorderRadius.all(Radius.circular(14)),
                   borderSide: BorderSide(color: Colors.redAccent, width: 1.4),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -231,18 +265,27 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.redAccent,
                 minimumSize: const Size(double.infinity, 54),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
                 elevation: 0,
               ),
               child: _isDeleting
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : Text(
                       l10n.deleteAccountButton,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
             ),
           ],

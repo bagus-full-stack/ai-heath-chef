@@ -1,6 +1,6 @@
 -- ============================================================================
--- Passe les buckets avatars / meal_photos / weight_photos en PRIVÉ, même
--- principe que chat_images (0019_add_chat_images_bucket.sql) : ce sont des
+-- Passe les buckets hc_avatars / hc_meal_photos / hc_weight_photos en PRIVÉ, même
+-- principe que hc_chat_images (0019_add_chat_images_bucket.sql) : ce sont des
 -- photos de profil, de repas et de progression — des données personnelles
 -- (de santé pour les deux dernières) qu'une URL publique devinable ou
 -- partagée exposerait sans expiration ni révocation possible.
@@ -25,109 +25,109 @@
 --      manuellement, deux options commentées).
 -- ============================================================================
 
-alter table public.profiles
+alter table health_chef.profiles
   add column if not exists avatar_path text;
-comment on column public.profiles.avatar_path is
-  'Chemin de la photo de profil dans le bucket Storage avatars ({user_id}/{uuid}.jpg). Remplace avatar_url (URL publique) pour tout nouvel upload.';
+comment on column health_chef.profiles.avatar_path is
+  'Chemin de la photo de profil dans le bucket Storage hc_avatars ({user_id}/{uuid}.jpg). Remplace avatar_url (URL publique) pour tout nouvel upload.';
 
-alter table public.meals
+alter table health_chef.meals
   add column if not exists image_path text;
-comment on column public.meals.image_path is
-  'Chemin de la photo du repas/produit dans le bucket Storage meal_photos ({user_id}/{meal_id}.jpg). Remplace image_url (URL publique) pour tout nouveau repas.';
+comment on column health_chef.meals.image_path is
+  'Chemin de la photo du repas/produit dans le bucket Storage hc_meal_photos ({user_id}/{meal_id}.jpg). Remplace image_url (URL publique) pour tout nouveau repas.';
 
-alter table public.weight_entries
+alter table health_chef.weight_entries
   add column if not exists image_path text;
-comment on column public.weight_entries.image_path is
-  'Chemin de la photo de progression dans le bucket Storage weight_photos ({user_id}/{entry_id}.jpg). Remplace image_url (URL publique) pour toute nouvelle pesée.';
+comment on column health_chef.weight_entries.image_path is
+  'Chemin de la photo de progression dans le bucket Storage hc_weight_photos ({user_id}/{entry_id}.jpg). Remplace image_url (URL publique) pour toute nouvelle pesée.';
 
-update storage.buckets set public = false where id in ('avatars', 'meal_photos', 'weight_photos');
+update storage.buckets set public = false where id in ('hc_avatars', 'hc_meal_photos', 'hc_weight_photos');
 
--- avatars ---------------------------------------------------------------
-drop policy if exists "avatars_public_read" on storage.objects;
-drop policy if exists "avatars_read_own_folder" on storage.objects;
-create policy "avatars_read_own_folder" on storage.objects
+-- hc_avatars ---------------------------------------------------------------
+drop policy if exists "hc_avatars_public_read" on storage.objects;
+drop policy if exists "hc_avatars_read_own_folder" on storage.objects;
+create policy "hc_avatars_read_own_folder" on storage.objects
   for select using (
-    bucket_id = 'avatars'
+    bucket_id = 'hc_avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
-drop policy if exists "avatars_write_own_folder" on storage.objects;
-create policy "avatars_write_own_folder" on storage.objects
+drop policy if exists "hc_avatars_write_own_folder" on storage.objects;
+create policy "hc_avatars_write_own_folder" on storage.objects
   for insert with check (
-    bucket_id = 'avatars'
+    bucket_id = 'hc_avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
-drop policy if exists "avatars_update_own_folder" on storage.objects;
-create policy "avatars_update_own_folder" on storage.objects
+drop policy if exists "hc_avatars_update_own_folder" on storage.objects;
+create policy "hc_avatars_update_own_folder" on storage.objects
   for update using (
-    bucket_id = 'avatars'
+    bucket_id = 'hc_avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
-drop policy if exists "avatars_delete_own_folder" on storage.objects;
-create policy "avatars_delete_own_folder" on storage.objects
+drop policy if exists "hc_avatars_delete_own_folder" on storage.objects;
+create policy "hc_avatars_delete_own_folder" on storage.objects
   for delete using (
-    bucket_id = 'avatars'
+    bucket_id = 'hc_avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
--- meal_photos -------------------------------------------------------------
-drop policy if exists "meal_photos_public_read" on storage.objects;
-drop policy if exists "meal_photos_read_own_folder" on storage.objects;
-create policy "meal_photos_read_own_folder" on storage.objects
+-- hc_meal_photos -------------------------------------------------------------
+drop policy if exists "hc_meal_photos_public_read" on storage.objects;
+drop policy if exists "hc_meal_photos_read_own_folder" on storage.objects;
+create policy "hc_meal_photos_read_own_folder" on storage.objects
   for select using (
-    bucket_id = 'meal_photos'
+    bucket_id = 'hc_meal_photos'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
-drop policy if exists "meal_photos_write_own_folder" on storage.objects;
-create policy "meal_photos_write_own_folder" on storage.objects
+drop policy if exists "hc_meal_photos_write_own_folder" on storage.objects;
+create policy "hc_meal_photos_write_own_folder" on storage.objects
   for insert with check (
-    bucket_id = 'meal_photos'
+    bucket_id = 'hc_meal_photos'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
-drop policy if exists "meal_photos_update_own_folder" on storage.objects;
-create policy "meal_photos_update_own_folder" on storage.objects
+drop policy if exists "hc_meal_photos_update_own_folder" on storage.objects;
+create policy "hc_meal_photos_update_own_folder" on storage.objects
   for update using (
-    bucket_id = 'meal_photos'
+    bucket_id = 'hc_meal_photos'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
-drop policy if exists "meal_photos_delete_own_folder" on storage.objects;
-create policy "meal_photos_delete_own_folder" on storage.objects
+drop policy if exists "hc_meal_photos_delete_own_folder" on storage.objects;
+create policy "hc_meal_photos_delete_own_folder" on storage.objects
   for delete using (
-    bucket_id = 'meal_photos'
+    bucket_id = 'hc_meal_photos'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
--- weight_photos -------------------------------------------------------------
-drop policy if exists "weight_photos_public_read" on storage.objects;
-drop policy if exists "weight_photos_read_own_folder" on storage.objects;
-create policy "weight_photos_read_own_folder" on storage.objects
+-- hc_weight_photos -------------------------------------------------------------
+drop policy if exists "hc_weight_photos_public_read" on storage.objects;
+drop policy if exists "hc_weight_photos_read_own_folder" on storage.objects;
+create policy "hc_weight_photos_read_own_folder" on storage.objects
   for select using (
-    bucket_id = 'weight_photos'
+    bucket_id = 'hc_weight_photos'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
-drop policy if exists "weight_photos_write_own_folder" on storage.objects;
-create policy "weight_photos_write_own_folder" on storage.objects
+drop policy if exists "hc_weight_photos_write_own_folder" on storage.objects;
+create policy "hc_weight_photos_write_own_folder" on storage.objects
   for insert with check (
-    bucket_id = 'weight_photos'
+    bucket_id = 'hc_weight_photos'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
-drop policy if exists "weight_photos_update_own_folder" on storage.objects;
-create policy "weight_photos_update_own_folder" on storage.objects
+drop policy if exists "hc_weight_photos_update_own_folder" on storage.objects;
+create policy "hc_weight_photos_update_own_folder" on storage.objects
   for update using (
-    bucket_id = 'weight_photos'
+    bucket_id = 'hc_weight_photos'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
-drop policy if exists "weight_photos_delete_own_folder" on storage.objects;
-create policy "weight_photos_delete_own_folder" on storage.objects
+drop policy if exists "hc_weight_photos_delete_own_folder" on storage.objects;
+create policy "hc_weight_photos_delete_own_folder" on storage.objects
   for delete using (
-    bucket_id = 'weight_photos'
+    bucket_id = 'hc_weight_photos'
     and (storage.foldername(name))[1] = auth.uid()::text
   );

@@ -170,7 +170,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
   /// supprimé...) — l'UI retombe alors sur un placeholder.
   Future<String?> getSignedImageUrl(String path) async {
     try {
-      return await _supabase.storage.from('chat_images').createSignedUrl(path, 3600);
+      return await _supabase.storage.from('hc_chat_images').createSignedUrl(path, 3600);
     } catch (_) {
       return null;
     }
@@ -234,7 +234,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     );
 
     // Non-null seulement pour une réponse cloud recommandant un plat précis
-    // (voir coach-chat/index.ts) : l'IA locale ne produit pas cette balise,
+    // (voir hc-coach-chat/index.ts) : l'IA locale ne produit pas cette balise,
     // donc pas d'illustration pour les réponses générées hors-ligne.
     String aiReplyText;
     String? suggestedDish;
@@ -436,7 +436,7 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
 
     try {
       final path = '${user.id}/${_uuid.v4()}.jpg';
-      await _supabase.storage.from('chat_images').uploadBinary(
+      await _supabase.storage.from('hc_chat_images').uploadBinary(
             path,
             bytes,
             fileOptions: const FileOptions(contentType: 'image/jpeg'),

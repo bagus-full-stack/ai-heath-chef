@@ -5,12 +5,12 @@
 -- compte (voir migration 0004).
 -- ============================================================================
 
-alter table public.profiles
+alter table health_chef.profiles
   add column if not exists cuisine_preference text not null default 'none'
     check (cuisine_preference in (
       'none', 'mediterranean', 'maghrebine', 'asian', 'indian',
       'middleEastern', 'african', 'latinAmerican', 'european'
     ));
 
-comment on column public.profiles.cuisine_preference is
+comment on column health_chef.profiles.cuisine_preference is
   'Cuisine préférée pour orienter les suggestions de repas IA : none (aucune préférence), mediterranean, maghrebine, asian, indian, middleEastern, african, latinAmerican, european.';

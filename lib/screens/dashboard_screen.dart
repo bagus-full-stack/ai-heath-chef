@@ -156,7 +156,7 @@ class DashboardScreen extends ConsumerWidget {
                         duration: const Duration(milliseconds: 300),
                         child: StorageImage(
                           key: ValueKey(profile?.avatarPath ?? 'no-avatar'),
-                          bucket: 'avatars',
+                          bucket: 'hc_avatars',
                           path: profile?.avatarPath,
                           builder: (context, snapshot) => CircleAvatar(
                             backgroundColor: const Color(0xFFEEEEEE),
@@ -889,7 +889,7 @@ class DashboardScreen extends ConsumerWidget {
                           const Icon(Icons.fastfood, color: Colors.grey),
                     )
                   : StorageImage(
-                      bucket: 'meal_photos',
+                      bucket: 'hc_meal_photos',
                       path: imagePath,
                       builder: (context, snapshot) => snapshot.data != null
                           ? Image.network(

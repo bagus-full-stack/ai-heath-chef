@@ -178,14 +178,14 @@ class AuthService {
       }
 
       final path = '${user.id}/${_uuid.v4()}.jpg';
-      await _supabase.storage.from('avatars').uploadBinary(
+      await _supabase.storage.from('hc_avatars').uploadBinary(
             path,
             compressedBytes,
             fileOptions: const FileOptions(contentType: 'image/jpeg'),
           );
 
       if (previousPath != null) {
-        await _supabase.storage.from('avatars').remove([previousPath]);
+        await _supabase.storage.from('hc_avatars').remove([previousPath]);
       }
 
       return path;
@@ -220,7 +220,7 @@ class AuthService {
     await PurchaseService.instance.logOut();
   }
 
-  /// Supprime définitivement le compte (Edge Function `delete-account`) :
+  /// Supprime définitivement le compte (Edge Function `hc-delete-account`) :
   /// Storage, toutes les lignes Postgres (cascade via `auth.users`) puis
   /// l'utilisateur Auth lui-même. Ne déconnecte pas localement ni ne purge
   /// les données locales : c'est à l'appelant de le faire une fois cet appel
@@ -229,7 +229,7 @@ class AuthService {
     final l10n = lookupAppLocalizations(Locale(lang));
     try {
       await _supabase.functions.invoke(
-        'delete-account',
+        'hc-delete-account',
         body: {'confirm': true, 'lang': lang},
       );
     } catch (e) {

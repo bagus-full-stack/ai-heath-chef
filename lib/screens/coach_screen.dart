@@ -250,7 +250,7 @@ class _Header extends ConsumerWidget {
           clipBehavior: Clip.none,
           children: [
             StorageImage(
-              bucket: 'avatars',
+              bucket: 'hc_avatars',
               path: avatarPath,
               builder: (context, snapshot) => CircleAvatar(
                 radius: 18,

@@ -11,27 +11,27 @@
 -- Cloudflare Workers AI partagé par toute l'app.
 -- ============================================================================
 
-create or replace function public.increment_global_api_usage(
+create or replace function health_chef.increment_global_api_usage(
   p_function_name text,
   p_daily_limit integer,
   p_increment integer
 ) returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = health_chef
 as $$
 declare
   v_count integer;
 begin
-  insert into public.global_api_usage (function_name, day, call_count)
+  insert into health_chef.global_api_usage (function_name, day, call_count)
   values (p_function_name, current_date, p_increment)
   on conflict (function_name, day)
-  do update set call_count = public.global_api_usage.call_count + p_increment
+  do update set call_count = health_chef.global_api_usage.call_count + p_increment
   returning call_count into v_count;
 
   return v_count <= p_daily_limit;
 end;
 $$;
 
-revoke all on function public.increment_global_api_usage(text, integer, integer) from public;
-grant execute on function public.increment_global_api_usage(text, integer, integer) to service_role;
+revoke all on function health_chef.increment_global_api_usage(text, integer, integer) from public;
+grant execute on function health_chef.increment_global_api_usage(text, integer, integer) to service_role;

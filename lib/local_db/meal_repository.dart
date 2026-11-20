@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
@@ -37,7 +36,7 @@ class MealRepository {
   /// construit avec un `httpClient` mocké, pour éviter tout appel réseau réel
   /// tout en gardant le code de synchronisation inchangé.
   MealRepository(this._db, [SupabaseClient? supabaseClient])
-      : _supabase = supabaseClient ?? Supabase.instance.client;
+    : _supabase = supabaseClient ?? Supabase.instance.client;
 
   final AppDatabase _db;
   final SupabaseClient _supabase;
@@ -122,10 +121,6 @@ class MealRepository {
     String sourcePath,
     AppLocalizations l10n,
   ) async {
-    // Web : ni dossier de l'app ni compression par fichier. L'URL blob: de la photo
-    // est gardée telle quelle et envoyée à la synchro (valable le temps de la session).
-    if (kIsWeb) return sourcePath;
-
     final compressedBytes = await FlutterImageCompress.compressWithFile(
       sourcePath,
       minWidth: 800,
@@ -197,8 +192,9 @@ class MealRepository {
   /// Heure habituelle de repas par créneau, déduite des repas loggés sur les
   /// [days] derniers jours — sert de valeur par défaut aux rappels plutôt
   /// que des horaires fixes (voir notification_settings_provider.dart).
-  Future<Map<MealReminderSlot, ({int hour, int minute})>>
-  getTypicalMealTimes({int days = 30}) async {
+  Future<Map<MealReminderSlot, ({int hour, int minute})>> getTypicalMealTimes({
+    int days = 30,
+  }) async {
     final meals = await getMealsSince(days);
     final minutesBySlot = <MealReminderSlot, List<int>>{};
     for (final meal in meals) {
@@ -315,8 +311,8 @@ class MealRepository {
   Future<void>? _inFlight;
 
   // Un second appel attend la synchro déjà en cours au lieu d'en lancer une autre.
-  Future<void> syncPendingMeals() =>
-      _inFlight ??= _syncPendingMealsOnce().whenComplete(() => _inFlight = null);
+  Future<void> syncPendingMeals() => _inFlight ??= _syncPendingMealsOnce()
+      .whenComplete(() => _inFlight = null);
 
   Future<void> _syncPendingMealsOnce() async {
     final user = _supabase.auth.currentUser;
@@ -337,7 +333,7 @@ class MealRepository {
             await _supabase.from('meals').delete().eq('id', row.id);
             await _removeRemotePhotoIfOrphan(row.imagePath);
           }
-          if (!kIsWeb && row.localImagePath != null) {
+          if (row.localImagePath != null) {
             final file = File(row.localImagePath!);
             if (await file.exists()) await file.delete();
           }
@@ -393,7 +389,7 @@ class MealRepository {
         .eq('image_path', imagePath)
         .limit(1);
     if (stillUsed.isEmpty) {
-      await _supabase.storage.from('meal_photos').remove([imagePath]);
+      await _supabase.storage.from('hc_meal_photos').remove([imagePath]);
     }
   }
 
@@ -405,7 +401,7 @@ class MealRepository {
     final bytes = await XFile(localPath).readAsBytes();
     final storagePath = '$userId/$mealId.jpg';
     await _supabase.storage
-        .from('meal_photos')
+        .from('hc_meal_photos')
         .uploadBinary(
           storagePath,
           bytes,

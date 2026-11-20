@@ -1,6 +1,6 @@
 /// Filet de sécurité déterministe, appliqué AVANT tout appel à un modèle
 /// (local ou cloud) : voir chat_provider.dart et
-/// supabase/functions/coach-chat/index.ts (filtre équivalent côté serveur).
+/// supabase/functions/hc-coach-chat/index.ts (filtre équivalent côté serveur).
 /// Un petit modèle on-device ne peut pas être la seule défense contre un
 /// message évoquant un risque vital ou un trouble du comportement
 /// alimentaire.

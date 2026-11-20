@@ -10,7 +10,7 @@
 -- postgres) et service_role restent libres de modifier la colonne.
 -- ============================================================================
 
-create or replace function public.prevent_is_admin_change()
+create or replace function health_chef.prevent_is_admin_change()
 returns trigger
 language plpgsql
 as $$
@@ -24,7 +24,7 @@ begin
 end;
 $$;
 
-drop trigger if exists profiles_protect_is_admin on public.profiles;
+drop trigger if exists profiles_protect_is_admin on health_chef.profiles;
 create trigger profiles_protect_is_admin
-  before insert or update on public.profiles
-  for each row execute function public.prevent_is_admin_change();
+  before insert or update on health_chef.profiles
+  for each row execute function health_chef.prevent_is_admin_change();

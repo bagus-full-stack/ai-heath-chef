@@ -135,11 +135,6 @@ flutter_launcher_icons:
   adaptive_icon_background: "#3E6B4F"
   adaptive_icon_foreground: "assets/icon/icon_foreground.png"
   ios: true
-  web:
-    generate: true
-    image_path: "assets/icon/icon.png"
-    background_color: "#3E6B4F"
-    theme_color: "#3E6B4F"
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

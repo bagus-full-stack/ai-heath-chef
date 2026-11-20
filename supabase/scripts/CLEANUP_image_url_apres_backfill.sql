@@ -21,7 +21,7 @@
 -- au cas où on voudrait raffiner le backfill plus tard.
 -- ============================================================================
 
-update public.chat_messages
+update health_chef.chat_messages
 set image_url = null
 where image_path is not null
   and image_url is not null;

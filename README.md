@@ -9,13 +9,13 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Dashboard** — jauges de macros (calories, protéines, glucides, lipides) sur la journée, IMC calculé à partir du profil (catégorie OMS + plage), suivi de l'hydratation (objectif quotidien, ajout rapide en un tap, annulable), et journal des repas du jour avec la photo de chaque repas (suppression d'un repas par glissement, ou relance en un tap pour reloguer un repas déjà mangé)
 - **Hors ligne (local-first)** — repas, pesées et prises d'eau enregistrés d'abord dans une base SQLite locale (fonctionne sans connexion), puis synchronisés vers Supabase dès que le réseau est disponible (au démarrage et à chaque retour de connexion) : survivent à une désinstallation et se retrouvent sur un nouvel appareil
 - **Analyse nutritionnelle étendue (PRO)** — en plus des macros principales, fibres/sucres/graisses saturées sont estimés par l'IA (ou lus depuis Open Food Facts pour un scan code-barres) et affichés en moyenne quotidienne dans les Analyses avancées, avec un graphique d'évolution des calories sur 30 jours (ligne cible incluse, valeurs au tap)
-- **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
-- **Analyse de produit par photo** — même principe pour un produit emballé (Edge Function `analyze-product`), lit l'étiquette nutritionnelle plutôt qu'une assiette
-- **Scan de menu restaurant** — photo de la carte d'un restaurant (Edge Function `analyze-menu`) : un plat détecté = une carte indépendante (portion + macros estimées), affichée sans total combiné puisque les plats d'une carte ne sont pas mangés ensemble, ajoutable individuellement au journal
-- **Recette à partir du frigo/placard** — photo de l'intérieur d'un frigo ou d'un placard (Edge Function `analyze-pantry`) : inventaire des aliments identifiés, corrigible (ajout/suppression manuelle) avant de lancer la génération de 3 recettes (`meal-suggestions`) qui priorisent ces ingrédients déjà disponibles
+- **Analyse de repas par photo** — capture caméra, compression d'image, envoi à une Edge Function Supabase (`hc-analyze-meal`) qui retourne les ingrédients détectés et leurs valeurs nutritionnelles
+- **Analyse de produit par photo** — même principe pour un produit emballé (Edge Function `hc-analyze-product`), lit l'étiquette nutritionnelle plutôt qu'une assiette
+- **Scan de menu restaurant** — photo de la carte d'un restaurant (Edge Function `hc-analyze-menu`) : un plat détecté = une carte indépendante (portion + macros estimées), affichée sans total combiné puisque les plats d'une carte ne sont pas mangés ensemble, ajoutable individuellement au journal
+- **Recette à partir du frigo/placard** — photo de l'intérieur d'un frigo ou d'un placard (Edge Function `hc-analyze-pantry`) : inventaire des aliments identifiés, corrigible (ajout/suppression manuelle) avant de lancer la génération de 3 recettes (`hc-meal-suggestions`) qui priorisent ces ingrédients déjà disponibles
 - **Sélecteur de modes de capture** — rangée horizontale circulaire (Scanner, Repas, Produit, Menu, Frigo, Manuel) sur l'écran caméra : glissement gauche/droite ou tap sur un libellé, le mode actif reste au centre ; le déclencheur ouvre l'écran de scan de code-barres ou de saisie manuelle quand l'un d'eux est au centre
 - **Scan de code-barres** — recherche instantanée d'un produit (EAN/UPC) via la base publique Open Food Facts, sans appel IA
-- **Coach IA** — chat avec un coach nutritionnel (Edge Function `coach-chat`, ou en IA locale, voir [IA locale](#ia-locale)), et idées de repas personnalisées selon le profil/objectif (Edge Function `meal-suggestions`, mises en cache un jour à la fois), chacune illustrée par une image générée via Pollinations.ai (Edge Function `meal-images`, voir ci-dessous). Chaque ingrédient d'une recette signale une correspondance avec une allergie déclarée et propose un substitut (mots-clés locaux, ex. lait → lait d'avoine), aussi utilisable en dépannage ("je n'ai pas ça dans mon placard") même sans allergie. Garde-fous santé identiques sur les deux moteurs (plancher calorique, orientation vers un professionnel en cas de signal de trouble alimentaire) + filet de sécurité déterministe avant tout appel modèle en cas de détresse/urgence évoquée ; le chat a aussi accès aux données du jour (repas, calories/macros restantes), un disclaimer visible + indicateur du moteur ayant répondu (local/cloud), et un signalement possible pour toute réponse jugée problématique
+- **Coach IA** — chat avec un coach nutritionnel (Edge Function `hc-coach-chat`, ou en IA locale, voir [IA locale](#ia-locale)), et idées de repas personnalisées selon le profil/objectif (Edge Function `hc-meal-suggestions`, mises en cache un jour à la fois), chacune illustrée par une image générée via Pollinations.ai (Edge Function `hc-meal-images`, voir ci-dessous). Chaque ingrédient d'une recette signale une correspondance avec une allergie déclarée et propose un substitut (mots-clés locaux, ex. lait → lait d'avoine), aussi utilisable en dépannage ("je n'ai pas ça dans mon placard") même sans allergie. Garde-fous santé identiques sur les deux moteurs (plancher calorique, orientation vers un professionnel en cas de signal de trouble alimentaire) + filet de sécurité déterministe avant tout appel modèle en cas de détresse/urgence évoquée ; le chat a aussi accès aux données du jour (repas, calories/macros restantes), un disclaimer visible + indicateur du moteur ayant répondu (local/cloud), et un signalement possible pour toute réponse jugée problématique
 - **Plan de repas hebdomadaire** — génère en un seul appel IA un plan complet (7 jours × 3 repas) adapté au profil/régime/allergies, mis en cache par semaine, ouvert depuis l'icône calendrier de l'écran "Idées repas" ; chaque repas garde recette/macros et peut être ajouté individuellement à la liste de courses, ou la semaine entière en un tap. Pas d'illustrations IA générées pour ce plan (21 repas d'un coup serait trop coûteux/lent) — les cartes retombent sur l'icône du moment de la journée. Export du plan en calendrier (`.ics`, un événement par repas à des heures par défaut) importable dans Google/Apple/Outlook Calendar via le partage natif
 - **Liste de courses** — alimentée en un tap depuis les ingrédients d'une idée de repas du Coach IA (ou du plan hebdomadaire), cochable, persistée localement
 - **Suivi du poids** — historique des pesées (synchronisé, voir [Hors ligne](#fonctionnalités) ci-dessus) avec courbe de progression, et rappel hebdomadaire de pesée réutilisant le système de rappels personnalisés (voir ci-dessous)
@@ -27,13 +27,13 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 - **Rappels** — notifications locales quotidiennes pour les repas (petit-déjeuner/déjeuner/dîner, activables et personnalisables individuellement) et rappels personnalisés illimités (nom + heure au choix, quotidien ou un jour de la semaine donné — ex. le rappel de pesée hebdomadaire), réglables depuis Profil > Notifications. Tant qu'un créneau repas n'a jamais été réglé manuellement, son heure par défaut est déduite de l'historique de repas de l'utilisateur (heure habituelle sur les 30 derniers jours) plutôt qu'un horaire fixe générique. Les rappels personnalisés sont aussi sauvegardés sur Supabase et restaurés automatiquement sur un appareil "vide" (nouvelle install/nouveau téléphone) ; les créneaux fixes petit-déjeuner/déjeuner/dîner restent purement locaux (rapides à réactiver manuellement)
 - **Profil & compte** — gestion du profil utilisateur, paramètres de compte, photo de profil
 - **Sécurité et confidentialité** — changement du mot de passe depuis Profil > Sécurité (session active requise, pas de ré-saisie de l'ancien mot de passe). Mot de passe : 8 caractères minimum (constante `kMinPasswordLength` ; règle à aligner dans Supabase > Authentication > Providers > Email > « Minimum password length »). Le 2FA n'est pas encore implémenté (chantier séparé : nécessite aussi une vérification à la connexion, pas seulement un écran d'inscription)
-- **Suppression de compte** — parcours complet depuis Profil > Sécurité > Supprimer mon compte : confirmation explicite (mot de confirmation à ressaisir), suppression côté serveur (Storage + lignes Postgres via cascade + compte Auth, Edge Function `delete-account`), purge locale (base SQLite, préférences, rappels programmés, widget écran d'accueil) puis déconnexion. Avertit qu'un abonnement Apple/Google actif n'est pas annulé automatiquement (lien vers la gestion des abonnements du store)
+- **Suppression de compte** — parcours complet depuis Profil > Sécurité > Supprimer mon compte : confirmation explicite (mot de confirmation à ressaisir), suppression côté serveur (Storage + lignes Postgres via cascade + compte Auth, Edge Function `hc-delete-account`), purge locale (base SQLite, préférences, rappels programmés, widget écran d'accueil) puis déconnexion. Avertit qu'un abonnement Apple/Google actif n'est pas annulé automatiquement (lien vers la gestion des abonnements du store)
 - **Centre d'aide** — FAQ groupée par thème + contact support par email
 - **Conditions d'utilisation** — CGU et mentions légales (⚠️ contenu de brouillon, voir [Notes](#notes) ci-dessous)
 - **À propos** — version de l'app (lue dynamiquement), liens vers l'aide et les CGU
 - **Compte admin** — accès complet aux fonctionnalités PRO sans abonnement réel, activable uniquement depuis le SQL Editor Supabase (jamais depuis l'app)
-- **Quotas IA par utilisateur** — limite quotidienne d'appels par utilisateur sur chaque Edge Function IA (20/jour pour `analyze-meal`/`analyze-product`/`analyze-menu`/`analyze-pantry`, 50/jour pour `coach-chat`, 10/jour pour `meal-suggestions`/`meal-images`), pour contenir les coûts en cas d'abus
-- **Quota IA global (protection du budget partagé)** — en plus du quota par utilisateur, `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat` et `meal-suggestions` (celles qui appellent la clé `GEMINI_API_KEY`, partagée par toute l'app) respectent aussi un plafond quotidien **agrégé, tous utilisateurs confondus** (500/jour pour `analyze-meal`/`analyze-product`/`analyze-menu`/`analyze-pantry`, 1000/jour pour `coach-chat`, 300/jour pour `meal-suggestions`) : un disjoncteur qui évite qu'un usage normal mais nombreux épuise silencieusement le débit/budget gratuit d'une seule clé partagée
+- **Quotas IA par utilisateur** — limite quotidienne d'appels par utilisateur sur chaque Edge Function IA (20/jour pour `hc-analyze-meal`/`hc-analyze-product`/`hc-analyze-menu`/`hc-analyze-pantry`, 50/jour pour `hc-coach-chat`, 10/jour pour `hc-meal-suggestions`/`hc-meal-images`), pour contenir les coûts en cas d'abus
+- **Quota IA global (protection du budget partagé)** — en plus du quota par utilisateur, `hc-analyze-meal`, `hc-analyze-product`, `hc-analyze-menu`, `hc-analyze-pantry`, `hc-coach-chat` et `hc-meal-suggestions` (celles qui appellent la clé `GEMINI_API_KEY`, partagée par toute l'app) respectent aussi un plafond quotidien **agrégé, tous utilisateurs confondus** (500/jour pour `hc-analyze-meal`/`hc-analyze-product`/`hc-analyze-menu`/`hc-analyze-pantry`, 1000/jour pour `hc-coach-chat`, 300/jour pour `hc-meal-suggestions`) : un disjoncteur qui évite qu'un usage normal mais nombreux épuise silencieusement le débit/budget gratuit d'une seule clé partagée
 - **Abonnement PRO** — paywall, checkout et gestion des achats in-app via RevenueCat (avec un **mode démo** intégré tant que les clés RevenueCat ne sont pas configurées, permettant de tester tout le parcours Paywall → Checkout → déblocage PRO sans compte Apple/Google payant)
 - **IA locale (scan + chat, optionnelle, gratuite)** — Gemma3n exécuté directement sur l'appareil (`flutter_gemma`), activable depuis Profil > IA locale : analyse photo et chat coach fonctionnent alors sans connexion et sans consommer le quota cloud partagé. Repli automatique sur le cloud si le modèle n'est pas téléchargé ou échoue. Jamais derrière un abonnement PRO — voir [IA locale](#ia-locale) ci-dessous pour la configuration.
 - **Bilingue Français/English** — sélecteur de langue depuis Profil > Langue (persisté), toute l'UI est traduite (ARB + `flutter_localizations`), et la langue choisie est aussi transmise à l'IA (analyse de repas/produit, coach, suggestions de repas — cloud et locale) pour qu'elle réponde dans la même langue
@@ -68,7 +68,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 ```
 lib/
   config/       Paramètres du modèle IA locale (local_ai_config), prompt système du
-                coach (coach_prompt, miroir de _shared/coach_prompt.ts) et contacts
+                coach (coach_prompt, miroir de _shared_hc/coach_prompt.ts) et contacts
                 d'urgence (emergency_contacts)
   l10n/         Localisation FR/EN : fichiers source app_fr.arb/app_en.arb, AppLocalizations
                 généré par flutter gen-l10n, extension context.l10n
@@ -107,55 +107,52 @@ lib/
                 (typical_meal_times), suggestion de substitut d'ingrédient par mots-clés
                 (ingredient_substitution), contexte du jour injecté au coach
                 (coach_context_builder), filtre de risque santé déterministe
-                (health_risk_filter, miroir de _shared/health_risk_filter.ts)
+                (health_risk_filter, miroir de _shared_hc/health_risk_filter.ts)
   widgets/      Composants réutilisables (layout principal, carte de suggestion de repas)
 android/app/src/main/kotlin/.../HealthChefWidgetProvider.kt
                 Rendu natif du widget écran d'accueil (RemoteViews), alimenté par les
                 données poussées depuis home_widget_service.dart
 supabase/
-  migrations/   Schéma SQL versionné (0001 à 0024, voir ci-dessous)
-  functions/    Edge Functions : analyze-meal, analyze-product, analyze-menu,
-                analyze-pantry, coach-chat, meal-suggestions, meal-images,
-                huggingface-token, delete-account — déployées en CI via la CLI
+  migrations/   Schéma SQL versionné (0000 à 0025, schéma dédié `health_chef`, voir ci-dessous)
+  functions/    Edge Functions : hc-analyze-meal, hc-analyze-product, hc-analyze-menu,
+                hc-analyze-pantry, hc-coach-chat, hc-meal-suggestions, hc-meal-images,
+                hc-huggingface-token, hc-delete-account — déployées en CI via la CLI
                 Supabase (voir ci-dessous), qui bundle les imports relatifs. La
-                vérification d'identité (`_shared/auth.ts`, `authenticate()`,
-                utilisée aussi par delete-account et huggingface-token) et le
+                vérification d'identité (`_shared_hc/auth.ts`, `authenticate()`,
+                utilisée aussi par hc-delete-account et hc-huggingface-token) et le
                 quota (quotidien par utilisateur + global partagé) vivent dans
-                `_shared/quota.ts`, importé par chaque fonction IA ;
-                `_shared/cors.ts` (respecte `ALLOWED_ORIGIN`) et `_shared/errors.ts`
+                `_shared_hc/quota.ts`, importé par chaque fonction IA ;
+                `_shared_hc/cors.ts` (`Access-Control-Allow-Origin: *`) et `_shared_hc/errors.ts`
                 mutualisent de même les headers CORS et la classe d'erreur HTTP
-                (`HttpError`), `_shared/coach_prompt.ts` et
-                `_shared/health_risk_filter.ts` (prompt et garde-fou santé du coach),
-                et `_shared/gemini.ts` mutualise le mécanisme de
+                (`HttpError`), `_shared_hc/coach_prompt.ts` et
+                `_shared_hc/health_risk_filter.ts` (prompt et garde-fou santé du coach),
+                et `_shared_hc/gemini.ts` mutualise le mécanisme de
                 cascade entre modèles Gemini (fetch, timeout, retry) — chaque
                 fonction garde néanmoins SA PROPRE liste de modèles `MODELS`
                 (réduite aux 4 premiers : seuls `GEMINI_MAX_MODELS_TRIED` modèles
-                sont essayés, voir `_shared/gemini.ts`). analyze-meal, analyze-menu, analyze-pantry et analyze-product partagent le même handler
-                (`_shared/analyze_image.ts`, contrat JSON `{ ingredients: [...] }`), seul
+                sont essayés, voir `_shared_hc/gemini.ts`). hc-analyze-meal, hc-analyze-menu, hc-analyze-pantry et hc-analyze-product partagent le même handler
+                (`_shared_hc/analyze_image.ts`, contrat JSON `{ ingredients: [...] }`), seul
                 le prompt de leur `index.ts` change (assiette / carte de restaurant /
                 inventaire de frigo / produit emballé).
                 Les erreurs inattendues des fonctions IA renvoient un message générique (500) ; seules les
                 `HttpError` exposent leur message.
-                delete-account n'a pas de quota IA (aucun appel GEMINI_API_KEY) mais applique
+                hc-delete-account n'a pas de quota IA (aucun appel GEMINI_API_KEY) mais applique
                 son propre rate limit (3 tentatives/heure, voir migration 0017).
-                coach-chat, delete-account et meal-images séparent la logique
+                hc-coach-chat, hc-delete-account et hc-meal-images séparent la logique
                 (`handler.ts`, exportée pour les tests) du point d'entrée
                 (`index.ts`, qui ne fait que `Deno.serve`).
-                huggingface-token et delete-account doivent être déployées via la CLI
-                (pas l'éditeur du Dashboard) car elles importent `_shared/`.
+                hc-huggingface-token et hc-delete-account doivent être déployées via la CLI
+                (pas l'éditeur du Dashboard) car elles importent `_shared_hc/`.
 test/           Tests Flutter (providers, utils, widgets, local_db)
 .github/workflows/
-                CI (ci.yml), déploiement Supabase (deploy_functions.yml) et
+                CI (ci.yml), et
                 keep-alive Supabase (supabase_keepalive.yml), voir CI/CD ci-dessous
-web/            drift_worker.js et sqlite3.wasm : requis par drift pour la base
-                locale sur le web (voir lib/local_db/app_database.dart), à régénérer
-                lors d'une mise à jour des paquets drift/sqlite3
 ```
 
 ## Prérequis
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (compatible Dart ^3.12.0 — bump récent, requis par `flutter_gemma`)
-- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images`, `huggingface-token` et `delete-account` déployées (voir ci-dessous)
+- Un projet [Supabase](https://supabase.com) avec le schéma de base de données initialisé et les Edge Functions `hc-analyze-meal`, `hc-analyze-product`, `hc-analyze-menu`, `hc-analyze-pantry`, `hc-coach-chat`, `hc-meal-suggestions`, `hc-meal-images`, `hc-huggingface-token` et `hc-delete-account` déployées (voir ci-dessous)
 - (Optionnel) Un projet [RevenueCat](https://www.revenuecat.com) pour activer les achats réels
 
 ## Installation
@@ -167,7 +164,7 @@ flutter pub get
 ### Configuration Supabase
 
 1. **Clés d'API** — copie `.env.example` vers `.env` et renseigne `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` avec les valeurs de ton projet (Project Settings > API dans le dashboard Supabase). `lib/main.dart` charge ces variables via `flutter_dotenv` au démarrage.
-2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0001 à 0024) depuis le **SQL Editor** du dashboard Supabase, ou laisse la CI le faire : `.github/workflows/deploy_functions.yml` lance automatiquement `supabase db push` sur push vers `master` dès qu'un fichier change dans `supabase/migrations/` (nécessite les secrets GitHub `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID` et `SUPABASE_DB_PASSWORD` — mot de passe de la base, Project Settings > Database). ⚠️ Ne mélange pas les deux : si tu as déjà appliqué une migration manuellement via le SQL Editor, le `supabase db push` CI échouera ou la rejouera en double tant que l'historique local (`supabase migration list`) n'est pas resynchronisé avec la prod.
+2. **Schéma de base de données** — exécute les scripts SQL de `supabase/migrations/` **dans l'ordre** (0000 à 0025) depuis le **SQL Editor** du dashboard Supabase, ou laisse la CI le faire : `.github/workflows/deploy_functions.yml` lance automatiquement `supabase db push` sur push vers `master` dès qu'un fichier change dans `supabase/migrations/` (nécessite les secrets GitHub `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID` et `SUPABASE_DB_PASSWORD` — mot de passe de la base, Project Settings > Database). ⚠️ Ne mélange pas les deux : si tu as déjà appliqué une migration manuellement via le SQL Editor, le `supabase db push` CI échouera ou la rejouera en double tant que l'historique local (`supabase migration list`) n'est pas resynchronisé avec la prod.
    - `0001` : tables `profiles`, `meals`, `chat_messages` + policies RLS + bucket `avatars`
    - `0002` : taille (`height_cm`) sur `profiles`
    - `0003` : table `meal_suggestions` (cache des idées de repas IA)
@@ -183,7 +180,7 @@ flutter pub get
    - `0013` : table `weekly_meal_plans` (cache du plan de repas hebdomadaire généré par l'IA)
    - `0014` : préférence de cuisine (`cuisine_preference` sur `profiles`), pour orienter les idées de repas générées
    - `0015` : illustration IA d'un plat recommandé par le coach (`image_url` sur `chat_messages`)
-   - `0016` : variante de `increment_global_api_usage` acceptant un incrément explicite (`p_increment`), utilisée par `meal-images` quand plusieurs images sont générées en un seul appel
+   - `0016` : variante de `increment_global_api_usage` acceptant un incrément explicite (`p_increment`), utilisée par `hc-meal-images` quand plusieurs images sont générées en un seul appel
    - `0017` : table `delete_account_attempts` + fonction `check_delete_account_rate_limit`, pour le rate limit (3 tentatives/heure) sur la suppression de compte
    - `0018` : traçabilité de l'acceptation des CGU (`accepted_terms_at`/`accepted_terms_version` sur `profiles`)
    - `0019` : illustrations du coach dans Storage plutôt qu'en base64 (`image_path` sur `chat_messages`) + bucket **privé** `chat_images` (policies scopées à `{user_id}/...`, URL signée générée à la demande côté app) — voir `supabase/scripts/backfill_chat_images.dart` pour migrer les anciens messages (`image_url`, conservée en lecture pour rétrocompatibilité) vers ce bucket
@@ -192,16 +189,16 @@ flutter pub get
    - `0022` : table `chat_reports` — signalement d'une réponse du Coach IA jugée problématique (exigence Google Play, voir [Notes](#notes))
    - `0023` : déclencheur qui interdit de modifier `profiles.is_admin` depuis l'API (le SQL Editor reste possible, voir migration 0007)
    - `0024` : limites de taille (contraintes `check`) sur les textes/JSON écrits par le client : signalements, messages de chat, ingrédients d'un repas
-3. **Edge Functions** — déploie `analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images`, `huggingface-token` et `delete-account` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas (et par `delete-account`) sont injectés automatiquement par Supabase, rien à configurer pour eux. En CI, `.github/workflows/deploy_functions.yml` déploie automatiquement tous les sous-dossiers de `supabase/functions/`, `delete-account` inclus — aucune modification du workflow n'est nécessaire.
-   - Les fonctions IA (`analyze-meal`, `analyze-product`, `analyze-menu`, `analyze-pantry`, `coach-chat`, `meal-suggestions`, `meal-images`) importent la logique commune depuis `supabase/functions/_shared/` (`quota.ts`, `cors.ts`, `errors.ts`, `gemini.ts`) via des imports relatifs (`../_shared/...`) : la CLI Supabase les bundle automatiquement au déploiement, il n'y a rien à copier manuellement. CORS : `Access-Control-Allow-Origin` vaut `*` par défaut ; définis le secret `ALLOWED_ORIGIN` (adresse du site web déployé) pour le restreindre (`supabase secrets set ALLOWED_ORIGIN=https://...`). Chaque fonction garde en revanche sa propre liste de modèles Gemini (`MODELS`), volontairement non harmonisée (voir ci-dessus).
-4. **Illustrations des idées de repas (optionnel, 100% gratuit)** — `meal-images` génère une image IA par suggestion, en cascade entre deux fournisseurs gratuits :
+3. **Edge Functions** — déploie `hc-analyze-meal`, `hc-analyze-product`, `hc-analyze-menu`, `hc-analyze-pantry`, `hc-coach-chat`, `hc-meal-suggestions`, `hc-meal-images`, `hc-huggingface-token` et `hc-delete-account` (`supabase/functions/`), et configure le secret `GEMINI_API_KEY` (clé API du modèle IA Google Gemini) via `supabase secrets set GEMINI_API_KEY=<clé>` ou l'onglet Edge Functions > Secrets du dashboard. Les secrets `SUPABASE_URL`/`SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` utilisés pour les quotas (et par `hc-delete-account`) sont injectés automatiquement par Supabase, rien à configurer pour eux. En CI, `.github/workflows/deploy_functions.yml` déploie automatiquement tous les sous-dossiers de `supabase/functions/`, `hc-delete-account` inclus — aucune modification du workflow n'est nécessaire.
+   - Les fonctions IA (`hc-analyze-meal`, `hc-analyze-product`, `hc-analyze-menu`, `hc-analyze-pantry`, `hc-coach-chat`, `hc-meal-suggestions`, `hc-meal-images`) importent la logique commune depuis `supabase/functions/_shared_hc/` (`quota.ts`, `cors.ts`, `errors.ts`, `gemini.ts`) via des imports relatifs (`../_shared_hc/...`) : la CLI Supabase les bundle automatiquement au déploiement, il n'y a rien à copier manuellement. CORS : `Access-Control-Allow-Origin` vaut `*` (app mobile uniquement, pas d'origine web à restreindre). Chaque fonction garde en revanche sa propre liste de modèles Gemini (`MODELS`), volontairement non harmonisée (voir ci-dessus).
+4. **Illustrations des idées de repas (optionnel, 100% gratuit)** — `hc-meal-images` génère une image IA par suggestion, en cascade entre deux fournisseurs gratuits :
    - **Cloudflare Workers AI (FLUX.1 [schnell])**, essayé en premier — meilleure qualité, gratuit jusqu'à ~10 000 Neurons/jour (~100 images, partagées entre tous les utilisateurs de l'app), sans carte bancaire requise. Crée un compte gratuit sur [dash.cloudflare.com](https://dash.cloudflare.com), récupère ton **Account ID** (visible sur le Dashboard) et crée un **API Token** avec la permission "Workers AI" (My Profile > API Tokens), puis configure les secrets `CLOUDFLARE_ACCOUNT_ID` et `CLOUDFLARE_API_TOKEN`.
    - **[Pollinations.ai](https://pollinations.ai)**, utilisé en repli si Cloudflare échoue ou n'est pas configuré — fonctionne **sans compte** (accès anonyme, gratuit, limité en débit). Pour un accès plus rapide et sans watermark, crée un compte sur [auth.pollinations.ai](https://auth.pollinations.ai) et configure le secret `POLLINATIONS_TOKEN`.
 
-   Configure les secrets utilisés via `supabase secrets set <NOM>=<valeur>` ou l'onglet Edge Functions > Secrets du dashboard. Aucun de ces tokens n'est exposé dans l'app cliente (utilisés uniquement côté Edge Function) ; en l'absence de tous, `meal-images` retombe sur l'accès anonyme Pollinations.
+   Configure les secrets utilisés via `supabase secrets set <NOM>=<valeur>` ou l'onglet Edge Functions > Secrets du dashboard. Aucun de ces tokens n'est exposé dans l'app cliente (utilisés uniquement côté Edge Function) ; en l'absence de tous, `hc-meal-images` retombe sur l'accès anonyme Pollinations.
 5. **IA locale (optionnel)** <a name="ia-locale"></a> — le scan et le chat coach peuvent tourner directement sur l'appareil (Gemma3n via `flutter_gemma`), sans connexion et sans consommer le quota cloud partagé, activable depuis Profil > IA locale dans l'app. Configuration :
    - Crée un compte sur [huggingface.co](https://huggingface.co), demande l'accès au modèle "gated" [google/gemma-3n-E2B-it-litert-lm](https://huggingface.co/google/gemma-3n-E2B-it-litert-lm) (acceptation de licence), puis génère un token d'accès (Settings > Access Tokens).
-   - Déploie `huggingface-token` et configure le secret `HUGGINGFACE_TOKEN` avec ce token. Cette fonction ne consomme aucune API payante (pas de quota global) : elle donne le token à un utilisateur authentifié, limité à 5 appels par jour, pour qu'il télécharge le modèle (~3,66 Go) directement depuis son appareil vers Hugging Face ; le token n'est jamais embarqué dans le binaire de l'app. Comme l'inscription est ouverte, utilise un token Hugging Face en **lecture seule**, limité à ce modèle.
+   - Déploie `hc-huggingface-token` et configure le secret `HUGGINGFACE_TOKEN` avec ce token. Cette fonction ne consomme aucune API payante (pas de quota global) : elle donne le token à un utilisateur authentifié, limité à 5 appels par jour, pour qu'il télécharge le modèle (~3,66 Go) directement depuis son appareil vers Hugging Face ; le token n'est jamais embarqué dans le binaire de l'app. Comme l'inscription est ouverte, utilise un token Hugging Face en **lecture seule**, limité à ce modèle.
    - **Android** : `minSdk` est passé à **30** (Android 11+) dans `android/app/build.gradle.kts` — requis par le moteur d'inférence `.litertlm` (`flutter_gemma_litertlm`). ⚠️ Ceci relève la version Android minimale pour **toute l'app**, pas seulement l'IA locale — vérifie que ça correspond à ton public cible avant de publier.
    - **iOS** : la cible de déploiement est passée à 15.0 dans `project.pbxproj`. Le fichier `ios/Runner/Runner.entitlements` (mémoire étendue, nécessaire pour l'inférence sur un modèle de plusieurs Go) est rattaché au projet via `CODE_SIGN_ENTITLEMENTS` dans `project.pbxproj`, **sans avoir pu être testé sur un Mac** : si la signature échoue, vérifie les capacités dans Xcode (Signing & Capabilities). Le partage de fichiers iOS (`UIFileSharingEnabled`) est désactivé volontairement : il exposerait la base locale et les photos.
 6. **Compte admin (optionnel)** — pour donner à un compte l'accès complet aux fonctionnalités PRO sans abonnement réel, exécute depuis le SQL Editor : `update public.profiles set is_admin = true where email = 'ton-email@exemple.com';`. Ce champ n'est modifiable que depuis le SQL Editor (aucun moyen de le changer depuis l'app, voir migration 0007).
@@ -261,21 +258,21 @@ flutter test
 Edge Functions (nécessite [Deno](https://deno.com), 2.x) :
 
 ```bash
-deno test --allow-env supabase/functions/_shared/
-deno test --allow-env --allow-read supabase/functions/delete-account/
-deno test --allow-env supabase/functions/coach-chat/
-deno test --allow-env supabase/functions/meal-images/
-deno test --allow-env supabase/functions/huggingface-token/
+deno test --allow-env supabase/functions/_shared_hc/
+deno test --allow-env --allow-read supabase/functions/hc-delete-account/
+deno test --allow-env supabase/functions/hc-coach-chat/
+deno test --allow-env supabase/functions/hc-meal-images/
+deno test --allow-env supabase/functions/hc-huggingface-token/
 ```
 
-Évaluation du coach sur `supabase/functions/coach-chat/eval_cases.json` : `deno run --allow-env --allow-net --allow-read supabase/functions/coach-chat/run_eval.ts` (voir l'en-tête du script pour les variables requises).
+Évaluation du coach sur `supabase/functions/hc-coach-chat/eval_cases.json` : `deno run --allow-env --allow-net --allow-read supabase/functions/hc-coach-chat/run_eval.ts` (voir l'en-tête du script pour les variables requises).
 
 ## CI/CD
 
 Workflows GitHub Actions (`.github/workflows/`) :
 
-- `ci.yml` — sur chaque push et pull request : `flutter analyze` + `flutter test` + `flutter build web` (job `flutter`), tests Deno des Edge Functions (job `deno`).
-- `deploy_functions.yml` — sur push vers `master` touchant `supabase/functions/` ou `supabase/migrations/` : `supabase db push` puis déploiement des fonctions. Secrets requis : `SUPABASE_ACCESS_TOKEN` (token personnel `sbp_...`), `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`.
+- `ci.yml` — sur chaque push et pull request : `flutter analyze` + `flutter test` (job `flutter`), tests Deno des Edge Functions (job `deno`).
+- Déploiement Supabase (self-host Coolify) — app Coolify `supabase-deployer` pointant sur `deploy/supabase/docker-compose.yml` : applique `supabase/migrations/` dans le schéma `health_chef` (suivi dans `health_chef._migrations`) puis copie `supabase/functions/` dans le volume partagé du runtime. Voir `scripts/apply-supabase.sh`.
 - `supabase_keepalive.yml` — tous les 3 jours (et à la demande) : requête REST vers la base pour éviter la mise en pause d'un projet Supabase gratuit après 7 jours d'inactivité. Secrets requis : `SUPABASE_PROJECT_ID`, `SUPABASE_ANON_KEY`.
 
 ## Notes
@@ -283,11 +280,11 @@ Workflows GitHub Actions (`.github/workflows/`) :
 - **Repas, poids et hydratation hors ligne** — écrits dans une base SQLite locale (`lib/local_db/`) avant toute tentative réseau, puis synchronisés vers Supabase (tables `meals`/`weight_entries`/`hydration_entries`) au prochain démarrage ou retour de connexion, sans action de l'utilisateur. Pour le poids et l'hydratation, la synchronisation est aussi descendante (`syncEntries()` rapatrie les lignes présentes sur Supabase mais absentes en local) : l'historique se restaure après une désinstallation et se partage entre appareils. Le poids actuel du profil (`profiles.current_weight`, mis à jour à chaque pesée) reste la valeur utilisée pour l'IMC et les cibles caloriques, indépendamment de cet historique.
 - **Notifications locales, rappels personnalisés sauvegardés** — les rappels (créneaux fixes et personnalisés) sont programmés en local sur l'appareil (`flutter_local_notifications`) et persistés dans `shared_preferences`. Les rappels personnalisés sont en plus sauvegardés dans la table Supabase `custom_reminders_backup` à chaque modification, et restaurés automatiquement (nouvelle installation ou nouvel appareil sans rappel local) — voir `lib/providers/custom_reminders_provider.dart`. Les créneaux fixes petit-déjeuner/déjeuner/dîner suivent désormais la même sauvegarde (table `custom_reminders_backup`, colonne `fixed_reminders`, voir migration 0021 et `lib/providers/notification_settings_provider.dart`). ⚠️ Restauration one-shot dans les deux cas, pas de fusion en cas d'usage simultané sur deux appareils avant leur première synchronisation.
 - **Photos de repas** — uploadées dans le bucket `meal_photos` uniquement pour les analyses par photo ("Repas"/"Produit") ; un repas issu d'un scan de code-barres n'a pas de photo. Supprimer un repas synchronisé supprime aussi sa photo du bucket, sauf si un autre repas (ex. « refaire ce repas ») utilise encore le même fichier.
-- **Plateformes** — Android, iOS et web uniquement (les dossiers `windows/`, `linux/` et `macos/` ont été retirés : `camera` et `flutter_image_compress` n'y fonctionnent pas).
+- **Plateformes** — Android et iOS uniquement (les dossiers `web/`, `windows/`, `linux/` et `macos/` ont été retirés : `camera` et `flutter_image_compress` n'y fonctionnent pas).
 - **Identité visuelle** — le logo source (`assets/icon/icon.png` / `icon_foreground.png`) alimente à la fois l'icône d'app (générée par `flutter_launcher_icons`, voir `pubspec.yaml`) et, depuis peu, le splash screen (Android/iOS) et l'écran de connexion. L'identifiant d'app est unifié en `com.aihealthchef.app` sur Android/iOS/macOS/Linux (Windows n'a pas d'identifiant de ce type).
 - **CGU/mentions légales à finaliser** — le contenu de `lib/screens/terms_screen.dart` décrit honnêtement le fonctionnement actuel de l'app (données collectées, absence de conseil médical, contenu généré par IA, abonnement, âge minimum) et identifie l'éditeur (Baga Assami, projet personnel sans société immatriculée) et son contact (`kSupportEmail`), mais reste un brouillon : le texte doit être relu par un professionnel du droit avant toute publication publique — un bandeau d'avertissement s'affiche sur l'écran tant que ce n'est pas fait.
 - **Âge minimum (RGPD art. 8/9)** — l'app est réservée aux personnes de 16 ans ou plus (`kMinimumAge` dans `lib/utils/age_policy.dart`), sans flux de consentement parental : en-dessous, la création de profil est bloquée (onboarding et écran "Mes objectifs"). L'inscription (`signup_screen.dart`) exige en plus une case explicite "J'ai au moins 16 ans et j'accepte les CGU…", dont l'horodatage et la version acceptée sont tracés dans `profiles.accepted_terms_at`/`accepted_terms_version` (migration 0018). Ceci n'empêche pas, par construction, qu'un compte créé avant ce changement ait un âge < 16 ans déjà enregistré ; requête de détection en lecture seule : `supabase/scripts/detect_underage_accounts.sql` (non exécutée automatiquement par l'app, aucun traitement/suppression automatique — décision humaine requise sur les comptes trouvés).
-- **Quotas IA** — les limites quotidiennes sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque `supabase/functions/<nom>/index.ts` (`handler.ts` pour `coach-chat`) si besoin (4ᵉ argument = quota par utilisateur, 5ᵉ argument optionnel = quota global partagé par toute l'app, voir migration 0009). Cette fonction vit dans `supabase/functions/_shared/quota.ts` et est importée par chaque Edge Function IA (voir Architecture ci-dessus) : un changement dans `_shared/quota.ts` s'applique à toutes d'un coup, pas besoin de le reporter manuellement. Un compte admin (`profiles.is_admin`) ou PRO actif (RevenueCat) a une limite par utilisateur ×10 (`UNLIMITED_FACTOR`) et non illimitée, et reste soumis au quota global : un seul compte ne peut pas vider le budget partagé. Le quota est consommé après validation de la requête (une image invalide ne coûte rien), mais une panne Gemini (502) coûte encore un crédit. Si le RPC de quota lui-même est en panne, l'appel passe (fail-open) et le log `[QUOTA_FAIL_OPEN]` est émis : crée une alerte dessus.
+- **Quotas IA** — les limites quotidiennes sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque `supabase/functions/<nom>/index.ts` (`handler.ts` pour `hc-coach-chat`) si besoin (4ᵉ argument = quota par utilisateur, 5ᵉ argument optionnel = quota global partagé par toute l'app, voir migration 0009). Cette fonction vit dans `supabase/functions/_shared_hc/quota.ts` et est importée par chaque Edge Function IA (voir Architecture ci-dessus) : un changement dans `_shared_hc/quota.ts` s'applique à toutes d'un coup, pas besoin de le reporter manuellement. Un compte admin (`profiles.is_admin`) ou PRO actif (RevenueCat) a une limite par utilisateur ×10 (`UNLIMITED_FACTOR`) et non illimitée, et reste soumis au quota global : un seul compte ne peut pas vider le budget partagé. Le quota est consommé après validation de la requête (une image invalide ne coûte rien), mais une panne Gemini (502) coûte encore un crédit. Si le RPC de quota lui-même est en panne, l'appel passe (fail-open) et le log `[QUOTA_FAIL_OPEN]` est émis : crée une alerte dessus.
 
 ## Ressources Flutter
 

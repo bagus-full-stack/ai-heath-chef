@@ -16,7 +16,7 @@ const List<(String value, IconData icon)> _kToneOptions = [
 ];
 
 /// Choix du ton adopté par le Coach IA dans ses réponses (chat) — sauvegardé
-/// sur le profil et transmis à l'Edge Function `coach-chat`.
+/// sur le profil et transmis à l'Edge Function `hc-coach-chat`.
 class CoachPersonalizationScreen extends ConsumerStatefulWidget {
   const CoachPersonalizationScreen({super.key});
 

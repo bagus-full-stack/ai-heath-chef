@@ -260,9 +260,9 @@ class DataExportService {
     }
 
     await Future.wait([
-      if (profile != null) resolveInto('avatars', profile, 'avatar_path'),
-      for (final m in meals) resolveInto('meal_photos', m, 'image_path'),
-      for (final w in weightEntries) resolveInto('weight_photos', w, 'image_path'),
+      if (profile != null) resolveInto('hc_avatars', profile, 'avatar_path'),
+      for (final m in meals) resolveInto('hc_meal_photos', m, 'image_path'),
+      for (final w in weightEntries) resolveInto('hc_weight_photos', w, 'image_path'),
     ]);
   }
 }

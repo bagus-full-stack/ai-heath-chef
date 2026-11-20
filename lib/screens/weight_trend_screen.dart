@@ -345,7 +345,7 @@ class _ProgressPhotoGallery extends StatelessWidget {
           final image = entry.localImagePath != null
               ? LocalFileImage(entry.localImagePath!, width: 80, height: 80, fit: BoxFit.cover)
               : StorageImage(
-                  bucket: 'weight_photos',
+                  bucket: 'hc_weight_photos',
                   path: entry.imagePath,
                   builder: (context, snapshot) => snapshot.data != null
                       ? Image.network(

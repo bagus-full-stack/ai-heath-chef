@@ -64,7 +64,7 @@ class _ConsentExplanation extends StatelessWidget {
 /// Bloque [child] tant que l'utilisateur n'a pas explicitement accepté
 /// l'envoi de photo/texte à l'IA cloud (voir ai_consent_provider.dart) — à
 /// poser en tête du build() des écrans qui déclenchent systématiquement
-/// analyze-meal/menu/pantry/product, meal-suggestions ou meal-images dès
+/// hc-analyze-meal/menu/pantry/product, hc-meal-suggestions ou hc-meal-images dès
 /// leur ouverture. [onGranted] (optionnel) ne se déclenche qu'une fois, la
 /// première fois que le consentement est constaté accordé — utile pour
 /// lancer l'appel IA qu'on ne voulait justement pas déclencher avant.

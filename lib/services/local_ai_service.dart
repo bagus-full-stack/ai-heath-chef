@@ -81,13 +81,13 @@ Le JSON doit avoir cette structure exacte :
   }
 
   /// Télécharge le modèle Gemma3n depuis Hugging Face, en récupérant
-  /// d'abord le token via l'Edge Function `huggingface-token` (jamais
+  /// d'abord le token via l'Edge Function `hc-huggingface-token` (jamais
   /// embarqué dans l'app). [onProgress] reçoit une valeur 0.0-1.0.
   Future<void> downloadModel({
     required void Function(double progress) onProgress,
     String lang = 'fr',
   }) async {
-    final tokenResponse = await Supabase.instance.client.functions.invoke('huggingface-token');
+    final tokenResponse = await Supabase.instance.client.functions.invoke('hc-huggingface-token');
     final token = tokenResponse.data?['token'] as String?;
     if (token == null || token.isEmpty) {
       throw Exception(lookupAppLocalizations(Locale(lang)).svcErrorHuggingFaceToken);

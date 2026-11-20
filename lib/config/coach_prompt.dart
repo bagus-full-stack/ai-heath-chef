@@ -1,5 +1,5 @@
 /// Prompt système du coach nutrition (IA locale, Gemma3n) — miroir manuel de
-/// supabase/functions/_shared/coach_prompt.ts (Dart et Deno ne peuvent pas
+/// supabase/functions/_shared_hc/coach_prompt.ts (Dart et Deno ne peuvent pas
 /// partager de code source, même principe que lib/utils/health_risk_filter.dart).
 /// Garder les deux fichiers synchronisés à la main.
 ///

@@ -9,8 +9,8 @@
 -- cache, comparée à la signature courante avant de le réutiliser.
 -- ============================================================================
 
-alter table public.meal_suggestions
+alter table health_chef.meal_suggestions
   add column if not exists preferences_signature text not null default '';
 
-comment on column public.meal_suggestions.preferences_signature is
+comment on column health_chef.meal_suggestions.preferences_signature is
   'Signature "diet_type|allergies triées" utilisée au moment de la génération, pour détecter un changement de préférences et invalider le cache du jour.';

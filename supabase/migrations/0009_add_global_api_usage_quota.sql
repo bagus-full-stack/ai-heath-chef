@@ -11,43 +11,43 @@
 -- tout le monde en même temps (erreur API brute, quota Gemini épuisé...).
 -- ============================================================================
 
-create table if not exists public.global_api_usage (
+create table if not exists health_chef.global_api_usage (
   function_name text not null,
   day           date not null default current_date,
   call_count    integer not null default 0,
   primary key (function_name, day)
 );
 
-comment on table public.global_api_usage is
+comment on table health_chef.global_api_usage is
   'Compteur d''appels IA par fonction/jour, agrégé sur tous les utilisateurs — plafond de sécurité pour le budget/débit partagé (clé API commune à toute l''app).';
 
-alter table public.global_api_usage enable row level security;
+alter table health_chef.global_api_usage enable row level security;
 
 -- Incrémente atomiquement le compteur global du jour et renvoie true si
 -- l'appel reste sous la limite (donc autorisé), false s'il la dépasse déjà.
 -- SECURITY DEFINER, réservé à service_role (même principe que
 -- increment_api_usage en 0008) : aucun utilisateur ne peut lire ou
 -- influencer ce compteur directement.
-create or replace function public.increment_global_api_usage(
+create or replace function health_chef.increment_global_api_usage(
   p_function_name text,
   p_daily_limit integer
 ) returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = health_chef
 as $$
 declare
   v_count integer;
 begin
-  insert into public.global_api_usage (function_name, day, call_count)
+  insert into health_chef.global_api_usage (function_name, day, call_count)
   values (p_function_name, current_date, 1)
   on conflict (function_name, day)
-  do update set call_count = public.global_api_usage.call_count + 1
+  do update set call_count = health_chef.global_api_usage.call_count + 1
   returning call_count into v_count;
 
   return v_count <= p_daily_limit;
 end;
 $$;
 
-revoke all on function public.increment_global_api_usage(text, integer) from public;
-grant execute on function public.increment_global_api_usage(text, integer) to service_role;
+revoke all on function health_chef.increment_global_api_usage(text, integer) from public;
+grant execute on function health_chef.increment_global_api_usage(text, integer) to service_role;

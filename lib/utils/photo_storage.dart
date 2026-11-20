@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -13,9 +12,6 @@ Future<String> compressAndStorePhoto(
   String fileId,
   String sourcePath,
 ) async {
-  // Web : pas de dossier de l'app ni de compression par fichier ; l'URL blob: est gardée telle quelle.
-  if (kIsWeb) return sourcePath;
-
   final compressedBytes = await FlutterImageCompress.compressWithFile(
     sourcePath,
     minWidth: 800,

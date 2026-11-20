@@ -30,7 +30,7 @@ void main() async {
 
   // Initialisation de l'IA locale (Gemma3n, format .litertlm). Enregistre
   // uniquement le moteur d'inférence ici — le token Hugging Face n'est
-  // récupéré (via l'Edge Function huggingface-token) qu'au moment où
+  // récupéré (via l'Edge Function hc-huggingface-token) qu'au moment où
   // l'utilisateur lance explicitement le téléchargement du modèle depuis
   // Profil > IA locale, pas au démarrage de l'app.
   await FlutterGemma.initialize(inferenceEngines: [LiteRtLmEngine()]);
@@ -44,6 +44,8 @@ void main() async {
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,
     publishableKey: dotenv.env['SUPABASE_PUBLISHABLE_KEY']!,
+    // Instance partagée entre plusieurs apps : les tables vivent dans ce schéma.
+    postgrestOptions: const PostgrestClientOptions(schema: 'health_chef'),
   );
 
   // Initialisation de RevenueCat (achats in-app natifs).

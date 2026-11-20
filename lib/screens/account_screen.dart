@@ -143,7 +143,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       }
 
       if (previousPath != null) {
-        ref.read(storageImageServiceProvider).invalidate('avatars', previousPath);
+        ref.read(storageImageServiceProvider).invalidate('hc_avatars', previousPath);
       }
 
       if (!mounted) {
@@ -307,7 +307,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       clipBehavior: Clip.none,
                       children: [
                         StorageImage(
-                          bucket: 'avatars',
+                          bucket: 'hc_avatars',
                           path: _avatarPath,
                           builder: (context, snapshot) => CircleAvatar(
                             radius: 48,

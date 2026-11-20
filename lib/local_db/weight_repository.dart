@@ -136,7 +136,7 @@ class WeightRepository {
   Future<String> _uploadPhoto(String userId, String entryId, String localPath) async {
     final bytes = await XFile(localPath).readAsBytes();
     final storagePath = '$userId/$entryId.jpg';
-    await _supabase.storage.from('weight_photos').uploadBinary(
+    await _supabase.storage.from('hc_weight_photos').uploadBinary(
           storagePath,
           bytes,
           fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),

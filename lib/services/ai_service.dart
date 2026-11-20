@@ -14,7 +14,7 @@ class AIService {
   Future<List<Ingredient>> analyzeMealImage(String imagePath, {String lang = 'fr'}) {
     return _analyzeImage(
       imagePath,
-      'analyze-meal',
+      'hc-analyze-meal',
       (l10n, error) => l10n.svcErrorAnalyzeMeal(error),
       lang,
     );
@@ -25,7 +25,7 @@ class AIService {
   Future<List<Ingredient>> analyzeProductImage(String imagePath, {String lang = 'fr'}) {
     return _analyzeImage(
       imagePath,
-      'analyze-product',
+      'hc-analyze-product',
       (l10n, error) => l10n.svcErrorAnalyzeProduct(error),
       lang,
     );
@@ -33,11 +33,11 @@ class AIService {
 
   /// Analyse la photo d'une carte de restaurant et retourne un "ingrédient"
   /// par plat identifié (portion estimée + macros pour cette portion) —
-  /// même contrat JSON que [analyzeMealImage], voir analyze-menu/index.ts.
+  /// même contrat JSON que [analyzeMealImage], voir hc-analyze-menu/index.ts.
   Future<List<Ingredient>> analyzeMenuImage(String imagePath, {String lang = 'fr'}) {
     return _analyzeImage(
       imagePath,
-      'analyze-menu',
+      'hc-analyze-menu',
       (l10n, error) => l10n.svcErrorAnalyzeMenu(error),
       lang,
     );
@@ -45,12 +45,12 @@ class AIService {
 
   /// Analyse la photo d'un frigo/placard et retourne un "ingrédient" par
   /// aliment identifié (inventaire, pas un repas à consommer) — même contrat
-  /// JSON que [analyzeMealImage], voir analyze-pantry/index.ts. Seul `name`
+  /// JSON que [analyzeMealImage], voir hc-analyze-pantry/index.ts. Seul `name`
   /// est réellement utilisé côté client (voir pantry_scan_screen.dart).
   Future<List<Ingredient>> analyzePantryImage(String imagePath, {String lang = 'fr'}) {
     return _analyzeImage(
       imagePath,
-      'analyze-pantry',
+      'hc-analyze-pantry',
       (l10n, error) => l10n.svcErrorAnalyzePantry(error),
       lang,
     );
@@ -66,9 +66,7 @@ class AIService {
     try {
       // 1. COMPRESSION DE L'IMAGE
       // On réduit la taille (max 800x800) et la qualité (70%) pour un envoi ultra-rapide.
-      // `compressWithFile` n'est pas supporté sur Flutter Web (dart:io uniquement) :
-      // on lit d'abord les octets via XFile (gère aussi bien un chemin natif qu'une
-      // URL blob: web), puis on compresse via `compressWithList`, supporté partout.
+      // On lit les octets via XFile, puis on compresse via `compressWithList`.
       final rawBytes = await XFile(imagePath).readAsBytes();
       final compressedBytes = await FlutterImageCompress.compressWithList(
         rawBytes,
@@ -124,7 +122,7 @@ class AIService {
   }) async {
     try {
       final response = await Supabase.instance.client.functions.invoke(
-        'coach-chat',
+        'hc-coach-chat',
         body: {
           'message': message,
           'history': history,
@@ -146,13 +144,13 @@ class AIService {
   }
 
   /// Génère une illustration IA pour un plat unique recommandé par le coach
-  /// (voir chat_provider.dart), en réutilisant l'edge function `meal-images`.
+  /// (voir chat_provider.dart), en réutilisant l'edge function `hc-meal-images`.
   /// Comme [getMealImages], c'est un bonus visuel : repli sur `null` en cas
   /// d'échec plutôt que de faire échouer la réponse du coach.
   Future<String?> getDishImage(String dishName) async {
     try {
       final response = await _supabase.functions.invoke(
-        'meal-images',
+        'hc-meal-images',
         body: {
           'meals': [
             {'title': dishName},
@@ -192,7 +190,7 @@ class AIService {
   }) async {
     try {
       final response = await _supabase.functions.invoke(
-        'meal-suggestions',
+        'hc-meal-suggestions',
         body: {
           'goal': goal,
           'targetKcal': targetKcal,
@@ -230,7 +228,7 @@ class AIService {
 
     try {
       final response = await _supabase.functions.invoke(
-        'meal-images',
+        'hc-meal-images',
         body: {
           'meals': suggestions
               .map((s) => {'title': s.title, 'description': s.description})
@@ -253,7 +251,7 @@ class AIService {
   /// Extrait un message d'erreur lisible d'une [FunctionException] (le champ
   /// `error` renvoyé par nos Edge Functions, ex. quota dépassé), au lieu de
   /// laisser fuiter la représentation brute de l'exception à l'utilisateur.
-  /// Si le quota dépassé inclut `resetAt` (UTC, voir `_shared/quota.ts`), on
+  /// Si le quota dépassé inclut `resetAt` (UTC, voir `_shared_hc/quota.ts`), on
   /// l'ajoute converti à l'heure locale de l'utilisateur.
   String _describeError(Object error, String lang) {
     if (error is FunctionException) {

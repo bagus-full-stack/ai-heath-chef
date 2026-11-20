@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -317,8 +316,6 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       onTap: () => context.push('/coach_personalization'),
                     ),
-                    // Modèle de plusieurs centaines de Mo : pas adapté à un onglet de navigateur.
-                    if (!kIsWeb)
                     _SettingsItem(
                       icon: Icons.memory_rounded,
                       title: context.l10n.profileLocalAiTitle,
@@ -404,7 +401,7 @@ class _ProfileHeader extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             StorageImage(
-              bucket: 'avatars',
+              bucket: 'hc_avatars',
               path: profile.avatarPath,
               builder: (context, snapshot) => CircleAvatar(
                 radius: 48,
@@ -676,53 +673,56 @@ class _SettingsTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(14),
+        contentPadding: EdgeInsets.zero,
+        leading: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(item.icon, color: Colors.black87),
         ),
-        child: Icon(item.icon, color: Colors.black87),
-      ),
-      title: Text(
-        item.title,
-        style: const TextStyle(fontWeight: FontWeight.w700),
-      ),
-      subtitle: Text(
-        item.subtitle,
-        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (item.badge != null) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFF6B66FF).withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                item.badge!,
-                style: const TextStyle(
-                  color: Color(0xFF6B66FF),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11,
+        title: Text(
+          item.title,
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          item.subtitle,
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (item.badge != null) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6B66FF).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  item.badge!,
+                  style: const TextStyle(
+                    color: Color(0xFF6B66FF),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
+            ],
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: Colors.grey,
             ),
-            const SizedBox(width: 8),
           ],
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 16,
-            color: Colors.grey,
-          ),
-        ],
-      ),
-      onTap: item.onTap,
+        ),
+        onTap: item.onTap,
       ),
     );
   }

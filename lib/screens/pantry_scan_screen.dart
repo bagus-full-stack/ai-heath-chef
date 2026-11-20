@@ -12,7 +12,7 @@ import '../widgets/local_file_image.dart';
 const _primaryColor = Color(0xFF6B66FF);
 
 /// Inventaire détecté sur une photo de frigo/placard (voir
-/// analyze-pantry/index.ts) : un [Ingredient] par aliment identifié, dont
+/// hc-analyze-pantry/index.ts) : un [Ingredient] par aliment identifié, dont
 /// seul `name` importe ici (poids/macros ne servent qu'au contrat JSON
 /// partagé, voir ai_service.dart). L'utilisateur peut corriger la liste
 /// (retirer un aliment mal identifié, en ajouter un manuellement) avant de
