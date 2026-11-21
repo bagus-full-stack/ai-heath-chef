@@ -9,7 +9,7 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'Mijo';
+  String get appTitle => 'Sève';
 
   @override
   String get navHome => 'Accueil';
@@ -60,25 +60,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get aboutAppBarTitle => 'À propos';
 
   @override
-  String get aboutAppName => 'Mijo';
+  String get aboutAppName => 'Sève';
 
   @override
   String get aboutContactLinkTitle => 'Contacter le support';
 
   @override
   String aboutCopyright(int year) {
-    return '© $year Mijo';
+    return '© $year Sève';
   }
 
   @override
   String get aboutDescription =>
-      'Mijo t’aide à suivre tes repas et tes objectifs nutritionnels : scanne ton assiette pour une estimation automatique des calories et macros, échange avec un coach IA, reçois des idées de repas personnalisées et des rappels pour ne rien oublier.';
+      'Sève t’aide à suivre tes repas et tes objectifs nutritionnels : scanne ton assiette pour une estimation automatique des calories et macros, échange avec un coach IA, reçois des idées de repas personnalisées et des rappels pour ne rien oublier.';
 
   @override
   String get aboutHelpCenterLinkTitle => 'Centre d’aide';
 
   @override
-  String get aboutMailtoSubject => 'Contact Mijo';
+  String get aboutMailtoSubject => 'Contact Sève';
 
   @override
   String aboutNoMailAppSnackbar(String supportEmail) {
@@ -303,7 +303,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Mode démo : cet achat est simulé, aucun paiement ni compte App Store / Google Play n\'est sollicité.';
 
   @override
-  String get checkoutOrderSummaryBrand => 'Mijo PRO';
+  String get checkoutOrderSummaryBrand => 'Sève PRO';
 
   @override
   String get checkoutOrderSummaryDemoNotice =>
@@ -344,7 +344,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get checkoutSuccessReal =>
-      'Abonnement activé !\nBienvenue dans Mijo PRO.';
+      'Abonnement activé !\nBienvenue dans Sève PRO.';
 
   @override
   String get checkoutSummaryLabel => 'RÉCAPITULATIF';
@@ -853,7 +853,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get helpCenterContactButtonLabel => 'Contacter le support';
 
   @override
-  String get helpCenterMailtoSubject => 'Question Mijo';
+  String get helpCenterMailtoSubject => 'Question Sève';
 
   @override
   String get helpCenterMealsQ1Answer =>
@@ -1479,7 +1479,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onboardingErrorUnderMinimumAge =>
-      'Mijo est réservé aux personnes de 16 ans ou plus. Ton âge n\'a pas été enregistré.';
+      'Sève est réservé aux personnes de 16 ans ou plus. Ton âge n\'a pas été enregistré.';
 
   @override
   String get onboardingErrorInvalidHeight => 'Entre ta taille en cm.';
@@ -1651,7 +1651,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paywallTitle => 'Passez au niveau supérieur';
 
   @override
-  String get paywallUnlockButton => 'Débloquer Mijo PRO';
+  String get paywallUnlockButton => 'Débloquer Sève PRO';
 
   @override
   String get profileAboutSubtitle => 'Version et informations';
@@ -1897,7 +1897,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get profileUnknownUser => 'Utilisateur inconnu';
 
   @override
-  String get profileVersionText => 'Mijo v1.0.0';
+  String get profileVersionText => 'Sève v1.0.0';
 
   @override
   String get profileWeightTrackingSubtitle => 'Voir ma courbe de progression';
@@ -2034,21 +2034,21 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get termsSection2Body =>
-      'Les présentes Conditions d’Utilisation (« CGU ») régissent l’accès et l’usage de l’application mobile Mijo (« l’Application »). En créant un compte ou en utilisant l’Application, tu acceptes l’intégralité des présentes CGU.';
+      'Les présentes Conditions d’Utilisation (« CGU ») régissent l’accès et l’usage de l’application mobile Sève (« l’Application »). En créant un compte ou en utilisant l’Application, tu acceptes l’intégralité des présentes CGU.';
 
   @override
   String get termsSection2Title => '2. Objet';
 
   @override
   String get termsSection3Body =>
-      'Mijo permet de : suivre ses repas et ses macronutriments au quotidien ; analyser une photo de repas via intelligence artificielle pour estimer les ingrédients et valeurs nutritionnelles ; échanger avec un coach nutritionnel conversationnel basé sur l’IA ; recevoir des idées de repas personnalisées ; configurer des rappels de repas ; et, via un abonnement PRO optionnel, débloquer des fonctionnalités additionnelles.';
+      'Sève permet de : suivre ses repas et ses macronutriments au quotidien ; analyser une photo de repas via intelligence artificielle pour estimer les ingrédients et valeurs nutritionnelles ; échanger avec un coach nutritionnel conversationnel basé sur l’IA ; recevoir des idées de repas personnalisées ; configurer des rappels de repas ; et, via un abonnement PRO optionnel, débloquer des fonctionnalités additionnelles.';
 
   @override
   String get termsSection3Title => '3. Description du service';
 
   @override
   String get termsSection4Body =>
-      'Mijo fournit des informations et estimations à titre purement informatif et ne constitue en aucun cas un avis médical, un diagnostic ou une prescription. Les calculs de calories, macros et objectifs nutritionnels sont des estimations générales. Consulte un médecin ou un·e diététicien·ne avant tout changement alimentaire significatif, en particulier en cas de pathologie, de grossesse, ou de trouble du comportement alimentaire. L’Application ne doit pas être utilisée comme seul outil de suivi dans un contexte médical.';
+      'Sève fournit des informations et estimations à titre purement informatif et ne constitue en aucun cas un avis médical, un diagnostic ou une prescription. Les calculs de calories, macros et objectifs nutritionnels sont des estimations générales. Consulte un médecin ou un·e diététicien·ne avant tout changement alimentaire significatif, en particulier en cas de pathologie, de grossesse, ou de trouble du comportement alimentaire. L’Application ne doit pas être utilisée comme seul outil de suivi dans un contexte médical.';
 
   @override
   String get termsSection4Title => '4. Ce n’est pas un avis médical';
@@ -2414,7 +2414,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String privacySection1Body(String supportEmail) {
-    return 'Mijo est éditée par Baga Assami, développeur individuel (pas de société immatriculée à ce jour). Contact : $supportEmail';
+    return 'Sève est éditée par Baga Assami, développeur individuel (pas de société immatriculée à ce jour). Contact : $supportEmail';
   }
 
   @override
@@ -2487,7 +2487,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get licensesIntro =>
-      'Mijo s\'appuie sur des packages open source ainsi que sur des données et modèles d\'IA tiers. Les licences des packages open source sont listées ci-dessous ; les autres crédits sont listés ici.';
+      'Sève s\'appuie sur des packages open source ainsi que sur des données et modèles d\'IA tiers. Les licences des packages open source sont listées ci-dessous ; les autres crédits sont listés ici.';
 
   @override
   String get licensesOpenFoodFactsBody =>

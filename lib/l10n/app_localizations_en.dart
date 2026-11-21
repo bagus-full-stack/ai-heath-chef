@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Mijo';
+  String get appTitle => 'Sève';
 
   @override
   String get navHome => 'Home';
@@ -60,25 +60,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutAppBarTitle => 'About';
 
   @override
-  String get aboutAppName => 'Mijo';
+  String get aboutAppName => 'Sève';
 
   @override
   String get aboutContactLinkTitle => 'Contact support';
 
   @override
   String aboutCopyright(int year) {
-    return '© $year Mijo';
+    return '© $year Sève';
   }
 
   @override
   String get aboutDescription =>
-      'Mijo helps you track your meals and nutritional goals: scan your plate for an automatic estimate of calories and macros, chat with an AI coach, get personalized meal ideas, and reminders so you never forget.';
+      'Sève helps you track your meals and nutritional goals: scan your plate for an automatic estimate of calories and macros, chat with an AI coach, get personalized meal ideas, and reminders so you never forget.';
 
   @override
   String get aboutHelpCenterLinkTitle => 'Help Center';
 
   @override
-  String get aboutMailtoSubject => 'Mijo Contact';
+  String get aboutMailtoSubject => 'Sève Contact';
 
   @override
   String aboutNoMailAppSnackbar(String supportEmail) {
@@ -302,7 +302,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Demo mode: this purchase is simulated, no payment or App Store / Google Play account is involved.';
 
   @override
-  String get checkoutOrderSummaryBrand => 'Mijo PRO';
+  String get checkoutOrderSummaryBrand => 'Sève PRO';
 
   @override
   String get checkoutOrderSummaryDemoNotice =>
@@ -343,7 +343,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkoutSuccessReal =>
-      'Subscription activated!\nWelcome to Mijo PRO.';
+      'Subscription activated!\nWelcome to Sève PRO.';
 
   @override
   String get checkoutSummaryLabel => 'SUMMARY';
@@ -847,7 +847,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpCenterContactButtonLabel => 'Contact support';
 
   @override
-  String get helpCenterMailtoSubject => 'Mijo Question';
+  String get helpCenterMailtoSubject => 'Sève Question';
 
   @override
   String get helpCenterMealsQ1Answer =>
@@ -1466,7 +1466,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingErrorUnderMinimumAge =>
-      'Mijo is for people aged 16 and over. Your age was not saved.';
+      'Sève is for people aged 16 and over. Your age was not saved.';
 
   @override
   String get onboardingErrorInvalidHeight => 'Enter your height in cm.';
@@ -1639,7 +1639,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallTitle => 'Take it to the next level';
 
   @override
-  String get paywallUnlockButton => 'Unlock Mijo PRO';
+  String get paywallUnlockButton => 'Unlock Sève PRO';
 
   @override
   String get profileAboutSubtitle => 'Version and information';
@@ -1882,7 +1882,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileUnknownUser => 'Unknown user';
 
   @override
-  String get profileVersionText => 'Mijo v1.0.0';
+  String get profileVersionText => 'Sève v1.0.0';
 
   @override
   String get profileWeightTrackingSubtitle => 'See my progress chart';
@@ -2018,21 +2018,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsSection2Body =>
-      'These Terms of Use (\"Terms\") govern access to and use of the Mijo mobile application (the \"App\"). By creating an account or using the App, you accept these Terms in full.';
+      'These Terms of Use (\"Terms\") govern access to and use of the Sève mobile application (the \"App\"). By creating an account or using the App, you accept these Terms in full.';
 
   @override
   String get termsSection2Title => '2. Purpose';
 
   @override
   String get termsSection3Body =>
-      'Mijo lets you: track your meals and macronutrients daily; analyze a photo of a meal using artificial intelligence to estimate ingredients and nutritional values; chat with an AI-based conversational nutrition coach; receive personalized meal ideas; set up meal reminders; and, via an optional PRO subscription, unlock additional features.';
+      'Sève lets you: track your meals and macronutrients daily; analyze a photo of a meal using artificial intelligence to estimate ingredients and nutritional values; chat with an AI-based conversational nutrition coach; receive personalized meal ideas; set up meal reminders; and, via an optional PRO subscription, unlock additional features.';
 
   @override
   String get termsSection3Title => '3. Description of the service';
 
   @override
   String get termsSection4Body =>
-      'Mijo provides information and estimates for informational purposes only and does not constitute medical advice, a diagnosis, or a prescription in any way. Calorie, macro, and nutritional goal calculations are general estimates. Consult a doctor or dietitian before making any significant dietary change, particularly in the case of a medical condition, pregnancy, or an eating disorder. The App should not be used as the sole tracking tool in a medical context.';
+      'Sève provides information and estimates for informational purposes only and does not constitute medical advice, a diagnosis, or a prescription in any way. Calorie, macro, and nutritional goal calculations are general estimates. Consult a doctor or dietitian before making any significant dietary change, particularly in the case of a medical condition, pregnancy, or an eating disorder. The App should not be used as the sole tracking tool in a medical context.';
 
   @override
   String get termsSection4Title => '4. This is not medical advice';
@@ -2396,7 +2396,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String privacySection1Body(String supportEmail) {
-    return 'Mijo is published by Baga Assami, an individual developer (no registered company as of this draft). Contact: $supportEmail';
+    return 'Sève is published by Baga Assami, an individual developer (no registered company as of this draft). Contact: $supportEmail';
   }
 
   @override
@@ -2469,7 +2469,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get licensesIntro =>
-      'Mijo is built on open-source packages and relies on third-party data and AI models. Open-source package licenses are listed below; other credits are listed here.';
+      'Sève is built on open-source packages and relies on third-party data and AI models. Open-source package licenses are listed below; other credits are listed here.';
 
   @override
   String get licensesOpenFoodFactsBody =>

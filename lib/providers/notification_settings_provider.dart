@@ -122,7 +122,7 @@ class NotificationSettingsNotifier
             final locale = ref.read(localeProvider).value ?? const Locale('fr');
             await NotificationService.instance.scheduleReminder(
               id: slot.notificationId,
-              title: 'Mijo',
+              title: 'Sève',
               body: slot.notificationBody(lookupAppLocalizations(locale)),
               hour: setting.hour,
               minute: setting.minute,
@@ -205,7 +205,7 @@ class NotificationSettingsNotifier
       final locale = ref.read(localeProvider).value ?? const Locale('fr');
       await NotificationService.instance.scheduleReminder(
         id: slot.notificationId,
-        title: 'Mijo',
+        title: 'Sève',
         body: slot.notificationBody(lookupAppLocalizations(locale)),
         hour: setting.hour,
         minute: setting.minute,
@@ -298,7 +298,7 @@ final noLogReminderReconcilerProvider = FutureProvider<void>((ref) async {
       final locale = ref.read(localeProvider).value ?? const Locale('fr');
       await NotificationService.instance.scheduleReminder(
         id: _kNoLogReminderId,
-        title: 'Mijo',
+        title: 'Sève',
         body: lookupAppLocalizations(locale).notificationSettingsBodyNoLog,
         hour: setting.hour,
         minute: setting.minute,

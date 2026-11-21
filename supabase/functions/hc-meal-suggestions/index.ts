@@ -158,7 +158,7 @@ Deno.serve(async (req) => {
         const dayFieldExample = isWeeklyPlan ? '\n      "day": 1,' : '';
 
         const promptText = `
-Tu es Mijo, un coach en nutrition expert et créatif.
+Tu es Sève, un coach en nutrition expert et créatif.
 Propose ${suggestionCount} idées de repas variées et réalistes, adaptées à un objectif de ${goalLabel}.
 L'utilisateur vise environ ${kcal} kcal, ${prot}g de protéines, ${gluc}g de glucides et ${lip}g de lipides par jour au total.${constraintsText}${weeklyPlanInstruction}
 ${safetyInstruction}
