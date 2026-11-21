@@ -91,7 +91,7 @@ class MyApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider).value;
 
     return MaterialApp.router(
-      title: 'AI Health Chef',
+      title: 'Mijo',
       debugShowCheckedModeBanner: false,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,

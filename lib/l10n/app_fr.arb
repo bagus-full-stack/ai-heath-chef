@@ -1,6 +1,6 @@
 {
   "@@locale": "fr",
-  "appTitle": "AI Health Chef",
+  "appTitle": "Mijo",
   "navHome": "Accueil",
   "navCoach": "Coach IA",
   "navProfile": "Profil",
@@ -17,9 +17,9 @@
   "bmiCategoryOverweight": "Surpoids",
   "bmiCategoryObese": "Obésité",
   "aboutAppBarTitle": "À propos",
-  "aboutAppName": "AI Health Chef",
+  "aboutAppName": "Mijo",
   "aboutContactLinkTitle": "Contacter le support",
-  "aboutCopyright": "© {year} AI Health Chef",
+  "aboutCopyright": "© {year} Mijo",
   "@aboutCopyright": {
     "placeholders": {
       "year": {
@@ -27,9 +27,9 @@
       }
     }
   },
-  "aboutDescription": "AI Health Chef t’aide à suivre tes repas et tes objectifs nutritionnels : scanne ton assiette pour une estimation automatique des calories et macros, échange avec un coach IA, reçois des idées de repas personnalisées et des rappels pour ne rien oublier.",
+  "aboutDescription": "Mijo t’aide à suivre tes repas et tes objectifs nutritionnels : scanne ton assiette pour une estimation automatique des calories et macros, échange avec un coach IA, reçois des idées de repas personnalisées et des rappels pour ne rien oublier.",
   "aboutHelpCenterLinkTitle": "Centre d’aide",
-  "aboutMailtoSubject": "Contact AI Health Chef",
+  "aboutMailtoSubject": "Contact Mijo",
   "aboutNoMailAppSnackbar": "Aucune app mail configurée. Écris-nous à {supportEmail}.",
   "@aboutNoMailAppSnackbar": {
     "placeholders": {
@@ -174,7 +174,7 @@
   },
   "checkoutDefaultPlanTitle": "Abonnement PRO",
   "checkoutDemoModeNotice": "Mode démo : cet achat est simulé, aucun paiement ni compte App Store / Google Play n'est sollicité.",
-  "checkoutOrderSummaryBrand": "AI Health Chef PRO",
+  "checkoutOrderSummaryBrand": "Mijo PRO",
   "checkoutOrderSummaryDemoNotice": "Mode démo — l'achat sera simulé, aucun paiement réel",
   "checkoutPaymentMethodLabel": "MOYEN DE PAIEMENT",
   "checkoutPendingConfirmation": "Achat effectué, en attente de confirmation.",
@@ -192,7 +192,7 @@
   "checkoutRenewalValue": "Automatique, résiliable à tout moment",
   "checkoutSecurePaymentNotice": "Paiement géré en toute sécurité par l'App Store / Google Play. Aucune information bancaire n'est demandée dans l'application.",
   "checkoutSuccessDemo": "Achat simulé (mode démo)\nAccès PRO débloqué !",
-  "checkoutSuccessReal": "Abonnement activé !\nBienvenue dans AI Health Chef PRO.",
+  "checkoutSuccessReal": "Abonnement activé !\nBienvenue dans Mijo PRO.",
   "checkoutSummaryLabel": "RÉCAPITULATIF",
   "checkoutTotalLabel": "Total",
   "coachAdjustMealPresetMessage": "Ajuste ce repas pour mon objectif: {mealTitle}",
@@ -483,7 +483,7 @@
   "helpCenterCoachQ2Answer": "L’onglet Coach propose des idées de repas générées selon ton profil et ton objectif. Appuie sur \"Tout voir\" pour la liste complète, puis sur l’icône de rafraîchissement (ou tire l’écran vers le bas) pour en générer de nouvelles.",
   "helpCenterCoachQ2Question": "Comment obtenir de nouvelles idées de repas ?",
   "helpCenterContactButtonLabel": "Contacter le support",
-  "helpCenterMailtoSubject": "Question AI Health Chef",
+  "helpCenterMailtoSubject": "Question Mijo",
   "helpCenterMealsQ1Answer": "Depuis le Dashboard, appuie sur le bouton caméra en bas à droite pour prendre en photo ton assiette. L’IA identifie les ingrédients et estime les calories et macros ; tu peux ajuster les quantités, ajouter ou retirer un ingrédient avant de valider.",
   "helpCenterMealsQ1Question": "Comment enregistrer un repas ?",
   "helpCenterMealsQ2Answer": "L’analyse est faite par un modèle d’IA (Google Gemini) à partir de la photo : c’est une estimation, pas une mesure exacte. Ajuste les quantités si besoin, ou ajoute un ingrédient manuellement avec ses valeurs exactes via \"Ajouter un ingrédient\".",
@@ -794,7 +794,7 @@
   "onboardingAgeUnitSuffix": "ans",
   "onboardingErrorGoalRequired": "Choisis ton objectif principal.",
   "onboardingErrorInvalidAge": "Entre un âge valide.",
-  "onboardingErrorUnderMinimumAge": "AI Health Chef est réservé aux personnes de 16 ans ou plus. Ton âge n'a pas été enregistré.",
+  "onboardingErrorUnderMinimumAge": "Mijo est réservé aux personnes de 16 ans ou plus. Ton âge n'a pas été enregistré.",
   "onboardingErrorInvalidHeight": "Entre ta taille en cm.",
   "onboardingErrorInvalidWeight": "Entre ton poids.",
   "onboardingErrorSaveProfile": "Impossible d'enregistrer le profil : {error}",
@@ -872,7 +872,7 @@
   },
   "paywallSubtitle": "Libérez tout le potentiel de votre nutrition avec l'intelligence artificielle de pointe.",
   "paywallTitle": "Passez au niveau supérieur",
-  "paywallUnlockButton": "Débloquer AI Health Chef PRO",
+  "paywallUnlockButton": "Débloquer Mijo PRO",
   "profileAboutSubtitle": "Version et informations",
   "profileAboutTitle": "À propos",
   "profileAccountSubtitle": "Informations personnelles",
@@ -991,7 +991,7 @@
   "profileTermsTitle": "Conditions d’utilisation",
   "profileTitle": "MON PROFIL",
   "profileUnknownUser": "Utilisateur inconnu",
-  "profileVersionText": "AI Health Chef v1.0.0",
+  "profileVersionText": "Mijo v1.0.0",
   "profileWeightTrackingSubtitle": "Voir ma courbe de progression",
   "profileWeightTrackingTitle": "Suivi du poids",
   "profileWeightValue": "{weight} kg",
@@ -1065,11 +1065,11 @@
     }
   },
   "termsSection1Title": "1. Mentions légales",
-  "termsSection2Body": "Les présentes Conditions d’Utilisation (« CGU ») régissent l’accès et l’usage de l’application mobile AI Health Chef (« l’Application »). En créant un compte ou en utilisant l’Application, tu acceptes l’intégralité des présentes CGU.",
+  "termsSection2Body": "Les présentes Conditions d’Utilisation (« CGU ») régissent l’accès et l’usage de l’application mobile Mijo (« l’Application »). En créant un compte ou en utilisant l’Application, tu acceptes l’intégralité des présentes CGU.",
   "termsSection2Title": "2. Objet",
-  "termsSection3Body": "AI Health Chef permet de : suivre ses repas et ses macronutriments au quotidien ; analyser une photo de repas via intelligence artificielle pour estimer les ingrédients et valeurs nutritionnelles ; échanger avec un coach nutritionnel conversationnel basé sur l’IA ; recevoir des idées de repas personnalisées ; configurer des rappels de repas ; et, via un abonnement PRO optionnel, débloquer des fonctionnalités additionnelles.",
+  "termsSection3Body": "Mijo permet de : suivre ses repas et ses macronutriments au quotidien ; analyser une photo de repas via intelligence artificielle pour estimer les ingrédients et valeurs nutritionnelles ; échanger avec un coach nutritionnel conversationnel basé sur l’IA ; recevoir des idées de repas personnalisées ; configurer des rappels de repas ; et, via un abonnement PRO optionnel, débloquer des fonctionnalités additionnelles.",
   "termsSection3Title": "3. Description du service",
-  "termsSection4Body": "AI Health Chef fournit des informations et estimations à titre purement informatif et ne constitue en aucun cas un avis médical, un diagnostic ou une prescription. Les calculs de calories, macros et objectifs nutritionnels sont des estimations générales. Consulte un médecin ou un·e diététicien·ne avant tout changement alimentaire significatif, en particulier en cas de pathologie, de grossesse, ou de trouble du comportement alimentaire. L’Application ne doit pas être utilisée comme seul outil de suivi dans un contexte médical.",
+  "termsSection4Body": "Mijo fournit des informations et estimations à titre purement informatif et ne constitue en aucun cas un avis médical, un diagnostic ou une prescription. Les calculs de calories, macros et objectifs nutritionnels sont des estimations générales. Consulte un médecin ou un·e diététicien·ne avant tout changement alimentaire significatif, en particulier en cas de pathologie, de grossesse, ou de trouble du comportement alimentaire. L’Application ne doit pas être utilisée comme seul outil de suivi dans un contexte médical.",
   "termsSection4Title": "4. Ce n’est pas un avis médical",
   "termsSection5Body": "Les ingrédients détectés sur photo, les valeurs nutritionnelles estimées, les réponses du coach IA et les idées de repas sont générés par des modèles d’IA tiers (actuellement Google Gemini) et peuvent contenir des erreurs, imprécisions ou approximations. Vérifie et ajuste les informations avant de t’y fier, en particulier en cas d’allergie ou de restriction alimentaire.",
   "termsSection5Title": "5. Contenu généré par intelligence artificielle",
@@ -1362,7 +1362,7 @@
     }
   },
   "privacySection1Title": "1. Responsable du traitement",
-  "privacySection1Body": "AI Health Chef est éditée par Baga Assami, développeur individuel (pas de société immatriculée à ce jour). Contact : {supportEmail}",
+  "privacySection1Body": "Mijo est éditée par Baga Assami, développeur individuel (pas de société immatriculée à ce jour). Contact : {supportEmail}",
   "@privacySection1Body": {
     "placeholders": {
       "supportEmail": {"type": "String"}
@@ -1397,7 +1397,7 @@
     }
   },
   "licensesAppBarTitle": "Licences",
-  "licensesIntro": "AI Health Chef s'appuie sur des packages open source ainsi que sur des données et modèles d'IA tiers. Les licences des packages open source sont listées ci-dessous ; les autres crédits sont listés ici.",
+  "licensesIntro": "Mijo s'appuie sur des packages open source ainsi que sur des données et modèles d'IA tiers. Les licences des packages open source sont listées ci-dessous ; les autres crédits sont listés ici.",
   "licensesOpenFoodFactsBody": "Les données produits (lookup par code-barres) viennent d'Open Food Facts, une base collaborative et libre sous licence Open Database License (ODbL).",
   "licensesGemmaBody": "L'analyse de repas sur l'appareil utilise le modèle Gemma 3n de Google, téléchargé directement sur ton appareil, sous les conditions d'utilisation Gemma de Google.",
   "licensesFluxBody": "Les illustrations de repas sont générées avec le modèle FLUX.1 [schnell] (Apache 2.0), servi via Cloudflare Workers AI.",

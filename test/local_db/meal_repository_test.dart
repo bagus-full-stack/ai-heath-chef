@@ -161,7 +161,7 @@ void main() {
           if (request.method == 'GET' && request.url.path.endsWith('/rest/v1/meals')) {
             return jsonResponse(request, stillReferencedBy, status: 200);
           }
-          if (request.method == 'DELETE' && request.url.path.contains('/storage/v1/object/meal_photos')) {
+          if (request.method == 'DELETE' && request.url.path.contains('/storage/v1/object/hc_meal_photos')) {
             removedFromStorage.add(request.url.path);
             return jsonResponse(request, [], status: 200);
           }

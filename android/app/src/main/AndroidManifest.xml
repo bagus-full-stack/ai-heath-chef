@@ -11,7 +11,7 @@
          ce mode) — voir foreground: true dans LocalAiService.downloadModel. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <application
-        android:label="AI Health Chef"
+        android:label="Mijo"
         android:name="${applicationName}"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher">

@@ -28,7 +28,7 @@ String buildWeeklyMealPlanIcs(List<MealSuggestion> plan, DateTime weekStart) {
   final buffer = StringBuffer()
     ..writeln('BEGIN:VCALENDAR')
     ..writeln('VERSION:2.0')
-    ..writeln('PRODID:-//AI Health Chef//Weekly Meal Plan//FR');
+    ..writeln('PRODID:-//Mijo//Weekly Meal Plan//FR');
 
   for (final dayEntry in byDay.entries) {
     final dayDate = weekStart.add(Duration(days: dayEntry.key - 1));
