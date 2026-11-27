@@ -2883,7 +2883,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallHeaderBadge.
   ///
   /// In fr, this message translates to:
-  /// **'AI-HEALTH-CHEF PRO'**
+  /// **'FODLI PRO'**
   String get paywallHeaderBadge;
 
   /// No description provided for @paywallPeriodMonth.

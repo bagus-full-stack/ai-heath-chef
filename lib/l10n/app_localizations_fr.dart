@@ -1606,7 +1606,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Mode démo : les achats sont simulés, aucun paiement réel n\'est effectué.';
 
   @override
-  String get paywallHeaderBadge => 'AI-HEALTH-CHEF PRO';
+  String get paywallHeaderBadge => 'FODLI PRO';
 
   @override
   String get paywallPeriodMonth => '/ mois';

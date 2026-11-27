@@ -102,14 +102,24 @@ class MyApp extends ConsumerWidget {
       darkTheme: _buildTheme(Brightness.dark),
       themeMode: ThemeMode.system,
       // Les jetons AppColors lisent un drapeau statique : on le synchronise avec la
-      // luminosité effective, et la clé reconstruit l'arbre quand elle change.
+      // luminosité effective et, quand elle change, on force un rebuild de tout l'arbre
+      // (comme un hot reload) pour garder l'état des écrans, sans recréer l'arbre.
       builder: (context, child) {
         final dark = Theme.of(context).brightness == Brightness.dark;
-        AppColors.dark = dark;
+        if (dark != AppColors.dark) {
+          AppColors.dark = dark;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _markAllDirty();
+            // Android réinitialise les icônes de la barre d'état au changement de thème, et
+            // Flutter ignore un style identique au dernier envoyé : on envoie l'opposé d'abord.
+            SystemChrome.setSystemUIOverlayStyle(dark ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light);
+            SystemChrome.setSystemUIOverlayStyle(dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
+          });
+        }
         return AnnotatedRegion<SystemUiOverlayStyle>(
           // Icônes de la barre d'état lisibles dans les deux thèmes.
           value: dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
-          child: KeyedSubtree(key: ValueKey(dark), child: child ?? const SizedBox.shrink()),
+          child: child ?? const SizedBox.shrink(),
         );
       },
       // On connecte simplement la variable de notre nouveau fichier
@@ -118,22 +128,30 @@ class MyApp extends ConsumerWidget {
   }
 }
 
+void _markAllDirty() {
+  void visit(Element e) {
+    e.markNeedsBuild();
+    e.visitChildren(visit);
+  }
+
+  WidgetsBinding.instance.rootElement?.visitChildren(visit);
+}
+
 ThemeData _buildTheme(Brightness brightness) {
   final dark = brightness == Brightness.dark;
-  AppColors.dark = dark; // pour que les getters ci-dessous donnent la bonne variante
-  final brand = AppColors.brand;
+  final brand = dark ? const Color(0xFF2F8A6B) : const Color(0xFF134E3F);
   final scheme = ColorScheme.fromSeed(
     seedColor: const Color(0xFF134E3F),
     brightness: brightness,
     primary: brand,
     onPrimary: Colors.white,
-    surface: AppColors.surface,
+    surface: dark ? const Color(0xFF1A1D1C) : Colors.white,
   );
   final grey = dark ? const Color(0xFF8A918F) : const Color(0xFF6B7280);
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
-    scaffoldBackgroundColor: AppColors.bg,
+    scaffoldBackgroundColor: dark ? const Color(0xFF101312) : const Color(0xFFF5F6FA),
     // Interrupteur « off » : contour et pouce assez contrastés (le gris sur gris par défaut se perd).
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith(
