@@ -151,6 +151,8 @@ ThemeData _buildTheme(Brightness brightness) {
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
+    // L'AppBar impose sinon son propre style d'icônes (blanches sur fond clair une fois défilée).
+    appBarTheme: AppBarTheme(systemOverlayStyle: dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark),
     scaffoldBackgroundColor: dark ? const Color(0xFF101312) : const Color(0xFFFBF7EC),
     // Interrupteur « off » : contour et pouce assez contrastés (le gris sur gris par défaut se perd).
     switchTheme: SwitchThemeData(
