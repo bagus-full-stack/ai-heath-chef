@@ -191,7 +191,7 @@ ${langInstruction}`;
                 generationConfig: {
                     temperature: 0.8 // Un peu de créativité pour varier les suggestions
                 }
-            });
+            }, { timeoutMs: 30000, maxModelsTried: 3 }); // réponse JSON longue : 8 s ne suffisent pas (3 x 30 s max)
             successData = result.text;
             usedModel = result.usedModel;
         } catch (err) {
