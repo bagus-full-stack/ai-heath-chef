@@ -11,7 +11,7 @@
          ce mode) — voir foreground: true dans LocalAiService.downloadModel. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <application
-        android:label="Sève"
+        android:label="Fodli"
         android:name="${applicationName}"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher">
@@ -32,7 +32,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="com.aihealthchef.app" android:host="login-callback" />
+                <data android:scheme="com.fodli.app" android:host="login-callback" />
             </intent-filter>
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"

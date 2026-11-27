@@ -1,4 +1,4 @@
-package com.aihealthchef.app
+package com.fodli.app
 
 import android.appwidget.AppWidgetManager
 import android.content.Context

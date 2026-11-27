@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/models/ingredient.dart';
-import 'package:ai_health_chef/providers/meal_provider.dart';
+import 'package:fodli/models/ingredient.dart';
+import 'package:fodli/providers/meal_provider.dart';
 
 Ingredient _sampleIngredient({String id = 'ing-1', int weight = 100}) {
   return Ingredient(

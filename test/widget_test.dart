@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/l10n/app_localizations.dart';
-import 'package:ai_health_chef/models/user_profile.dart';
+import 'package:fodli/l10n/app_localizations.dart';
+import 'package:fodli/models/user_profile.dart';
 
 /// Runs [test] with a [BuildContext] that has French localizations loaded,
 /// since `sexLabel`/`goalLabel` read their strings from `context.l10n`.

@@ -1,8 +1,8 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/local_db/app_database.dart';
-import 'package:ai_health_chef/local_db/local_data_purge.dart';
+import 'package:fodli/local_db/app_database.dart';
+import 'package:fodli/local_db/local_data_purge.dart';
 
 void main() {
   group('wipeLocalDatabase', () {

@@ -1,5 +1,5 @@
 -- ============================================================================
--- AI Health Chef — Schéma de base de données initial
+-- Fodli — Schéma de base de données initial
 -- ============================================================================
 -- Ce script est idempotent (IF NOT EXISTS) et peut être exécuté depuis le
 -- dashboard Supabase (SQL Editor) ou via `supabase db push`.

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:ai_health_chef/services/storage_image_service.dart';
+import 'package:fodli/services/storage_image_service.dart';
 
 import '../local_db/fake_supabase.dart';
 

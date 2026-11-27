@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/models/meal.dart';
-import 'package:ai_health_chef/utils/daily_nutrition_summary.dart';
+import 'package:fodli/models/meal.dart';
+import 'package:fodli/utils/daily_nutrition_summary.dart';
 
 Meal _meal(DateTime createdAt, {int kcal = 500}) {
   return Meal(

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/models/user_profile.dart';
-import 'package:ai_health_chef/utils/nutrition_targets.dart';
+import 'package:fodli/models/user_profile.dart';
+import 'package:fodli/utils/nutrition_targets.dart';
 
 UserProfile _profile({
   String sex = 'male',

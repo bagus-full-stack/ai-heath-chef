@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/models/chat_message.dart';
+import 'package:fodli/models/chat_message.dart';
 
 void main() {
   group('ChatMessage', () {

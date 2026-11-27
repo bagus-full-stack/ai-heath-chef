@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/providers/storage_image_provider.dart';
-import 'package:ai_health_chef/services/storage_image_service.dart';
-import 'package:ai_health_chef/widgets/storage_image.dart';
+import 'package:fodli/providers/storage_image_provider.dart';
+import 'package:fodli/services/storage_image_service.dart';
+import 'package:fodli/widgets/storage_image.dart';
 
 class _FakeStorageImageService implements StorageImageService {
   _FakeStorageImageService(this.urlToReturn);

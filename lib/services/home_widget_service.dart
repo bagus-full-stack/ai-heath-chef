@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:home_widget/home_widget.dart';
 
 /// Widget écran d'accueil Android (macros du jour + streak) — voir
-/// android/app/src/main/kotlin/com/aihealthchef/app/HealthChefWidgetProvider.kt
+/// android/app/src/main/kotlin/com/fodli/app/HealthChefWidgetProvider.kt
 /// pour le rendu natif et [homeWidgetReconcilerProvider] (dashboard_provider.dart)
 /// pour le déclenchement à chaque ouverture du dashboard.
 ///

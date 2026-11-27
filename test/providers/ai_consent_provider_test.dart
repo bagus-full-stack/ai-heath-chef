@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:ai_health_chef/providers/ai_consent_provider.dart';
-import 'package:ai_health_chef/providers/local_ai_provider.dart';
+import 'package:fodli/providers/ai_consent_provider.dart';
+import 'package:fodli/providers/local_ai_provider.dart';
 
 // Vérifie les 5 cas de routage local/cloud décrits ci-dessous, via les primitives d'état qui pilotent le
 // branchement (coach_screen.dart / chat_provider.dart) :

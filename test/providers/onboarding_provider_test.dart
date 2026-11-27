@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/providers/onboarding_provider.dart';
+import 'package:fodli/providers/onboarding_provider.dart';
 
 void main() {
   group('OnboardingNotifier', () {

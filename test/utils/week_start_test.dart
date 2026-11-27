@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/utils/week_start.dart';
+import 'package:fodli/utils/week_start.dart';
 
 void main() {
   test('resolves to Monday of the same week for a mid-week date', () {

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/utils/age_policy.dart';
+import 'package:fodli/utils/age_policy.dart';
 
 void main() {
   group('isValidAge', () {

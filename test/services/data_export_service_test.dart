@@ -6,8 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:ai_health_chef/local_db/app_database.dart';
-import 'package:ai_health_chef/services/data_export_service.dart';
+import 'package:fodli/local_db/app_database.dart';
+import 'package:fodli/services/data_export_service.dart';
 
 import '../local_db/fake_supabase.dart';
 

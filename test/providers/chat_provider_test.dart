@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:ai_health_chef/models/ingredient.dart';
-import 'package:ai_health_chef/models/meal_suggestion.dart';
-import 'package:ai_health_chef/providers/chat_provider.dart';
-import 'package:ai_health_chef/providers/dashboard_provider.dart';
-import 'package:ai_health_chef/providers/fasting_provider.dart';
-import 'package:ai_health_chef/providers/local_ai_provider.dart';
-import 'package:ai_health_chef/providers/locale_provider.dart';
-import 'package:ai_health_chef/providers/profile_provider.dart';
-import 'package:ai_health_chef/services/ai_service.dart';
+import 'package:fodli/models/ingredient.dart';
+import 'package:fodli/models/meal_suggestion.dart';
+import 'package:fodli/providers/chat_provider.dart';
+import 'package:fodli/providers/dashboard_provider.dart';
+import 'package:fodli/providers/fasting_provider.dart';
+import 'package:fodli/providers/local_ai_provider.dart';
+import 'package:fodli/providers/locale_provider.dart';
+import 'package:fodli/providers/profile_provider.dart';
+import 'package:fodli/services/ai_service.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

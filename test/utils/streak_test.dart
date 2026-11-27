@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/utils/streak.dart';
+import 'package:fodli/utils/streak.dart';
 
 DateTime _day(DateTime today, int offset) {
   final d = DateTime(today.year, today.month, today.day);

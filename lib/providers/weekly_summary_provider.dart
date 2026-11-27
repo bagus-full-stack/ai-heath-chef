@@ -62,7 +62,7 @@ final weeklySummaryReconcilerProvider = FutureProvider<void>((ref) async {
   try {
     await NotificationService.instance.showNotification(
       id: _kWeeklySummaryNotificationId,
-      title: 'Sève',
+      title: 'Fodli',
       body: body,
     );
   } catch (_) {

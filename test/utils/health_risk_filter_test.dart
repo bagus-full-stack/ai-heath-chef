@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/utils/health_risk_filter.dart';
+import 'package:fodli/utils/health_risk_filter.dart';
 
 void main() {
   group('detectHealthRisk — self harm (FR)', () {

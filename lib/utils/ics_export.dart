@@ -28,7 +28,7 @@ String buildWeeklyMealPlanIcs(List<MealSuggestion> plan, DateTime weekStart) {
   final buffer = StringBuffer()
     ..writeln('BEGIN:VCALENDAR')
     ..writeln('VERSION:2.0')
-    ..writeln('PRODID:-//Seve//Weekly Meal Plan//FR');
+    ..writeln('PRODID:-//Fodli//Weekly Meal Plan//FR');
 
   for (final dayEntry in byDay.entries) {
     final dayDate = weekStart.add(Duration(days: dayEntry.key - 1));
@@ -40,7 +40,7 @@ String buildWeeklyMealPlanIcs(List<MealSuggestion> plan, DateTime weekStart) {
       final end = start.add(const Duration(minutes: 30));
       buffer
         ..writeln('BEGIN:VEVENT')
-        ..writeln('UID:${start.millisecondsSinceEpoch}-$i@aihealthchef.app')
+        ..writeln('UID:${start.millisecondsSinceEpoch}-$i@fodli.app')
         ..writeln('DTSTART:${_icsDateTime(start)}')
         ..writeln('DTEND:${_icsDateTime(end)}')
         ..writeln('SUMMARY:${_icsEscape('${meal.timeSlot} : ${meal.title}')}')

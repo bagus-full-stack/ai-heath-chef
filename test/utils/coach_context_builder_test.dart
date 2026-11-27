@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/models/meal.dart';
-import 'package:ai_health_chef/models/user_profile.dart';
-import 'package:ai_health_chef/utils/coach_context_builder.dart';
+import 'package:fodli/models/meal.dart';
+import 'package:fodli/models/user_profile.dart';
+import 'package:fodli/utils/coach_context_builder.dart';
 
 UserProfile _profile({
   String goal = 'maintain',

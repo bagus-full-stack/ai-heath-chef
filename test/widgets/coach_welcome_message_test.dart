@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ai_health_chef/l10n/app_localizations.dart';
+import 'package:fodli/l10n/app_localizations.dart';
 
 void main() {
   Future<String> welcomeFor(WidgetTester tester, Locale locale) async {

@@ -278,7 +278,7 @@ class AuthService {
         provider,
         // C'est l'URL qui dira au navigateur de rouvrir ton application une fois connecté.
         // Format typique : ton.bundle.id://login-callback
-        redirectTo: 'com.aihealthchef.app://login-callback/',
+        redirectTo: 'com.fodli.app://login-callback/',
       );
     } catch (e) {
       throw Exception(

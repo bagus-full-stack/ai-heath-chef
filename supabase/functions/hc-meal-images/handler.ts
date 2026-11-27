@@ -144,7 +144,7 @@ async function generateWithPollinations(
         const url =
             `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}` +
             `?width=768&height=512&nologo=true&enhance=true&seed=${seed}` +
-            `&model=${modelName}&referrer=aihealthchef.app`;
+            `&model=${modelName}&referrer=fodli.app`;
 
         // Une seule nouvelle tentative sur un 429 (quota Pollinations atteint) :
         // au-delà, on préfère passer au modèle suivant plutôt que de faire

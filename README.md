@@ -1,4 +1,6 @@
-# AI Health Chef
+# Fodli
+
+Fodli est votre compagnon intelligent de nutrition, conçu pour vous aider à mieux comprendre votre alimentation et à adopter des habitudes plus saines au quotidien. Identifiant d'app : `com.fodli.app` (Android et iOS).
 
 Application mobile Flutter de suivi nutritionnel : analyse de repas et de produits par photo ou code-barres via IA, coaching nutritionnel personnalisable par chat, rappels de repas, suivi des macros/calories et abonnement PRO.
 
@@ -205,7 +207,25 @@ flutter pub get
 
 ### Configuration RevenueCat (optionnel)
 
-Sans configuration, l'application fonctionne en **mode démo** (achats simulés, aucun appel réseau). Pour activer les achats réels, renseigne tes clés API publiques dans `lib/services/purchase_service.dart` (`_androidApiKey` / `_iosApiKey`) et configure l'entitlement `pro` correspondant dans le dashboard RevenueCat.
+Sans configuration, l'application fonctionne en **mode démo** (achats simulés, aucun appel réseau). Pour activer les achats réels, renseigne tes clés API publiques dans `lib/services/purchase_service.dart` (`_androidApiKey` / `_iosApiKey`) et configure l'entitlement `pro` correspondant dans le dashboard RevenueCat. Crée les apps Android et iOS du projet RevenueCat avec l'identifiant `com.fodli.app`.
+
+Côté serveur, les Edge Functions interrogent l'API **v1** de RevenueCat (`api.revenuecat.com/v1/subscribers/`, voir `supabase/functions/_shared_hc/quota.ts`) : il faut donc une **clé secrète v1** dans `REVENUECAT_SECRET_KEY` (voir ci-dessous).
+
+### Secrets des Edge Functions (self-host Coolify)
+
+Sur le Supabase self-host, ces variables se définissent dans Coolify > service Supabase > Environment Variables, puis redémarrer le service :
+
+| Variable | Rôle |
+|---|---|
+| `GEMINI_API_KEY` | Modèle IA Gemini (analyses, coach, suggestions) |
+| `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | Images de repas (Workers AI, FLUX) |
+| `POLLINATIONS_TOKEN` | Repli image Pollinations (optionnel) |
+| `HUGGINGFACE_TOKEN` | Téléchargement du modèle IA locale (`hc-huggingface-token`) ; préférer un token à portée limitée au modèle |
+| `EVAL_AUTH_TOKEN` | Évaluation du coach (`run_eval.ts`) |
+| `REVENUECAT_SECRET_KEY` | Clé secrète RevenueCat v1 (quota PRO) |
+| `ADDITIONAL_REDIRECT_URLS` | Redirections d'authentification autorisées : `com.fodli.app://login-callback/` |
+
+Ne commite jamais ces valeurs.
 
 ## Lancer l'application
 
@@ -281,7 +301,7 @@ Workflows GitHub Actions (`.github/workflows/`) :
 - **Notifications locales, rappels personnalisés sauvegardés** — les rappels (créneaux fixes et personnalisés) sont programmés en local sur l'appareil (`flutter_local_notifications`) et persistés dans `shared_preferences`. Les rappels personnalisés sont en plus sauvegardés dans la table Supabase `custom_reminders_backup` à chaque modification, et restaurés automatiquement (nouvelle installation ou nouvel appareil sans rappel local) — voir `lib/providers/custom_reminders_provider.dart`. Les créneaux fixes petit-déjeuner/déjeuner/dîner suivent désormais la même sauvegarde (table `custom_reminders_backup`, colonne `fixed_reminders`, voir migration 0021 et `lib/providers/notification_settings_provider.dart`). ⚠️ Restauration one-shot dans les deux cas, pas de fusion en cas d'usage simultané sur deux appareils avant leur première synchronisation.
 - **Photos de repas** — uploadées dans le bucket `meal_photos` uniquement pour les analyses par photo ("Repas"/"Produit") ; un repas issu d'un scan de code-barres n'a pas de photo. Supprimer un repas synchronisé supprime aussi sa photo du bucket, sauf si un autre repas (ex. « refaire ce repas ») utilise encore le même fichier.
 - **Plateformes** — Android et iOS uniquement (les dossiers `web/`, `windows/`, `linux/` et `macos/` ont été retirés : `camera` et `flutter_image_compress` n'y fonctionnent pas).
-- **Identité visuelle** — le logo source (`assets/icon/icon.png` / `icon_foreground.png`) alimente à la fois l'icône d'app (générée par `flutter_launcher_icons`, voir `pubspec.yaml`) et, depuis peu, le splash screen (Android/iOS) et l'écran de connexion. L'identifiant d'app est unifié en `com.aihealthchef.app` sur Android/iOS/macOS/Linux (Windows n'a pas d'identifiant de ce type).
+- **Identité visuelle** — le logo source (`assets/icon/icon.png` / `icon_foreground.png`) alimente à la fois l'icône d'app (générée par `flutter_launcher_icons`, voir `pubspec.yaml`) et, depuis peu, le splash screen (Android/iOS) et l'écran de connexion. Le logo est un obturateur à 5 lames (vert `#134E3F`, une lame citron `#C4F26A`). L'identifiant d'app est `com.fodli.app` sur Android et iOS.
 - **CGU/mentions légales à finaliser** — le contenu de `lib/screens/terms_screen.dart` décrit honnêtement le fonctionnement actuel de l'app (données collectées, absence de conseil médical, contenu généré par IA, abonnement, âge minimum) et identifie l'éditeur (Baga Assami, projet personnel sans société immatriculée) et son contact (`kSupportEmail`), mais reste un brouillon : le texte doit être relu par un professionnel du droit avant toute publication publique — un bandeau d'avertissement s'affiche sur l'écran tant que ce n'est pas fait.
 - **Âge minimum (RGPD art. 8/9)** — l'app est réservée aux personnes de 16 ans ou plus (`kMinimumAge` dans `lib/utils/age_policy.dart`), sans flux de consentement parental : en-dessous, la création de profil est bloquée (onboarding et écran "Mes objectifs"). L'inscription (`signup_screen.dart`) exige en plus une case explicite "J'ai au moins 16 ans et j'accepte les CGU…", dont l'horodatage et la version acceptée sont tracés dans `profiles.accepted_terms_at`/`accepted_terms_version` (migration 0018). Ceci n'empêche pas, par construction, qu'un compte créé avant ce changement ait un âge < 16 ans déjà enregistré ; requête de détection en lecture seule : `supabase/scripts/detect_underage_accounts.sql` (non exécutée automatiquement par l'app, aucun traitement/suppression automatique — décision humaine requise sur les comptes trouvés).
 - **Quotas IA** — les limites quotidiennes sont volontairement généreuses pour un usage personnel normal ; ajuste les valeurs passées à `checkAndIncrementQuota(...)` dans chaque `supabase/functions/<nom>/index.ts` (`handler.ts` pour `hc-coach-chat`) si besoin (4ᵉ argument = quota par utilisateur, 5ᵉ argument optionnel = quota global partagé par toute l'app, voir migration 0009). Cette fonction vit dans `supabase/functions/_shared_hc/quota.ts` et est importée par chaque Edge Function IA (voir Architecture ci-dessus) : un changement dans `_shared_hc/quota.ts` s'applique à toutes d'un coup, pas besoin de le reporter manuellement. Un compte admin (`profiles.is_admin`) ou PRO actif (RevenueCat) a une limite par utilisateur ×10 (`UNLIMITED_FACTOR`) et non illimitée, et reste soumis au quota global : un seul compte ne peut pas vider le budget partagé. Le quota est consommé après validation de la requête (une image invalide ne coûte rien), mais une panne Gemini (502) coûte encore un crédit. Si le RPC de quota lui-même est en panne, l'appel passe (fail-open) et le log `[QUOTA_FAIL_OPEN]` est émis : crée une alerte dessus.

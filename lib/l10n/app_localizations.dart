@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Sève'**
+  /// **'Fodli'**
   String get appTitle;
 
   /// No description provided for @navHome.
@@ -203,7 +203,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutAppName.
   ///
   /// In fr, this message translates to:
-  /// **'Sève'**
+  /// **'Fodli'**
   String get aboutAppName;
 
   /// No description provided for @aboutContactLinkTitle.
@@ -215,13 +215,13 @@ abstract class AppLocalizations {
   /// No description provided for @aboutCopyright.
   ///
   /// In fr, this message translates to:
-  /// **'© {year} Sève'**
+  /// **'© {year} Fodli'**
   String aboutCopyright(int year);
 
   /// No description provided for @aboutDescription.
   ///
   /// In fr, this message translates to:
-  /// **'Sève t’aide à suivre tes repas et tes objectifs nutritionnels : scanne ton assiette pour une estimation automatique des calories et macros, échange avec un coach IA, reçois des idées de repas personnalisées et des rappels pour ne rien oublier.'**
+  /// **'Fodli t’aide à suivre tes repas et tes objectifs nutritionnels : scanne ton assiette pour une estimation automatique des calories et macros, échange avec un coach IA, reçois des idées de repas personnalisées et des rappels pour ne rien oublier.'**
   String get aboutDescription;
 
   /// No description provided for @aboutHelpCenterLinkTitle.
@@ -233,7 +233,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutMailtoSubject.
   ///
   /// In fr, this message translates to:
-  /// **'Contact Sève'**
+  /// **'Contact Fodli'**
   String get aboutMailtoSubject;
 
   /// No description provided for @aboutNoMailAppSnackbar.
@@ -629,7 +629,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutOrderSummaryBrand.
   ///
   /// In fr, this message translates to:
-  /// **'Sève PRO'**
+  /// **'Fodli PRO'**
   String get checkoutOrderSummaryBrand;
 
   /// No description provided for @checkoutOrderSummaryDemoNotice.
@@ -695,7 +695,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutSuccessReal.
   ///
   /// In fr, this message translates to:
-  /// **'Abonnement activé !\nBienvenue dans Sève PRO.'**
+  /// **'Abonnement activé !\nBienvenue dans Fodli PRO.'**
   String get checkoutSuccessReal;
 
   /// No description provided for @checkoutSummaryLabel.
@@ -1563,7 +1563,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpCenterMailtoSubject.
   ///
   /// In fr, this message translates to:
-  /// **'Question Sève'**
+  /// **'Question Fodli'**
   String get helpCenterMailtoSubject;
 
   /// No description provided for @helpCenterMealsQ1Answer.
@@ -2655,7 +2655,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingErrorUnderMinimumAge.
   ///
   /// In fr, this message translates to:
-  /// **'Sève est réservé aux personnes de 16 ans ou plus. Ton âge n\'a pas été enregistré.'**
+  /// **'Fodli est réservé aux personnes de 16 ans ou plus. Ton âge n\'a pas été enregistré.'**
   String get onboardingErrorUnderMinimumAge;
 
   /// No description provided for @onboardingErrorInvalidHeight.
@@ -2961,7 +2961,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallUnlockButton.
   ///
   /// In fr, this message translates to:
-  /// **'Débloquer Sève PRO'**
+  /// **'Débloquer Fodli PRO'**
   String get paywallUnlockButton;
 
   /// No description provided for @profileAboutSubtitle.
@@ -3405,7 +3405,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileVersionText.
   ///
   /// In fr, this message translates to:
-  /// **'Sève v1.0.0'**
+  /// **'Fodli v1.0.0'**
   String get profileVersionText;
 
   /// No description provided for @profileWeightTrackingSubtitle.
@@ -3639,7 +3639,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsSection2Body.
   ///
   /// In fr, this message translates to:
-  /// **'Les présentes Conditions d’Utilisation (« CGU ») régissent l’accès et l’usage de l’application mobile Sève (« l’Application »). En créant un compte ou en utilisant l’Application, tu acceptes l’intégralité des présentes CGU.'**
+  /// **'Les présentes Conditions d’Utilisation (« CGU ») régissent l’accès et l’usage de l’application mobile Fodli (« l’Application »). En créant un compte ou en utilisant l’Application, tu acceptes l’intégralité des présentes CGU.'**
   String get termsSection2Body;
 
   /// No description provided for @termsSection2Title.
@@ -3651,7 +3651,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsSection3Body.
   ///
   /// In fr, this message translates to:
-  /// **'Sève permet de : suivre ses repas et ses macronutriments au quotidien ; analyser une photo de repas via intelligence artificielle pour estimer les ingrédients et valeurs nutritionnelles ; échanger avec un coach nutritionnel conversationnel basé sur l’IA ; recevoir des idées de repas personnalisées ; configurer des rappels de repas ; et, via un abonnement PRO optionnel, débloquer des fonctionnalités additionnelles.'**
+  /// **'Fodli permet de : suivre ses repas et ses macronutriments au quotidien ; analyser une photo de repas via intelligence artificielle pour estimer les ingrédients et valeurs nutritionnelles ; échanger avec un coach nutritionnel conversationnel basé sur l’IA ; recevoir des idées de repas personnalisées ; configurer des rappels de repas ; et, via un abonnement PRO optionnel, débloquer des fonctionnalités additionnelles.'**
   String get termsSection3Body;
 
   /// No description provided for @termsSection3Title.
@@ -3663,7 +3663,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsSection4Body.
   ///
   /// In fr, this message translates to:
-  /// **'Sève fournit des informations et estimations à titre purement informatif et ne constitue en aucun cas un avis médical, un diagnostic ou une prescription. Les calculs de calories, macros et objectifs nutritionnels sont des estimations générales. Consulte un médecin ou un·e diététicien·ne avant tout changement alimentaire significatif, en particulier en cas de pathologie, de grossesse, ou de trouble du comportement alimentaire. L’Application ne doit pas être utilisée comme seul outil de suivi dans un contexte médical.'**
+  /// **'Fodli fournit des informations et estimations à titre purement informatif et ne constitue en aucun cas un avis médical, un diagnostic ou une prescription. Les calculs de calories, macros et objectifs nutritionnels sont des estimations générales. Consulte un médecin ou un·e diététicien·ne avant tout changement alimentaire significatif, en particulier en cas de pathologie, de grossesse, ou de trouble du comportement alimentaire. L’Application ne doit pas être utilisée comme seul outil de suivi dans un contexte médical.'**
   String get termsSection4Body;
 
   /// No description provided for @termsSection4Title.
@@ -4245,7 +4245,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacySection1Body.
   ///
   /// In fr, this message translates to:
-  /// **'Sève est éditée par Baga Assami, développeur individuel (pas de société immatriculée à ce jour). Contact : {supportEmail}'**
+  /// **'Fodli est éditée par Baga Assami, développeur individuel (pas de société immatriculée à ce jour). Contact : {supportEmail}'**
   String privacySection1Body(String supportEmail);
 
   /// No description provided for @privacySection2Title.
@@ -4365,7 +4365,7 @@ abstract class AppLocalizations {
   /// No description provided for @licensesIntro.
   ///
   /// In fr, this message translates to:
-  /// **'Sève s\'appuie sur des packages open source ainsi que sur des données et modèles d\'IA tiers. Les licences des packages open source sont listées ci-dessous ; les autres crédits sont listés ici.'**
+  /// **'Fodli s\'appuie sur des packages open source ainsi que sur des données et modèles d\'IA tiers. Les licences des packages open source sont listées ci-dessous ; les autres crédits sont listés ici.'**
   String get licensesIntro;
 
   /// No description provided for @licensesOpenFoodFactsBody.

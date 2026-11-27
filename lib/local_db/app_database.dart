@@ -157,7 +157,7 @@ class AppDatabase extends _$AppDatabase {
 
   static QueryExecutor _openConnection() {
     return driftDatabase(
-      name: 'ai_health_chef',
+      name: 'fodli',
       native: const DriftNativeOptions(
         databaseDirectory: getApplicationSupportDirectory,
       ),

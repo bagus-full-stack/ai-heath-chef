@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ai_health_chef/services/purchase_service.dart';
+import 'package:fodli/services/purchase_service.dart';
 
 // Les tests tournent en debug avec les clés RevenueCat factices : mode démo.
 // Le cas "release sans clés = jamais PRO" ne peut pas être testé ici
