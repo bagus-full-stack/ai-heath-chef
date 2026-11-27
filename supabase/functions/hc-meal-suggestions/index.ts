@@ -9,10 +9,8 @@ import { callGeminiWithFallback } from "../_shared_hc/gemini.ts"
 // drift historique des autres fonctions IA du projet, non harmonisée).
 // Seuls les GEMINI_MAX_MODELS_TRIED premiers sont essayés (voir gemini.ts) : inutile d'en lister plus.
 const MODELS = [
-    "gemini-2.5-flash",
-    "gemini-2.5-pro",
-    "gemini-2.0-flash-exp",
-    "gemini-2.0-flash",
+    "gemini-3.8-flash",
+    "gemini-3.1-pro-preview",
 ];
 
 const GOAL_LABELS: Record<string, string> = {
