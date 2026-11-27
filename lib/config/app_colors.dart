@@ -24,8 +24,8 @@ class AppColors {
   static Color get brandTintSoft => _p(const Color(0xFFF3F8F4), const Color(0xFF16231D));
 
   // Surfaces
-  static Color get bg => _p(const Color(0xFFF5F6FA), const Color(0xFF101312));
-  static Color get surface => _p(Colors.white, const Color(0xFF1A1D1C));
+  static Color get bg => _p(const Color(0xFFFBF7EC), const Color(0xFF101312));
+  static Color get surface => _p(const Color(0xFFFFFEFB), const Color(0xFF1A1D1C));
 
   // Échelle de gris : même nom que Material, inversée en sombre.
   static Color get grey50 => _p(const Color(0xFFFAFAFA), const Color(0xFF1E2120));
@@ -50,6 +50,11 @@ class AppColors {
   static Color get warnBorder => _p(const Color(0xFFFFD9A0), const Color(0xFF5C4520));
   static Color get warnIcon => _p(const Color(0xFFB8791A), const Color(0xFFE5A94A));
   static Color get warnText => _p(const Color(0xFF7A5310), const Color(0xFFF0CD8E));
-  static Color get pinkBg => _p(const Color(0xFFFCE8EF), const Color(0xFF33202A));
-  static Color get pinkBorder => _p(const Color(0xFFF7C6D6), const Color(0xFF5A3445));
+  static Color get pinkBg => _p(const Color(0xFFEAF3EC), const Color(0xFF1B2E26));
+  static Color get pinkBorder => _p(const Color(0xFFCFE3D6), const Color(0xFF2F5A47));
+
+  // Macros : trois teintes de la marque (vert, citron, terre cuite) au lieu de bleu/orange/rose.
+  static Color get protein => _p(const Color(0xFF2F7D63), const Color(0xFF4FB38F));
+  static Color get carbs => _p(const Color(0xFF8DB82E), const Color(0xFFC4F26A));
+  static Color get fat => _p(const Color(0xFFD9694A), const Color(0xFFE88A70));
 }

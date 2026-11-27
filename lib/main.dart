@@ -145,13 +145,13 @@ ThemeData _buildTheme(Brightness brightness) {
     brightness: brightness,
     primary: brand,
     onPrimary: Colors.white,
-    surface: dark ? const Color(0xFF1A1D1C) : Colors.white,
+    surface: dark ? const Color(0xFF1A1D1C) : const Color(0xFFFFFEFB),
   );
   final grey = dark ? const Color(0xFF8A918F) : const Color(0xFF6B7280);
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
-    scaffoldBackgroundColor: dark ? const Color(0xFF101312) : const Color(0xFFF5F6FA),
+    scaffoldBackgroundColor: dark ? const Color(0xFF101312) : const Color(0xFFFBF7EC),
     // Interrupteur « off » : contour et pouce assez contrastés (le gris sur gris par défaut se perd).
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith(

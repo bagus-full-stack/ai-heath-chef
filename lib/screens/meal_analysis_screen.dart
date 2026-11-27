@@ -460,12 +460,12 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                     _buildSummaryMacro(
                                       context.l10n.mealAnalysisMacroCarbs,
                                       totalGluc,
-                                      Colors.orange,
+                                      AppColors.carbs,
                                     ),
                                     _buildSummaryMacro(
                                       context.l10n.mealAnalysisMacroFat,
                                       totalLip,
-                                      Colors.pink,
+                                      AppColors.fat,
                                     ),
                                   ],
                                 ),
@@ -719,13 +719,13 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                         _buildMacroBadge(
                           context.l10n.mealAnalysisBadgeGluc,
                           item.currentGluc,
-                          Colors.orange,
+                          AppColors.carbs,
                         ),
                         const SizedBox(width: 8),
                         _buildMacroBadge(
                           context.l10n.mealAnalysisBadgeLip,
                           item.currentLip,
-                          Colors.pink,
+                          AppColors.fat,
                         ),
                       ],
                     ),

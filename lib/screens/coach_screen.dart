@@ -300,12 +300,12 @@ class _RealtimeBanner extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const _PulsingDot(color: Color(0xFFF06B9E), size: 10),
+            _PulsingDot(color: AppColors.brand, size: 10),
             const SizedBox(width: 10),
             Text(
               context.l10n.coachRealtimeBannerLabel,
-              style: const TextStyle(
-                color: Color(0xFFF06B9E),
+              style: TextStyle(
+                color: AppColors.brand,
                 fontWeight: FontWeight.w800,
                 fontSize: 12,
                 letterSpacing: 1.0,
@@ -426,8 +426,8 @@ class _DailyObjectiveCard extends ConsumerWidget {
                 ),
                 TextSpan(
                   text: context.l10n.coachKcalUnitLabel,
-                  style: const TextStyle(
-                    color: Color(0xFFF06B9E),
+                  style: TextStyle(
+                    color: AppColors.brand,
                     fontSize: 28,
                   ),
                 ),
@@ -527,7 +527,7 @@ class _NeedsCard extends ConsumerWidget {
           const SizedBox(height: 14),
           _NeedRow(
             icon: Icons.grain_rounded,
-            iconColor: const Color(0xFFF06B9E),
+            iconColor: AppColors.carbs,
             label: context.l10n.coachCarbsLabel,
             value: context.l10n.coachNeedValueGrams(
               totalGluc.toInt(),
@@ -538,7 +538,7 @@ class _NeedsCard extends ConsumerWidget {
           const SizedBox(height: 14),
           _NeedRow(
             icon: Icons.local_fire_department_rounded,
-            iconColor: const Color(0xFFFFB54A),
+            iconColor: AppColors.fat,
             label: context.l10n.coachFatLabel,
             value: context.l10n.coachNeedValueGrams(
               totalLip.toInt(),

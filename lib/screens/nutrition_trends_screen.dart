@@ -19,9 +19,9 @@ import '../widgets/staggered_entrance.dart';
 import '../config/app_colors.dart';
 
 final _primaryColor = AppColors.brand;
-const _protColor = Colors.blue;
-const _glucColor = Colors.orange;
-const _lipColor = Colors.pink;
+Color get _protColor => AppColors.protein;
+Color get _glucColor => AppColors.carbs;
+Color get _lipColor => AppColors.fat;
 const _fiberColor = Colors.green;
 const _sugarColor = Colors.redAccent;
 const _satFatColor = Colors.brown;

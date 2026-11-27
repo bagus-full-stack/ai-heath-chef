@@ -216,7 +216,7 @@ class WeightTrendScreen extends ConsumerWidget {
                       child: _StatCard(
                         label: context.l10n.weightTrendCurrentLabel,
                         value: latestWeight > 0 ? context.l10n.weightTrendKgValue(latestWeight.toStringAsFixed(1)) : '—',
-                        color: const Color(0xFFF06B9E),
+                        color: AppColors.fat,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -224,7 +224,7 @@ class WeightTrendScreen extends ConsumerWidget {
                       child: _StatCard(
                         label: context.l10n.weightTrendTargetLabel,
                         value: targetWeight > 0 ? context.l10n.weightTrendKgValue(targetWeight.toStringAsFixed(1)) : '—',
-                        color: const Color(0xFFFFB54A),
+                        color: AppColors.carbs,
                       ),
                     ),
                   ],
