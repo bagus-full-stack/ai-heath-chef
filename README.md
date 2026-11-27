@@ -221,7 +221,7 @@ Sur le Supabase self-host, ces variables se définissent dans Coolify > service 
 | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | Images de repas (Workers AI, FLUX) |
 | `POLLINATIONS_TOKEN` | Repli image Pollinations (optionnel) |
 | `HUGGINGFACE_TOKEN` | Téléchargement du modèle IA locale (`hc-huggingface-token`) ; préférer un token à portée limitée au modèle |
-| `EVAL_AUTH_TOKEN` | Évaluation du coach (`run_eval.ts`) |
+| `EVAL_AUTH_TOKEN` | Optionnelle, à ne pas stocker : JWT d'un compte de test (expire en ~1 h), à passer en ligne de commande à `run_eval.ts` |
 | `REVENUECAT_SECRET_KEY` | Clé secrète RevenueCat v1 (quota PRO) |
 | `ADDITIONAL_REDIRECT_URLS` | Redirections d'authentification autorisées : `com.fodli.app://login-callback/` |
 
