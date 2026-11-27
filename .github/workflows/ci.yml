@@ -17,6 +17,8 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Version fixée : `stable` seul a avancé et signale des API dépréciées (material_ui) que le code n'a pas encore migrées.
+          flutter-version: 3.47.7
           cache: true
 
       - name: Récupération des dépendances

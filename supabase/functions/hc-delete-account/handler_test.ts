@@ -45,6 +45,10 @@ function stubFetch(options: { rateLimitAllowed?: boolean; storageListStatus?: nu
             events.push(`remove:${remove[1]}`);
             return Promise.resolve(json([]));
         }
+        // Les versions récentes de supabase-js lisent l'utilisateur avant de le supprimer.
+        if (url.includes(`/auth/v1/admin/users/${USER_ID}`) && method === "GET") {
+            return Promise.resolve(json({ id: USER_ID, email: "a@b.com" }));
+        }
         if (url.includes(`/auth/v1/admin/users/${USER_ID}`) && method === "DELETE") {
             events.push("deleteUser");
             return Promise.resolve(json({}));
