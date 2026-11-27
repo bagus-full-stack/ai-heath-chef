@@ -10,6 +10,8 @@ import { callGeminiWithFallback } from "../_shared_hc/gemini.ts"
 // Seuls les GEMINI_MAX_MODELS_TRIED premiers sont essayés (voir gemini.ts) : inutile d'en lister plus.
 const MODELS = [
     "gemini-3.8-flash",
+    "gemini-flash-latest",
+    "gemini-flash-lite-latest",
     "gemini-3.1-pro-preview",
 ];
 
