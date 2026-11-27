@@ -20,6 +20,7 @@ import '../widgets/animated_async_value.dart';
 import '../widgets/local_file_image.dart';
 import '../widgets/storage_image.dart';
 import '../l10n/l10n_extensions.dart';
+import '../widgets/app_logo.dart';
 
 const _kLastCelebratedStreakMilestoneKey =
     'streak_last_celebrated_milestone';
@@ -131,13 +132,7 @@ class DashboardScreen extends ConsumerWidget {
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.bolt, color: Colors.white),
-          ),
+          child: const AppLogo(size: 40, radius: 8),
         ),
         actions: [
           Padding(

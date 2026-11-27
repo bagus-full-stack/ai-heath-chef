@@ -18,6 +18,7 @@ import '../widgets/cloud_ai_consent_gate.dart';
 import '../widgets/meal_suggestion_card.dart';
 import '../widgets/staggered_entrance.dart';
 import '../widgets/storage_image.dart';
+import '../widgets/app_logo.dart';
 
 const Color kCoachPrimaryColor = Color(0xFF6B66FF);
 
@@ -226,15 +227,7 @@ class _Header extends ConsumerWidget {
 
     return Row(
       children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: const Icon(Icons.bolt, color: Colors.white, size: 22),
-        ),
+        const AppLogo(size: 40, radius: 10),
         Expanded(
           child: Text(
             context.l10n.coachHeaderTitle,

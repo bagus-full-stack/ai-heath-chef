@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
+import '../widgets/app_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -94,15 +95,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               Align(
                 alignment: Alignment.centerLeft,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.bolt, color: Colors.white, size: 22),
-                ),
+                child: const AppLogo(size: 40, radius: 12),
               ),
               const SizedBox(height: 16),
               Center(

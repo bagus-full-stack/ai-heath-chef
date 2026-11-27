@@ -4,6 +4,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/l10n_extensions.dart';
+import '../widgets/app_logo.dart';
 
 const Color _kPrimaryColor = Color(0xFF6B66FF);
 const String kSupportEmail = 'bagaassami009@gmail.com';
@@ -63,19 +64,7 @@ class AboutScreen extends StatelessWidget {
             Center(
               child: Column(
                 children: [
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: const Icon(
-                      Icons.bolt,
-                      color: Colors.white,
-                      size: 36,
-                    ),
-                  ),
+                  const AppLogo(size: 72, radius: 18),
                   const SizedBox(height: 16),
                   Text(
                     context.l10n.aboutAppName,
