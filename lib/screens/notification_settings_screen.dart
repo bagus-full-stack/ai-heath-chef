@@ -7,8 +7,9 @@ import '../providers/notification_settings_provider.dart';
 import '../utils/weekday_name.dart';
 import '../widgets/animated_async_value.dart';
 import '../l10n/l10n_extensions.dart';
+import '../config/app_colors.dart';
 
-const Color _kPrimaryColor = Color(0xFF6B66FF);
+Color get _kPrimaryColor => AppColors.brand;
 
 /// Réglages des rappels : les créneaux fixes (petit-déjeuner/déjeuner/dîner)
 /// avec un interrupteur + une heure chacun, et des rappels personnalisés
@@ -49,26 +50,26 @@ class NotificationSettingsScreen extends ConsumerWidget {
     final noLogReminderAsync = ref.watch(noLogReminderProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.notificationSettingsTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: AppColors.ink,
           ),
         ),
         centerTitle: true,
       ),
       body: settingsAsync.animatedWhen(
-        loading: () => const Center(
+        loading: () => Center(
           child: CircularProgressIndicator(color: _kPrimaryColor),
         ),
         error: (error, stackTrace) => Center(
@@ -77,7 +78,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
             child: Text(
               context.l10n.notificationSettingsLoadError,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(color: AppColors.grey600),
             ),
           ),
         ),
@@ -86,7 +87,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
           children: [
             Text(
               context.l10n.notificationSettingsIntro,
-              style: TextStyle(color: Colors.grey.shade600, height: 1.4),
+              style: TextStyle(color: AppColors.grey600, height: 1.4),
             ),
             const SizedBox(height: 20),
             for (final slot in MealReminderSlot.values) ...[
@@ -124,26 +125,26 @@ class NotificationSettingsScreen extends ConsumerWidget {
               children: [
                 Text(
                   context.l10n.notificationSettingsCustomRemindersTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 12,
                     letterSpacing: 0.8,
-                    color: Colors.grey,
+                    color: AppColors.grey,
                   ),
                 ),
                 TextButton.icon(
                   onPressed: () => _openAddReminderSheet(context, ref),
-                  icon: const Icon(Icons.add, size: 18, color: _kPrimaryColor),
+                  icon: Icon(Icons.add, size: 18, color: _kPrimaryColor),
                   label: Text(
                     context.l10n.notificationSettingsAddButton,
-                    style: const TextStyle(color: _kPrimaryColor),
+                    style: TextStyle(color: _kPrimaryColor),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             customRemindersAsync.animatedWhen(
-              loading: () => const Padding(
+              loading: () => Padding(
                 padding: EdgeInsets.symmetric(vertical: 20),
                 child: Center(
                   child: CircularProgressIndicator(color: _kPrimaryColor),
@@ -151,13 +152,13 @@ class NotificationSettingsScreen extends ConsumerWidget {
               ),
               error: (error, stackTrace) => Text(
                 context.l10n.notificationSettingsCustomRemindersLoadError,
-                style: TextStyle(color: Colors.grey.shade600),
+                style: TextStyle(color: AppColors.grey600),
               ),
               data: (reminders) {
                 if (reminders.isEmpty) {
                   return Text(
                     context.l10n.notificationSettingsNoCustomReminders,
-                    style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                    style: TextStyle(color: AppColors.grey500, fontSize: 13),
                   );
                 }
                 return Column(
@@ -235,9 +236,9 @@ class _ReminderTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
       ),
       child: Row(
         children: [
@@ -248,7 +249,7 @@ class _ReminderTile extends StatelessWidget {
               color: _kPrimaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.notifications_none_rounded,
               color: _kPrimaryColor,
             ),
@@ -283,7 +284,7 @@ class _ReminderTile extends StatelessWidget {
                                     ))
                         : context.l10n.notificationSettingsDisabledLabel,
                     style: TextStyle(
-                      color: enabled ? _kPrimaryColor : Colors.grey.shade500,
+                      color: enabled ? _kPrimaryColor : AppColors.grey500,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -299,9 +300,10 @@ class _ReminderTile extends StatelessWidget {
           ),
           if (onDelete != null)
             IconButton(
+              tooltip: context.l10n.notificationSettingsDeleteReminderTooltip,
               icon: Icon(
                 Icons.delete_outline_rounded,
-                color: Colors.grey.shade400,
+                color: AppColors.grey400,
               ),
               onPressed: onDelete,
             ),
@@ -365,8 +367,8 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
       ),
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
@@ -378,7 +380,7 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: AppColors.grey300,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -397,10 +399,10 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
                 labelText: context.l10n.notificationSettingsReminderNameLabel,
                 hintText: context.l10n.notificationSettingsReminderNameHint,
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: AppColors.grey50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(color: AppColors.grey200),
                 ),
               ),
             ),
@@ -414,13 +416,13 @@ class _AddReminderSheetState extends State<_AddReminderSheet> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: AppColors.grey50,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: AppColors.grey200),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.access_time_rounded,
                       color: _kPrimaryColor,
                     ),

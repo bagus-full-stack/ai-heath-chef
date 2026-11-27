@@ -6,8 +6,9 @@ import 'package:go_router/go_router.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../providers/fasting_provider.dart';
+import '../config/app_colors.dart';
 
-const _primaryColor = Color(0xFF6B66FF);
+final _primaryColor = AppColors.brand;
 const _goalOptions = [12, 14, 16, 18, 20, 24];
 
 /// Jeûne intermittent : fenêtre horaire (objectif de durée) + minuteur —
@@ -41,21 +42,21 @@ class _FastingScreenState extends ConsumerState<FastingScreen> {
     final fastingAsync = ref.watch(fastingProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Colors.black),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.ink),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.fastingTitle,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.ink),
         ),
       ),
       body: fastingAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: _primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: _primaryColor)),
         error: (err, stack) => Center(child: Text(err.toString())),
         data: (fasting) {
           final elapsed = fasting.elapsed;
@@ -80,7 +81,7 @@ class _FastingScreenState extends ConsumerState<FastingScreen> {
                         child: CircularProgressIndicator(
                           value: fasting.isFasting ? progress : 0,
                           strokeWidth: 12,
-                          backgroundColor: Colors.grey.shade200,
+                          backgroundColor: AppColors.grey200,
                           color: goalReached ? Colors.green : _primaryColor,
                         ),
                       ),
@@ -99,7 +100,7 @@ class _FastingScreenState extends ConsumerState<FastingScreen> {
                             fasting.isFasting
                                 ? context.l10n.fastingStatusFasting
                                 : context.l10n.fastingStatusIdle,
-                            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                            style: TextStyle(color: AppColors.grey600, fontSize: 13),
                           ),
                           if (goalReached) ...[
                             const SizedBox(height: 6),
@@ -130,7 +131,7 @@ class _FastingScreenState extends ConsumerState<FastingScreen> {
                       selected: fasting.goalHours == hours,
                       selectedColor: _primaryColor.withValues(alpha: 0.15),
                       labelStyle: TextStyle(
-                        color: fasting.goalHours == hours ? _primaryColor : Colors.black87,
+                        color: fasting.goalHours == hours ? _primaryColor : AppColors.ink87,
                         fontWeight: fasting.goalHours == hours ? FontWeight.bold : FontWeight.normal,
                       ),
                       onSelected: (_) => ref.read(fastingProvider.notifier).setGoalHours(hours),

@@ -8,8 +8,9 @@ import '../providers/meal_provider.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/cloud_ai_consent_gate.dart';
 import '../widgets/local_file_image.dart';
+import '../config/app_colors.dart';
 
-const _primaryColor = Color(0xFF6B66FF);
+final _primaryColor = AppColors.brand;
 
 /// Inventaire détecté sur une photo de frigo/placard (voir
 /// hc-analyze-pantry/index.ts) : un [Ingredient] par aliment identifié, dont
@@ -75,24 +76,24 @@ class _PantryScanScreenState extends ConsumerState<PantryScanScreen> {
     return CloudAiConsentGate(
       onGranted: _startAnalysis,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
+          leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+            icon: Icon(
               Icons.arrow_back_ios,
-              color: Colors.black,
+              color: AppColors.ink,
               size: 20,
             ),
             onPressed: () => context.pop(),
           ),
           title: Text(
             context.l10n.pantryScanTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: AppColors.ink,
             ),
           ),
           centerTitle: true,
@@ -116,11 +117,11 @@ class _PantryScanScreenState extends ConsumerState<PantryScanScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 60),
                   child: Column(
                     children: [
-                      const CircularProgressIndicator(color: _primaryColor),
+                      CircularProgressIndicator(color: _primaryColor),
                       const SizedBox(height: 16),
                       Text(
                         context.l10n.pantryScanLoadingMessage,
-                        style: TextStyle(color: Colors.grey.shade600),
+                        style: TextStyle(color: AppColors.grey600),
                       ),
                     ],
                   ),
@@ -138,7 +139,7 @@ class _PantryScanScreenState extends ConsumerState<PantryScanScreen> {
                       Text(
                         error.toString(),
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey.shade600),
+                        style: TextStyle(color: AppColors.grey600),
                       ),
                     ],
                   ),
@@ -153,7 +154,7 @@ class _PantryScanScreenState extends ConsumerState<PantryScanScreen> {
                           child: Text(
                             context.l10n.pantryScanEmptyMessage,
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey.shade600),
+                            style: TextStyle(color: AppColors.grey600),
                           ),
                         )
                       else
@@ -171,7 +172,7 @@ class _PantryScanScreenState extends ConsumerState<PantryScanScreen> {
                                 backgroundColor: _primaryColor.withValues(
                                   alpha: 0.08,
                                 ),
-                                labelStyle: const TextStyle(
+                                labelStyle: TextStyle(
                                   color: _primaryColor,
                                   fontWeight: FontWeight.w600,
                                 ),

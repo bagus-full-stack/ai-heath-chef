@@ -7,6 +7,7 @@ import '../models/selected_plan.dart';
 import '../providers/purchase_provider.dart';
 import '../services/purchase_service.dart';
 import '../widgets/success_transition_dialog.dart';
+import '../config/app_colors.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final SelectedPlan? plan;
@@ -95,16 +96,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF6B66FF);
+    final primaryColor = AppColors.brand;
     final plan = _plan;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).closeButtonTooltip, 
           icon: const Icon(Icons.close_rounded),
           onPressed: () => context.pop(),
         ),
@@ -144,7 +145,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       PurchaseService.instance.isDemoMode
                           ? context.l10n.checkoutDemoModeNotice
                           : context.l10n.checkoutSecurePaymentNotice,
-                      style: const TextStyle(color: Colors.black87, height: 1.4),
+                      style: TextStyle(color: AppColors.ink87, height: 1.4),
                     ),
                   ),
                 ],
@@ -201,7 +202,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             Text(
               context.l10n.checkoutRenewalDisclaimer,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              style: TextStyle(color: AppColors.grey600, fontSize: 12),
             ),
           ],
         ),
@@ -287,9 +288,9 @@ class _SectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -329,14 +330,14 @@ class _SummaryRow extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey.shade600,
+            color: AppColors.grey600,
             fontWeight: FontWeight.w600,
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            color: emphasize ? const Color(0xFF6B66FF) : Colors.black87,
+            color: emphasize ? AppColors.brand : AppColors.ink87,
             fontWeight: FontWeight.bold,
             fontSize: emphasize ? 18 : 14,
           ),

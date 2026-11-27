@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
+import '../config/app_colors.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -57,10 +58,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF6B66FF);
+    final primaryColor = AppColors.brand;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar( /* ... Garde ton AppBar actuel ... */ ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -69,11 +70,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           children: [
             // ... (Garde ton en-tête et l'icône) ...
             const SizedBox(height: 20),
-            Center(child: Container(width: 80, height: 80, decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.05), shape: BoxShape.circle), child: const Icon(Icons.vpn_key_outlined, size: 36, color: primaryColor))),
+            Center(child: Container(width: 80, height: 80, decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.05), shape: BoxShape.circle), child: Icon(Icons.vpn_key_outlined, size: 36, color: primaryColor))),
             const SizedBox(height: 24),
             Text(context.l10n.forgotPasswordTitle, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            Text(context.l10n.forgotPasswordSubtitle, textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey.shade600, height: 1.4)),
+            Text(context.l10n.forgotPasswordSubtitle, textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: AppColors.grey600, height: 1.4)),
             const SizedBox(height: 40),
 
             // Champ Email
@@ -112,7 +113,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => context.pop(),
-              child: Text(context.l10n.forgotPasswordBackToLogin, style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
+              child: Text(context.l10n.forgotPasswordBackToLogin, style: TextStyle(color: AppColors.grey700, fontWeight: FontWeight.w600)),
             ),
           ],
         ),

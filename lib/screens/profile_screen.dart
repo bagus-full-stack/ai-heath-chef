@@ -18,6 +18,7 @@ import '../services/home_widget_service.dart';
 import '../utils/journal_export.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/storage_image.dart';
+import '../config/app_colors.dart';
 
 const _kLanguageNames = {'fr': 'Français', 'en': 'English'};
 
@@ -33,9 +34,9 @@ Future<void> _showExportPicker(BuildContext context, WidgetRef ref) async {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.ios_share_rounded,
-                color: Color(0xFF6B66FF),
+                color: AppColors.brand,
               ),
               title: Text(context.l10n.profileExportJournalTitle),
               subtitle: Text(context.l10n.profileExportJournalSubtitle),
@@ -45,9 +46,9 @@ Future<void> _showExportPicker(BuildContext context, WidgetRef ref) async {
               },
             ),
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.picture_as_pdf_outlined,
-                color: Color(0xFF6B66FF),
+                color: AppColors.brand,
               ),
               title: Text(context.l10n.profileExportPdfTitle),
               subtitle: Text(context.l10n.profileExportPdfSubtitle),
@@ -57,9 +58,9 @@ Future<void> _showExportPicker(BuildContext context, WidgetRef ref) async {
               },
             ),
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.picture_as_pdf_rounded,
-                color: Color(0xFF6B66FF),
+                color: AppColors.brand,
               ),
               title: Text(context.l10n.profileExportMonthlyPdfTitle),
               subtitle: Text(context.l10n.profileExportMonthlyPdfSubtitle),
@@ -94,7 +95,7 @@ Future<void> _showLanguagePicker(
               ListTile(
                 title: Text(_kLanguageNames[code]!),
                 trailing: current.languageCode == code
-                    ? const Icon(Icons.check_rounded, color: Color(0xFF6B66FF))
+                    ? Icon(Icons.check_rounded, color: AppColors.brand)
                     : null,
                 onTap: () {
                   ref.read(localeProvider.notifier).setLocale(Locale(code));
@@ -154,18 +155,18 @@ class ProfileScreen extends ConsumerWidget {
     final currentLocale = ref.watch(localeProvider).value ?? const Locale('fr');
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         title: Text(
           context.l10n.profileTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
-            color: Colors.black,
+            color: AppColors.ink,
           ),
         ),
       ),
@@ -373,7 +374,7 @@ class ProfileScreen extends ConsumerWidget {
                 Center(
                   child: Text(
                     context.l10n.profileVersionText,
-                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                    style: TextStyle(color: AppColors.grey500, fontSize: 12),
                   ),
                 ),
               ],
@@ -393,7 +394,7 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF6B66FF);
+    final primaryColor = AppColors.brand;
 
     return Column(
       children: [
@@ -405,12 +406,12 @@ class _ProfileHeader extends StatelessWidget {
               path: profile.avatarPath,
               builder: (context, snapshot) => CircleAvatar(
                 radius: 48,
-                backgroundColor: Colors.grey.shade200,
+                backgroundColor: AppColors.grey200,
                 backgroundImage: snapshot.data != null
                     ? NetworkImage(snapshot.data!)
                     : null,
                 child: snapshot.data == null
-                    ? Icon(Icons.person, size: 48, color: Colors.grey.shade500)
+                    ? Icon(Icons.person, size: 48, color: AppColors.grey500)
                     : null,
               ),
             ),
@@ -440,8 +441,8 @@ class _ProfileHeader extends StatelessWidget {
           children: [
             Text(
               profile.fullName,
-              style: const TextStyle(
-                color: Colors.black,
+              style: TextStyle(
+                color: AppColors.ink,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -459,7 +460,7 @@ class _ProfileHeader extends StatelessWidget {
                 ),
                 child: Text(
                   context.l10n.profileProBadgeHeader,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: primaryColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
@@ -473,7 +474,7 @@ class _ProfileHeader extends StatelessWidget {
         Text(
           profile.email,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+          style: TextStyle(color: AppColors.grey500, fontSize: 13),
         ),
       ],
     );
@@ -498,7 +499,7 @@ class _QuickStatsSection extends StatelessWidget {
                     ? '—'
                     : context.l10n.profileAgeValue(profile.age),
                 icon: Icons.cake_outlined,
-                accentColor: const Color(0xFF6B66FF),
+                accentColor: AppColors.brand,
               ),
             ),
             const SizedBox(width: 12),
@@ -565,9 +566,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -596,7 +597,7 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             title,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            style: TextStyle(color: AppColors.grey600, fontSize: 12),
           ),
         ],
       ),
@@ -615,9 +616,9 @@ class _SettingsGroup extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -678,10 +679,10 @@ class _SettingsTile extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: AppColors.grey100,
             borderRadius: BorderRadius.circular(14),
           ),
-          child: Icon(item.icon, color: Colors.black87),
+          child: Icon(item.icon, color: AppColors.ink87),
         ),
         title: Text(
           item.title,
@@ -689,7 +690,7 @@ class _SettingsTile extends StatelessWidget {
         ),
         subtitle: Text(
           item.subtitle,
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+          style: TextStyle(color: AppColors.grey600, fontSize: 12),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -701,13 +702,13 @@ class _SettingsTile extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6B66FF).withValues(alpha: 0.12),
+                  color: AppColors.brand.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   item.badge!,
-                  style: const TextStyle(
-                    color: Color(0xFF6B66FF),
+                  style: TextStyle(
+                    color: AppColors.brand,
                     fontWeight: FontWeight.bold,
                     fontSize: 11,
                   ),
@@ -715,10 +716,10 @@ class _SettingsTile extends StatelessWidget {
               ),
               const SizedBox(width: 8),
             ],
-            const Icon(
+            Icon(
               Icons.arrow_forward_ios_rounded,
               size: 16,
-              color: Colors.grey,
+              color: AppColors.grey,
             ),
           ],
         ),

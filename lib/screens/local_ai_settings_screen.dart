@@ -6,8 +6,9 @@ import '../config/local_ai_config.dart';
 import '../providers/local_ai_provider.dart';
 import '../widgets/animated_async_value.dart';
 import '../l10n/l10n_extensions.dart';
+import '../config/app_colors.dart';
 
-const Color _kPrimaryColor = Color(0xFF6B66FF);
+Color get _kPrimaryColor => AppColors.brand;
 
 /// Réglages de l'IA locale (scan + chat coach via Gemma3n, exécuté sur
 /// l'appareil). Fonctionnalité opt-in : jamais activée par défaut, jamais
@@ -29,7 +30,7 @@ class LocalAiSettingsScreen extends ConsumerWidget {
           TextButton(onPressed: () => context.pop(false), child: Text(context.l10n.localAiSettingsCancelButton)),
           TextButton(
             onPressed: () => context.pop(true),
-            child: Text(context.l10n.localAiSettingsDownloadButton, style: const TextStyle(color: _kPrimaryColor)),
+            child: Text(context.l10n.localAiSettingsDownloadButton, style: TextStyle(color: _kPrimaryColor)),
           ),
         ],
       ),
@@ -74,29 +75,29 @@ class LocalAiSettingsScreen extends ConsumerWidget {
     final settingsAsync = ref.watch(localAiSettingsProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.localAiSettingsTitle,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.ink),
         ),
         centerTitle: true,
       ),
       body: settingsAsync.animatedWhen(
-        loading: () => const Center(child: CircularProgressIndicator(color: _kPrimaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: _kPrimaryColor)),
         error: (error, stackTrace) => Center(
           child: Padding(
             padding: const EdgeInsets.all(40.0),
             child: Text(
               context.l10n.localAiSettingsLoadError,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(color: AppColors.grey600),
             ),
           ),
         ),
@@ -105,15 +106,15 @@ class LocalAiSettingsScreen extends ConsumerWidget {
           children: [
             Text(
               context.l10n.localAiSettingsIntro,
-              style: TextStyle(color: Colors.grey.shade600, height: 1.4),
+              style: TextStyle(color: AppColors.grey600, height: 1.4),
             ),
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: AppColors.grey200),
               ),
               child: Row(
                 children: [
@@ -124,7 +125,7 @@ class LocalAiSettingsScreen extends ConsumerWidget {
                       color: _kPrimaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(Icons.memory_rounded, color: _kPrimaryColor),
+                    child: Icon(Icons.memory_rounded, color: _kPrimaryColor),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -166,9 +167,9 @@ class _ModelStatusCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +199,7 @@ class _ModelStatusCard extends StatelessWidget {
                     ),
                     Text(
                       LocalAiConfig.approxSizeLabel,
-                      style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                      style: TextStyle(color: AppColors.grey500, fontSize: 13),
                     ),
                   ],
                 ),
@@ -215,7 +216,7 @@ class _ModelStatusCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               context.l10n.localAiSettingsDownloadProgressLabel((settings.downloadProgress * 100).toStringAsFixed(0)),
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+              style: TextStyle(color: AppColors.grey600, fontSize: 13),
             ),
           ] else if (settings.isDownloaded)
             SizedBox(

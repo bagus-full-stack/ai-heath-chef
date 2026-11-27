@@ -10,6 +10,7 @@ import '../widgets/animated_async_value.dart';
 import '../widgets/cloud_ai_consent_gate.dart';
 import '../widgets/meal_suggestion_card.dart';
 import 'coach_screen.dart' show openCoachChatSheet, kCoachPrimaryColor;
+import '../config/app_colors.dart';
 
 /// Recettes générées à partir de l'inventaire détecté sur une photo de
 /// frigo/placard (voir pantry_scan_screen.dart) — même carte/actions que
@@ -43,30 +44,31 @@ class _PantryRecipesScreenState extends ConsumerState<PantryRecipesScreen> {
     return CloudAiConsentGate(
       onGranted: _startAnalysis,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F6FA),
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
+          leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+            icon: Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 18,
-              color: Colors.black,
+              color: AppColors.ink,
             ),
             onPressed: () => context.pop(),
           ),
           title: Text(
             context.l10n.pantryRecipesTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: AppColors.ink,
             ),
           ),
           centerTitle: true,
           actions: [
             IconButton(
-              icon: const Icon(
+              tooltip: context.l10n.mealSuggestionsRegenerateTooltip,
+              icon: Icon(
                 Icons.refresh_rounded,
                 color: kCoachPrimaryColor,
               ),
@@ -77,7 +79,7 @@ class _PantryRecipesScreenState extends ConsumerState<PantryRecipesScreen> {
         ),
         body: SafeArea(
           child: recipesAsync.animatedWhen(
-            loading: () => const Center(
+            loading: () => Center(
               child: CircularProgressIndicator(color: kCoachPrimaryColor),
             ),
             error: (error, stack) => Center(
@@ -95,7 +97,7 @@ class _PantryRecipesScreenState extends ConsumerState<PantryRecipesScreen> {
                     Text(
                       context.l10n.pantryRecipesLoadError,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey.shade600),
+                      style: TextStyle(color: AppColors.grey600),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
@@ -118,7 +120,7 @@ class _PantryRecipesScreenState extends ConsumerState<PantryRecipesScreen> {
                 return Center(
                   child: Text(
                     context.l10n.pantryRecipesEmptyMessage,
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(color: AppColors.grey600),
                   ),
                 );
               }

@@ -16,6 +16,7 @@ import '../utils/age_policy.dart';
 import '../utils/bmi.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/storage_image.dart';
+import '../config/app_colors.dart';
 
 /// Écran d'édition du profil (identité + objectifs), ouvert depuis "Compte"
 /// et "Mes objectifs" dans lib/screens/profile_screen.dart.
@@ -27,7 +28,7 @@ class AccountScreen extends ConsumerStatefulWidget {
 }
 
 class _AccountScreenState extends ConsumerState<AccountScreen> {
-  static const Color _primaryColor = Color(0xFF6B66FF);
+  static Color get _primaryColor => AppColors.brand;
 
   final _fullNameController = TextEditingController();
   final _ageController = TextEditingController();
@@ -255,11 +256,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final profileAsync = ref.watch(profileProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: () => context.pop(),
         ),
@@ -301,7 +302,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(
-                  child: GestureDetector(
+                  child: Semantics(
+                    button: true,
+                    label: context.l10n.accountChangeAvatarTooltip,
+                    child: GestureDetector(
                     onTap: _changeAvatar,
                     child: Stack(
                       clipBehavior: Clip.none,
@@ -311,12 +315,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           path: _avatarPath,
                           builder: (context, snapshot) => CircleAvatar(
                             radius: 48,
-                            backgroundColor: Colors.grey.shade200,
+                            backgroundColor: AppColors.grey200,
                             backgroundImage: snapshot.data != null
                                 ? NetworkImage(snapshot.data!)
                                 : null,
                             child: snapshot.data == null
-                                ? Icon(Icons.person, size: 48, color: Colors.grey.shade500)
+                                ? Icon(Icons.person, size: 48, color: AppColors.grey500)
                                 : null,
                           ),
                         ),
@@ -341,6 +345,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         ),
                       ],
                     ),
+                  ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -455,7 +460,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 const SizedBox(height: 14),
                 Text(
                   context.l10n.onboardingMedicalDisclaimer,
-                  style: TextStyle(fontSize: 11.5, color: Colors.grey.shade500, height: 1.3),
+                  style: TextStyle(fontSize: 11.5, color: AppColors.grey500, height: 1.3),
                 ),
                 const SizedBox(height: 28),
                 ElevatedButton(
@@ -504,18 +509,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 key: const ValueKey('bmi-placeholder'),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: AppColors.grey200),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.monitor_weight_outlined, color: Colors.grey.shade400),
+                    Icon(Icons.monitor_weight_outlined, color: AppColors.grey400),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         context.l10n.accountBmiPlaceholder,
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                        style: TextStyle(color: AppColors.grey600, fontSize: 13),
                       ),
                     ),
                   ],
@@ -558,7 +563,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           const SizedBox(height: 2),
                           Text(
                             context.l10n.accountBmiRangeLabel(bmi.label(context).toLowerCase(), bmi.rangeLabel),
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            style: TextStyle(fontSize: 12, color: AppColors.grey600),
                           ),
                         ],
                       ),
@@ -574,18 +579,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     return InputDecoration(
       suffixText: suffixText,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppColors.surface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.grey200),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.grey200),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _primaryColor, width: 1.4),
+        borderSide: BorderSide(color: _primaryColor, width: 1.4),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
     );

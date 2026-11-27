@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../l10n/l10n_extensions.dart';
+import '../config/app_colors.dart';
 
 /// Paramètres d'affichage pour [ComingSoonScreen], passés via `extra` du
 /// GoRoute '/coming-soon'. `message` reste optionnel : quand non fourni,
@@ -31,11 +32,11 @@ class ComingSoonScreen extends StatelessWidget {
     final message = resolved.message ?? context.l10n.comingSoonDefaultMessage;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: () => context.pop(),
         ),
@@ -54,10 +55,10 @@ class ComingSoonScreen extends StatelessWidget {
                 width: 84,
                 height: 84,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6B66FF).withValues(alpha: 0.1),
+                  color: AppColors.brand.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(resolved.icon, color: const Color(0xFF6B66FF), size: 38),
+                child: Icon(resolved.icon, color: AppColors.brand, size: 38),
               ),
               const SizedBox(height: 20),
               Text(
@@ -69,7 +70,7 @@ class ComingSoonScreen extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade600, height: 1.4),
+                style: TextStyle(color: AppColors.grey600, height: 1.4),
               ),
             ],
           ),

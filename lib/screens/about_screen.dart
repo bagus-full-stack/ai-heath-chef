@@ -5,9 +5,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../widgets/app_logo.dart';
+import '../config/app_colors.dart';
 
-const Color _kPrimaryColor = Color(0xFF6B66FF);
-const String kSupportEmail = 'bagaassami009@gmail.com';
+Color get _kPrimaryColor => AppColors.brand;
+const String kSupportEmail = 'bagaassami09@gmail.com';
 
 /// Écran "À propos" : identité de l'app, version installée (lue en direct
 /// via package_info_plus plutôt que codée en dur, pour rester juste après un
@@ -39,20 +40,20 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.aboutAppBarTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: AppColors.ink,
           ),
         ),
         centerTitle: true,
@@ -87,7 +88,7 @@ class AboutScreen extends StatelessWidget {
                       return Text(
                         versionLabel,
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: AppColors.grey600,
                           fontSize: 13,
                         ),
                       );
@@ -100,7 +101,7 @@ class AboutScreen extends StatelessWidget {
             Text(
               context.l10n.aboutDescription,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade700, height: 1.5),
+              style: TextStyle(color: AppColors.grey700, height: 1.5),
             ),
             const SizedBox(height: 28),
             _AboutLinkTile(
@@ -133,7 +134,7 @@ class AboutScreen extends StatelessWidget {
             Center(
               child: Text(
                 context.l10n.aboutCopyright(DateTime.now().year),
-                style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+                style: TextStyle(color: AppColors.grey400, fontSize: 12),
               ),
             ),
           ],
@@ -165,9 +166,9 @@ class _AboutLinkTile extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.grey200),
         ),
         child: Row(
           children: [
@@ -197,7 +198,7 @@ class _AboutLinkTile extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: TextStyle(
-                        color: Colors.grey.shade500,
+                        color: AppColors.grey500,
                         fontSize: 12,
                       ),
                     ),
@@ -205,7 +206,7 @@ class _AboutLinkTile extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
+            Icon(Icons.chevron_right_rounded, color: AppColors.grey400),
           ],
         ),
       ),

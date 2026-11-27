@@ -19,8 +19,9 @@ import '../widgets/meal_suggestion_card.dart';
 import '../widgets/staggered_entrance.dart';
 import '../widgets/storage_image.dart';
 import '../widgets/app_logo.dart';
+import '../config/app_colors.dart';
 
-const Color kCoachPrimaryColor = Color(0xFF6B66FF);
+Color get kCoachPrimaryColor => AppColors.brand;
 
 class CoachScreen extends ConsumerWidget {
   const CoachScreen({super.key});
@@ -28,7 +29,7 @@ class CoachScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => openCoachChatSheet(context),
         backgroundColor: kCoachPrimaryColor,
@@ -74,7 +75,7 @@ class CoachScreen extends ConsumerWidget {
                       onPressed: () => context.push('/meal_suggestions'),
                       child: Text(
                         context.l10n.coachSeeAllButton,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: kCoachPrimaryColor,
                           fontWeight: FontWeight.w700,
                         ),
@@ -134,7 +135,7 @@ class _MealSuggestionsRow extends ConsumerWidget {
     return SizedBox(
       height: 285,
       child: suggestionsAsync.animatedWhen(
-        loading: () => const Center(
+        loading: () => Center(
           child: CircularProgressIndicator(color: kCoachPrimaryColor),
         ),
         error: (error, stackTrace) => Center(
@@ -146,7 +147,15 @@ class _MealSuggestionsRow extends ConsumerWidget {
                 Text(
                   context.l10n.coachMealSuggestionsErrorText,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey.shade600),
+                  style: TextStyle(color: AppColors.grey600),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  error.toString().replaceFirst('Exception: ', ''),
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: AppColors.grey500, fontSize: 12),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
@@ -162,7 +171,7 @@ class _MealSuggestionsRow extends ConsumerWidget {
             return Center(
               child: Text(
                 context.l10n.coachMealSuggestionsEmptyText,
-                style: TextStyle(color: Colors.grey.shade600),
+                style: TextStyle(color: AppColors.grey600),
               ),
             );
           }
@@ -247,12 +256,12 @@ class _Header extends ConsumerWidget {
               path: avatarPath,
               builder: (context, snapshot) => CircleAvatar(
                 radius: 18,
-                backgroundColor: Colors.grey.shade200,
+                backgroundColor: AppColors.grey200,
                 backgroundImage: snapshot.data != null
                     ? NetworkImage(snapshot.data!)
                     : null,
                 child: snapshot.data == null
-                    ? Icon(Icons.person, color: Colors.grey.shade500, size: 20)
+                    ? Icon(Icons.person, color: AppColors.grey500, size: 20)
                     : null,
               ),
             ),
@@ -261,8 +270,8 @@ class _Header extends ConsumerWidget {
               bottom: -1,
               child: Container(
                 padding: const EdgeInsets.all(1.5),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
                   shape: BoxShape.circle,
                 ),
                 child: const _PulsingDot(color: Colors.greenAccent, size: 10),
@@ -284,9 +293,9 @@ class _RealtimeBanner extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFFFCE8EF),
+          color: AppColors.pinkBg,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: const Color(0xFFF7C6D6)),
+          border: Border.all(color: AppColors.pinkBorder),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -380,9 +389,9 @@ class _DailyObjectiveCard extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -395,8 +404,8 @@ class _DailyObjectiveCard extends ConsumerWidget {
         children: [
           Text(
             context.l10n.coachDailyObjectiveTitle,
-            style: const TextStyle(
-              color: Color(0xFF6F7688),
+            style: TextStyle(
+              color: AppColors.grey600,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.1,
             ),
@@ -409,8 +418,8 @@ class _DailyObjectiveCard extends ConsumerWidget {
               children: [
                 TextSpan(
                   text: '$remainingKcal',
-                  style: const TextStyle(
-                    color: Colors.black,
+                  style: TextStyle(
+                    color: AppColors.ink,
                     fontSize: 52,
                     height: 1,
                   ),
@@ -430,7 +439,7 @@ class _DailyObjectiveCard extends ConsumerWidget {
             context.l10n.coachRemainingKcalText(remainingKcal, goalLabel),
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.grey.shade600,
+              color: AppColors.grey600,
               fontSize: 15,
               height: 1.45,
             ),
@@ -475,9 +484,9 @@ class _NeedsCard extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: AppColors.grey100),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -495,7 +504,7 @@ class _NeedsCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   context.l10n.coachNeedsTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: kCoachPrimaryColor,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.0,
@@ -507,7 +516,7 @@ class _NeedsCard extends ConsumerWidget {
           const SizedBox(height: 18),
           _NeedRow(
             icon: Icons.fitness_center,
-            iconColor: const Color(0xFF6B66FF),
+            iconColor: AppColors.brand,
             label: context.l10n.coachProteinLabel,
             value: context.l10n.coachNeedValueGrams(
               totalProt.toInt(),
@@ -581,18 +590,18 @@ class _NeedRow extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF556070),
+                      color: AppColors.grey600,
                     ),
                   ),
                   Text(
                     value,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF202733),
+                      color: AppColors.ink,
                     ),
                   ),
                 ],
@@ -610,7 +619,7 @@ class _NeedRow extends StatelessWidget {
                         minHeight: 6,
                         // Gris neutre plutôt qu'une teinte de iconColor : sinon
                         // la piste vide à 0% ressemble à une barre pleine.
-                        backgroundColor: Colors.grey.shade200,
+                        backgroundColor: AppColors.grey200,
                         color: iconColor,
                       ),
                 ),
@@ -634,7 +643,7 @@ class _CoachTipCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F7FF),
+        color: AppColors.brandTintSoft,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: kCoachPrimaryColor.withValues(alpha: 0.18),
@@ -647,10 +656,10 @@ class _CoachTipCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.flash_on_rounded,
               color: kCoachPrimaryColor,
             ),
@@ -670,7 +679,7 @@ class _CoachTipCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   text,
-                  style: TextStyle(color: Colors.grey.shade700, height: 1.45),
+                  style: TextStyle(color: AppColors.grey700, height: 1.45),
                 ),
               ],
             ),
@@ -799,7 +808,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = kCoachPrimaryColor;
+    final primaryColor = kCoachPrimaryColor;
     final messagesAsync = ref.watch(chatProvider);
     final messages = messagesAsync.value ?? const <ChatMessage>[];
     // Cas 4 : IA locale pas prête ET consentement cloud refusé
@@ -816,8 +825,8 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
       maxChildSize: 0.96,
       builder: (context, controller) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           ),
           child: SafeArea(
@@ -829,7 +838,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                   width: 46,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: AppColors.grey300,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -844,7 +853,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                           color: primaryColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.auto_awesome_rounded,
                           color: primaryColor,
                         ),
@@ -863,8 +872,8 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                             ),
                             Text(
                               context.l10n.coachSheetSubtitle,
-                              style: const TextStyle(
-                                color: Colors.black54,
+                              style: TextStyle(
+                                color: AppColors.ink54,
                                 fontSize: 13,
                               ),
                             ),
@@ -876,7 +885,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                         icon: const Icon(Icons.refresh_rounded),
                         tooltip: context.l10n.coachResetTooltip,
                       ),
-                      IconButton(
+                      IconButton(tooltip: MaterialLocalizations.of(context).closeButtonTooltip, 
                         onPressed: () => Navigator.pop(context),
                         icon: const Icon(Icons.close_rounded),
                       ),
@@ -893,14 +902,14 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.info_outline_rounded,
-                            size: 14, color: Colors.black45),
+                        Icon(Icons.info_outline_rounded,
+                            size: 14, color: AppColors.ink45),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             context.l10n.coachDisclaimer,
-                            style: const TextStyle(
-                              color: Colors.black45,
+                            style: TextStyle(
+                              color: AppColors.ink45,
                               fontSize: 11,
                             ),
                           ),
@@ -998,7 +1007,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                               decoration: InputDecoration(
                                 hintText: context.l10n.coachInputHint,
                                 filled: true,
-                                fillColor: Colors.grey.shade100,
+                                fillColor: AppColors.grey100,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(18),
                                   borderSide: BorderSide.none,
@@ -1011,7 +1020,10 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          InkWell(
+                          Semantics(
+                            button: true,
+                            label: context.l10n.coachSendTooltip,
+                            child: InkWell(
                             onTap: _isSending ? null : _sendMessage,
                             borderRadius: BorderRadius.circular(18),
                             child: Container(
@@ -1046,6 +1058,7 @@ class _CoachChatSheetState extends ConsumerState<_CoachChatSheet> {
                               ),
                             ),
                           ),
+                          ),
                         ],
                       ),
                     ),
@@ -1076,7 +1089,7 @@ class _LocalAiRequiredCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: AppColors.grey100,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -1089,7 +1102,7 @@ class _LocalAiRequiredCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             context.l10n.coachLocalAiRequiredBody,
-            style: TextStyle(color: Colors.grey.shade700, fontSize: 13, height: 1.4),
+            style: TextStyle(color: AppColors.grey700, fontSize: 13, height: 1.4),
           ),
           const SizedBox(height: 14),
           ElevatedButton(
@@ -1122,10 +1135,10 @@ class _PromptChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionChip(
       onPressed: onTap,
-      backgroundColor: const Color(0xFFF5F2FF),
+      backgroundColor: AppColors.brandTint,
       label: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           color: kCoachPrimaryColor,
           fontWeight: FontWeight.w700,
         ),
@@ -1166,7 +1179,7 @@ class _TypingBubbleState extends State<_TypingBubble>
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: AppColors.grey100,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(16),
             topRight: Radius.circular(16),
@@ -1224,7 +1237,7 @@ class _ChatBubble extends ConsumerWidget {
           maxWidth: MediaQuery.of(context).size.width * 0.78,
         ),
         decoration: BoxDecoration(
-          color: isUser ? kCoachPrimaryColor : Colors.grey.shade100,
+          color: isUser ? kCoachPrimaryColor : AppColors.grey100,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -1240,7 +1253,7 @@ class _ChatBubble extends ConsumerWidget {
             Text(
               message.text,
               style: TextStyle(
-                color: isUser ? Colors.white : Colors.black87,
+                color: isUser ? Colors.white : AppColors.ink87,
                 fontSize: 14,
                 height: 1.35,
               ),
@@ -1284,9 +1297,9 @@ class _ReportButton extends StatelessWidget {
       child: InkWell(
         onTap: () => _openReportSheet(context),
         borderRadius: BorderRadius.circular(12),
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.all(2),
-          child: Icon(Icons.flag_outlined, size: 14, color: Colors.black38),
+          child: Icon(Icons.flag_outlined, size: 14, color: AppColors.ink38),
         ),
       ),
     );
@@ -1438,12 +1451,12 @@ class _EngineBadge extends StatelessWidget {
             Icon(
               isLocal ? Icons.phone_iphone_rounded : Icons.cloud_outlined,
               size: 12,
-              color: Colors.black38,
+              color: AppColors.ink38,
             ),
             const SizedBox(width: 4),
             Text(
               label,
-              style: const TextStyle(fontSize: 10, color: Colors.black38),
+              style: TextStyle(fontSize: 10, color: AppColors.ink38),
             ),
           ],
         ),
@@ -1567,11 +1580,11 @@ class _DishImageState extends ConsumerState<_DishImage> {
     return Container(
       height: 140,
       width: double.infinity,
-      color: Colors.grey.shade200,
+      color: AppColors.grey200,
       alignment: Alignment.center,
       child: Icon(
         Icons.image_not_supported_outlined,
-        color: Colors.grey.shade400,
+        color: AppColors.grey400,
       ),
     );
   }

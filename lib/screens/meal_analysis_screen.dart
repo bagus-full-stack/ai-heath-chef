@@ -10,6 +10,7 @@ import '../widgets/cloud_ai_consent_gate.dart';
 import '../widgets/local_file_image.dart';
 import '../widgets/success_transition_dialog.dart';
 import '../l10n/l10n_extensions.dart';
+import '../config/app_colors.dart';
 
 class MealAnalysisScreen extends ConsumerStatefulWidget {
   final String? imagePath;
@@ -58,7 +59,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF6B66FF);
+    final primaryColor = AppColors.brand;
 
     // On écoute l'état de notre Provider (loading, data, ou error)
     final mealState = ref.watch(mealProvider);
@@ -67,14 +68,14 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
       enabled: widget.imagePath != null,
       onGranted: _startAnalysis,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
+          leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+            icon: Icon(
               Icons.arrow_back_ios,
-              color: Colors.black,
+              color: AppColors.ink,
               size: 20,
             ),
             onPressed: () => context.pop(),
@@ -85,16 +86,17 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                 : _isProductFlow
                 ? context.l10n.mealAnalysisTitleProduct
                 : context.l10n.mealAnalysisTitleMeal,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: AppColors.ink,
             ),
           ),
           centerTitle: true,
           actions: [
             IconButton(
-              icon: const Icon(Icons.info_outline, color: primaryColor),
+              tooltip: context.l10n.commonHelpButtonTooltip,
+              icon: Icon(Icons.info_outline, color: primaryColor),
               onPressed: () => showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
@@ -120,7 +122,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                 Container(
                   height: 200,
                   width: double.infinity,
-                  decoration: BoxDecoration(color: Colors.grey.shade200),
+                  decoration: BoxDecoration(color: AppColors.grey200),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -134,7 +136,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                               ? Icons.edit_note_rounded
                               : Icons.fastfood,
                           size: 80,
-                          color: Colors.grey,
+                          color: AppColors.grey,
                         ),
 
                       Positioned(
@@ -174,7 +176,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 60.0),
                     child: Column(
                       children: [
-                        const CircularProgressIndicator(color: primaryColor),
+                        CircularProgressIndicator(color: primaryColor),
                         const SizedBox(height: 20),
                         Text(
                           widget.barcode != null
@@ -184,7 +186,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                               : context.l10n.mealAnalysisLoadingPlate,
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.grey.shade600,
+                            color: AppColors.grey600,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -193,7 +195,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                           context.l10n.mealAnalysisLoadingHint,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey.shade400,
+                            color: AppColors.grey400,
                           ),
                         ),
                       ],
@@ -222,7 +224,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                         Text(
                           error.toString(),
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey.shade600),
+                          style: TextStyle(color: AppColors.grey600),
                         ),
                         const SizedBox(height: 20),
                         ElevatedButton(
@@ -301,8 +303,8 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                     context
                                         .l10n
                                         .mealAnalysisIngredientsSubtitle,
-                                    style: const TextStyle(
-                                      color: Colors.grey,
+                                    style: TextStyle(
+                                      color: AppColors.grey,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -319,7 +321,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                     ),
                                     builder: (context, value, child) => Text(
                                       '$value',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 28,
                                         fontWeight: FontWeight.bold,
                                         color: primaryColor,
@@ -328,10 +330,10 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                   ),
                                   Text(
                                     context.l10n.mealAnalysisTotalKcalLabel,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black54,
+                                      color: AppColors.ink54,
                                     ),
                                   ),
                                 ],
@@ -391,14 +393,14 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                         .addIngredient(ingredient);
                                   }
                                 },
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.add,
-                                  color: Colors.black54,
+                                  color: AppColors.ink54,
                                 ),
                                 label: Text(
                                   context.l10n.mealAnalysisAddIngredientButton,
-                                  style: const TextStyle(
-                                    color: Colors.black87,
+                                  style: TextStyle(
+                                    color: AppColors.ink87,
                                     fontSize: 16,
                                   ),
                                 ),
@@ -407,7 +409,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                     vertical: 16,
                                   ),
                                   side: BorderSide(
-                                    color: Colors.grey.shade300,
+                                    color: AppColors.grey300,
                                     width: 2,
                                   ),
                                   shape: RoundedRectangleBorder(
@@ -438,7 +440,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                                   context
                                       .l10n
                                       .mealAnalysisNutritionSummaryTitle,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: primaryColor,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 1.2,
@@ -627,9 +629,9 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -638,10 +640,10 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: AppColors.grey200,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.restaurant, color: Colors.grey),
+            child: Icon(Icons.restaurant, color: AppColors.grey),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -661,14 +663,17 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () => ref
-                          .read(mealProvider.notifier)
-                          .removeIngredient(item.id),
-                      child: const Icon(
-                        Icons.delete_outline,
-                        color: Colors.black54,
-                        size: 20,
+                    Tooltip(
+                      message: context.l10n.mealAnalysisDeleteIngredientTooltip,
+                      child: GestureDetector(
+                        onTap: () => ref
+                            .read(mealProvider.notifier)
+                            .removeIngredient(item.id),
+                        child: Icon(
+                          Icons.delete_outline,
+                          color: AppColors.ink54,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ],
@@ -691,7 +696,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                       builder: (context, value, child) => Text(
                         context.l10n.mealAnalysisKcalValue(value.toString()),
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: AppColors.grey600,
                           fontSize: 13,
                         ),
                       ),
@@ -726,12 +731,13 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
+                        color: AppColors.grey100,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
                         children: [
                           IconButton(
+                            tooltip: context.l10n.mealAnalysisDecreaseQuantityTooltip,
                             icon: const Icon(Icons.remove, size: 16),
                             onPressed: () => ref
                                 .read(mealProvider.notifier)
@@ -759,6 +765,7 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
                             ),
                           ),
                           IconButton(
+                            tooltip: context.l10n.mealAnalysisIncreaseQuantityTooltip,
                             icon: const Icon(Icons.add, size: 16),
                             onPressed: () => ref
                                 .read(mealProvider.notifier)
@@ -787,10 +794,10 @@ class _MealAnalysisScreenState extends ConsumerState<MealAnalysisScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 9,
             fontWeight: FontWeight.bold,
-            color: Colors.black54,
+            color: AppColors.ink54,
           ),
         ),
         TweenAnimationBuilder<double>(
@@ -866,7 +873,7 @@ class _AddIngredientSheet extends StatefulWidget {
 }
 
 class _AddIngredientSheetState extends State<_AddIngredientSheet> {
-  static const primaryColor = Color(0xFF6B66FF);
+  static Color get primaryColor => AppColors.brand;
 
   final _nameController = TextEditingController();
   final _weightController = TextEditingController();
@@ -940,8 +947,8 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
       ),
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: SingleChildScrollView(
@@ -954,7 +961,7 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: AppColors.grey300,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -970,7 +977,7 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
               const SizedBox(height: 4),
               Text(
                 context.l10n.mealAnalysisAddIngredientSubtitle,
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                style: TextStyle(color: AppColors.grey600, fontSize: 13),
               ),
               const SizedBox(height: 18),
               TextField(
@@ -1083,18 +1090,18 @@ class _AddIngredientSheetState extends State<_AddIngredientSheet> {
       labelText: label,
       suffixText: suffixText,
       filled: true,
-      fillColor: Colors.grey.shade50,
+      fillColor: AppColors.grey50,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.grey200),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.grey200),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: primaryColor, width: 1.4),
+        borderSide: BorderSide(color: primaryColor, width: 1.4),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
     );

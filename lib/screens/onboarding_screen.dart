@@ -7,6 +7,7 @@ import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 import '../utils/age_policy.dart';
+import '../config/app_colors.dart';
 
 /// Ordre d'affichage des objectifs, aligné sur la maquette (Onboarding.png) :
 /// Perdre du poids, Maintenir mon poids, Prendre de la masse.
@@ -32,7 +33,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   OnboardingSex? _selectedSex;
   OnboardingGoal? _selectedGoal;
 
-  static const Color _primaryColor = Color(0xFF6B66FF);
+  static Color get _primaryColor => AppColors.brand;
 
   @override
   void dispose() {
@@ -204,7 +205,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Stack(
           children: [
@@ -246,7 +247,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     child: Text(
                       context.l10n.onboardingStepIndicator,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: _primaryColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -267,7 +268,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     context.l10n.onboardingSubtitle,
                     style: TextStyle(
                       fontSize: 15,
-                      color: Colors.grey.shade600,
+                      color: AppColors.grey600,
                       height: 1.45,
                     ),
                   ),
@@ -349,7 +350,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   const SizedBox(height: 14),
                   Text(
                     context.l10n.onboardingMedicalDisclaimer,
-                    style: TextStyle(fontSize: 11.5, color: Colors.grey.shade500, height: 1.3),
+                    style: TextStyle(fontSize: 11.5, color: AppColors.grey500, height: 1.3),
                   ),
                   const SizedBox(height: 28),
                   ElevatedButton(
@@ -408,18 +409,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           color: selected ? _primaryColor.withValues(alpha: 0.08) : Colors.white,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: selected ? _primaryColor : Colors.grey.shade300,
+            color: selected ? _primaryColor : AppColors.grey300,
             width: selected ? 1.6 : 1.2,
           ),
         ),
         child: Column(
           children: [
-            Icon(_sexIcon(sex), color: selected ? _primaryColor : Colors.black54, size: 26),
+            Icon(_sexIcon(sex), color: selected ? _primaryColor : AppColors.ink54, size: 26),
             const SizedBox(height: 8),
             Text(
               _sexLabel(sex),
               style: TextStyle(
-                color: selected ? _primaryColor : Colors.black87,
+                color: selected ? _primaryColor : AppColors.ink87,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -439,12 +440,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         decoration: BoxDecoration(
           color: selected ? _primaryColor.withValues(alpha: 0.08) : Colors.transparent,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: selected ? _primaryColor : Colors.grey.shade300),
+          border: Border.all(color: selected ? _primaryColor : AppColors.grey300),
         ),
         child: Text(
           _sexLabel(sex),
           style: TextStyle(
-            color: selected ? _primaryColor : Colors.grey.shade600,
+            color: selected ? _primaryColor : AppColors.grey600,
             fontWeight: FontWeight.w600,
             fontSize: 13,
           ),
@@ -465,7 +466,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           color: selected ? _primaryColor.withValues(alpha: 0.06) : Colors.white,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: selected ? _primaryColor : Colors.grey.shade200,
+            color: selected ? _primaryColor : AppColors.grey200,
             width: selected ? 1.6 : 1.2,
           ),
         ),
@@ -475,10 +476,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: selected ? _primaryColor : Colors.grey.shade100,
+                color: selected ? _primaryColor : AppColors.grey100,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(_goalIcon(goal), color: selected ? Colors.white : Colors.black54),
+              child: Icon(_goalIcon(goal), color: selected ? Colors.white : AppColors.ink54),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -492,14 +493,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   const SizedBox(height: 3),
                   Text(
                     _goalDescription(goal),
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600, height: 1.35),
+                    style: TextStyle(fontSize: 12, color: AppColors.grey600, height: 1.35),
                   ),
                 ],
               ),
             ),
             if (selected) ...[
               const SizedBox(width: 8),
-              const Icon(Icons.check_circle_rounded, color: _primaryColor, size: 22),
+              Icon(Icons.check_circle_rounded, color: _primaryColor, size: 22),
             ],
           ],
         ),
@@ -512,18 +513,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       hintText: hintText,
       suffixText: suffixText,
       filled: true,
-      fillColor: Colors.grey.shade50,
+      fillColor: AppColors.grey50,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.grey200),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.grey200),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: _primaryColor, width: 1.5),
+        borderSide: BorderSide(color: _primaryColor, width: 1.5),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
@@ -540,7 +541,7 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: Colors.black54),
+        Icon(icon, size: 18, color: AppColors.ink54),
         const SizedBox(width: 6),
         Text(
           label,

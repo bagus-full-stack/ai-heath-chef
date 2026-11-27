@@ -140,6 +140,30 @@ abstract class AppLocalizations {
   /// **'Flash'**
   String get commonFlashButtonTooltip;
 
+  /// No description provided for @commonAddButtonTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get commonAddButtonTooltip;
+
+  /// No description provided for @commonTogglePasswordTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher ou masquer le mot de passe'**
+  String get commonTogglePasswordTooltip;
+
+  /// No description provided for @coachSendTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le message'**
+  String get coachSendTooltip;
+
+  /// No description provided for @accountChangeAvatarTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer la photo de profil'**
+  String get accountChangeAvatarTooltip;
+
   /// No description provided for @commonHelpButtonTooltip.
   ///
   /// In fr, this message translates to:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../l10n/l10n_extensions.dart';
+import '../config/app_colors.dart';
 
 class MainLayout extends StatelessWidget {
   final Widget child;
@@ -34,7 +35,7 @@ class MainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF6B66FF);
+    final primaryColor = AppColors.brand;
 
     return Scaffold(
       // Le child est l'écran actuel (Dashboard, Coach ou Profil)
@@ -45,19 +46,19 @@ class MainLayout extends StatelessWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.2),
+              color: AppColors.grey.withValues(alpha: 0.2),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
           ],
         ),
         child: BottomNavigationBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           elevation: 0,
           currentIndex: _calculateSelectedIndex(context),
           onTap: (index) => _onItemTapped(index, context),
           selectedItemColor: primaryColor,
-          unselectedItemColor: Colors.grey.shade400,
+          unselectedItemColor: AppColors.grey400,
           showSelectedLabels: true,
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,

@@ -4,6 +4,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/l10n_extensions.dart';
+import '../config/app_colors.dart';
 
 class _Attribution {
   final String name;
@@ -52,20 +53,20 @@ class LicensesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.licensesAppBarTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: AppColors.ink,
           ),
         ),
         centerTitle: true,
@@ -77,7 +78,7 @@ class LicensesScreen extends StatelessWidget {
             Text(
               context.l10n.licensesIntro,
               style: TextStyle(
-                color: Colors.grey.shade700,
+                color: AppColors.grey700,
                 height: 1.5,
                 fontSize: 13.5,
               ),
@@ -88,9 +89,9 @@ class LicensesScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: AppColors.grey200),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +107,7 @@ class LicensesScreen extends StatelessWidget {
                     Text(
                       attribution.body,
                       style: TextStyle(
-                        color: Colors.grey.shade700,
+                        color: AppColors.grey700,
                         height: 1.4,
                         fontSize: 13,
                       ),
@@ -117,8 +118,8 @@ class LicensesScreen extends StatelessWidget {
                         onTap: () => _openUrl(attribution.url!),
                         child: Text(
                           attribution.url!,
-                          style: const TextStyle(
-                            color: Color(0xFF6B66FF),
+                          style: TextStyle(
+                            color: AppColors.brand,
                             fontSize: 12.5,
                           ),
                         ),

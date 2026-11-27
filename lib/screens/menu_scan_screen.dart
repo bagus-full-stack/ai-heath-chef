@@ -10,8 +10,9 @@ import '../providers/meal_provider.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/cloud_ai_consent_gate.dart';
 import '../widgets/local_file_image.dart';
+import '../config/app_colors.dart';
 
-const _primaryColor = Color(0xFF6B66FF);
+final _primaryColor = AppColors.brand;
 
 /// Résultat du scan d'une carte de restaurant : un plat détecté = un
 /// [Ingredient] indépendant (voir hc-analyze-menu/index.ts) — contrairement à
@@ -73,24 +74,24 @@ class _MenuScanScreenState extends ConsumerState<MenuScanScreen> {
     return CloudAiConsentGate(
       onGranted: _startAnalysis,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
+          leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+            icon: Icon(
               Icons.arrow_back_ios,
-              color: Colors.black,
+              color: AppColors.ink,
               size: 20,
             ),
             onPressed: () => context.pop(),
           ),
           title: Text(
             context.l10n.menuScanTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: AppColors.ink,
             ),
           ),
           centerTitle: true,
@@ -114,11 +115,11 @@ class _MenuScanScreenState extends ConsumerState<MenuScanScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 60),
                   child: Column(
                     children: [
-                      const CircularProgressIndicator(color: _primaryColor),
+                      CircularProgressIndicator(color: _primaryColor),
                       const SizedBox(height: 16),
                       Text(
                         context.l10n.menuScanLoadingMessage,
-                        style: TextStyle(color: Colors.grey.shade600),
+                        style: TextStyle(color: AppColors.grey600),
                       ),
                     ],
                   ),
@@ -136,7 +137,7 @@ class _MenuScanScreenState extends ConsumerState<MenuScanScreen> {
                       Text(
                         error.toString(),
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey.shade600),
+                        style: TextStyle(color: AppColors.grey600),
                       ),
                     ],
                   ),
@@ -148,7 +149,7 @@ class _MenuScanScreenState extends ConsumerState<MenuScanScreen> {
                       child: Text(
                         context.l10n.menuScanEmptyMessage,
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey.shade600),
+                        style: TextStyle(color: AppColors.grey600),
                       ),
                     );
                   }
@@ -205,9 +206,9 @@ class _DishCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.grey200),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,7 +229,7 @@ class _DishCard extends StatelessWidget {
                   context.l10n.mealAnalysisKcalValue(
                     dish.currentKcal.toString(),
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: _primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
@@ -238,7 +239,7 @@ class _DishCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               context.l10n.mealAnalysisWeightValue(dish.weight.toString()),
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+              style: TextStyle(color: AppColors.grey500, fontSize: 12),
             ),
             const SizedBox(height: 12),
             Row(
@@ -262,7 +263,7 @@ class _DishCard extends StatelessWidget {
                   onPressed: onAdd,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: _primaryColor,
-                    side: const BorderSide(color: _primaryColor),
+                    side: BorderSide(color: _primaryColor),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                   ),
                   child: Text(context.l10n.menuScanAddButton),
@@ -285,7 +286,7 @@ class _MacroChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       '$label ${context.l10n.mealAnalysisGramsValue(value.toStringAsFixed(1))}',
-      style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+      style: TextStyle(fontSize: 11, color: AppColors.grey600),
     );
   }
 }

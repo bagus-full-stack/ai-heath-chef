@@ -4,8 +4,9 @@ import '../l10n/l10n_extensions.dart';
 import '../models/meal_suggestion.dart';
 import '../utils/image_data_uri.dart';
 import '../utils/ingredient_substitution.dart';
+import '../config/app_colors.dart';
 
-const Color _kPrimaryColor = Color(0xFF6B66FF);
+Color get _kPrimaryColor => AppColors.brand;
 
 const Map<String, IconData> _kTimeSlotIcons = {
   'Petit-déjeuner': Icons.free_breakfast_rounded,
@@ -46,9 +47,9 @@ class MealSuggestionCard extends StatelessWidget {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -95,7 +96,7 @@ class MealSuggestionCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
@@ -131,7 +132,7 @@ class MealSuggestionCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: Colors.grey.shade600,
+                      color: AppColors.grey600,
                       fontSize: 12,
                       height: 1.3,
                     ),
@@ -140,7 +141,7 @@ class MealSuggestionCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.local_fire_department_outlined,
                       size: 16,
                       color: _kPrimaryColor,
@@ -150,7 +151,7 @@ class MealSuggestionCard extends StatelessWidget {
                       context.l10n.mealSuggestionCardKcalLabel(
                         suggestion.kcal.toString(),
                       ),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: _kPrimaryColor,
                         fontWeight: FontWeight.w800,
                       ),
@@ -188,7 +189,7 @@ class MealSuggestionCard extends StatelessWidget {
                           color: _kPrimaryColor.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.shopping_cart_outlined,
                           color: _kPrimaryColor,
                           size: 18,
@@ -201,7 +202,7 @@ class MealSuggestionCard extends StatelessWidget {
                       child: Container(
                         width: 36,
                         height: 36,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           color: _kPrimaryColor,
                           shape: BoxShape.circle,
                         ),
@@ -250,8 +251,8 @@ class _RecipeSheet extends StatelessWidget {
       expand: false,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           ),
           child: ListView(
@@ -263,7 +264,7 @@ class _RecipeSheet extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: AppColors.grey300,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -314,7 +315,7 @@ class _RecipeSheet extends StatelessWidget {
                           ),
                           child: Text(
                             '${i + 1}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                               color: _kPrimaryColor,
@@ -388,9 +389,9 @@ class _IngredientRow extends StatelessWidget {
                       content: Text(context.l10n.mealSuggestionRecipeSubstituteMessage(substitute)),
                     ),
                   ),
-                  child: const Padding(
+                  child: Padding(
                     padding: EdgeInsets.only(left: 8),
-                    child: Icon(Icons.swap_horiz_rounded, size: 18, color: Colors.grey),
+                    child: Icon(Icons.swap_horiz_rounded, size: 18, color: AppColors.grey),
                   ),
                 ),
             ],
@@ -427,7 +428,7 @@ class _MacroMini extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey.shade500,
+            color: AppColors.grey500,
             fontSize: 10,
             fontWeight: FontWeight.w700,
           ),
@@ -435,10 +436,10 @@ class _MacroMini extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.ink87,
           ),
         ),
       ],

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../config/app_colors.dart';
 
 /// Dialogue modal affichant un indicateur de chargement, qui se transforme
 /// en confirmation visuelle (cercle vert + check, avec un léger effet de
@@ -21,13 +22,13 @@ class SuccessTransitionDialog extends StatefulWidget {
   /// (ex. "Bienvenue en PRO !"). Sans lui, seul le cercle animé s'affiche.
   final String? successMessage;
 
-  const SuccessTransitionDialog({
+  SuccessTransitionDialog({
     super.key,
     required this.isSuccess,
     this.successColor = const Color(0xFF45C48C),
-    this.loadingColor = const Color(0xFF6B66FF),
+    Color? loadingColor,
     this.successMessage,
-  });
+  }) : loadingColor = loadingColor ?? AppColors.brand;
 
   @override
   State<SuccessTransitionDialog> createState() =>

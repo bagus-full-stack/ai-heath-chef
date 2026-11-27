@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../models/meal_analysis_args.dart';
+import '../config/app_colors.dart';
 
 enum _CaptureMode { scanner, repas, produit, menu, frigo, manuel }
 
@@ -338,7 +339,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
               width: double.infinity,
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(context.l10n.cameraCaptureHelpDismiss, style: const TextStyle(color: Color(0xFF6B66FF))),
+                child: Text(context.l10n.cameraCaptureHelpDismiss, style: TextStyle(color: AppColors.brand)),
               ),
             ),
           ],
@@ -357,7 +358,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF6B66FF);
+    final primaryColor = AppColors.brand;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -466,9 +467,9 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen>
                                             color: Colors.white,
                                           ),
                                         )
-                                      : const Icon(
+                                      : Icon(
                                           Icons.camera_alt_rounded,
-                                          color: Colors.black,
+                                          color: AppColors.ink,
                                           size: 30,
                                         ),
                                 ),
@@ -628,12 +629,12 @@ class _FocusCaption extends StatelessWidget {
               Text(
                 context.l10n.cameraCaptureAiAnalysisCaption,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,
-                  shadows: [Shadow(color: Colors.black54, blurRadius: 6)],
+                  shadows: [Shadow(color: AppColors.ink54, blurRadius: 6)],
                 ),
               ),
               const SizedBox(height: 6),
@@ -645,11 +646,11 @@ class _FocusCaption extends StatelessWidget {
                   _ => context.l10n.cameraCaptureFrameMealHint,
                 },
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white70,
                   fontSize: 13,
                   fontStyle: FontStyle.italic,
-                  shadows: [Shadow(color: Colors.black54, blurRadius: 6)],
+                  shadows: [Shadow(color: AppColors.ink54, blurRadius: 6)],
                 ),
               ),
             ],

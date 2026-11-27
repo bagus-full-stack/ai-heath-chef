@@ -5,13 +5,14 @@ import 'package:go_router/go_router.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
+import '../config/app_colors.dart';
 
-const Color _kPrimaryColor = Color(0xFF6B66FF);
+Color get _kPrimaryColor => AppColors.brand;
 
 const List<(String value, IconData icon)> _kToneOptions = [
   ('motivant', Icons.bolt_rounded),
   ('bienveillant', Icons.favorite_rounded),
-  ('direct', Icons.bolt_outlined),
+  ('direct', Icons.arrow_forward_rounded),
   ('humoristique', Icons.emoji_emotions_rounded),
 ];
 
@@ -88,22 +89,22 @@ class _CoachPersonalizationScreenState extends ConsumerState<CoachPersonalizatio
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.coachPersonalizationAppBarTitle,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.ink),
         ),
         centerTitle: true,
         actions: [
           if (_saving)
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(right: 20),
               child: Center(
                 child: SizedBox(
@@ -121,7 +122,7 @@ class _CoachPersonalizationScreenState extends ConsumerState<CoachPersonalizatio
           children: [
             Text(
               context.l10n.coachPersonalizationIntro,
-              style: TextStyle(color: Colors.grey.shade600, height: 1.4),
+              style: TextStyle(color: AppColors.grey600, height: 1.4),
             ),
             const SizedBox(height: 20),
             for (final option in _kToneOptions) ...[
@@ -166,7 +167,7 @@ class _ToneCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? _kPrimaryColor.withValues(alpha: 0.08) : Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: selected ? _kPrimaryColor : Colors.grey.shade200, width: selected ? 1.6 : 1),
+          border: Border.all(color: selected ? _kPrimaryColor : AppColors.grey200, width: selected ? 1.6 : 1),
         ),
         child: Row(
           children: [
@@ -174,10 +175,10 @@ class _ToneCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: selected ? _kPrimaryColor : Colors.grey.shade100,
+                color: selected ? _kPrimaryColor : AppColors.grey100,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: selected ? Colors.white : Colors.grey.shade600),
+              child: Icon(icon, color: selected ? Colors.white : AppColors.grey600),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -189,15 +190,15 @@ class _ToneCard extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: selected ? _kPrimaryColor : Colors.black87,
+                      color: selected ? _kPrimaryColor : AppColors.ink87,
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(description, style: TextStyle(color: Colors.grey.shade600, fontSize: 12.5)),
+                  Text(description, style: TextStyle(color: AppColors.grey600, fontSize: 12.5)),
                 ],
               ),
             ),
-            if (selected) const Icon(Icons.check_circle_rounded, color: _kPrimaryColor, size: 22),
+            if (selected) Icon(Icons.check_circle_rounded, color: _kPrimaryColor, size: 22),
           ],
         ),
       ),

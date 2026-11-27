@@ -13,6 +13,7 @@ import '../widgets/cloud_ai_consent_gate.dart';
 import '../widgets/meal_suggestion_card.dart';
 import 'coach_screen.dart' show openCoachChatSheet, kCoachPrimaryColor;
 import '../l10n/l10n_extensions.dart';
+import '../config/app_colors.dart';
 
 /// Plan de repas des 7 prochains jours, généré par l'IA — ouvert depuis
 /// l'icône calendrier sur l'écran "Idées repas" (voir meal_suggestions_screen.dart).
@@ -38,26 +39,26 @@ class _WeeklyMealPlanContent extends ConsumerWidget {
     final allergies = ref.watch(profileProvider).value?.allergies ?? const [];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.weeklyMealPlanTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: AppColors.ink,
           ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.event_available_outlined,
               color: kCoachPrimaryColor,
             ),
@@ -78,7 +79,7 @@ class _WeeklyMealPlanContent extends ConsumerWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: kCoachPrimaryColor),
+            icon: Icon(Icons.refresh_rounded, color: kCoachPrimaryColor),
             tooltip: context.l10n.weeklyMealPlanRegenerateTooltip,
             onPressed: () =>
                 ref.read(weeklyMealPlanProvider.notifier).regenerate(),
@@ -87,7 +88,7 @@ class _WeeklyMealPlanContent extends ConsumerWidget {
       ),
       body: SafeArea(
         child: planAsync.animatedWhen(
-          loading: () => const Center(
+          loading: () => Center(
             child: CircularProgressIndicator(color: kCoachPrimaryColor),
           ),
           error: (error, stackTrace) => Center(
@@ -105,7 +106,7 @@ class _WeeklyMealPlanContent extends ConsumerWidget {
                   Text(
                     context.l10n.weeklyMealPlanLoadError,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(color: AppColors.grey600),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
@@ -127,7 +128,7 @@ class _WeeklyMealPlanContent extends ConsumerWidget {
               return Center(
                 child: Text(
                   context.l10n.weeklyMealPlanEmptyMessage,
-                  style: TextStyle(color: Colors.grey.shade600),
+                  style: TextStyle(color: AppColors.grey600),
                 ),
               );
             }
@@ -164,16 +165,16 @@ class _WeeklyMealPlanContent extends ConsumerWidget {
                           ),
                         );
                       },
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.shopping_cart_outlined,
                         color: kCoachPrimaryColor,
                       ),
                       label: Text(
                         context.l10n.weeklyMealPlanAddAllButton,
-                        style: const TextStyle(color: kCoachPrimaryColor),
+                        style: TextStyle(color: kCoachPrimaryColor),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: kCoachPrimaryColor),
+                        side: BorderSide(color: kCoachPrimaryColor),
                       ),
                     ),
                   ),

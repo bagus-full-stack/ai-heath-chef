@@ -8,6 +8,7 @@ import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 import '../utils/password_policy.dart';
 import 'terms_screen.dart' show kTermsVersion;
+import '../config/app_colors.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -141,10 +142,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF6B66FF);
+    final primaryColor = AppColors.brand;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
@@ -153,7 +154,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             children: [
               Align(
                 alignment: Alignment.centerLeft,
-                child: IconButton(
+                child: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
                   padding: EdgeInsets.zero,
                   onPressed: _openLogin,
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -175,8 +176,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   width: 76,
                   height: 76,
                   padding: const EdgeInsets.all(14),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF3E6B4F),
+                  decoration: BoxDecoration(
+                    color: AppColors.brand,
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset('assets/icon/icon_foreground.png'),
@@ -192,7 +193,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               Text(
                 context.l10n.signupSubtitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                style: TextStyle(fontSize: 16, color: AppColors.grey600),
               ),
               const SizedBox(height: 34),
               Text(
@@ -242,7 +243,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   hintText: '••••••••',
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
-                    icon: Icon(
+                    tooltip: context.l10n.commonTogglePasswordTooltip, icon: Icon(
                       _obscurePassword
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
@@ -274,7 +275,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         border: Border.all(
                           color: _acceptedTerms
                               ? primaryColor
-                              : Colors.grey.shade400,
+                              : AppColors.grey400,
                         ),
                       ),
                       child: _acceptedTerms
@@ -293,7 +294,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           Text(
                             context.l10n.signupTermsAcceptance,
                             style: TextStyle(
-                              color: Colors.grey.shade700,
+                              color: AppColors.grey700,
                               height: 1.35,
                               fontSize: 13,
                             ),
@@ -371,19 +372,19 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               const SizedBox(height: 18),
               Row(
                 children: [
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                  Expanded(child: Divider(color: AppColors.grey300)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       context.l10n.signupDividerOrSignUpWith,
                       style: TextStyle(
-                        color: Colors.grey.shade500,
+                        color: AppColors.grey500,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                  Expanded(child: Divider(color: AppColors.grey300)),
                 ],
               ),
               const SizedBox(height: 18),
@@ -397,10 +398,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             OAuthProvider.apple,
                             lang: Localizations.localeOf(context).languageCode,
                           ),
-                      icon: const Icon(Icons.apple, color: Colors.black),
-                      label: const Text(
+                      icon: Icon(Icons.apple, color: AppColors.ink),
+                      label: Text(
                         'Apple',
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(color: AppColors.ink),
                       ),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
@@ -419,14 +420,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             OAuthProvider.google,
                             lang: Localizations.localeOf(context).languageCode,
                           ),
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.g_mobiledata,
-                        color: Colors.black,
+                        color: AppColors.ink,
                         size: 28,
                       ),
-                      label: const Text(
+                      label: Text(
                         'Google',
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(color: AppColors.ink),
                       ),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
@@ -445,7 +446,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   Text(
                     context.l10n.signupAlreadyMember,
                     style: TextStyle(
-                      color: Colors.grey.shade700,
+                      color: AppColors.grey700,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -453,8 +454,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     onPressed: _openLogin,
                     child: Text(
                       context.l10n.signupLoginLink,
-                      style: const TextStyle(
-                        color: Colors.black87,
+                      style: TextStyle(
+                        color: AppColors.ink87,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -465,7 +466,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               Text(
                 context.l10n.signupSecureDataNotice,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                style: TextStyle(color: AppColors.grey500, fontSize: 12),
               ),
             ],
           ),

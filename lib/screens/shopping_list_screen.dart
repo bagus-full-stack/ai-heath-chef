@@ -5,8 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/shopping_list_provider.dart';
 import '../widgets/animated_async_value.dart';
+import '../config/app_colors.dart';
 
-const _primaryColor = Color(0xFF6B66FF);
+final _primaryColor = AppColors.brand;
 
 /// Liste de courses cochable, alimentée depuis les idées du Coach IA
 /// (voir [shoppingListProvider]).
@@ -18,29 +19,29 @@ class ShoppingListScreen extends ConsumerWidget {
     final itemsAsync = ref.watch(shoppingListProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.shoppingListTitle,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.ink),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.checklist_rtl_rounded, color: _primaryColor),
+            icon: Icon(Icons.checklist_rtl_rounded, color: _primaryColor),
             tooltip: context.l10n.shoppingListClearCheckedButton,
             onPressed: () => ref.read(shoppingListProvider.notifier).clearChecked(),
           ),
         ],
       ),
       body: itemsAsync.animatedWhen(
-        loading: () => const Center(child: CircularProgressIndicator(color: _primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: _primaryColor)),
         error: (err, stack) => Center(child: Text(err.toString())),
         data: (items) {
           if (items.isEmpty) {
@@ -50,7 +51,7 @@ class ShoppingListScreen extends ConsumerWidget {
                 child: Text(
                   context.l10n.shoppingListEmptyState,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey.shade600),
+                  style: TextStyle(color: AppColors.grey600),
                 ),
               ),
             );
@@ -74,9 +75,9 @@ class ShoppingListScreen extends ConsumerWidget {
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: AppColors.grey200),
                   ),
                   child: CheckboxListTile(
                     value: item.checked,
@@ -88,7 +89,7 @@ class ShoppingListScreen extends ConsumerWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         decoration: item.checked ? TextDecoration.lineThrough : null,
-                        color: item.checked ? Colors.grey.shade400 : Colors.black87,
+                        color: item.checked ? AppColors.grey400 : AppColors.ink87,
                       ),
                     ),
                   ),

@@ -9,8 +9,9 @@ import '../models/ingredient.dart';
 import '../models/meal_analysis_args.dart';
 import '../providers/locale_provider.dart';
 import '../providers/meal_provider.dart';
+import '../config/app_colors.dart';
 
-const _primaryColor = Color(0xFF6B66FF);
+final _primaryColor = AppColors.brand;
 
 /// Recherche d'un aliment par nom (repas maison, resto...) dans la base
 /// Open Food Facts, sans passer par une photo ou un code-barres. Le résultat
@@ -69,17 +70,17 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.foodSearchTitle,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.ink),
         ),
         centerTitle: true,
       ),
@@ -95,20 +96,20 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
                 onChanged: _onChanged,
                 decoration: InputDecoration(
                   hintText: context.l10n.foodSearchFieldHint,
-                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  prefixIcon: Icon(Icons.search, color: AppColors.grey),
                   filled: true,
-                  fillColor: Colors.grey.shade50,
+                  fillColor: AppColors.grey50,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: Colors.grey.shade200),
+                    borderSide: BorderSide(color: AppColors.grey200),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: Colors.grey.shade200),
+                    borderSide: BorderSide(color: AppColors.grey200),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: _primaryColor, width: 1.4),
+                    borderSide: BorderSide(color: _primaryColor, width: 1.4),
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                 ),
@@ -123,7 +124,7 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
                   onPressed: _addManually,
                   child: Text(
                     context.l10n.foodSearchAddManuallyButton,
-                    style: const TextStyle(color: _primaryColor, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: _primaryColor, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -147,7 +148,7 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
       future: future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: _primaryColor));
+          return Center(child: CircularProgressIndicator(color: _primaryColor));
         }
         if (snapshot.hasError) {
           return _buildMessage(
@@ -188,12 +189,12 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: color ?? Colors.grey.shade400),
+            Icon(icon, size: 48, color: color ?? AppColors.grey400),
             const SizedBox(height: 12),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(color: color ?? Colors.grey.shade600, fontSize: 14),
+              style: TextStyle(color: color ?? AppColors.grey600, fontSize: 14),
             ),
           ],
         ),
@@ -216,17 +217,17 @@ class _ResultTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.grey200),
         ),
         child: Row(
           children: [
             Container(
               width: 44,
               height: 44,
-              decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
-              child: const Icon(Icons.fastfood, color: Colors.grey),
+              decoration: BoxDecoration(color: AppColors.grey100, shape: BoxShape.circle),
+              child: Icon(Icons.fastfood, color: AppColors.grey),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -241,12 +242,12 @@ class _ResultTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     context.l10n.foodSearchKcalPer100g(ingredient.kcalPer100g.toStringAsFixed(0)),
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                    style: TextStyle(color: AppColors.grey600, fontSize: 12),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: Colors.grey.shade400),
+            Icon(Icons.chevron_right, color: AppColors.grey400),
           ],
         ),
       ),

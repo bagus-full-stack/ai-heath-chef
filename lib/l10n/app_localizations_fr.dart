@@ -30,6 +30,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commonFlashButtonTooltip => 'Flash';
 
   @override
+  String get commonAddButtonTooltip => 'Ajouter';
+
+  @override
+  String get commonTogglePasswordTooltip =>
+      'Afficher ou masquer le mot de passe';
+
+  @override
+  String get coachSendTooltip => 'Envoyer le message';
+
+  @override
+  String get accountChangeAvatarTooltip => 'Changer la photo de profil';
+
+  @override
   String get commonHelpButtonTooltip => 'Aide';
 
   @override

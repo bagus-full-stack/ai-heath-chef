@@ -21,6 +21,7 @@ import '../widgets/local_file_image.dart';
 import '../widgets/storage_image.dart';
 import '../l10n/l10n_extensions.dart';
 import '../widgets/app_logo.dart';
+import '../config/app_colors.dart';
 
 const _kLastCelebratedStreakMilestoneKey =
     'streak_last_celebrated_milestone';
@@ -63,7 +64,7 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const primaryColor = Color(0xFF6B66FF);
+    final primaryColor = AppColors.brand;
 
     // Objectifs personnalisés, calculés à partir du profil (sexe/âge/poids/
     // objectif). Repli sur des valeurs par défaut tant que le profil n'est
@@ -126,9 +127,9 @@ class DashboardScreen extends ConsumerWidget {
         );
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -159,14 +160,14 @@ class DashboardScreen extends ConsumerWidget {
                                 ? NetworkImage(snapshot.data!)
                                 : null,
                             child: snapshot.data == null
-                                ? const Icon(Icons.person, color: Colors.grey)
+                                ? Icon(Icons.person, color: AppColors.grey)
                                 : null,
                           ),
                         ),
                       ),
-                      orElse: () => const CircleAvatar(
+                      orElse: () => CircleAvatar(
                         backgroundColor: Color(0xFFEEEEEE),
-                        child: Icon(Icons.person, color: Colors.grey),
+                        child: Icon(Icons.person, color: AppColors.grey),
                       ),
                     ),
                   ),
@@ -179,7 +180,7 @@ class DashboardScreen extends ConsumerWidget {
 
       body: mealsAsyncValue.animatedWhen(
         loading: () =>
-            const Center(child: CircularProgressIndicator(color: primaryColor)),
+            Center(child: CircularProgressIndicator(color: primaryColor)),
         error: (err, stack) => Center(
           child: Text(context.l10n.dashboardMealsLoadError(err.toString())),
         ),
@@ -283,7 +284,7 @@ class DashboardScreen extends ConsumerWidget {
                             ),
                             child: Text(
                               '${DateTime.now().day} / ${DateTime.now().month}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: primaryColor,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
@@ -294,10 +295,11 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 28),
 
-                  // Jauge Circulaire
+                  // Jauge Circulaire (demi-arc : on ne réserve que la moitié haute du cercle)
                   Center(
+                    heightFactor: 0.68,
                     child: Semantics(
                       excludeSemantics: true,
                       label: context.l10n.dashboardCaloriesGaugeSemanticLabel(
@@ -310,7 +312,7 @@ class DashboardScreen extends ConsumerWidget {
                       animation: true,
                       percent: percentKcal,
                       arcType: ArcType.HALF,
-                      arcBackgroundColor: Colors.grey.shade200,
+                      arcBackgroundColor: AppColors.grey200,
                       circularStrokeCap: CircularStrokeCap.round,
                       progressColor: primaryColor,
                       center: Column(
@@ -325,17 +327,17 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                           Text(
                             context.l10n.dashboardKcalRemainingLabel,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black54,
+                              color: AppColors.ink54,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.local_fire_department,
                                 size: 16,
                                 color: primaryColor,
@@ -344,8 +346,8 @@ class DashboardScreen extends ConsumerWidget {
                                 context.l10n.dashboardCalorieGoalLabel(
                                   targetKcal,
                                 ),
-                                style: const TextStyle(
-                                  color: Colors.black54,
+                                style: TextStyle(
+                                  color: AppColors.ink54,
                                   fontSize: 12,
                                 ),
                               ),
@@ -383,9 +385,9 @@ class DashboardScreen extends ConsumerWidget {
 
                   // Cartes de Macronutriments
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Semantics(
+                      Expanded(child: Semantics(
                         excludeSemantics: true,
                         label: context.l10n.dashboardMacroProgressSemanticLabel(
                           context.l10n.dashboardProteinLabel,
@@ -399,8 +401,9 @@ class DashboardScreen extends ConsumerWidget {
                           percentProt,
                           Colors.blue,
                         ),
-                      ),
-                      Semantics(
+                      )),
+                      const SizedBox(width: 10),
+                      Expanded(child: Semantics(
                         excludeSemantics: true,
                         label: context.l10n.dashboardMacroProgressSemanticLabel(
                           context.l10n.dashboardCarbsLabel,
@@ -414,8 +417,9 @@ class DashboardScreen extends ConsumerWidget {
                           percentGluc,
                           Colors.orange,
                         ),
-                      ),
-                      Semantics(
+                      )),
+                      const SizedBox(width: 10),
+                      Expanded(child: Semantics(
                         excludeSemantics: true,
                         label: context.l10n.dashboardMacroProgressSemanticLabel(
                           context.l10n.dashboardFatLabel,
@@ -429,7 +433,7 @@ class DashboardScreen extends ConsumerWidget {
                           percentLip,
                           Colors.pink,
                         ),
-                      ),
+                      )),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -459,7 +463,7 @@ class DashboardScreen extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.restaurant, color: primaryColor),
+                          Icon(Icons.restaurant, color: primaryColor),
                           const SizedBox(width: 8),
                           Text(
                             context.l10n.dashboardMealJournalTitle,
@@ -485,7 +489,7 @@ class DashboardScreen extends ConsumerWidget {
                               child: Text(
                                 context.l10n.dashboardEmptyMealsMessage,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.grey.shade500),
+                                style: TextStyle(color: AppColors.grey500),
                               ),
                             ),
                           )
@@ -564,7 +568,7 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                   ),
 
-                  const SizedBox(height: 100), // Espace pour le bouton flottant
+                  const SizedBox(height: 120), // Espace pour le bouton flottant (même agrandi)
                 ],
               ),
             ),
@@ -575,16 +579,15 @@ class DashboardScreen extends ConsumerWidget {
       // Bouton Flottant
       floatingActionButton: mealsAsyncValue.isLoading
           ? null
-          : FloatingActionButton(
+          : FloatingActionButton.extended(
               onPressed: () => _openCameraCapture(context),
-              tooltip: context.l10n.cameraCaptureShutterButtonLabel,
-              backgroundColor: Colors.pink.shade400,
-              shape: const CircleBorder(),
+              backgroundColor: AppColors.brand,
+              foregroundColor: Colors.white,
               elevation: 4,
-              child: const Icon(
-                Icons.camera_alt,
-                color: Colors.white,
-                size: 28,
+              icon: const Icon(Icons.camera_alt, size: 24),
+              label: Text(
+                context.l10n.cameraCaptureShutterButtonLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
     );
@@ -600,16 +603,16 @@ class DashboardScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade100,
+            color: AppColors.grey100,
             blurRadius: 10,
             spreadRadius: 1,
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: AppColors.grey100),
       ),
       child: Row(
         children: [
@@ -649,7 +652,7 @@ class DashboardScreen extends ConsumerWidget {
                     totalMl,
                     _hydrationGoalMl,
                   ),
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 12, color: AppColors.grey600),
                 ),
               ],
             ),
@@ -716,16 +719,16 @@ class DashboardScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade100,
+            color: AppColors.grey100,
             blurRadius: 10,
             spreadRadius: 1,
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: AppColors.grey100),
       ),
       child: Row(
         children: [
@@ -738,8 +741,8 @@ class DashboardScreen extends ConsumerWidget {
                 bmi.value.toStringAsFixed(1),
                 // ponytail: texte noir plutôt que blanc sur ces pastels
                 // (ratio WCAG AA insuffisant en blanc, confortable en noir).
-                style: const TextStyle(
-                  color: Colors.black,
+                style: TextStyle(
+                  color: AppColors.ink,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),
@@ -764,7 +767,7 @@ class DashboardScreen extends ConsumerWidget {
                     bmi.label(context).toLowerCase(),
                     bmi.rangeLabel,
                   ),
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 12, color: AppColors.grey600),
                 ),
               ],
             ),
@@ -782,14 +785,13 @@ class DashboardScreen extends ConsumerWidget {
     Color color,
   ) {
     return Container(
-      width: 105,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade200,
+            color: AppColors.grey200,
             blurRadius: 10,
             spreadRadius: 2,
           ),
@@ -802,33 +804,41 @@ class DashboardScreen extends ConsumerWidget {
             children: [
               CircleAvatar(radius: 6, backgroundColor: color),
               const SizedBox(width: 6),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
+              Flexible(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.ink54,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                current,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  current,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              Text(
-                total,
-                style: const TextStyle(fontSize: 10, color: Colors.grey),
-              ),
-            ],
+                Text(
+                  total,
+                  style: TextStyle(fontSize: 10, color: AppColors.grey),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 8),
           LinearPercentIndicator(
@@ -857,16 +867,16 @@ class DashboardScreen extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade100,
+            color: AppColors.grey100,
             blurRadius: 10,
             spreadRadius: 1,
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: AppColors.grey100),
       ),
       child: Row(
         children: [
@@ -875,13 +885,13 @@ class DashboardScreen extends ConsumerWidget {
             child: Container(
               width: 60,
               height: 60,
-              color: Colors.grey.shade200,
+              color: AppColors.grey200,
               child: imageUrl != null && imageUrl.startsWith(localImagePrefix)
                   ? LocalFileImage(
                       imageUrl.substring(localImagePrefix.length),
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.fastfood, color: Colors.grey),
+                          Icon(Icons.fastfood, color: AppColors.grey),
                     )
                   : StorageImage(
                       bucket: 'hc_meal_photos',
@@ -891,9 +901,9 @@ class DashboardScreen extends ConsumerWidget {
                               snapshot.data!,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.fastfood, color: Colors.grey),
+                                  Icon(Icons.fastfood, color: AppColors.grey),
                             )
-                          : const Icon(Icons.fastfood, color: Colors.grey),
+                          : Icon(Icons.fastfood, color: AppColors.grey),
                     ),
             ),
           ),
@@ -912,11 +922,11 @@ class DashboardScreen extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                    Icon(Icons.access_time, size: 14, color: AppColors.grey),
                     const SizedBox(width: 4),
                     Text(
                       time,
-                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                      style: TextStyle(color: AppColors.grey, fontSize: 12),
                     ),
                   ],
                 ),
@@ -926,13 +936,13 @@ class DashboardScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFF6B66FF).withValues(alpha: 0.1),
+              color: AppColors.brand.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               calories,
-              style: const TextStyle(
-                color: Color(0xFF6B66FF),
+              style: TextStyle(
+                color: AppColors.brand,
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
               ),
@@ -945,7 +955,7 @@ class DashboardScreen extends ConsumerWidget {
             visualDensity: VisualDensity.compact,
             icon: Icon(
               Icons.replay_rounded,
-              color: Colors.grey.shade400,
+              color: AppColors.grey400,
               size: 20,
             ),
             tooltip: context.l10n.dashboardRepeatMealTooltip,

@@ -7,6 +7,7 @@ import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 import '../widgets/app_logo.dart';
+import '../config/app_colors.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -83,10 +84,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF6B66FF);
+    final primaryColor = AppColors.brand;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 18, 24, 24),
@@ -103,8 +104,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   width: 76,
                   height: 76,
                   padding: const EdgeInsets.all(14),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF3E6B4F),
+                  decoration: BoxDecoration(
+                    color: AppColors.brand,
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset('assets/icon/icon_foreground.png'),
@@ -130,7 +131,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Text(
                 context.l10n.loginSubtitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                style: TextStyle(fontSize: 16, color: AppColors.grey600),
               ),
               const SizedBox(height: 36),
               Text(context.l10n.loginEmailLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -175,7 +176,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   hintText: '••••••••',
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
-                    icon: Icon(
+                    tooltip: context.l10n.commonTogglePasswordTooltip, icon: Icon(
                       _obscurePassword
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
@@ -229,8 +230,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 onPressed: _openSignup,
                 child: Text(
                   context.l10n.loginSignupPrompt,
-                  style: const TextStyle(
-                    color: Colors.black87,
+                  style: TextStyle(
+                    color: AppColors.ink87,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -238,19 +239,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: 20),
               Row(
                 children: [
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                  Expanded(child: Divider(color: AppColors.grey300)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       context.l10n.loginDividerOrContinueWith,
                       style: TextStyle(
-                        color: Colors.grey.shade500,
+                        color: AppColors.grey500,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                  Expanded(child: Divider(color: AppColors.grey300)),
                 ],
               ),
               const SizedBox(height: 18),
@@ -260,8 +261,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () =>
                           ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.google, lang: Localizations.localeOf(context).languageCode),
-                      icon: const Icon(Icons.g_mobiledata, color: Colors.black, size: 28),
-                      label: const Text('Google', style: TextStyle(color: Colors.black)),
+                      icon: Icon(Icons.g_mobiledata, color: AppColors.ink, size: 28),
+                      label: Text('Google', style: TextStyle(color: AppColors.ink)),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
@@ -275,8 +276,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () =>
                           ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.github, lang: Localizations.localeOf(context).languageCode),
-                      icon: const Icon(Icons.code, color: Colors.black),
-                      label: const Text('GitHub', style: TextStyle(color: Colors.black)),
+                      icon: Icon(Icons.code, color: AppColors.ink),
+                      label: Text('GitHub', style: TextStyle(color: AppColors.ink)),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
@@ -294,7 +295,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 icon: const Icon(Icons.discord, color: Color(0xFF5865F2)),
                 label: Text(
                   context.l10n.loginContinueWithDiscord,
-                  style: const TextStyle(color: Colors.black),
+                  style: TextStyle(color: AppColors.ink),
                 ),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),

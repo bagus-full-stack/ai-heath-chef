@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
@@ -20,6 +21,7 @@ import 'local_db/hydration_repository.dart';
 import 'local_db/local_db_provider.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
+import 'config/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,15 +98,50 @@ class MyApp extends ConsumerWidget {
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6B66FF),
-          surface: Colors.white,
-        ),
-        useMaterial3: true,
-      ),
+      theme: _buildTheme(Brightness.light),
+      darkTheme: _buildTheme(Brightness.dark),
+      themeMode: ThemeMode.system,
+      // Les jetons AppColors lisent un drapeau statique : on le synchronise avec la
+      // luminosité effective, et la clé reconstruit l'arbre quand elle change.
+      builder: (context, child) {
+        final dark = Theme.of(context).brightness == Brightness.dark;
+        AppColors.dark = dark;
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          // Icônes de la barre d'état lisibles dans les deux thèmes.
+          value: dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+          child: KeyedSubtree(key: ValueKey(dark), child: child ?? const SizedBox.shrink()),
+        );
+      },
       // On connecte simplement la variable de notre nouveau fichier
       routerConfig: appRouter,
     );
   }
+}
+
+ThemeData _buildTheme(Brightness brightness) {
+  final dark = brightness == Brightness.dark;
+  AppColors.dark = dark; // pour que les getters ci-dessous donnent la bonne variante
+  final brand = AppColors.brand;
+  final scheme = ColorScheme.fromSeed(
+    seedColor: const Color(0xFF134E3F),
+    brightness: brightness,
+    primary: brand,
+    onPrimary: Colors.white,
+    surface: AppColors.surface,
+  );
+  final grey = dark ? const Color(0xFF8A918F) : const Color(0xFF6B7280);
+  return ThemeData(
+    colorScheme: scheme,
+    useMaterial3: true,
+    scaffoldBackgroundColor: AppColors.bg,
+    // Interrupteur « off » : contour et pouce assez contrastés (le gris sur gris par défaut se perd).
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith(
+        (s) => s.contains(WidgetState.selected) ? Colors.white : grey,
+      ),
+      trackOutlineColor: WidgetStateProperty.resolveWith(
+        (s) => s.contains(WidgetState.selected) ? Colors.transparent : grey,
+      ),
+    ),
+  );
 }

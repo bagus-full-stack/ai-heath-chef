@@ -10,6 +10,7 @@ import '../local_db/local_data_purge.dart';
 import '../local_db/local_db_provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/purchase_service.dart';
+import '../config/app_colors.dart';
 
 const _kAppleSubscriptionsUrl = 'https://apps.apple.com/account/subscriptions';
 const _kGoogleSubscriptionsUrl =
@@ -107,7 +108,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
     final expectedWord = l10n.deleteAccountConfirmWord;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -173,7 +174,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
             Text(
               l10n.deleteAccountDataListBody,
               style: TextStyle(
-                color: Colors.grey.shade700,
+                color: AppColors.grey700,
                 height: 1.5,
                 fontSize: 13,
               ),
@@ -240,14 +241,14 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
               decoration: InputDecoration(
                 labelText: l10n.deleteAccountConfirmFieldLabel,
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(color: AppColors.grey200),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(color: AppColors.grey200),
                 ),
                 focusedBorder: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(14)),

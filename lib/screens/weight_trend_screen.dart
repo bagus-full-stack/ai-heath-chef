@@ -13,8 +13,9 @@ import '../providers/dashboard_provider.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/local_file_image.dart';
 import '../widgets/storage_image.dart';
+import '../config/app_colors.dart';
 
-const _primaryColor = Color(0xFF6B66FF);
+final _primaryColor = AppColors.brand;
 
 /// Courbe de progression du poids, alimentée par [WeightEntries] (base
 /// locale) — le pendant de nutrition_trends_screen.dart pour le poids
@@ -77,10 +78,10 @@ class WeightTrendScreen extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             sheetContext.l10n.weightTrendPhotoAttachedLabel,
-                            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                            style: TextStyle(color: AppColors.grey600, fontSize: 12),
                           ),
                         ),
-                        IconButton(
+                        IconButton(tooltip: MaterialLocalizations.of(context).closeButtonTooltip, 
                           icon: const Icon(Icons.close_rounded, size: 20),
                           onPressed: () => setSheetState(() => photoPath = null),
                         ),
@@ -184,21 +185,21 @@ class WeightTrendScreen extends ConsumerWidget {
     final fallbackWeight = profileAsync.maybeWhen(data: (p) => p?.currentWeight ?? 0, orElse: () => 0.0);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Colors.black),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.ink),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.weightTrendTitle,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.ink),
         ),
       ),
       body: entriesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: _primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: _primaryColor)),
         error: (err, stack) => Center(child: Text(context.l10n.weightTrendErrorMessage(err.toString()))),
         data: (entries) {
           final latestWeight = entries.isNotEmpty ? entries.last.weightKg : fallbackWeight;
@@ -235,7 +236,7 @@ class WeightTrendScreen extends ConsumerWidget {
                     child: Text(
                       context.l10n.weightTrendEmptyState,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey.shade600),
+                      style: TextStyle(color: AppColors.grey600),
                     ),
                   )
                 else
@@ -243,9 +244,9 @@ class WeightTrendScreen extends ConsumerWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(18),
-                      boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 10, spreadRadius: 1)],
+                      boxShadow: [BoxShadow(color: AppColors.grey200, blurRadius: 10, spreadRadius: 1)],
                     ),
                     child: _WeightChart(entries: entries, targetWeight: targetWeight),
                   ),
@@ -273,10 +274,10 @@ class WeightTrendScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 TextButton.icon(
                   onPressed: () => _setupWeeklyReminder(context, ref),
-                  icon: const Icon(Icons.notifications_active_outlined, color: _primaryColor),
+                  icon: Icon(Icons.notifications_active_outlined, color: _primaryColor),
                   label: Text(
                     context.l10n.weightTrendWeeklyReminderButton,
-                    style: const TextStyle(color: _primaryColor),
+                    style: TextStyle(color: _primaryColor),
                   ),
                 ),
               ],
@@ -299,9 +300,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.grey200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,7 +311,7 @@ class _StatCard extends StatelessWidget {
             children: [
               CircleAvatar(radius: 6, backgroundColor: color),
               const SizedBox(width: 6),
-              Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black54)),
+              Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.ink54)),
             ],
           ),
           const SizedBox(height: 8),
@@ -354,12 +355,12 @@ class _ProgressPhotoGallery extends StatelessWidget {
                           height: 80,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                              Icon(Icons.image_not_supported_outlined, color: AppColors.grey),
                         )
-                      : const SizedBox(
+                      : SizedBox(
                           width: 80,
                           height: 80,
-                          child: Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                          child: Icon(Icons.image_not_supported_outlined, color: AppColors.grey),
                         ),
                 );
 
@@ -369,7 +370,7 @@ class _ProgressPhotoGallery extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 '${entry.recordedAt.day}/${entry.recordedAt.month}',
-                style: const TextStyle(fontSize: 10, color: Colors.black45),
+                style: TextStyle(fontSize: 10, color: AppColors.ink45),
               ),
             ],
           );
@@ -408,7 +409,7 @@ class _WeightChart extends StatelessWidget {
                 reservedSize: 40,
                 getTitlesWidget: (value, meta) => Text(
                   value.toStringAsFixed(1),
-                  style: const TextStyle(fontSize: 9, color: Colors.black45),
+                  style: TextStyle(fontSize: 9, color: AppColors.ink45),
                 ),
               ),
             ),
@@ -422,7 +423,7 @@ class _WeightChart extends StatelessWidget {
                   final d = entries[i].recordedAt;
                   return Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text('${d.day}/${d.month}', style: const TextStyle(fontSize: 9, color: Colors.black45)),
+                    child: Text('${d.day}/${d.month}', style: TextStyle(fontSize: 9, color: AppColors.ink45)),
                   );
                 },
               ),

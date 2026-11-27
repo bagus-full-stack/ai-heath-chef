@@ -4,8 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../providers/ai_consent_provider.dart';
+import '../config/app_colors.dart';
 
-const _primaryColor = Color(0xFF6B66FF);
+final _primaryColor = AppColors.brand;
 
 class _ConsentExplanation extends StatelessWidget {
   final VoidCallback onAccept;
@@ -19,7 +20,7 @@ class _ConsentExplanation extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Icon(Icons.cloud_outlined, size: 40, color: Colors.grey),
+        Icon(Icons.cloud_outlined, size: 40, color: AppColors.grey),
         const SizedBox(height: 16),
         Text(
           context.l10n.cloudAiConsentTitle,
@@ -30,7 +31,7 @@ class _ConsentExplanation extends StatelessWidget {
         Text(
           context.l10n.cloudAiConsentBody,
           style: TextStyle(
-            color: Colors.grey.shade700,
+            color: AppColors.grey700,
             height: 1.5,
             fontSize: 13.5,
           ),
@@ -118,14 +119,14 @@ class _CloudAiConsentGateState extends ConsumerState<CloudAiConsentGate> {
       data: (given) {
         if (!given) {
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.surface,
             appBar: AppBar(
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.surface,
               elevation: 0,
-              leading: IconButton(
-                icon: const Icon(
+              leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+                icon: Icon(
                   Icons.arrow_back_ios,
-                  color: Colors.black,
+                  color: AppColors.ink,
                   size: 20,
                 ),
                 onPressed: () => context.pop(),

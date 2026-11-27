@@ -30,6 +30,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonFlashButtonTooltip => 'Flash';
 
   @override
+  String get commonAddButtonTooltip => 'Add';
+
+  @override
+  String get commonTogglePasswordTooltip => 'Show or hide password';
+
+  @override
+  String get coachSendTooltip => 'Send message';
+
+  @override
+  String get accountChangeAvatarTooltip => 'Change profile photo';
+
+  @override
   String get commonHelpButtonTooltip => 'Help';
 
   @override

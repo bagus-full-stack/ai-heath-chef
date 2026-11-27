@@ -5,8 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
+import '../config/app_colors.dart';
 
-const Color _kPrimaryColor = Color(0xFF6B66FF);
+Color get _kPrimaryColor => AppColors.brand;
 
 const List<(String value, String label, IconData icon)> _kDietOptions = [
   ('none', 'Aucune restriction', Icons.restaurant_rounded),
@@ -154,17 +155,17 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.dietaryPreferencesTitle,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.ink),
         ),
         centerTitle: true,
       ),
@@ -172,7 +173,7 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           children: [
-            Text(context.l10n.dietaryPreferencesDietSectionTitle, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8, color: Colors.grey)),
+            Text(context.l10n.dietaryPreferencesDietSectionTitle, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8, color: AppColors.grey)),
             const SizedBox(height: 12),
             for (final option in _kDietOptions) ...[
               _SelectableRow(
@@ -184,7 +185,7 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
               const SizedBox(height: 10),
             ],
             const SizedBox(height: 12),
-            Text(context.l10n.dietaryPreferencesCuisineSectionTitle, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8, color: Colors.grey)),
+            Text(context.l10n.dietaryPreferencesCuisineSectionTitle, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8, color: AppColors.grey)),
             const SizedBox(height: 12),
             for (final option in _kCuisineOptions) ...[
               _SelectableRow(
@@ -196,11 +197,11 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
               const SizedBox(height: 10),
             ],
             const SizedBox(height: 12),
-            Text(context.l10n.dietaryPreferencesAllergiesSectionTitle, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8, color: Colors.grey)),
+            Text(context.l10n.dietaryPreferencesAllergiesSectionTitle, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8, color: AppColors.grey)),
             const SizedBox(height: 4),
             Text(
               context.l10n.dietaryPreferencesAllergiesDescription,
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 12, height: 1.4),
+              style: TextStyle(color: AppColors.grey500, fontSize: 12, height: 1.4),
             ),
             const SizedBox(height: 12),
             Wrap(
@@ -221,10 +222,10 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
                     selectedColor: _kPrimaryColor.withValues(alpha: 0.15),
                     checkmarkColor: _kPrimaryColor,
                     labelStyle: TextStyle(
-                      color: _allergies.contains(allergy) ? _kPrimaryColor : Colors.black87,
+                      color: _allergies.contains(allergy) ? _kPrimaryColor : AppColors.ink87,
                       fontWeight: FontWeight.w600,
                     ),
-                    side: BorderSide(color: _allergies.contains(allergy) ? _kPrimaryColor : Colors.grey.shade300),
+                    side: BorderSide(color: _allergies.contains(allergy) ? _kPrimaryColor : AppColors.grey300),
                   ),
                 for (final allergy in _allergies.where((a) => !_kCommonAllergies.contains(a)))
                   FilterChip(
@@ -233,8 +234,8 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
                     onSelected: (_) => setState(() => _allergies.remove(allergy)),
                     selectedColor: _kPrimaryColor.withValues(alpha: 0.15),
                     checkmarkColor: _kPrimaryColor,
-                    labelStyle: const TextStyle(color: _kPrimaryColor, fontWeight: FontWeight.w600),
-                    side: const BorderSide(color: _kPrimaryColor),
+                    labelStyle: TextStyle(color: _kPrimaryColor, fontWeight: FontWeight.w600),
+                    side: BorderSide(color: _kPrimaryColor),
                   ),
               ],
             ),
@@ -249,19 +250,20 @@ class _DietaryPreferencesScreenState extends ConsumerState<DietaryPreferencesScr
                     decoration: InputDecoration(
                       hintText: context.l10n.dietaryPreferencesOtherAllergyHint,
                       filled: true,
-                      fillColor: Colors.grey.shade50,
+                      fillColor: AppColors.grey50,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: Colors.grey.shade200),
+                        borderSide: BorderSide(color: AppColors.grey200),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 IconButton(
+                  tooltip: context.l10n.commonAddButtonTooltip,
                   onPressed: _addCustomAllergy,
-                  icon: const Icon(Icons.add_circle, color: _kPrimaryColor, size: 30),
+                  icon: Icon(Icons.add_circle, color: _kPrimaryColor, size: 30),
                 ),
               ],
             ),
@@ -312,11 +314,11 @@ class _SelectableRow extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? _kPrimaryColor.withValues(alpha: 0.08) : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: selected ? _kPrimaryColor : Colors.grey.shade200, width: selected ? 1.6 : 1),
+          border: Border.all(color: selected ? _kPrimaryColor : AppColors.grey200, width: selected ? 1.6 : 1),
         ),
         child: Row(
           children: [
-            Icon(icon, color: selected ? _kPrimaryColor : Colors.grey.shade600),
+            Icon(icon, color: selected ? _kPrimaryColor : AppColors.grey600),
             const SizedBox(width: 14),
             Expanded(
               child: Text(
@@ -324,11 +326,11 @@ class _SelectableRow extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: selected ? _kPrimaryColor : Colors.black87,
+                  color: selected ? _kPrimaryColor : AppColors.ink87,
                 ),
               ),
             ),
-            if (selected) const Icon(Icons.check_circle_rounded, color: _kPrimaryColor, size: 20),
+            if (selected) Icon(Icons.check_circle_rounded, color: _kPrimaryColor, size: 20),
           ],
         ),
       ),

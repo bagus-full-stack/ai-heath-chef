@@ -16,8 +16,9 @@ import '../providers/weekly_summary_provider.dart';
 import '../utils/nutrition_targets.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/staggered_entrance.dart';
+import '../config/app_colors.dart';
 
-const _primaryColor = Color(0xFF6B66FF);
+final _primaryColor = AppColors.brand;
 const _protColor = Colors.blue;
 const _glucColor = Colors.orange;
 const _lipColor = Colors.pink;
@@ -92,17 +93,17 @@ class NutritionTrendsScreen extends ConsumerWidget {
     final isPro = entitlementAsync.value ?? false;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Colors.black),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.ink),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.nutritionTrendsTitle,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.ink),
         ),
       ),
       body: !isPro
@@ -118,7 +119,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
                 );
 
                 return mealsAsync.animatedWhen(
-                  loading: () => const Center(child: CircularProgressIndicator(color: _primaryColor)),
+                  loading: () => Center(child: CircularProgressIndicator(color: _primaryColor)),
                   error: (err, stack) => Center(child: Text(context.l10n.nutritionTrendsErrorMessage(err.toString()))),
                   data: (meals) {
                     final days = _buildDailySummaries(meals);
@@ -130,7 +131,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
                           child: Text(
                             context.l10n.nutritionTrendsEmptyState,
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey.shade600),
+                            style: TextStyle(color: AppColors.grey600),
                           ),
                         ),
                       );
@@ -165,7 +166,7 @@ class NutritionTrendsScreen extends ConsumerWidget {
                                   days: _buildDailySummaries(meals30, days: 30),
                                   targetKcal: targets.kcal,
                                 ),
-                                orElse: () => const SizedBox(
+                                orElse: () => SizedBox(
                                   height: 160,
                                   child: Center(child: CircularProgressIndicator(color: _primaryColor)),
                                 ),
@@ -233,7 +234,7 @@ class _ProLockedView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return const Center(child: CircularProgressIndicator(color: _primaryColor));
+      return Center(child: CircularProgressIndicator(color: _primaryColor));
     }
     return Center(
       child: Padding(
@@ -245,7 +246,7 @@ class _ProLockedView extends StatelessWidget {
               width: 84,
               height: 84,
               decoration: BoxDecoration(color: _primaryColor.withValues(alpha: 0.1), shape: BoxShape.circle),
-              child: const Icon(Icons.insights_rounded, color: _primaryColor, size: 38),
+              child: Icon(Icons.insights_rounded, color: _primaryColor, size: 38),
             ),
             const SizedBox(height: 20),
             Text(
@@ -257,7 +258,7 @@ class _ProLockedView extends StatelessWidget {
             Text(
               context.l10n.nutritionTrendsProLockedDescription,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade600, height: 1.4),
+              style: TextStyle(color: AppColors.grey600, height: 1.4),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -288,9 +289,9 @@ class _SectionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 10, spreadRadius: 1)],
+        boxShadow: [BoxShadow(color: AppColors.grey200, blurRadius: 10, spreadRadius: 1)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,7 +328,7 @@ class _CaloriesChart extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text('${d.kcal}', style: const TextStyle(fontSize: 9, color: Colors.black54)),
+                  Text('${d.kcal}', style: TextStyle(fontSize: 9, color: AppColors.ink54)),
                   const SizedBox(height: 4),
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 400),
@@ -341,7 +342,7 @@ class _CaloriesChart extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     _dayLabel(context, d.day.weekday),
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey.shade600),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.grey600),
                   ),
                 ],
               ),
@@ -381,7 +382,7 @@ class _CaloriesTrend30Chart extends StatelessWidget {
                 interval: interval,
                 getTitlesWidget: (value, meta) => Text(
                   value.round().toString(),
-                  style: const TextStyle(fontSize: 9, color: Colors.black45),
+                  style: TextStyle(fontSize: 9, color: AppColors.ink45),
                 ),
               ),
             ),
@@ -396,7 +397,7 @@ class _CaloriesTrend30Chart extends StatelessWidget {
                   final d = days[i].day;
                   return Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text('${d.day}/${d.month}', style: const TextStyle(fontSize: 9, color: Colors.black45)),
+                    child: Text('${d.day}/${d.month}', style: TextStyle(fontSize: 9, color: AppColors.ink45)),
                   );
                 },
               ),
@@ -499,7 +500,7 @@ class _MacroLegend extends StatelessWidget {
           children: [
             CircleAvatar(radius: 5, backgroundColor: color),
             const SizedBox(width: 6),
-            Text(label, style: const TextStyle(fontSize: 11, color: Colors.black54)),
+            Text(label, style: TextStyle(fontSize: 11, color: AppColors.ink54)),
           ],
         ),
         const SizedBox(height: 4),
@@ -600,7 +601,7 @@ class _WeeklySummaryShareSection extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [_primaryColor, Color(0xFF9C6BFF)]),
+              gradient: LinearGradient(colors: [_primaryColor, Color(0xFF2F7D63)]),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Column(
@@ -643,9 +644,9 @@ class _AverageRow extends StatelessWidget {
       children: [
         CircleAvatar(radius: 5, backgroundColor: color),
         const SizedBox(width: 8),
-        Expanded(child: Text(label, style: const TextStyle(fontSize: 13, color: Colors.black87))),
+        Expanded(child: Text(label, style: TextStyle(fontSize: 13, color: AppColors.ink87))),
         Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-        Text(target, style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+        Text(target, style: TextStyle(fontSize: 12, color: AppColors.grey500)),
       ],
     );
   }

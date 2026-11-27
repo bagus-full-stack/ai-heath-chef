@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../l10n/l10n_extensions.dart';
 import 'about_screen.dart' show kSupportEmail;
+import '../config/app_colors.dart';
 
 /// Version du texte de la politique de confidentialité — même logique que
 /// kTermsVersion dans terms_screen.dart, mais non reliée à un champ `profiles`
@@ -60,20 +61,20 @@ class PrivacyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.privacyAppBarTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: AppColors.ink,
           ),
         ),
         centerTitle: true,
@@ -85,16 +86,16 @@ class PrivacyScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF4E5),
+                color: AppColors.warnBg,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFFFD9A0)),
+                border: Border.all(color: AppColors.warnBorder),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.warning_amber_rounded,
-                    color: Color(0xFFB8791A),
+                    color: AppColors.warnIcon,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
@@ -102,7 +103,7 @@ class PrivacyScreen extends StatelessWidget {
                     child: Text(
                       context.l10n.privacyDraftBanner,
                       style: TextStyle(
-                        color: const Color(0xFF7A5310),
+                        color: AppColors.warnText,
                         fontSize: 12.5,
                         height: 1.4,
                       ),
@@ -116,7 +117,7 @@ class PrivacyScreen extends StatelessWidget {
               context.l10n.privacyLastUpdated(
                 _formatDate(context, DateTime.now()),
               ),
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+              style: TextStyle(color: AppColors.grey500, fontSize: 12),
             ),
             const SizedBox(height: 16),
             for (final section in _sections(context)) ...[
@@ -131,7 +132,7 @@ class PrivacyScreen extends StatelessWidget {
               Text(
                 section.body,
                 style: TextStyle(
-                  color: Colors.grey.shade700,
+                  color: AppColors.grey700,
                   height: 1.5,
                   fontSize: 13.5,
                 ),

@@ -9,6 +9,7 @@ import '../providers/purchase_provider.dart';
 import '../services/purchase_service.dart';
 import '../widgets/animated_async_value.dart';
 import '../widgets/staggered_entrance.dart';
+import '../config/app_colors.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key});
@@ -21,7 +22,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   int _selectedIndex = 0;
   bool _isRestoring = false;
 
-  static const Color _primaryColor = Color(0xFF6B66FF);
+  static Color get _primaryColor => AppColors.brand;
 
   /// Plans affichés tant qu'aucune offre RevenueCat n'a pu être chargée
   /// (ex: clés API non configurées en développement). L'achat est désactivé
@@ -157,6 +158,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     child: Row(
                       children: [
                         _TopIconButton(
+                          label: context.l10n.commonCloseButtonTooltip,
                           icon: Icons.close_rounded,
                           onTap: () => context.pop(),
                         ),
@@ -214,7 +216,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.grey.shade400,
+                            color: AppColors.grey400,
                             height: 1.45,
                           ),
                         ),
@@ -288,7 +290,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         ),
                         const SizedBox(height: 14),
                         offeringsAsync.animatedWhen(
-                          loading: () => const Padding(
+                          loading: () => Padding(
                             padding: EdgeInsets.symmetric(vertical: 24),
                             child: Center(
                               child: CircularProgressIndicator(color: _primaryColor),
@@ -315,7 +317,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                 : Text(
                                     context.l10n.paywallRestoreButton,
                                     style: TextStyle(
-                                      color: Colors.grey.shade400,
+                                      color: AppColors.grey400,
                                       decoration: TextDecoration.underline,
                                     ),
                                   ),
@@ -378,23 +380,28 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
 class _TopIconButton extends StatelessWidget {
   final IconData icon;
+  final String label;
   final VoidCallback onTap;
 
-  const _TopIconButton({required this.icon, required this.onTap});
+  const _TopIconButton({required this.icon, required this.onTap, required this.label});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.08),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          ),
+          child: Icon(icon, color: Colors.white),
         ),
-        child: Icon(icon, color: Colors.white),
       ),
     );
   }
@@ -426,10 +433,10 @@ class _BenefitCard extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: const Color(0xFF6B66FF).withValues(alpha: 0.18),
+              color: AppColors.brand.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: const Color(0xFFB8B5FF), size: 22),
+            child: Icon(icon, color: AppColors.lime, size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -448,7 +455,7 @@ class _BenefitCard extends StatelessWidget {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.grey.shade400,
+                    color: AppColors.grey400,
                     height: 1.35,
                     fontSize: 13,
                   ),
@@ -475,7 +482,7 @@ class _PlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF6B66FF);
+    final primaryColor = AppColors.brand;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -509,7 +516,7 @@ class _PlanCard extends StatelessWidget {
                       child: Container(
                         width: 12,
                         height: 12,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           color: primaryColor,
                           shape: BoxShape.circle,
                         ),

@@ -4,8 +4,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/l10n_extensions.dart';
 import 'about_screen.dart' show kSupportEmail;
+import '../config/app_colors.dart';
 
-const Color _kPrimaryColor = Color(0xFF6B66FF);
+Color get _kPrimaryColor => AppColors.brand;
 
 class _FaqItem {
   final String question;
@@ -92,20 +93,20 @@ class HelpCenterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.helpCenterAppBarTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: AppColors.ink,
           ),
         ),
         centerTitle: true,
@@ -120,7 +121,7 @@ class HelpCenterScreen extends StatelessWidget {
                 child: Text(
                   section.title.toUpperCase(),
                   style: TextStyle(
-                    color: Colors.grey.shade500,
+                    color: AppColors.grey500,
                     fontWeight: FontWeight.w800,
                     fontSize: 12,
                     letterSpacing: 0.8,
@@ -128,11 +129,11 @@ class HelpCenterScreen extends StatelessWidget {
                 ),
               ),
               Material(
-                color: Colors.white,
+                color: AppColors.surface,
                 clipBehavior: Clip.antiAlias,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.grey.shade200),
+                  side: BorderSide(color: AppColors.grey200),
                 ),
                 child: Column(
                   children: [
@@ -151,7 +152,7 @@ class HelpCenterScreen extends StatelessWidget {
                             ),
                           ),
                           iconColor: _kPrimaryColor,
-                          collapsedIconColor: Colors.grey.shade400,
+                          collapsedIconColor: AppColors.grey400,
                           childrenPadding: const EdgeInsets.fromLTRB(
                             16,
                             0,
@@ -163,7 +164,7 @@ class HelpCenterScreen extends StatelessWidget {
                             Text(
                               section.items[i].answer,
                               style: TextStyle(
-                                color: Colors.grey.shade600,
+                                color: AppColors.grey600,
                                 height: 1.45,
                                 fontSize: 13,
                               ),
@@ -199,7 +200,7 @@ class HelpCenterScreen extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     context.l10n.helpCenterNotFoundSubtitle,
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                    style: TextStyle(color: AppColors.grey600, fontSize: 13),
                   ),
                   const SizedBox(height: 14),
                   ElevatedButton.icon(

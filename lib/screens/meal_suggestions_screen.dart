@@ -10,6 +10,7 @@ import '../widgets/cloud_ai_consent_gate.dart';
 import '../widgets/meal_suggestion_card.dart';
 import 'coach_screen.dart' show openCoachChatSheet, kCoachPrimaryColor;
 import '../l10n/l10n_extensions.dart';
+import '../config/app_colors.dart';
 
 /// Liste complète des idées de repas générées par l'IA, ouverte depuis
 /// "Tout voir" sur l'écran du Coach. [mealSuggestionsProvider] se construit
@@ -34,26 +35,26 @@ class _MealSuggestionsContent extends ConsumerWidget {
     final allergies = ref.watch(profileProvider).value?.allergies ?? const [];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, 
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.ink, size: 20),
           onPressed: () => context.pop(),
         ),
         title: Text(
           context.l10n.mealSuggestionsTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: AppColors.ink,
           ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.calendar_month_outlined,
               color: kCoachPrimaryColor,
             ),
@@ -61,7 +62,7 @@ class _MealSuggestionsContent extends ConsumerWidget {
             onPressed: () => context.push('/weekly_meal_plan'),
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.shopping_cart_outlined,
               color: kCoachPrimaryColor,
             ),
@@ -69,7 +70,7 @@ class _MealSuggestionsContent extends ConsumerWidget {
             onPressed: () => context.push('/shopping_list'),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: kCoachPrimaryColor),
+            icon: Icon(Icons.refresh_rounded, color: kCoachPrimaryColor),
             tooltip: context.l10n.mealSuggestionsRegenerateTooltip,
             onPressed: () =>
                 ref.read(mealSuggestionsProvider.notifier).regenerate(),
@@ -78,7 +79,7 @@ class _MealSuggestionsContent extends ConsumerWidget {
       ),
       body: SafeArea(
         child: suggestionsAsync.animatedWhen(
-          loading: () => const Center(
+          loading: () => Center(
             child: CircularProgressIndicator(color: kCoachPrimaryColor),
           ),
           error: (error, stackTrace) => Center(
@@ -96,7 +97,15 @@ class _MealSuggestionsContent extends ConsumerWidget {
                   Text(
                     context.l10n.mealSuggestionsLoadError,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(color: AppColors.grey600),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    error.toString().replaceFirst('Exception: ', ''),
+                    textAlign: TextAlign.center,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: AppColors.grey500, fontSize: 12),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
@@ -118,7 +127,7 @@ class _MealSuggestionsContent extends ConsumerWidget {
               return Center(
                 child: Text(
                   context.l10n.mealSuggestionsEmptyMessage,
-                  style: TextStyle(color: Colors.grey.shade600),
+                  style: TextStyle(color: AppColors.grey600),
                 ),
               );
             }

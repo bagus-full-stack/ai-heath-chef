@@ -6,8 +6,9 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../l10n/l10n_extensions.dart';
 import '../models/meal_analysis_args.dart';
+import '../config/app_colors.dart';
 
-const Color _kPrimaryColor = Color(0xFF6B66FF);
+Color get _kPrimaryColor => AppColors.brand;
 
 /// Scan de code-barres produit (EAN/UPC). Une fois un code détecté, on route
 /// vers l'écran d'analyse qui cherche les infos nutritionnelles via

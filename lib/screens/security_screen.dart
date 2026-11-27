@@ -7,6 +7,7 @@ import '../providers/ai_consent_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/journal_export.dart';
 import '../utils/password_policy.dart';
+import '../config/app_colors.dart';
 
 /// Écran Sécurité et Confidentialité : changement de mot de passe (le seul
 /// réglage réellement actionnable pour l'instant). Remplace l'ancien stub
@@ -24,7 +25,7 @@ class SecurityScreen extends ConsumerStatefulWidget {
 }
 
 class _SecurityScreenState extends ConsumerState<SecurityScreen> {
-  static const Color _primaryColor = Color(0xFF6B66FF);
+  static Color get _primaryColor => AppColors.brand;
 
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -106,24 +107,25 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
     return InputDecoration(
       prefixIcon: Icon(icon),
       suffixIcon: IconButton(
+        tooltip: context.l10n.commonTogglePasswordTooltip,
         icon: Icon(
           obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
         ),
         onPressed: onToggle,
       ),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppColors.surface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.grey200),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.grey200),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _primaryColor, width: 1.4),
+        borderSide: BorderSide(color: _primaryColor, width: 1.4),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
     );
@@ -132,7 +134,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -220,15 +222,15 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: AppColors.grey200),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.verified_user_outlined,
-                    color: Colors.grey.shade400,
+                    color: AppColors.grey400,
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -244,7 +246,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                           context.l10n.security2faMessage,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color: AppColors.grey600,
                           ),
                         ),
                       ],
@@ -266,9 +268,9 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                 return Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: AppColors.grey200),
                   ),
                   child: Row(
                     children: [
@@ -287,7 +289,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                               context.l10n.securityCloudAiConsentSubtitle,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey.shade600,
+                                color: AppColors.grey600,
                               ),
                             ),
                           ],
@@ -317,9 +319,9 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: AppColors.grey200),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,20 +333,20 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   const SizedBox(height: 2),
                   Text(
                     context.l10n.securityDataExportSubtitle,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    style: TextStyle(fontSize: 12, color: AppColors.grey600),
                   ),
                   const SizedBox(height: 14),
                   OutlinedButton(
                     onPressed: _isExporting ? null : _exportData,
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 54),
-                      side: const BorderSide(color: _primaryColor, width: 1.4),
+                      side: BorderSide(color: _primaryColor, width: 1.4),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
                       ),
                     ),
                     child: _isExporting
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
@@ -354,7 +356,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                           )
                         : Text(
                             context.l10n.securityDataExportButton,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: _primaryColor,
                             ),
