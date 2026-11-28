@@ -989,9 +989,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get localAiSettingsTitle => 'IA locale';
 
   @override
-  String get loginContinueWithDiscord => 'Continuer avec Discord';
-
-  @override
   String get loginDividerOrContinueWith => 'OU CONTINUER AVEC';
 
   @override

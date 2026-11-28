@@ -272,7 +272,8 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
               dailyContext: buildDailyContextBlock(contextInput, compact: true),
             );
             usedEngine = 'local';
-          } catch (_) {
+          } catch (e, st) {
+            debugPrint('Coach local en échec : $e $st');
             // Repli cloud uniquement si le consentement a déjà été donné
             // (étape 3, cas 5) : jamais d'appel cloud silencieux faute de
             // mieux.

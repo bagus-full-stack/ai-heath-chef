@@ -981,9 +981,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localAiSettingsTitle => 'On-device AI';
 
   @override
-  String get loginContinueWithDiscord => 'Continue with Discord';
-
-  @override
   String get loginDividerOrContinueWith => 'OR CONTINUE WITH';
 
   @override

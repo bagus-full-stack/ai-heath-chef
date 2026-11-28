@@ -6,7 +6,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
-import '../widgets/app_logo.dart';
 import '../config/app_colors.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -94,11 +93,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: const AppLogo(size: 40, radius: 12),
-              ),
-              const SizedBox(height: 16),
               Center(
                 child: Container(
                   width: 76,
@@ -259,10 +253,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () =>
-                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.google, lang: Localizations.localeOf(context).languageCode),
-                      icon: Icon(Icons.g_mobiledata, color: AppColors.ink, size: 28),
-                      label: Text('Google', style: TextStyle(color: AppColors.ink)),
+                      onPressed: () => ref
+                          .read(authServiceProvider)
+                          .signInWithOAuth(OAuthProvider.discord, lang: Localizations.localeOf(context).languageCode),
+                      icon: const Icon(Icons.discord, color: Color(0xFF5865F2)),
+                      label: Text('Discord', style: TextStyle(color: AppColors.ink)),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
@@ -274,10 +269,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(width: 14),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () =>
-                          ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.github, lang: Localizations.localeOf(context).languageCode),
-                      icon: Icon(Icons.code, color: AppColors.ink),
-                      label: Text('GitHub', style: TextStyle(color: AppColors.ink)),
+                      onPressed: () => ref
+                          .read(authServiceProvider)
+                          .signInWithOAuth(OAuthProvider.google, lang: Localizations.localeOf(context).languageCode),
+                      icon: Icon(Icons.g_mobiledata, color: AppColors.ink, size: 28),
+                      label: Text('Google', style: TextStyle(color: AppColors.ink)),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
@@ -287,22 +283,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 14),
-              OutlinedButton.icon(
-                onPressed: () =>
-                    ref.read(authServiceProvider).signInWithOAuth(OAuthProvider.discord, lang: Localizations.localeOf(context).languageCode),
-                icon: const Icon(Icons.discord, color: Color(0xFF5865F2)),
-                label: Text(
-                  context.l10n.loginContinueWithDiscord,
-                  style: TextStyle(color: AppColors.ink),
-                ),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
               ),
             ],
           ),

@@ -1788,12 +1788,6 @@ abstract class AppLocalizations {
   /// **'IA locale'**
   String get localAiSettingsTitle;
 
-  /// No description provided for @loginContinueWithDiscord.
-  ///
-  /// In fr, this message translates to:
-  /// **'Continuer avec Discord'**
-  String get loginContinueWithDiscord;
-
   /// No description provided for @loginDividerOrContinueWith.
   ///
   /// In fr, this message translates to:

@@ -6,7 +6,7 @@ Application mobile Flutter de suivi nutritionnel : analyse de repas et de produi
 
 ## Fonctionnalités
 
-- **Authentification** — inscription, connexion, mot de passe oublié (Supabase Auth)
+- **Authentification** — inscription, connexion, mot de passe oublié, connexion avec Google ou Discord (Supabase Auth)
 - **Onboarding** — questionnaire de profil (objectifs, données physiques dont la taille) utilisé pour calculer les cibles nutritionnelles
 - **Dashboard** — jauges de macros (calories, protéines, glucides, lipides) sur la journée, IMC calculé à partir du profil (catégorie OMS + plage), suivi de l'hydratation (objectif quotidien, ajout rapide en un tap, annulable), et journal des repas du jour avec la photo de chaque repas (suppression d'un repas par glissement, ou relance en un tap pour reloguer un repas déjà mangé)
 - **Hors ligne (local-first)** — repas, pesées et prises d'eau enregistrés d'abord dans une base SQLite locale (fonctionne sans connexion), puis synchronisés vers Supabase dès que le réseau est disponible (au démarrage et à chaque retour de connexion) : survivent à une désinstallation et se retrouvent sur un nouvel appareil
@@ -205,6 +205,7 @@ flutter pub get
    - **iOS** : la cible de déploiement est passée à 15.0 dans `project.pbxproj`. Le fichier `ios/Runner/Runner.entitlements` (mémoire étendue, nécessaire pour l'inférence sur un modèle de plusieurs Go) est rattaché au projet via `CODE_SIGN_ENTITLEMENTS` dans `project.pbxproj`, **sans avoir pu être testé sur un Mac** : si la signature échoue, vérifie les capacités dans Xcode (Signing & Capabilities). Le partage de fichiers iOS (`UIFileSharingEnabled`) est désactivé volontairement : il exposerait la base locale et les photos.
 6. **Compte admin (optionnel)** — pour donner à un compte l'accès complet aux fonctionnalités PRO sans abonnement réel, exécute depuis le SQL Editor : `update public.profiles set is_admin = true where email = 'ton-email@exemple.com';`. Ce champ n'est modifiable que depuis le SQL Editor (aucun moyen de le changer depuis l'app, voir migration 0007).
 7. **Redirection de connexion (obligatoire)** — l'app revient du navigateur via le schéma `com.fodli.app://login-callback/` (`redirectTo` dans `lib/services/supabase_service.dart`). Sur le Supabase self-host (Coolify), ajoute cette URL exacte à la variable `ADDITIONAL_REDIRECT_URLS` du service, puis redémarre le service. Sans elle, le retour de connexion échoue. Sur Supabase Cloud : Authentication > URL Configuration > Redirect URLs. Le schéma doit rester identique à celui d'`AndroidManifest.xml` et d'`Info.plist`.
+8. **Connexion Google et Discord (optionnel)** — l'app propose ces deux fournisseurs (`signInWithOAuth`). Pour chacun, crée une application OAuth chez le fournisseur (Google Cloud Console > Identifiants > ID client OAuth « Application Web » ; Discord Developer Portal > OAuth2) avec l'URI de redirection `https://<ton-domaine-supabase>/auth/v1/callback`. Sur le self-host (Coolify), ajoute au service `supabase-auth` du compose les variables `GOTRUE_EXTERNAL_<GOOGLE|DISCORD>_ENABLED=true`, `..._CLIENT_ID`, `..._SECRET` (référencée par `${GOTRUE_EXTERNAL_<FOURNISSEUR>_SECRET}`) et `..._REDIRECT_URI` (la même URI de callback), renseigne chaque secret dans Environment Variables, puis redéploie le service (coupure d'authentification de quelques secondes). Ne mets jamais un secret client dans le compose ni dans le dépôt. Sans cette configuration, les boutons s'ouvrent sur une erreur du fournisseur. Sur iOS, l'App Store impose « Se connecter avec Apple » dès qu'une connexion tierce est proposée : ce bouton reste à ajouter avant publication.
 
 ### Configuration RevenueCat (optionnel)
 
@@ -225,6 +226,7 @@ Sur le Supabase self-host, ces variables se définissent dans Coolify > service 
 | `EVAL_AUTH_TOKEN` | Optionnelle, à ne pas stocker : JWT d'un compte de test (expire en ~1 h), à passer en ligne de commande à `run_eval.ts` |
 | `REVENUECAT_SECRET_KEY` | Clé secrète RevenueCat v1 (quota PRO) |
 | `ADDITIONAL_REDIRECT_URLS` | Redirections d'authentification autorisées : `com.fodli.app://login-callback/` |
+| `GOTRUE_EXTERNAL_GOOGLE_SECRET`, `GOTRUE_EXTERNAL_DISCORD_SECRET` | Secrets clients OAuth Google et Discord (voir étape 8 de la configuration Supabase) |
 
 Ne commite jamais ces valeurs.
 

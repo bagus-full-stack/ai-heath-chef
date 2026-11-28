@@ -395,12 +395,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       onPressed: () => ref
                           .read(authServiceProvider)
                           .signInWithOAuth(
-                            OAuthProvider.apple,
+                            OAuthProvider.discord,
                             lang: Localizations.localeOf(context).languageCode,
                           ),
-                      icon: Icon(Icons.apple, color: AppColors.ink),
+                      icon: const Icon(Icons.discord, color: Color(0xFF5865F2)),
                       label: Text(
-                        'Apple',
+                        'Discord',
                         style: TextStyle(color: AppColors.ink),
                       ),
                       style: OutlinedButton.styleFrom(

@@ -549,7 +549,6 @@
   "localAiSettingsModelDownloadedLabel": "Modèle téléchargé",
   "localAiSettingsModelNotDownloadedLabel": "Modèle non téléchargé",
   "localAiSettingsTitle": "IA locale",
-  "loginContinueWithDiscord": "Continuer avec Discord",
   "loginDividerOrContinueWith": "OU CONTINUER AVEC",
   "loginEmailHint": "nom@exemple.fr",
   "loginEmailLabel": "Email",

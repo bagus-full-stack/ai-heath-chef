@@ -309,7 +309,6 @@
   "localAiSettingsModelDownloadedLabel": "Model downloaded",
   "localAiSettingsModelNotDownloadedLabel": "Model not downloaded",
   "localAiSettingsTitle": "On-device AI",
-  "loginContinueWithDiscord": "Continue with Discord",
   "loginDividerOrContinueWith": "OR CONTINUE WITH",
   "loginEmailHint": "name@example.com",
   "loginEmailLabel": "Email",
